@@ -41,8 +41,13 @@ declare module 'axios' {
 
 export type ApiRequestConfig = AxiosRequestConfig
 
+/** MetaRtr production: static site on www, API on api (no Pages BFF). */
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ||
+  (import.meta.env.PROD ? 'https://api.metartr.com' : '')
+
 export const api = axios.create({
-  baseURL: '',
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     'Cache-Control': 'no-store',

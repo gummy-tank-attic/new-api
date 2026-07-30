@@ -42,6 +42,14 @@ export type TopNavLink = {
  *   docs: true,
  *   about: true
  * }
+ *
+ * IMPORTANT (upstream contract):
+ * - Titles are translated HERE with t('Home') / t('Console') / …
+ * - Consumers (AppHeader → TopNav, public-navigation) render `link.title` as plain text
+ *   and do NOT call t() again.
+ * - PublicHeader additionally calls t(link.title); that is harmless for already-translated
+ *   Chinese strings (missing key falls back to the string itself).
+ * Do not store raw English keys without translating — it breaks the console top nav.
  */
 export function useTopNavLinks(): TopNavLink[] {
   const { t } = useTranslation()

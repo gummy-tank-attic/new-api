@@ -1,0 +1,13 @@
+{
+  "Copy the model ID into your client or SDK.": "Copy the model ID into your client or SDK.",
+  "Could not load price data. Please try again.": "Could not load price data. Please try again.",
+  "Discount badges and “N% off” on the pricing page are for display. Actual charges follow console group ratios and backend billing.": "Discount badges and “N% off” on the pricing page are for display. Actual charges follow console group ratios and backend billing.",
+  "Failed to load pricing": "Failed to load pricing",
+  "If a model requires the Responses API, set the provider wire_api according to current Codex docs. Prefer models verified on Model Square.": "If a model requires the Responses API, set the provider wire_api according to current Codex docs. Prefer models verified on Model Square.",
+  "Note the group you are allowed to use (Sale, Premium, Max, …).": "Note the group you are allowed to use (Sale, Premium, Max, …).",
+  "Official price is the site baseline after ratio sync, not a live fetch.": "Official price is the site baseline after ratio sync, not a live fetch.",
+  "Official prices use the site model baseline (ratio 1.0)": "Official prices use the site model baseline (ratio 1.0)",
+  "Select a group to view prices": "Select a group to view prices",
+  "UI labels such as “85% off” are marketing display. Billing uses the group ratio configured in the backend for your account/token group.": "UI labels such as “85% off” are marketing display. Billing uses the group ratio configured in the backend for your account/token group.",
+  "Use an exact Model Square ID, confirm your group can access it, and that the model is enabled.": "Use an exact Model Square ID, confirm your group can access it, and that the model is enabled."
+}

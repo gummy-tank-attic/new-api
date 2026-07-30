@@ -22,6 +22,13 @@ import { useMemo } from 'react'
 import { useStatus } from '@/hooks/use-status'
 
 import { getPricing } from '../api'
+import type { PricingVendor } from '../types'
+
+const EMPTY_VENDORS: PricingVendor[] = []
+const EMPTY_RATIO: Record<string, number> = {}
+const EMPTY_USABLE: Record<string, string> = {}
+const EMPTY_ENDPOINT: Record<string, unknown> = {}
+const EMPTY_AUTO: string[] = []
 
 export function usePricingData() {
   const { status } = useStatus()
@@ -64,11 +71,11 @@ export function usePricingData() {
 
   return {
     models,
-    vendors: data?.vendors ?? [],
-    groupRatio: data?.group_ratio ?? {},
-    usableGroup: data?.usable_group ?? {},
-    endpointMap: data?.supported_endpoint ?? {},
-    autoGroups: data?.auto_groups ?? [],
+    vendors: data?.vendors ?? EMPTY_VENDORS,
+    groupRatio: data?.group_ratio ?? EMPTY_RATIO,
+    usableGroup: (data?.usable_group as Record<string, string> | undefined) ?? EMPTY_USABLE,
+    endpointMap: data?.supported_endpoint ?? EMPTY_ENDPOINT,
+    autoGroups: data?.auto_groups ?? EMPTY_AUTO,
     isLoading,
     error,
     refetch,

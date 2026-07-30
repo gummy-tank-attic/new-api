@@ -48,8 +48,8 @@ const MoreIcon = () => (
 export function Hero(props: HeroProps) {
   const { t } = useTranslation()
   const { status } = useStatus()
-  const docsUrl =
-    (status?.docs_link as string | undefined) || 'https://docs.newapi.pro'
+  // Prefer site-configured docs; never fall back to third-party / upstream doc hosts.
+  const docsUrl = (status?.docs_link as string | undefined) || '/docs'
 
   const renderDocsButton = () => {
     const isExternal = docsUrl.startsWith('http')

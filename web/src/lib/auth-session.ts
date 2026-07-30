@@ -66,8 +66,12 @@ export class AuthRotationError extends Error {
   }
 }
 
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ||
+  (import.meta.env.PROD ? 'https://api.metartr.com' : '')
+
 const authClient = axios.create({
-  baseURL: '',
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     'Cache-Control': 'no-store',

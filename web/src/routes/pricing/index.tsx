@@ -20,7 +20,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import z from 'zod'
 
 import { Pricing } from '@/features/pricing'
-import { getFreshModuleAccess } from '@/lib/nav-modules'
+import { getModuleAccess } from '@/lib/nav-modules'
 import { useAuthStore } from '@/stores/auth-store'
 
 const pricingSearchSchema = z.object({
@@ -38,8 +38,10 @@ const pricingSearchSchema = z.object({
 
 export const Route = createFileRoute('/pricing/')({
   validateSearch: pricingSearchSchema,
-  beforeLoad: async ({ location }) => {
-    const access = await getFreshModuleAccess('pricing')
+  // Sync, cache-only access check — never block / hang the route on /api/status.
+  // (Fresh status is still loaded by the app shell via useStatus.)
+  beforeLoad: ({ location }) => {
+    const access = getModuleAccess('pricing')
     if (!access.enabled) {
       throw redirect({ to: '/' })
     }

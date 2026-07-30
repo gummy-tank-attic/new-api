@@ -181,7 +181,13 @@ export async function getFreshModuleAccess(
     cacheStatus(status)
     return getModuleAccessFromStatus(status, module)
   } catch {
-    return { enabled: false, requireAuth: true }
+    // Network/proxy failure: keep last cached status if any, otherwise allow
+    // public modules so local preview is not a blank redirect loop.
+    const cached = getCachedStatus()
+    if (cached) {
+      return getModuleAccessFromStatus(cached, module)
+    }
+    return { ...DEFAULTS[module] }
   }
 }
 

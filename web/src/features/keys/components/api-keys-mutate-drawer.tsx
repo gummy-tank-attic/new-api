@@ -63,6 +63,7 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { useStatus } from '@/hooks/use-status'
+import { resolveGroupDescription } from '@/features/pricing/lib/group-intro-i18n'
 import { getUserModels, getUserGroups } from '@/lib/api'
 import { getCurrencyDisplay, getCurrencyLabel } from '@/lib/currency'
 import { cn } from '@/lib/utils'
@@ -124,7 +125,8 @@ export function ApiKeysMutateDrawer({
     ([key, info]) => ({
       value: key,
       label: key,
-      desc: info.desc || key,
+      // Curated 7-locale intro when mapped; else admin/backend string.
+      desc: resolveGroupDescription(t, key, info.desc || key),
       ratio: info.ratio,
     })
   )

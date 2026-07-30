@@ -44,8 +44,12 @@ export function useStatus() {
       const status = await getStatus()
       try {
         if (status) {
-          const { setConfig } = useSystemConfigStore.getState()
+          const { setConfig, setLoading } = useSystemConfigStore.getState()
           setConfig(mapStatusDataToConfig(status))
+          // Status is the sole brand-config loader on production Pages;
+          // clear the store loading flag so header logo/name are not stuck
+          // on skeletons forever (useSystemConfig autoLoad is disabled).
+          setLoading(false)
         }
       } catch (err) {
         if (import.meta.env.DEV) {

@@ -37,13 +37,17 @@ export function HeaderLogo({
   logoLoaded,
   className,
 }: HeaderLogoProps) {
+  // Prefer showing the image once config loading is done, even if the
+  // preload flag is stale (common after logo URL changes / CDN cache).
+  const visible = !loading || logoLoaded
+
   return (
     <img
-      src={src}
+      src={src || '/logo.png'}
       alt={alt}
       className={cn(
-        'h-6 w-6 rounded-full transition-opacity duration-200',
-        !loading && logoLoaded ? 'opacity-100' : 'opacity-0',
+        'size-full rounded-lg object-contain transition-opacity duration-200',
+        visible ? 'opacity-100' : 'opacity-0',
         className
       )}
     />

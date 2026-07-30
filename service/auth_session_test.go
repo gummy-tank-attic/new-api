@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
@@ -429,3 +430,59 @@ func TestUserAuthVersionInvalidatesExistingSession(t *testing.T) {
 	_, err = CreateLoginSessionAtAuthVersion(user.Id, identity.UserAuthVersion, "2fa", "127.0.0.1", "test-agent")
 	assert.ErrorIs(t, err, ErrLoginSessionRevoked, "a pending 2FA flow must not survive an auth-version change")
 }
+
+func TestClearRefreshCookieExpiresHostOnlyAndLegacyDomain(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	w := &cookieCaptureWriter{header: make(http.Header)}
+	c, _ := gin.CreateTestContext(w)
+
+	ClearRefreshCookie(c)
+
+	cookies := w.Header()["Set-Cookie"]
+	require.Len(t, cookies, 2)
+
+	// net/http.SetCookie strips a leading dot from Domain (RFC 6265), so
+	// Domain=.metartr.com is serialized as Domain=metartr.com.
+	legacyDomainSerialized := strings.TrimPrefix(legacyRefreshCookieDomain, ".")
+	var sawHostOnly, sawLegacyDomain bool
+	for _, raw := range cookies {
+		assert.Contains(t, raw, RefreshCookieName+"=")
+		assert.Contains(t, raw, "Path="+refreshCookiePath)
+		assert.Contains(t, raw, "HttpOnly")
+		assert.Contains(t, raw, "SameSite=Strict")
+		if strings.Contains(raw, "Domain="+legacyDomainSerialized) {
+			sawLegacyDomain = true
+			continue
+		}
+		assert.NotContains(t, raw, "Domain=")
+		sawHostOnly = true
+	}
+	assert.True(t, sawHostOnly, "must clear host-only jar entry")
+	assert.True(t, sawLegacyDomain, "must clear rolled-back Domain=.metartr.com jar entry")
+}
+
+func TestWriteRefreshCookieClearsLegacyDomainBeforeHostOnlyWrite(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	w := &cookieCaptureWriter{header: make(http.Header)}
+	c, _ := gin.CreateTestContext(w)
+
+	WriteRefreshCookie(c, "00000000-0000-4000-8000-000000000001.raw-refresh-secret")
+
+	cookies := w.Header()["Set-Cookie"]
+	require.Len(t, cookies, 2)
+	legacyDomainSerialized := strings.TrimPrefix(legacyRefreshCookieDomain, ".")
+	assert.Contains(t, cookies[0], "Domain="+legacyDomainSerialized)
+	assert.Contains(t, cookies[0], "Max-Age=0")
+	assert.Contains(t, cookies[1], "00000000-0000-4000-8000-000000000001.raw-refresh-secret")
+	assert.NotContains(t, cookies[1], "Domain=")
+	assert.Contains(t, cookies[1], "Path="+refreshCookiePath)
+}
+
+type cookieCaptureWriter struct {
+	header http.Header
+	code   int
+}
+
+func (w *cookieCaptureWriter) Header() http.Header         { return w.header }
+func (w *cookieCaptureWriter) Write(b []byte) (int, error)  { return len(b), nil }
+func (w *cookieCaptureWriter) WriteHeader(statusCode int)   { w.code = statusCode }

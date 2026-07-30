@@ -139,6 +139,25 @@ function applyRechargeRate(
 }
 
 /**
+ * Resolve the group ratio used for a price cell.
+ * When `overrideGroupRatio` is a finite number (e.g. 1 for official/base),
+ * it wins over selected-group / best-group logic.
+ */
+export function resolvePriceGroupRatio(
+  model: PricingModel,
+  selectedGroup?: string,
+  overrideGroupRatio?: number
+): number {
+  if (
+    typeof overrideGroupRatio === 'number' &&
+    Number.isFinite(overrideGroupRatio)
+  ) {
+    return overrideGroupRatio
+  }
+  return getDisplayGroupRatio(model, selectedGroup)
+}
+
+/**
  * Format token-based price for display
  */
 export function formatPrice(
@@ -148,15 +167,23 @@ export function formatPrice(
   showWithRecharge = false,
   priceRate = 1,
   usdExchangeRate = 1,
-  selectedGroup?: string
+  selectedGroup?: string,
+  overrideGroupRatio?: number
 ): string {
   if (model.quota_type === QUOTA_TYPE_VALUES.REQUEST) {
     return '-'
   }
 
-  const displayGroupRatio = getDisplayGroupRatio(model, selectedGroup)
+  const displayGroupRatio = resolvePriceGroupRatio(
+    model,
+    selectedGroup,
+    overrideGroupRatio
+  )
 
   let priceInUSD = calculateTokenPrice(model, type, displayGroupRatio)
+  if (Number.isNaN(priceInUSD)) {
+    return '-'
+  }
   priceInUSD = applyRechargeRate(
     priceInUSD,
     showWithRecharge,
@@ -247,13 +274,18 @@ export function formatRequestPrice(
   showWithRecharge = false,
   priceRate = 1,
   usdExchangeRate = 1,
-  selectedGroup?: string
+  selectedGroup?: string,
+  overrideGroupRatio?: number
 ): string {
   if (model.quota_type !== QUOTA_TYPE_VALUES.REQUEST) {
     return '-'
   }
 
-  const displayGroupRatio = getDisplayGroupRatio(model, selectedGroup)
+  const displayGroupRatio = resolvePriceGroupRatio(
+    model,
+    selectedGroup,
+    overrideGroupRatio
+  )
 
   let priceInUSD = (model.model_price || 0) * displayGroupRatio
 

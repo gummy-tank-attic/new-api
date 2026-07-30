@@ -34,6 +34,7 @@ import { saveAffiliateCode } from '@/features/auth/lib/storage'
 import { GeneralError } from '@/features/errors/general-error'
 import { NotFoundError } from '@/features/errors/not-found-error'
 import { getSetupStatus } from '@/features/setup/api'
+import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import {
   bootstrapAuthentication,
@@ -48,8 +49,11 @@ function RootComponent() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  // Load system configuration (logo, system name, etc.) from backend
-  useSystemConfig({ autoLoad: true })
+  // Single /api/status load (react-query, correct API host). Syncs brand config into the store.
+  // Do NOT useSystemConfig({ autoLoad: true }) — that used relative /api/status and hit Pages HTML.
+  useStatus()
+  // Read store + preload logo only; no second status request.
+  useSystemConfig({ autoLoad: false })
 
   useEffect(() => {
     const aff = new URLSearchParams(window.location.search).get('aff')?.trim()

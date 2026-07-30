@@ -57,7 +57,17 @@ function formatGroupRatio(
   ratioLabel: string
 ) {
   if (ratio === undefined || ratio === null || ratio === '') return null
-  return `${ratio}x ${ratioLabel}`
+  // Skip non-numeric labels from older backends (e.g. Chinese "自动").
+  if (typeof ratio === 'number') {
+    if (!Number.isFinite(ratio)) return null
+    return `${ratio}x ${ratioLabel}`
+  }
+  if (typeof ratio === 'string') {
+    const n = Number(ratio)
+    if (!Number.isFinite(n)) return null
+    return `${ratio}x ${ratioLabel}`
+  }
+  return null
 }
 
 function getRatioBadgeClassName(ratio: ApiKeyGroupOption['ratio']) {

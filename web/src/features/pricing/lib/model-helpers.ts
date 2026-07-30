@@ -16,7 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { EXCLUDED_GROUPS, FILTER_ALL, QUOTA_TYPE_VALUES } from '../constants'
+import {
+  EXCLUDED_GROUPS,
+  FILTER_ALL,
+  getModelDisplayRank,
+  getVendorTabRank,
+  QUOTA_TYPE_VALUES,
+} from '../constants'
 import type { PricingModel } from '../types'
 
 // ----------------------------------------------------------------------------
@@ -28,7 +34,7 @@ import type { PricingModel } from '../types'
  */
 export function getAvailableGroups(
   model: PricingModel,
-  usableGroup: Record<string, { desc: string; ratio: number }>
+  usableGroup: Record<string, string>
 ): string[] {
   const modelEnableGroups = Array.isArray(model.enable_groups)
     ? model.enable_groups
@@ -106,4 +112,39 @@ export function replaceModelInPath(path: string, modelName: string): string {
  */
 export function isTokenBasedModel(model: PricingModel): boolean {
   return model.quota_type === QUOTA_TYPE_VALUES.TOKEN
+}
+
+/**
+ * Natural model-name compare (version-aware, descending):
+ * Larger numbers sort first (top), e.g. minimax-m3 before minimax-m2.7 before minimax-m2.5.
+ */
+export function compareModelNames(a: string, b: string): number {
+  return (b || '').localeCompare(a || '', undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  })
+}
+
+/**
+ * Stable pricing table order:
+ * preferred vendor tab order → MODEL_DISPLAY_ORDER → model name (natural).
+ */
+export function comparePricingModels(
+  a: PricingModel,
+  b: PricingModel
+): number {
+  const va = a.vendor_name || ''
+  const vb = b.vendor_name || ''
+  if (va !== vb) {
+    const rankA = getVendorTabRank(va)
+    const rankB = getVendorTabRank(vb)
+    if (rankA !== rankB) return rankA - rankB
+    return va.localeCompare(vb, undefined, { sensitivity: 'base' })
+  }
+  const ma = a.model_name || ''
+  const mb = b.model_name || ''
+  const modelRankA = getModelDisplayRank(ma)
+  const modelRankB = getModelDisplayRank(mb)
+  if (modelRankA !== modelRankB) return modelRankA - modelRankB
+  return compareModelNames(ma, mb)
 }

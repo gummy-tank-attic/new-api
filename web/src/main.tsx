@@ -28,7 +28,6 @@ import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { toast } from 'sonner'
 
-import { getStatus } from '@/lib/api'
 import { installBuildMetadata } from '@/lib/build-metadata'
 import { applyFaviconToDom } from '@/lib/dom-utils'
 import '@/lib/dayjs'
@@ -38,6 +37,7 @@ import { handleServerError } from '@/lib/handle-server-error'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'
+// i18n: option 1 — sync all locales at startup (aligned with upstream new-api)
 import './i18n/config'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
@@ -113,8 +113,9 @@ const rootElement = document.querySelector<HTMLElement>('#root')
 if (!rootElement) {
   throw new Error('Root element not found')
 }
-// Set document.title and favicon from cached status, then refresh from network
-;(function initSystemBranding() {
+// Brand from localStorage only here. Network refresh is owned by useStatus() in the
+// root shell — avoids a duplicate /api/status on every full page load.
+;(function initSystemBrandingFromCache() {
   try {
     if (typeof window === 'undefined' || typeof document === 'undefined') return
     const apply = (name: string) => {
@@ -124,39 +125,22 @@ if (!rootElement) {
       ) as HTMLMetaElement | null
       if (metaTitle) metaTitle.setAttribute('content', name)
     }
-    // Cache-first
-    try {
-      const saved = localStorage.getItem('status')
-      if (saved) {
-        const s = JSON.parse(saved)
-        if (s?.system_name) apply(s.system_name)
-        if (s?.logo) applyFaviconToDom(s.logo)
-      }
-    } catch {
-      /* empty */
+    const saved = localStorage.getItem('status')
+    if (!saved) return
+    const s = JSON.parse(saved) as {
+      system_name?: string
+      logo?: string
     }
-    // Background refresh
-    getStatus()
-      .then((s) => {
-        if (s?.system_name) {
-          apply(s.system_name as string)
-          try {
-            localStorage.setItem('status', JSON.stringify(s))
-          } catch {
-            /* empty */
-          }
-        }
-        if (s?.logo) applyFaviconToDom(s.logo as string)
-      })
-      .catch(() => {
-        /* empty */
-      })
+    if (s?.system_name) apply(s.system_name)
+    if (s?.logo) applyFaviconToDom(s.logo)
   } catch {
     /* empty */
   }
 })()
+
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
+  // Language packs are already in the main bundle (upstream style); render immediately.
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>

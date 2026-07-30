@@ -77,7 +77,9 @@ export const useSystemConfigStore = create<SystemConfigState>()(
         logo: DEFAULT_LOGO,
         currency: { ...DEFAULT_CURRENCY_CONFIG },
       },
-      loading: true,
+      // Start false so public header is not stuck on skeletons when brand
+      // config is hydrated only via useStatus (autoLoad disabled on root).
+      loading: false,
       loadedLogoUrl: DEFAULT_LOGO,
       setConfig: (newConfig) =>
         set((state) => ({

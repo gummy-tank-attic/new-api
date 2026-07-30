@@ -852,7 +852,7 @@ function getDynamicFormattedPricesByTier(
 function GroupPricingSection(props: {
   model: PricingModel
   groupRatio: Record<string, number>
-  usableGroup: Record<string, { desc: string; ratio: number }>
+  usableGroup: Record<string, string>
   autoGroups: string[]
   priceRate: number
   usdExchangeRate: number
@@ -1128,7 +1128,7 @@ const TAB_META: Record<
 export interface ModelDetailsContentProps {
   model: PricingModel
   groupRatio: Record<string, number>
-  usableGroup: Record<string, { desc: string; ratio: number }>
+  usableGroup: Record<string, string>
   endpointMap: Record<string, { path?: string; method?: string }>
   autoGroups: string[]
   priceRate: number

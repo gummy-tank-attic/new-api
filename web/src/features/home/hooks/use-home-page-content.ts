@@ -16,9 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import i18next from 'i18next'
 import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
 
 import { isHttpUrl } from '@/lib/content-format'
 
@@ -61,9 +59,10 @@ export function useHomePageContent(): HomePageContentResult {
         }
       } catch (error) {
         if (!mounted) return
+        // Keep cached content if any; don't toast on every refresh (slow/flaky API
+        // made homepage reloads feel broken). Empty default home still works.
         // eslint-disable-next-line no-console
-        console.error('Failed to load home page content:', error)
-        toast.error(i18next.t('Failed to load home page content'))
+        console.warn('Failed to load home page content:', error)
       } finally {
         if (mounted) {
           setIsLoaded(true)

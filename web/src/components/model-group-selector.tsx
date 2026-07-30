@@ -59,6 +59,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { resolveGroupDescription } from '@/features/pricing/lib/group-intro-i18n'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 
@@ -375,9 +376,24 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
     const [open, setOpen] = useState(false)
     const isMobile = useIsMobile()
 
+    // Localize curated group intros (same map as pricing / API keys).
+    const localizedGroups = useMemo(
+      () =>
+        groups.map((group) => {
+          const rawDesc = group.desc || group.description || ''
+          const desc = resolveGroupDescription(t, group.value, rawDesc)
+          return {
+            ...group,
+            desc,
+            description: desc,
+          }
+        }),
+      [groups, t]
+    )
+
     const currentGroup = useMemo(
-      () => groups.find((g) => g.value === selectedGroup),
-      [groups, selectedGroup]
+      () => localizedGroups.find((g) => g.value === selectedGroup),
+      [localizedGroups, selectedGroup]
     )
 
     const handleGroupChange = useCallback(
@@ -397,13 +413,13 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
             : 'rounded-lg'
         )}
         filter={(value, search) => {
-          const group = groups.find((g) => g.value === value)
+          const group = localizedGroups.find((g) => g.value === value)
           if (!group || !search) return 1
 
           const searchTerm = search.toLowerCase()
           const searchableFields = [
             group.label,
-            group.description || '',
+            group.description || group.desc || '',
             group.value,
           ]
             .join(' ')
@@ -421,7 +437,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
             <div className='text-muted-foreground px-2 py-1 text-[10px] font-medium'>
               {t('Model Group')}
             </div>
-            {groups.map((group) => (
+            {localizedGroups.map((group) => (
               <CommandItem
                 key={group.value}
                 value={group.value}
@@ -441,12 +457,13 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
                     {(group.desc || group.description) && (
                       <div className='text-muted-foreground truncate text-[9px] leading-tight'>
                         {group.desc || group.description}
-                        {group.ratio && (
-                          <>
-                            {' · '}
-                            {t('Ratio: {{value}}', { value: group.ratio })}
-                          </>
-                        )}
+                        {group.ratio != null &&
+                          Number.isFinite(Number(group.ratio)) && (
+                            <>
+                              {' · '}
+                              {t('Ratio: {{value}}', { value: group.ratio })}
+                            </>
+                          )}
                       </div>
                     )}
                   </div>
@@ -480,7 +497,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
           </DrawerHeader>
           <div className='max-h-[calc(80vh-100px)] overflow-y-auto px-4 pb-6'>
             <div className='space-y-2'>
-              {groups.map((group) => (
+              {localizedGroups.map((group) => (
                 <Button
                   key={group.value}
                   variant='outline'
@@ -501,14 +518,15 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
                       {(group.desc || group.description) && (
                         <div className='text-muted-foreground mt-0.5 text-xs'>
                           {group.desc || group.description}
-                          {group.ratio && (
-                            <>
-                              {' · '}
-                              {t('Ratio: {{value}}', {
-                                value: group.ratio,
-                              })}
-                            </>
-                          )}
+                          {group.ratio != null &&
+                            Number.isFinite(Number(group.ratio)) && (
+                              <>
+                                {' · '}
+                                {t('Ratio: {{value}}', {
+                                  value: group.ratio,
+                                })}
+                              </>
+                            )}
                         </div>
                       )}
                     </div>

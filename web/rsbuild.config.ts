@@ -68,6 +68,9 @@ export default defineConfig(({ envMode }) => {
     server: {
       host: '0.0.0.0',
       strictPort: false,
+      // SPA: refresh on /pricing etc. must serve index.html (default htmlFallback
+      // can miss some paths depending on Accept headers / proxy order).
+      historyApiFallback: true,
       proxy: devProxy,
     },
     output: {

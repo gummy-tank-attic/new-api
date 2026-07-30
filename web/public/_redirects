@@ -1,0 +1,8 @@
+# Optional best-effort rewrites only. Panel axios uses https://api.metartr.com in production.
+# Payment webhooks MUST use api.metartr.com, never www.
+/api/*  https://api.metartr.com/api/:splat  200
+/mj/*   https://api.metartr.com/mj/:splat   200
+/pg/*   https://api.metartr.com/pg/:splat   200
+
+# SPA fallback
+/*      /index.html  200

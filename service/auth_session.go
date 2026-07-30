@@ -15,6 +15,17 @@ import (
 
 const RefreshCookieName = "new_api_refresh"
 
+// legacyRefreshCookieDomain is only used when clearing cookies. A 2026-07-28
+// production experiment briefly set Domain=.metartr.com on new_api_refresh.
+// After rollback the binary writes host-only cookies again, but host-only
+// ClearCookie cannot remove the Domain-scoped jar entry. Browsers may then
+// send a stale Domain cookie alongside (or instead of) the host-only one and
+// trigger refresh 401 / refresh_reuse. Do NOT use this domain when writing
+// new refresh cookies (product red line: no Cookie Domain compatibility).
+const legacyRefreshCookieDomain = ".metartr.com"
+
+const refreshCookiePath = "/api/user/auth"
+
 var (
 	ErrLoginSessionInvalid  = errors.New("login session is invalid")
 	ErrLoginSessionRevoked  = errors.New("login session is revoked")
@@ -277,6 +288,44 @@ func RefreshTokenSID(rawRefreshToken string) (string, bool) {
 	return sid, ok
 }
 
+// ResolveSessionFromRefreshCookie validates the HttpOnly refresh cookie without rotating it.
+// Used as a GET-only dashboard auth fallback for third-party tools (e.g. All API Hub)
+// that call /api/user/self with credentials:include after a successful AuthBundle refresh
+// but do not attach Authorization: Bearer.
+func ResolveSessionFromRefreshCookie(rawRefreshToken string) (*model.UserBase, AuthIdentity, error) {
+	sid, secret, ok := splitRefreshToken(rawRefreshToken)
+	if !ok {
+		return nil, AuthIdentity{}, ErrRefreshTokenInvalid
+	}
+	session, err := model.GetUserSessionCached(sid)
+	if err != nil {
+		if errors.Is(err, model.ErrUserSessionInactive) {
+			return nil, AuthIdentity{}, ErrLoginSessionRevoked
+		}
+		return nil, AuthIdentity{}, ErrRefreshTokenInvalid
+	}
+	if session.Status != model.UserSessionStatusActive || session.RevokedAt != 0 || session.ExpiresAt <= time.Now().Unix() {
+		return nil, AuthIdentity{}, ErrLoginSessionRevoked
+	}
+	if session.RefreshHash != hashRefreshSecret(secret) {
+		// Accept current rotated secret only (not previous) to avoid reuse windows here.
+		return nil, AuthIdentity{}, ErrRefreshTokenInvalid
+	}
+	user, err := model.GetUserCache(session.UserID)
+	if err != nil {
+		return nil, AuthIdentity{}, err
+	}
+	if user.Status != common.UserStatusEnabled || user.AuthVersion != session.UserAuthVersion {
+		return nil, AuthIdentity{}, ErrLoginSessionRevoked
+	}
+	return user, AuthIdentity{
+		UserID:          user.Id,
+		SessionID:       session.SID,
+		UserAuthVersion: session.UserAuthVersion,
+		SessionVersion:  session.Version,
+	}, nil
+}
+
 func ListLoginSessions(userID int, currentSID string) ([]LoginSessionView, error) {
 	sessions, err := model.ListActiveUserSessions(userID, currentSID, time.Now().Unix())
 	if err != nil {
@@ -300,10 +349,12 @@ func WriteRefreshCookie(c *gin.Context, rawToken string) {
 	if maxAge < 1 {
 		maxAge = 1
 	}
+	// Drop any Domain-scoped jar residue before issuing a host-only cookie.
+	clearLegacyDomainRefreshCookie(c)
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     RefreshCookieName,
 		Value:    rawToken,
-		Path:     "/api/user/auth",
+		Path:     refreshCookiePath,
 		MaxAge:   maxAge,
 		Expires:  expiresAt,
 		HttpOnly: true,
@@ -313,10 +364,28 @@ func WriteRefreshCookie(c *gin.Context, rawToken string) {
 }
 
 func ClearRefreshCookie(c *gin.Context) {
+	// Host-only clear (matches current WriteRefreshCookie).
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     RefreshCookieName,
 		Value:    "",
-		Path:     "/api/user/auth",
+		Path:     refreshCookiePath,
+		MaxAge:   -1,
+		Expires:  time.Unix(1, 0),
+		HttpOnly: true,
+		Secure:   common.SessionCookieSecure,
+		SameSite: http.SameSiteStrictMode,
+	})
+	clearLegacyDomainRefreshCookie(c)
+}
+
+// clearLegacyDomainRefreshCookie expires Domain=.metartr.com new_api_refresh
+// left by a rolled-back cookie-domain experiment. Safe no-op if absent.
+func clearLegacyDomainRefreshCookie(c *gin.Context) {
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     RefreshCookieName,
+		Value:    "",
+		Path:     refreshCookiePath,
+		Domain:   legacyRefreshCookieDomain,
 		MaxAge:   -1,
 		Expires:  time.Unix(1, 0),
 		HttpOnly: true,

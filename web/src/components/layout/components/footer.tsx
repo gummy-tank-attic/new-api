@@ -42,11 +42,8 @@ interface FooterProps {
   className?: string
 }
 
-const NEW_API_FOOTER_ATTRIBUTION_KEY = [
-  'footer',
-  'new' + 'api',
-  'projectAttributionSuffix',
-].join('.')
+const TELEGRAM_SUPPORT_URL = 'https://t.me/MetaRtrSupport_bot'
+const TELEGRAM_CHANNEL_URL = 'https://t.me/MetaRtr'
 
 function FooterLinkItem(props: { link: FooterLink }) {
   const { t } = useTranslation()
@@ -121,22 +118,15 @@ function LegalLinks(props: { leadingSeparator?: boolean }) {
   )
 }
 
-// inline=true returns just the inner span for composition in a parent flex
-// row. inline=false wraps in a centered/right-aligned div (default).
-function ProjectAttribution(props: { currentYear: number; inline?: boolean }) {
-  const { t } = useTranslation()
+/** Plain brand copyright — no external project hyperlink. */
+function BrandAttribution(props: {
+  currentYear: number
+  brandName: string
+  inline?: boolean
+}) {
   const content = (
     <span className='text-muted-foreground/45'>
-      &copy; {props.currentYear}{' '}
-      <a
-        href='https://github.com/QuantumNous/new-api'
-        target='_blank'
-        rel='noopener noreferrer'
-        className='text-foreground/70 hover:text-foreground font-medium transition-colors'
-      >
-        {t('New API')}
-      </a>
-      . {t(NEW_API_FOOTER_ATTRIBUTION_KEY)}
+      &copy; {props.currentYear} {props.brandName}
     </span>
   )
   if (props.inline) {
@@ -149,17 +139,45 @@ function ProjectAttribution(props: { currentYear: number; inline?: boolean }) {
   )
 }
 
+/** Clickable Telegram support + channel entries for the site footer. */
+function TelegramFooterLinks(props: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        'text-muted-foreground flex min-w-0 flex-col gap-1 text-sm leading-relaxed',
+        props.className
+      )}
+    >
+      <a
+        href={TELEGRAM_SUPPORT_URL}
+        target='_blank'
+        rel='noopener noreferrer'
+        className='text-foreground/80 hover:text-foreground underline underline-offset-4 transition-colors'
+      >
+        Telegram Support：MetaRtrSupport_bot
+      </a>
+      <a
+        href={TELEGRAM_CHANNEL_URL}
+        target='_blank'
+        rel='noopener noreferrer'
+        className='text-foreground/80 hover:text-foreground break-all underline underline-offset-4 transition-colors'
+      >
+        Telegram Channel：https://t.me/MetaRtr
+      </a>
+    </div>
+  )
+}
+
 export function Footer(props: FooterProps) {
   const { t } = useTranslation()
   const {
     systemName,
     logo: systemLogo,
-    footerHtml,
     demoSiteEnabled,
   } = useSystemConfig()
 
   const displayLogo = systemLogo || props.logo || '/logo.png'
-  const displayName = systemName || props.name || 'New API'
+  const displayName = systemName || props.name || 'MetaRtr'
   const isDemoSiteMode = Boolean(demoSiteEnabled)
   const currentYear = new Date().getFullYear()
 
@@ -222,55 +240,42 @@ export function Footer(props: FooterProps) {
 
   const displayColumns = props.columns ?? fallbackColumns
 
-  if (footerHtml) {
-    return (
-      <footer
-        className={cn(
-          'border-border/40 relative z-10 border-t',
-          props.className
-        )}
-      >
-        <div className='mx-auto w-full max-w-6xl px-6 py-5'>
-          <div className='bg-muted/20 border-border/50 flex flex-col items-center justify-between gap-4 rounded-2xl border px-4 py-4 backdrop-blur-sm sm:flex-row sm:px-5'>
-            <div
-              className='custom-footer text-muted-foreground min-w-0 text-center text-sm sm:text-left'
-              dangerouslySetInnerHTML={{ __html: footerHtml }}
-            />
-            <div className='border-border/60 text-muted-foreground/45 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-4 text-xs sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5'>
-              <LegalLinks />
-              <ProjectAttribution currentYear={currentYear} inline />
-            </div>
-          </div>
-        </div>
-      </footer>
-    )
-  }
-
+  // Compact bar used on MetaRtr (brand + Telegram + legal).
   return (
     <footer
-      className={cn('border-border/40 relative z-10 border-t', props.className)}
+      className={cn(
+        'border-border/40 relative z-10 border-t',
+        props.className
+      )}
     >
-      <div className='mx-auto max-w-6xl px-6 py-12 md:py-16'>
-        <div className='flex flex-col justify-between gap-10 md:flex-row md:gap-16'>
-          {/* Brand column */}
-          <div className='shrink-0'>
-            <Link to='/' className='group flex items-center gap-2.5'>
-              <img
-                src={displayLogo}
-                alt={displayName}
-                className='size-7 rounded-lg object-contain'
-              />
-              <span className='text-sm font-semibold tracking-tight'>
-                {displayName}
-              </span>
-            </Link>
-            <p className='text-muted-foreground/60 mt-3 max-w-[200px] text-xs leading-relaxed'>
-              {t('Powerful API Management Platform')}
-            </p>
+      <div className='mx-auto w-full max-w-6xl px-6 py-5'>
+        <div className='bg-muted/20 border-border/50 flex flex-col items-center justify-between gap-4 rounded-2xl border px-4 py-4 backdrop-blur-sm sm:flex-row sm:items-center sm:px-5'>
+          <TelegramFooterLinks className='text-center sm:text-left' />
+          <div className='border-border/60 text-muted-foreground/45 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-4 text-xs sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5'>
+            <LegalLinks />
+            <BrandAttribution
+              currentYear={currentYear}
+              brandName={displayName}
+              inline
+            />
           </div>
+        </div>
 
-          {/* Links columns */}
-          {isDemoSiteMode && (
+        {/* Keep full multi-column footer only in demo-site mode */}
+        {isDemoSiteMode && (
+          <div className='mt-10 flex flex-col justify-between gap-10 md:flex-row md:gap-16'>
+            <div className='shrink-0'>
+              <Link to='/' className='group flex items-center gap-2.5'>
+                <img
+                  src={displayLogo}
+                  alt={displayName}
+                  className='size-7 rounded-lg object-contain'
+                />
+                <span className='text-sm font-semibold tracking-tight'>
+                  {displayName}
+                </span>
+              </Link>
+            </div>
             <div className='grid grid-cols-3 gap-8 md:gap-16'>
               {displayColumns.map((column, index) => (
                 <div key={index}>
@@ -287,21 +292,8 @@ export function Footer(props: FooterProps) {
                 </div>
               ))}
             </div>
-          )}
-        </div>
-
-        {/* Copyright + optional legal links inline on the left, project
-            attribution on the right; wraps on narrow screens. */}
-        <div className='border-border/30 mt-12 flex flex-col items-center justify-between gap-x-3 gap-y-2 border-t pt-6 sm:flex-row'>
-          <div className='text-muted-foreground/40 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs sm:justify-start'>
-            <span>
-              &copy; {currentYear} {displayName}.{' '}
-              {props.copyright ?? t('footer.defaultCopyright')}
-            </span>
-            <LegalLinks leadingSeparator />
           </div>
-          <ProjectAttribution currentYear={currentYear} />
-        </div>
+        )}
       </div>
     </footer>
   )

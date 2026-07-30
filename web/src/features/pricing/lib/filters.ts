@@ -24,6 +24,7 @@ import {
   ENDPOINT_TYPES,
 } from '../constants'
 import type { PricingModel } from '../types'
+import { compareModelNames } from './model-helpers'
 
 // ----------------------------------------------------------------------------
 // Filter Utilities
@@ -117,7 +118,7 @@ export function sortModels(
   switch (sortBy) {
     case SORT_OPTIONS.NAME:
       sorted.sort((a, b) =>
-        (a.model_name || '').localeCompare(b.model_name || '')
+        compareModelNames(a.model_name || '', b.model_name || '')
       )
       break
     case SORT_OPTIONS.PRICE_LOW:
