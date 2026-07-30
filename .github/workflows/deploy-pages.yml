@@ -1,0 +1,47 @@
+name: Deploy Frontend to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+      - production
+      - 'metartr/*'
+    paths:
+      - 'web/**'
+      - '.github/workflows/deploy-pages.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        working-directory: web
+        run: npm ci --legacy-peer-deps --no-fund --no-audit
+
+      - name: Typecheck
+        working-directory: web
+        run: npm run typecheck
+
+      - name: Build Frontend
+        working-directory: web
+        run: npm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: 'metartr-web'
+          directory: 'web/dist'
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

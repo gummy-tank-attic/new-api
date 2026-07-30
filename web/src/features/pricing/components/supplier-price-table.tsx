@@ -20,6 +20,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
+import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -254,6 +255,99 @@ function ModelPriceCells(props: {
   } = props
 
   if (isDynamicPricingModel(model)) {
+    if (model.model_name === 'gpt-image-2') {
+      return (
+        <>
+          <TableCell colSpan={4} className='px-3 py-3.5 text-center'>
+            <div className='flex items-center justify-center gap-4 flex-wrap'>
+              <div className='flex items-center gap-1.5'>
+                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>1K</Badge>
+                <span className='text-sm font-medium'>$0.025 / image</span>
+              </div>
+              <div className='flex items-center gap-1.5'>
+                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>2K</Badge>
+                <span className='text-sm font-medium'>$0.035 / image</span>
+              </div>
+              <div className='flex items-center gap-1.5'>
+                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>4K</Badge>
+                <span className='text-sm font-medium'>$0.07 / image</span>
+              </div>
+            </div>
+          </TableCell>
+          <TableCell className='px-3 py-3.5 text-center'>
+            <span className='text-muted-foreground/35 text-sm'>—</span>
+          </TableCell>
+        </>
+      )
+    }
+    if (model.model_name === 'grok-imagine-image-quality') {
+      return (
+        <>
+          <TableCell colSpan={4} className='px-3 py-3.5 text-center'>
+            <div className='flex items-center justify-center gap-4 flex-wrap'>
+              <div className='flex items-center gap-1.5'>
+                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>1K</Badge>
+                <span className='text-sm font-medium'>$0.035 / image</span>
+              </div>
+              <div className='flex items-center gap-1.5'>
+                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>2K</Badge>
+                <span className='text-sm font-medium'>$0.045 / image</span>
+              </div>
+            </div>
+          </TableCell>
+          <TableCell className='px-3 py-3.5 text-center'>
+            <span className='text-muted-foreground/35 text-sm'>—</span>
+          </TableCell>
+        </>
+      )
+    }
+    if (model.model_name === 'grok-imagine-image') {
+      return (
+        <>
+          <TableCell colSpan={4} className='px-3 py-3.5 text-center'>
+            <div className='flex items-center justify-center gap-4 flex-wrap'>
+              <div className='flex items-center gap-1.5'>
+                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>1K</Badge>
+                <span className='text-sm font-medium'>$0.025 / image</span>
+              </div>
+              <div className='flex items-center gap-1.5'>
+                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>2K</Badge>
+                <span className='text-sm font-medium'>$0.035 / image</span>
+              </div>
+            </div>
+          </TableCell>
+          <TableCell className='px-3 py-3.5 text-center'>
+            <span className='text-muted-foreground/35 text-sm'>—</span>
+          </TableCell>
+        </>
+      )
+    }
+    if (model.model_name === 'grok-imagine-video') {
+      return (
+        <>
+          <TableCell colSpan={4} className='px-3 py-3.5 text-center'>
+            <div className='flex flex-col items-center justify-center gap-2'>
+              <div className='flex items-center gap-1.5'>
+                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>480p</Badge>
+                <span className='text-sm font-medium'>
+                  $0.025 / s <span className='text-xs font-normal text-muted-foreground ml-1'>(Default: 8s, Configurable: 1-15s)</span>
+                </span>
+              </div>
+              <div className='flex items-center gap-1.5'>
+                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>720p</Badge>
+                <span className='text-sm font-medium'>
+                  $0.035 / s <span className='text-xs font-normal text-muted-foreground ml-1'>(Default: 8s, Configurable: 1-15s)</span>
+                </span>
+              </div>
+            </div>
+          </TableCell>
+          <TableCell className='px-3 py-3.5 text-center'>
+            <span className='text-muted-foreground/35 text-sm'>—</span>
+          </TableCell>
+        </>
+      )
+    }
+
     return (
       <>
         <TableCell colSpan={4} className='px-3 py-3.5 text-center'>

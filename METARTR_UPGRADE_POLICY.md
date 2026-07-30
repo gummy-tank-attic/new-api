@@ -26,6 +26,8 @@ security fixes forward selectively, then reapply MetaRtr frontend changes.
 4. Deploy production only after the operator accepts any intentional visual
    change.
 
-The snapshot branch is the rollback baseline for local source state. Production
-VPS and Cloudflare deployment identifiers must be captured separately before a
-future upgrade.
+The snapshot branch is the rollback baseline for local source state. Before a
+future upgrade, capture production VPS evidence and Cloudflare Pages deployment
+identifiers using the project-level `docs/ONLINE_ALIGNMENT_CAPTURE.md` procedure.
+The production branch is `production`; do not treat `main` or an arbitrary Pages
+preview as the live frontend.
