@@ -35,6 +35,7 @@ let telegramCallbackSequence = 0
 export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
   const { t } = useTranslation()
   const authorizationHandler = useRef(props.onAuthorization)
+  const widgetRef = useRef<HTMLDivElement>(null)
   const [callbackName] = useState(
     () => `newApiTelegramLogin${++telegramCallbackSequence}`
   )
@@ -52,30 +53,35 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
     const browserWindow = window as unknown as Record<string, unknown>
     browserWindow[callbackName] = callback
 
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://oauth.telegram.org') return
-      try {
-        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data
-        if (data && (data.event === 'auth_result' || data.result)) {
-          authorizationHandler.current(data.result || data)
-        }
-      } catch {
-        // ignore non-json messages
-      }
-    }
-    window.addEventListener('message', handleMessage)
-
     return () => {
-      window.removeEventListener('message', handleMessage)
       delete browserWindow[callbackName]
     }
   }, [callbackName, props.open])
 
-  const botName = props.botName.trim().replace(/^@/, '')
-  const origin = typeof window !== 'undefined' ? window.location.origin : ''
-  const iframeSrc = botName && props.open
-    ? `https://oauth.telegram.org/embed/${botName}?origin=${encodeURIComponent(origin)}&size=large&radius=8&onauth=${callbackName}(user)`
-    : ''
+  useEffect(() => {
+    const container = widgetRef.current
+    if (!container || !props.open) return
+
+    const cleanBotName = props.botName.trim().replace(/^@/, '')
+    if (!cleanBotName) return
+
+    container.replaceChildren()
+    const script = document.createElement('script')
+    script.async = true
+    script.src = 'https://telegram.org/js/telegram-widget.js?22'
+    script.setAttribute('data-telegram-login', cleanBotName)
+    script.setAttribute('data-size', 'large')
+    script.setAttribute('data-radius', '8')
+    script.setAttribute('data-onauth', `${callbackName}(user)`)
+    script.setAttribute('data-request-access', 'write')
+    container.appendChild(script)
+
+    return () => {
+      container.replaceChildren()
+    }
+  }, [props.botName, props.open, callbackName])
+
+  const cleanBotName = props.botName.trim().replace(/^@/, '')
 
   return (
     <Dialog
@@ -87,22 +93,17 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
       contentHeight='auto'
       bodyClassName='space-y-4'
     >
-      <div className='flex min-h-16 flex-col items-center justify-center gap-2 py-2'>
+      <div className='flex min-h-16 flex-col items-center justify-center gap-2 py-4'>
         {props.pending && <Spinner />}
-        {iframeSrc ? (
-          <iframe
-            title='Telegram Login'
-            src={iframeSrc}
-            width='240'
-            height='40'
-            style={{ border: 'none', overflow: 'hidden', colorScheme: 'light' }}
-            scrolling='no'
-          />
-        ) : (
+        {!cleanBotName && (
           <p className='text-muted-foreground text-sm'>
             {t('Telegram Bot Username is not configured.')}
           </p>
         )}
+        <div
+          ref={widgetRef}
+          className='flex min-h-12 w-full items-center justify-center'
+        />
       </div>
     </Dialog>
   )
