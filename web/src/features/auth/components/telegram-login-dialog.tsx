@@ -35,60 +35,47 @@ let telegramCallbackSequence = 0
 export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
   const { t } = useTranslation()
   const authorizationHandler = useRef(props.onAuthorization)
-  // Base UI Dialog portals only after store.mounted flips (layout effect).
-  // A plain ref + open-only effect races that mount and never re-runs, leaving
-  // an empty dialog. Track the real DOM node so the widget mounts when ready.
-  const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null)
-  const setWidgetContainer = useCallback((node: HTMLDivElement | null) => {
-    setContainerEl(node)
-  }, [])
   const [callbackName] = useState(
     () => `newApiTelegramLogin${++telegramCallbackSequence}`
   )
-  const [widgetState, setWidgetState] = useState<
-    'idle' | 'loading' | 'ready' | 'failed'
-  >('idle')
 
   useEffect(() => {
     authorizationHandler.current = props.onAuthorization
   }, [props.onAuthorization])
 
-   useEffect(() => {
-     if (!props.open) {
-       setWidgetState('idle')
-       return
-     }
+  useEffect(() => {
+    if (!props.open) return
 
-      const botName = props.botName.trim().replace(/^@/, '')
-      if (!containerEl || !botName) return
+    const callback = (authorization: unknown) => {
+      authorizationHandler.current(authorization)
+    }
+    const browserWindow = window as unknown as Record<string, unknown>
+    browserWindow[callbackName] = callback
 
-      setWidgetState('loading')
-      const callback = (authorization: unknown) => {
-        authorizationHandler.current(authorization)
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://oauth.telegram.org') return
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data
+        if (data && (data.event === 'auth_result' || data.result)) {
+          authorizationHandler.current(data.result || data)
+        }
+      } catch {
+        // ignore non-json messages
       }
-      const browserWindow = window as unknown as Record<string, unknown>
-      browserWindow[callbackName] = callback
+    }
+    window.addEventListener('message', handleMessage)
 
-      const script = document.createElement('script')
-      script.async = true
-      script.src = 'https://telegram.org/js/telegram-widget.js?22'
-      script.dataset.telegramLogin = botName
-      script.dataset.size = 'large'
-      script.dataset.radius = '8'
-      script.dataset.onauth = `${callbackName}(user)`
-      const handleLoad = () => setWidgetState('ready')
-      const handleError = () => setWidgetState('failed')
-      script.addEventListener('load', handleLoad)
-      script.addEventListener('error', handleError)
-      containerEl.replaceChildren(script)
+    return () => {
+      window.removeEventListener('message', handleMessage)
+      delete browserWindow[callbackName]
+    }
+  }, [callbackName, props.open])
 
-      return () => {
-        script.removeEventListener('load', handleLoad)
-        script.removeEventListener('error', handleError)
-        containerEl.replaceChildren()
-        delete browserWindow[callbackName]
-      }
-    }, [callbackName, containerEl, props.botName, props.open])
+  const botName = props.botName.trim().replace(/^@/, '')
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  const iframeSrc = botName && props.open
+    ? `https://oauth.telegram.org/embed/${botName}?origin=${encodeURIComponent(origin)}&size=large&radius=8&onauth=${callbackName}(user)`
+    : ''
 
   return (
     <Dialog
@@ -100,15 +87,22 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
       contentHeight='auto'
       bodyClassName='space-y-4'
     >
-      <div className='flex min-h-16 flex-col items-center justify-center gap-2'>
-        {(widgetState === 'loading' || props.pending) && <Spinner />}
-        {widgetState === 'failed' && (
-          <p className='text-destructive text-sm'>{t('Login failed')}</p>
+      <div className='flex min-h-16 flex-col items-center justify-center gap-2 py-2'>
+        {props.pending && <Spinner />}
+        {iframeSrc ? (
+          <iframe
+            title='Telegram Login'
+            src={iframeSrc}
+            width='240'
+            height='40'
+            style={{ border: 'none', overflow: 'hidden', colorScheme: 'light' }}
+            scrolling='no'
+          />
+        ) : (
+          <p className='text-muted-foreground text-sm'>
+            {t('Telegram Bot Username is not configured.')}
+          </p>
         )}
-        <div
-          ref={setWidgetContainer}
-          className='flex w-full justify-center min-h-[40px] items-center'
-        />
       </div>
     </Dialog>
   )
