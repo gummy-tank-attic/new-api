@@ -16,12 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
 import { Spinner } from '@/components/ui/spinner'
-import { getStatus } from '@/lib/api'
 
 type TelegramLoginDialogProps = {
   open: boolean
@@ -35,66 +34,53 @@ let telegramCallbackSequence = 0
 
 export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
   const { t } = useTranslation()
+  const widgetContainer = useRef<HTMLDivElement | null>(null)
   const authorizationHandler = useRef(props.onAuthorization)
-  const widgetRef = useRef<HTMLDivElement>(null)
-  const [fetchedBotName, setFetchedBotName] = useState('')
   const [callbackName] = useState(
     () => `newApiTelegramLogin${++telegramCallbackSequence}`
   )
-
-  const rawBotName = props.botName || fetchedBotName
-  const cleanBotName = rawBotName.trim().replace(/^@/, '')
+  const [widgetState, setWidgetState] = useState<
+    'idle' | 'loading' | 'ready' | 'failed'
+  >('idle')
 
   useEffect(() => {
     authorizationHandler.current = props.onAuthorization
   }, [props.onAuthorization])
 
   useEffect(() => {
-    if (!props.open) return
+    const container = widgetContainer.current
+    // 去掉 @ 前缀，upstream 原始代码未去 @ 是已知 bug
+    const botName = props.botName.trim().replace(/^@/, '')
+    if (!props.open || !container || !botName) return
 
-    if (!props.botName) {
-      getStatus()
-        .then((statusData) => {
-          const name = (statusData?.telegram_bot_name as string) || ''
-          if (name) {
-            setFetchedBotName(name)
-          }
-        })
-        .catch(() => {})
-    }
-
+    setWidgetState('loading')
     const callback = (authorization: unknown) => {
       authorizationHandler.current(authorization)
     }
     const browserWindow = window as unknown as Record<string, unknown>
     browserWindow[callbackName] = callback
 
-    return () => {
-      delete browserWindow[callbackName]
-    }
-  }, [callbackName, props.open, props.botName])
-
-  useEffect(() => {
-    const container = widgetRef.current
-    if (!container || !props.open || !cleanBotName) return
-
-    container.replaceChildren()
     const script = document.createElement('script')
     script.async = true
     script.src = 'https://telegram.org/js/telegram-widget.js?22'
-    script.setAttribute('data-telegram-login', cleanBotName)
-    script.setAttribute('data-size', 'large')
-    script.setAttribute('data-radius', '8')
-    script.setAttribute('data-onauth', `${callbackName}(user)`)
-    script.setAttribute('data-request-access', 'write')
-    container.appendChild(script)
+    script.dataset.telegramLogin = botName
+    script.dataset.size = 'large'
+    script.dataset.radius = '8'
+    script.dataset.onauth = `${callbackName}(user)`
+    script.dataset.requestAccess = 'write'
+    const handleLoad = () => setWidgetState('ready')
+    const handleError = () => setWidgetState('failed')
+    script.addEventListener('load', handleLoad)
+    script.addEventListener('error', handleError)
+    container.replaceChildren(script)
 
     return () => {
+      script.removeEventListener('load', handleLoad)
+      script.removeEventListener('error', handleError)
       container.replaceChildren()
+      delete browserWindow[callbackName]
     }
-  }, [cleanBotName, props.open, callbackName])
-
-  const cleanBotName = props.botName.trim().replace(/^@/, '')
+  }, [callbackName, props.botName, props.open])
 
   return (
     <Dialog
@@ -106,16 +92,19 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
       contentHeight='auto'
       bodyClassName='space-y-4'
     >
-      <div className='flex min-h-16 flex-col items-center justify-center gap-2 py-4'>
-        {props.pending && <Spinner />}
-        {!cleanBotName && (
-          <p className='text-muted-foreground text-sm'>
-            {t('Telegram Bot Username is not configured.')}
-          </p>
+      <div
+        className='flex min-h-12 items-center justify-center'
+        aria-busy={widgetState === 'loading' || props.pending}
+      >
+        {(widgetState === 'loading' || props.pending) && <Spinner />}
+        {widgetState === 'failed' && (
+          <p className='text-destructive text-sm'>{t('Login failed')}</p>
         )}
         <div
-          ref={widgetRef}
-          className='flex min-h-12 w-full items-center justify-center'
+          ref={widgetContainer}
+          className={
+            widgetState === 'ready' && !props.pending ? 'block' : 'hidden'
+          }
         />
       </div>
     </Dialog>
