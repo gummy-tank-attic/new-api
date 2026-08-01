@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/i18n"
@@ -18,6 +21,64 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+const telegramBotAPIBaseURL = "https://api.telegram.org"
+
+type telegramGetMeResponse struct {
+	OK          bool   `json:"ok"`
+	Description string `json:"description"`
+	Result      struct {
+		Username string `json:"username"`
+	} `json:"result"`
+}
+
+var fetchTelegramBotName = fetchTelegramBotNameFromAPI
+
+func fetchTelegramBotNameFromAPI(ctx context.Context, token string) (string, error) {
+	token = strings.TrimSpace(token)
+	if token == "" {
+		return "", errors.New("telegram bot token is empty")
+	}
+
+	requestCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(requestCtx, http.MethodGet, telegramBotAPIBaseURL+"/bot"+token+"/getMe", nil)
+	if err != nil {
+		return "", err
+	}
+
+	client := http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", errors.New("telegram getMe request failed")
+	}
+	defer resp.Body.Close()
+
+	var telegramResp telegramGetMeResponse
+	if err := common.DecodeJson(resp.Body, &telegramResp); err != nil {
+		return "", err
+	}
+	if !telegramResp.OK {
+		if telegramResp.Description != "" {
+			return "", errors.New(telegramResp.Description)
+		}
+		return "", errors.New("telegram getMe failed")
+	}
+	botName := strings.TrimSpace(telegramResp.Result.Username)
+	if botName == "" {
+		return "", errors.New("telegram bot username is empty")
+	}
+	return botName, nil
+}
+
+func syncTelegramBotNameFromToken(ctx context.Context, token string) error {
+	botName, err := fetchTelegramBotName(ctx, token)
+	if err != nil {
+		return err
+	}
+	return model.UpdateOption("TelegramBotName", botName)
+}
 
 var completionRatioMetaOptionKeys = []string{
 	"ModelPrice",
@@ -219,6 +280,15 @@ func UpdateOption(c *gin.Context) {
 			})
 			return
 		}
+		if option.Value == "true" && strings.TrimSpace(common.TelegramBotName) == "" {
+			if err := syncTelegramBotNameFromToken(c.Request.Context(), common.TelegramBotToken); err != nil {
+				c.JSON(http.StatusOK, gin.H{
+					"success": false,
+					"message": "无法启用 Telegram OAuth，无法通过 Bot Token 获取 Bot Name：" + err.Error(),
+				})
+				return
+			}
+		}
 	case "theme.frontend":
 		if option.Value != "default" {
 			c.JSON(http.StatusOK, gin.H{
@@ -362,6 +432,33 @@ func UpdateOption(c *gin.Context) {
 			})
 			return
 		}
+	}
+	if option.Key == "TelegramBotToken" {
+		telegramBotToken := strings.TrimSpace(option.Value.(string))
+		telegramValues := map[string]string{
+			"TelegramBotToken": telegramBotToken,
+			"TelegramBotName":  "",
+		}
+		if telegramBotToken != "" {
+			telegramBotName, err := fetchTelegramBotName(c.Request.Context(), telegramBotToken)
+			if err != nil {
+				common.ApiErrorMsg(c, "无法通过 Telegram Bot Token 获取 Bot Name："+err.Error())
+				return
+			}
+			telegramValues["TelegramBotName"] = telegramBotName
+		}
+		if err := model.UpdateOptionsBulk(telegramValues); err != nil {
+			common.ApiError(c, err)
+			return
+		}
+		recordManageAudit(c, "option.update", map[string]interface{}{
+			"key": option.Key,
+		})
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"message": "",
+		})
+		return
 	}
 	err = model.UpdateOption(option.Key, option.Value.(string))
 	if err != nil {

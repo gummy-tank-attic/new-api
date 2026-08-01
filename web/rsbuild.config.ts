@@ -50,6 +50,30 @@ export default defineConfig(({ envMode }) => {
           priority: 0,
           enforce: true,
         },
+        // Ant Design is one of the heaviest UI libraries; keep async to avoid initial bundle bloat.
+        'vendor-antd': {
+          test: /node_modules[\\/](antd|antd-style|@ant-design)[\\/]/,
+          name: 'vendor-antd',
+          chunks: 'async',
+          priority: 0,
+          enforce: true,
+        },
+        // Charting libraries (VChart, Recharts) are large; keep async — only needed on chart pages.
+        'vendor-chart': {
+          test: /node_modules[\\/](@visactor|recharts)[\\/]/,
+          name: 'vendor-chart',
+          chunks: 'async',
+          priority: 0,
+          enforce: true,
+        },
+        // Syntax highlighting, math rendering, markdown — keep async, only needed in specific views.
+        'vendor-rendering': {
+          test: /node_modules[\\/](shiki|katex|marked|@codemirror|@lezer)[\\/]/,
+          name: 'vendor-rendering',
+          chunks: 'async',
+          priority: 0,
+          enforce: true,
+        },
       },
     },
     source: {

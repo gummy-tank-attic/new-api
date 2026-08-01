@@ -21,6 +21,11 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 import { initReactI18next } from 'react-i18next'
 
 import { convertDetectedLanguage } from './languages'
+// i18n: option 1 — sync all locales at startup (aligned with upstream new-api).
+// DO NOT switch to lazy-loading without addressing the known UX regression:
+// right-click "open in new tab" would briefly flash English before the detected
+// locale chunk arrives, and could write 'en' back into localStorage.
+// See docs/FRONTEND_I18N.md §1.2 for the full list of prohibited patterns.
 import en from './locales/en.json'
 import fr from './locales/fr.json'
 import ja from './locales/ja.json'

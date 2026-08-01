@@ -1,27 +1,33 @@
-# newapi溠码/web/deploy.ps1
-<#!
+<#
 .SYNOPSIS
-Builds the MetaRtr frontend and deploys it to the Cloudflare Pages production branch.
+Deprecated local deploy entrypoint for the MetaRtr frontend.
 
 .DESCRIPTION
-Credentials must already be supplied in the current process environment. Load them
-from an ignored local .env file or the approved secret store; never add them here.
+Frontend production deployment is handled by GitHub Actions.
+This script intentionally fails fast to prevent accidental local Cloudflare Pages
+deployments with stale or uncommitted code.
+
+Correct flow:
+  cd newapi源码
+  git add .
+  git commit -m "fix: your change"
+  git push
+
+The push triggers .github/workflows/deploy-pages.yml for main, production,
+and metartr/* branches when files under web/** changed.
 #>
 
 $ErrorActionPreference = 'Stop'
 
-foreach ($requiredVariable in 'CLOUDFLARE_ACCOUNT_ID', 'CLOUDFLARE_API_KEY') {
-  if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($requiredVariable))) {
-    throw "Missing $requiredVariable. Load the approved Cloudflare deployment credentials into the environment first."
-  }
-}
+throw @'
+Local frontend deployment is disabled.
 
-npm ci --legacy-peer-deps --no-fund --no-audit
-npm run typecheck
-npm run build
+Use the GitHub Actions deployment flow documented in the project README:
 
-if (!(Test-Path 'dist/_headers') -or !(Test-Path 'dist/_redirects')) {
-  throw 'Build output is missing Cloudflare Pages _headers or _redirects.'
-}
+  cd newapi源码
+  git add .
+  git commit -m "fix: your change"
+  git push
 
-npx wrangler@4 pages deploy dist --project-name=metartr-web --branch=production --commit-dirty=true
+Do not run deploy.ps1 or wrangler locally for production Pages deploys.
+'@

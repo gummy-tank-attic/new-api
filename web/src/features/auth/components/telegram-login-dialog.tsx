@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
@@ -34,8 +34,14 @@ let telegramCallbackSequence = 0
 
 export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
   const { t } = useTranslation()
-  const widgetContainer = useRef<HTMLDivElement | null>(null)
   const authorizationHandler = useRef(props.onAuthorization)
+  // Base UI Dialog portals only after store.mounted flips (layout effect).
+  // A plain ref + open-only effect races that mount and never re-runs, leaving
+  // an empty dialog. Track the real DOM node so the widget mounts when ready.
+  const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null)
+  const setWidgetContainer = useCallback((node: HTMLDivElement | null) => {
+    setContainerEl(node)
+  }, [])
   const [callbackName] = useState(
     () => `newApiTelegramLogin${++telegramCallbackSequence}`
   )
@@ -47,38 +53,42 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
     authorizationHandler.current = props.onAuthorization
   }, [props.onAuthorization])
 
-  useEffect(() => {
-    const container = widgetContainer.current
-    const botName = props.botName.trim()
-    if (!props.open || !container || !botName) return
+   useEffect(() => {
+     if (!props.open) {
+       setWidgetState('idle')
+       return
+     }
 
-    setWidgetState('loading')
-    const callback = (authorization: unknown) => {
-      authorizationHandler.current(authorization)
-    }
-    const browserWindow = window as unknown as Record<string, unknown>
-    browserWindow[callbackName] = callback
+      const botName = props.botName.trim().replace(/^@/, '')
+      if (!containerEl || !botName) return
 
-    const script = document.createElement('script')
-    script.async = true
-    script.src = 'https://telegram.org/js/telegram-widget.js?22'
-    script.dataset.telegramLogin = botName
-    script.dataset.size = 'large'
-    script.dataset.radius = '8'
-    script.dataset.onauth = `${callbackName}(user)`
-    const handleLoad = () => setWidgetState('ready')
-    const handleError = () => setWidgetState('failed')
-    script.addEventListener('load', handleLoad)
-    script.addEventListener('error', handleError)
-    container.replaceChildren(script)
+      setWidgetState('loading')
+      const callback = (authorization: unknown) => {
+        authorizationHandler.current(authorization)
+      }
+      const browserWindow = window as unknown as Record<string, unknown>
+      browserWindow[callbackName] = callback
 
-    return () => {
-      script.removeEventListener('load', handleLoad)
-      script.removeEventListener('error', handleError)
-      container.replaceChildren()
-      delete browserWindow[callbackName]
-    }
-  }, [callbackName, props.botName, props.open])
+      const script = document.createElement('script')
+      script.async = true
+      script.src = 'https://telegram.org/js/telegram-widget.js?22'
+      script.dataset.telegramLogin = botName
+      script.dataset.size = 'large'
+      script.dataset.radius = '8'
+      script.dataset.onauth = `${callbackName}(user)`
+      const handleLoad = () => setWidgetState('ready')
+      const handleError = () => setWidgetState('failed')
+      script.addEventListener('load', handleLoad)
+      script.addEventListener('error', handleError)
+      containerEl.replaceChildren(script)
+
+      return () => {
+        script.removeEventListener('load', handleLoad)
+        script.removeEventListener('error', handleError)
+        containerEl.replaceChildren()
+        delete browserWindow[callbackName]
+      }
+    }, [callbackName, containerEl, props.botName, props.open])
 
   return (
     <Dialog
@@ -99,7 +109,7 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
           <p className='text-destructive text-sm'>{t('Login failed')}</p>
         )}
         <div
-          ref={widgetContainer}
+          ref={setWidgetContainer}
           className={
             widgetState === 'ready' && !props.pending ? 'block' : 'hidden'
           }
