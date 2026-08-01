@@ -29,7 +29,13 @@ function getInitialStatus(): SystemStatus | undefined {
   try {
     if (typeof window !== 'undefined') {
       const saved = window.localStorage.getItem('status')
-      return saved ? (JSON.parse(saved) as SystemStatus) : undefined
+      if (!saved) return undefined
+      const parsed = JSON.parse(saved) as SystemStatus
+      if (parsed?.telegram_oauth && !parsed?.telegram_bot_name) {
+        window.localStorage.removeItem('status')
+        return undefined
+      }
+      return parsed
     }
   } catch {
     /* empty */

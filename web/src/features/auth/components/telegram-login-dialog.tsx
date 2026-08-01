@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
 import { Spinner } from '@/components/ui/spinner'
+import { getStatus } from '@/lib/api'
 
 type TelegramLoginDialogProps = {
   open: boolean
@@ -36,9 +37,13 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
   const { t } = useTranslation()
   const authorizationHandler = useRef(props.onAuthorization)
   const widgetRef = useRef<HTMLDivElement>(null)
+  const [fetchedBotName, setFetchedBotName] = useState('')
   const [callbackName] = useState(
     () => `newApiTelegramLogin${++telegramCallbackSequence}`
   )
+
+  const rawBotName = props.botName || fetchedBotName
+  const cleanBotName = rawBotName.trim().replace(/^@/, '')
 
   useEffect(() => {
     authorizationHandler.current = props.onAuthorization
@@ -46,6 +51,17 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
 
   useEffect(() => {
     if (!props.open) return
+
+    if (!props.botName) {
+      getStatus()
+        .then((statusData) => {
+          const name = (statusData?.telegram_bot_name as string) || ''
+          if (name) {
+            setFetchedBotName(name)
+          }
+        })
+        .catch(() => {})
+    }
 
     const callback = (authorization: unknown) => {
       authorizationHandler.current(authorization)
@@ -56,14 +72,11 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
     return () => {
       delete browserWindow[callbackName]
     }
-  }, [callbackName, props.open])
+  }, [callbackName, props.open, props.botName])
 
   useEffect(() => {
     const container = widgetRef.current
-    if (!container || !props.open) return
-
-    const cleanBotName = props.botName.trim().replace(/^@/, '')
-    if (!cleanBotName) return
+    if (!container || !props.open || !cleanBotName) return
 
     container.replaceChildren()
     const script = document.createElement('script')
@@ -79,7 +92,7 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
     return () => {
       container.replaceChildren()
     }
-  }, [props.botName, props.open, callbackName])
+  }, [cleanBotName, props.open, callbackName])
 
   const cleanBotName = props.botName.trim().replace(/^@/, '')
 
