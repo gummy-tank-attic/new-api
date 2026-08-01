@@ -1,4 +1,5 @@
 name: Deploy Frontend to Cloudflare Pages
+# last-trigger: 2026-08-01 with correct CF_API_TOKEN (Pages Write)
 
 on:
   push:
