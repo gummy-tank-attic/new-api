@@ -100,19 +100,14 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
       contentHeight='auto'
       bodyClassName='space-y-4'
     >
-      <div
-        className='flex min-h-12 items-center justify-center'
-        aria-busy={widgetState === 'loading' || props.pending}
-      >
+      <div className='flex min-h-16 flex-col items-center justify-center gap-2'>
         {(widgetState === 'loading' || props.pending) && <Spinner />}
         {widgetState === 'failed' && (
           <p className='text-destructive text-sm'>{t('Login failed')}</p>
         )}
         <div
           ref={setWidgetContainer}
-          className={
-            widgetState === 'ready' && !props.pending ? 'block' : 'hidden'
-          }
+          className='flex w-full justify-center min-h-[40px] items-center'
         />
       </div>
     </Dialog>
