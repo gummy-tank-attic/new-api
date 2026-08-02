@@ -104,12 +104,12 @@ export function Docs() {
             {/* Card 1: Base URL */}
             <div
               className={cn(
-                'bg-card flex flex-col justify-between gap-3.5 rounded-2xl border p-4 shadow-sm transition-all hover:border-primary/40'
+                'bg-card flex flex-col justify-between gap-3.5 rounded-2xl border p-4 shadow-sm transition-all hover:border-violet-500/40'
               )}
             >
               <div className='flex items-center justify-between gap-2'>
                 <div className='flex items-center gap-2.5'>
-                  <div className='bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-xl shadow-sm shrink-0'>
+                  <div className='bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex size-8 items-center justify-center rounded-xl shadow-sm shrink-0'>
                     <Server className='size-4' />
                   </div>
                   <div>
@@ -121,16 +121,16 @@ export function Docs() {
                     </div>
                   </div>
                 </div>
-                <Button onClick={handleCopyBaseUrl} size='sm' className='gap-1.5 shrink-0'>
+                <Button onClick={handleCopyBaseUrl} size='sm' variant='outline' className='gap-1.5 shrink-0 hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-400'>
                   {copiedBase ? (
-                    <Check className='size-3.5 text-emerald-400' />
+                    <Check className='size-3.5 text-emerald-500' />
                   ) : (
                     <Copy className='size-3.5' />
                   )}
                   <span>{copiedBase ? t('Copied') : t('Copy Base URL')}</span>
                 </Button>
               </div>
-              <div className='bg-muted/60 text-primary flex items-center justify-between rounded-xl px-3.5 py-2.5 font-mono text-xs font-semibold sm:text-sm'>
+              <div className='bg-muted/60 text-violet-600 dark:text-violet-400 flex items-center justify-between rounded-xl px-3.5 py-2.5 font-mono text-xs font-semibold sm:text-sm'>
                 <span className='truncate'>{API_BASE_URL}</span>
               </div>
             </div>
