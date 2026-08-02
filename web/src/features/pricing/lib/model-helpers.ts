@@ -129,10 +129,7 @@ export function compareModelNames(a: string, b: string): number {
  * Stable pricing table order:
  * preferred vendor tab order → MODEL_DISPLAY_ORDER → model name (natural).
  */
-export function comparePricingModels(
-  a: PricingModel,
-  b: PricingModel
-): number {
+export function comparePricingModels(a: PricingModel, b: PricingModel): number {
   const va = a.vendor_name || ''
   const vb = b.vendor_name || ''
   if (va !== vb) {

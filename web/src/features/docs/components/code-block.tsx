@@ -65,7 +65,7 @@ export function CodeBlock(props: CodeBlockProps) {
           {copied ? t('Copied') : t('Copy')}
         </Button>
       </div>
-      <pre className='overflow-x-auto p-4 font-mono text-xs leading-relaxed text-slate-300 whitespace-pre'>
+      <pre className='overflow-x-auto p-4 font-mono text-xs leading-relaxed whitespace-pre text-slate-300'>
         {props.code}
       </pre>
     </div>

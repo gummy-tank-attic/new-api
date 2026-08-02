@@ -73,7 +73,9 @@ export function usePricingData() {
     models,
     vendors: data?.vendors ?? EMPTY_VENDORS,
     groupRatio: data?.group_ratio ?? EMPTY_RATIO,
-    usableGroup: (data?.usable_group as Record<string, string> | undefined) ?? EMPTY_USABLE,
+    usableGroup:
+      (data?.usable_group as Record<string, string> | undefined) ??
+      EMPTY_USABLE,
     endpointMap: data?.supported_endpoint ?? EMPTY_ENDPOINT,
     autoGroups: data?.auto_groups ?? EMPTY_AUTO,
     isLoading,

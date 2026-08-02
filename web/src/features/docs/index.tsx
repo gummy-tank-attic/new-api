@@ -17,7 +17,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { getRouteApi, Link } from '@tanstack/react-router'
-import { Check, Code, Copy, Image as ImageIcon, Menu, Server } from 'lucide-react'
+import {
+  Check,
+  Code,
+  Copy,
+  Image as ImageIcon,
+  Menu,
+  Server,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -73,7 +80,8 @@ export function Docs() {
   }
 
   const activeLabel =
-    DOCS_NAV.find((item) => item.id === activeSection)?.labelKey ?? 'Quick start'
+    DOCS_NAV.find((item) => item.id === activeSection)?.labelKey ??
+    'Quick start'
 
   return (
     <PublicLayout>
@@ -109,7 +117,7 @@ export function Docs() {
             >
               <div className='flex items-center justify-between gap-2'>
                 <div className='flex items-center gap-2.5'>
-                  <div className='bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex size-8 items-center justify-center rounded-xl shadow-sm shrink-0'>
+                  <div className='flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-sm'>
                     <Server className='size-4' />
                   </div>
                   <div>
@@ -121,7 +129,12 @@ export function Docs() {
                     </div>
                   </div>
                 </div>
-                <Button onClick={handleCopyBaseUrl} size='sm' variant='outline' className='gap-1.5 shrink-0 hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-400'>
+                <Button
+                  onClick={handleCopyBaseUrl}
+                  size='sm'
+                  variant='outline'
+                  className='shrink-0 gap-1.5 hover:border-violet-400 hover:bg-violet-500/10 hover:text-violet-600'
+                >
                   {copiedBase ? (
                     <Check className='size-3.5 text-emerald-500' />
                   ) : (
@@ -130,7 +143,7 @@ export function Docs() {
                   <span>{copiedBase ? t('Copied') : t('Copy Base URL')}</span>
                 </Button>
               </div>
-              <div className='bg-muted/60 text-violet-600 dark:text-violet-400 flex items-center justify-between rounded-xl px-3.5 py-2.5 font-mono text-xs font-semibold sm:text-sm'>
+              <div className='bg-muted/60 flex items-center justify-between rounded-xl px-3.5 py-2.5 font-mono text-xs font-semibold text-violet-600 sm:text-sm dark:text-violet-400'>
                 <span className='truncate'>{API_BASE_URL}</span>
               </div>
             </div>
@@ -143,7 +156,7 @@ export function Docs() {
             >
               <div className='flex items-center justify-between gap-2'>
                 <div className='flex items-center gap-2.5'>
-                  <div className='bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex size-8 items-center justify-center rounded-xl shadow-sm shrink-0'>
+                  <div className='flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-sm'>
                     <ImageIcon className='size-4' />
                   </div>
                   <div>
@@ -155,7 +168,12 @@ export function Docs() {
                     </div>
                   </div>
                 </div>
-                <Button onClick={handleCopyImagesUrl} size='sm' variant='outline' className='gap-1.5 shrink-0 hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-400'>
+                <Button
+                  onClick={handleCopyImagesUrl}
+                  size='sm'
+                  variant='outline'
+                  className='shrink-0 gap-1.5 hover:border-violet-400 hover:bg-violet-500/10 hover:text-violet-600'
+                >
                   {copiedImages ? (
                     <Check className='size-3.5 text-emerald-500' />
                   ) : (
@@ -164,7 +182,7 @@ export function Docs() {
                   <span>{copiedImages ? t('Copied') : t('Copy Endpoint')}</span>
                 </Button>
               </div>
-              <div className='bg-muted/60 text-violet-600 dark:text-violet-400 flex items-center justify-between rounded-xl px-3.5 py-2.5 font-mono text-xs font-semibold sm:text-sm'>
+              <div className='bg-muted/60 flex items-center justify-between rounded-xl px-3.5 py-2.5 font-mono text-xs font-semibold text-violet-600 sm:text-sm dark:text-violet-400'>
                 <span className='truncate'>{API_IMAGES_ENDPOINT}</span>
               </div>
             </div>

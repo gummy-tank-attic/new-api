@@ -22,15 +22,12 @@ import { cn } from '@/lib/utils'
 
 import { getUsableGroupDescription } from '../lib/derive-vendor-groups'
 import { resolveGroupDescription } from '../lib/group-intro-i18n'
+import type { PricingModel } from '../types'
 import { EmptyState } from './empty-state'
 import { GroupPriceCards } from './group-price-cards'
 import { PricingRulesBanner } from './pricing-rules-banner'
-import {
-  SupplierPriceTable,
-  type PriceMode,
-} from './supplier-price-table'
+import { SupplierPriceTable, type PriceMode } from './supplier-price-table'
 import { SupplierTabs, type SupplierTabOption } from './supplier-tabs'
-import type { PricingModel } from '../types'
 
 export interface SupplierPricingLayoutProps {
   vendorOptions: SupplierTabOption[]
@@ -75,14 +72,14 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
       <PricingRulesBanner usdExchangeRate={props.usdExchangeRate} />
 
       {/* Card: neutral surface, soft elevation — brand color only in controls */}
-      <div className='bg-card overflow-hidden rounded-2xl border border-border/70 shadow-sm'>
-        <div className='flex flex-wrap items-center gap-3 border-b border-border/60 px-5 py-3.5 sm:px-6'>
+      <div className='bg-card border-border/70 overflow-hidden rounded-2xl border shadow-sm'>
+        <div className='border-border/60 flex flex-wrap items-center gap-3 border-b px-5 py-3.5 sm:px-6'>
           {/* Title 16 — below sell price so numbers stay hero */}
           <h2 className='text-foreground text-base font-semibold tracking-tight'>
             {t('Price list')}
           </h2>
           <div
-            className='bg-muted inline-flex rounded-full p-1 ring-1 ring-border/50'
+            className='bg-muted ring-border/50 inline-flex rounded-full p-1 ring-1'
             role='group'
             aria-label={t('Price mode')}
           >
@@ -124,7 +121,7 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
 
           {props.selectedGroup && (
             // Slightly stronger contrast than body muted — easy to scan, not loud
-            <div className='bg-muted/55 rounded-xl border border-border/60 px-4 py-3 text-[15px] leading-relaxed'>
+            <div className='bg-muted/55 border-border/60 rounded-xl border px-4 py-3 text-[15px] leading-relaxed'>
               <span className='text-foreground font-semibold tracking-tight'>
                 {t('Group intro')}
               </span>

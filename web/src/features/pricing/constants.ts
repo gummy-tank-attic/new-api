@@ -270,15 +270,17 @@ export const GROUP_DISPLAY_ORDER = [
  * So "Claude lite（Sale）" / "Claude lite (Sale)" / "Claude lite(Sale)" match.
  */
 export function normalizeGroupName(name: string): string {
-  return (name || '')
-    .trim()
-    .toLowerCase()
-    .replace(/\uFF08/g, '(')
-    .replace(/\uFF09/g, ')')
-    .replace(/\s+/g, ' ')
-    // 全角转半角后常出现 "lite(sale)" vs "lite (sale)"，统一去括号两侧空白
-    .replace(/\s*\(\s*/g, '(')
-    .replace(/\s*\)\s*/g, ')')
+  return (
+    (name || '')
+      .trim()
+      .toLowerCase()
+      .replace(/\uFF08/g, '(')
+      .replace(/\uFF09/g, ')')
+      .replace(/\s+/g, ' ')
+      // 全角转半角后常出现 "lite(sale)" vs "lite (sale)"，统一去括号两侧空白
+      .replace(/\s*\(\s*/g, '(')
+      .replace(/\s*\)\s*/g, ')')
+  )
 }
 
 /** Look up a group-keyed map with normalizeGroupName (case / 全角括号 tolerant). */

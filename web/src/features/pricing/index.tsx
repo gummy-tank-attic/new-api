@@ -25,8 +25,8 @@ import { PageTransition } from '@/components/page-transition'
 import { Button } from '@/components/ui/button'
 
 import { LoadingSkeleton, ModelDetailsDrawer } from './components'
-import { SupplierPricingLayout } from './components/supplier-pricing-layout'
 import type { PriceMode } from './components/supplier-price-table'
+import { SupplierPricingLayout } from './components/supplier-pricing-layout'
 import { FILTER_ALL, VIEW_MODES } from './constants'
 import { usePricingData } from './hooks/use-pricing-data'
 import {

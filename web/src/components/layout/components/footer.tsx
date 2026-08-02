@@ -170,11 +170,7 @@ function TelegramFooterLinks(props: { className?: string }) {
 
 export function Footer(props: FooterProps) {
   const { t } = useTranslation()
-  const {
-    systemName,
-    logo: systemLogo,
-    demoSiteEnabled,
-  } = useSystemConfig()
+  const { systemName, logo: systemLogo, demoSiteEnabled } = useSystemConfig()
 
   const displayLogo = systemLogo || props.logo || '/logo.png'
   const displayName = systemName || props.name || 'MetaRtr'
@@ -243,10 +239,7 @@ export function Footer(props: FooterProps) {
   // Compact bar used on MetaRtr (brand + Telegram + legal).
   return (
     <footer
-      className={cn(
-        'border-border/40 relative z-10 border-t',
-        props.className
-      )}
+      className={cn('border-border/40 relative z-10 border-t', props.className)}
     >
       <div className='mx-auto w-full max-w-6xl px-6 py-5'>
         <div className='bg-muted/20 border-border/50 flex flex-col items-center justify-between gap-4 rounded-2xl border px-4 py-4 backdrop-blur-sm sm:flex-row sm:items-center sm:px-5'>

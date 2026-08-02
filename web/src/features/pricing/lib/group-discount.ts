@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-
 /**
  * Chinese "折" badge from group ratio (0.5 → 5折, 0.14 → 1.4折).
  * Returns null when ratio is not a positive finite discount base.
@@ -47,7 +46,11 @@ export function resolveGroupSavingsOffPercent(
   ratio: number,
   manualOff?: number | null
 ): number | null {
-  if (typeof manualOff === 'number' && Number.isFinite(manualOff) && manualOff > 0) {
+  if (
+    typeof manualOff === 'number' &&
+    Number.isFinite(manualOff) &&
+    manualOff > 0
+  ) {
     return Math.round(manualOff)
   }
   return formatSavingsPercent(ratio)

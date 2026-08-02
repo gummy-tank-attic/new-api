@@ -146,6 +146,7 @@ try {
     {
       cwd: root,
       stdio: 'inherit',
+      shell: true,
     }
   )
   exitCode = result.status ?? 1

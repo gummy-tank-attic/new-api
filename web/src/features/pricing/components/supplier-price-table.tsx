@@ -96,14 +96,14 @@ function DualPriceCell(props: {
   return (
     <div className='flex flex-col items-center gap-0.5 py-0.5 text-center'>
       <span
-        className='text-foreground !text-base font-sans font-medium leading-none tabular-nums tracking-tight'
+        className='text-foreground font-sans !text-base leading-none font-medium tracking-tight tabular-nums'
         style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.2 }}
       >
         {primaryText}
       </span>
       {officialText ? (
         <span
-          className='text-muted-foreground/60 !text-[13px] font-sans font-normal leading-none tabular-nums line-through decoration-muted-foreground/40'
+          className='text-muted-foreground/60 decoration-muted-foreground/40 font-sans !text-[13px] leading-none font-normal tabular-nums line-through'
           style={{ fontSize: 13, fontWeight: 400, lineHeight: 1.2 }}
         >
           {officialText}
@@ -125,10 +125,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
   // Official mode: empty. Group mode: any group → convert ratio to N% off (all vendors).
   const savings = useMemo(() => {
     if (!isGroupMode || !props.selectedGroup) return null
-    const ratio = getConfiguredGroupRatio(
-      props.groupRatio,
-      props.selectedGroup
-    )
+    const ratio = getConfiguredGroupRatio(props.groupRatio, props.selectedGroup)
     return resolveGroupSavingsOffPercent(
       ratio,
       lookupGroupMapValue(MANUAL_GROUP_SAVINGS_OFF, props.selectedGroup)
@@ -155,8 +152,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
       {/* Scale: head 12 · body 15 · price 18/12. Drop forced equal text-sm. */}
       <Table className='[&_td]:text-[15px] [&_td_*]:text-[length:inherit] [&_th]:text-xs [&_th_*]:text-xs'>
         <TableHeader>
-          <TableRow className='bg-muted/40 hover:bg-muted/40 border-b border-border/60'>
-            <TableHead className='text-muted-foreground min-w-[11rem] h-11 px-4 font-medium tracking-wide'>
+          <TableRow className='bg-muted/40 hover:bg-muted/40 border-border/60 border-b'>
+            <TableHead className='text-muted-foreground h-11 min-w-[11rem] px-4 font-medium tracking-wide'>
               {t('Model ID')}
             </TableHead>
             <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
@@ -192,7 +189,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           {rows.map((model) => (
             <TableRow
               key={model.model_name}
-              className='hover:bg-muted/25 cursor-pointer border-border/50 transition-colors'
+              className='hover:bg-muted/25 border-border/50 cursor-pointer transition-colors'
               onClick={() => props.onModelClick?.(model.model_name)}
             >
               <TableCell className='px-4 py-3.5'>
@@ -259,17 +256,32 @@ function ModelPriceCells(props: {
       return (
         <>
           <TableCell colSpan={4} className='px-3 py-3.5 text-center'>
-            <div className='flex items-center justify-center gap-4 flex-wrap'>
+            <div className='flex flex-wrap items-center justify-center gap-4'>
               <div className='flex items-center gap-1.5'>
-                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>1K</Badge>
+                <Badge
+                  variant='outline'
+                  className='text-muted-foreground px-1.5 py-0 text-[10px] font-semibold uppercase'
+                >
+                  1K
+                </Badge>
                 <span className='text-sm font-medium'>$0.025 / image</span>
               </div>
               <div className='flex items-center gap-1.5'>
-                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>2K</Badge>
+                <Badge
+                  variant='outline'
+                  className='text-muted-foreground px-1.5 py-0 text-[10px] font-semibold uppercase'
+                >
+                  2K
+                </Badge>
                 <span className='text-sm font-medium'>$0.035 / image</span>
               </div>
               <div className='flex items-center gap-1.5'>
-                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>4K</Badge>
+                <Badge
+                  variant='outline'
+                  className='text-muted-foreground px-1.5 py-0 text-[10px] font-semibold uppercase'
+                >
+                  4K
+                </Badge>
                 <span className='text-sm font-medium'>$0.07 / image</span>
               </div>
             </div>
@@ -284,13 +296,23 @@ function ModelPriceCells(props: {
       return (
         <>
           <TableCell colSpan={4} className='px-3 py-3.5 text-center'>
-            <div className='flex items-center justify-center gap-4 flex-wrap'>
+            <div className='flex flex-wrap items-center justify-center gap-4'>
               <div className='flex items-center gap-1.5'>
-                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>1K</Badge>
+                <Badge
+                  variant='outline'
+                  className='text-muted-foreground px-1.5 py-0 text-[10px] font-semibold uppercase'
+                >
+                  1K
+                </Badge>
                 <span className='text-sm font-medium'>$0.035 / image</span>
               </div>
               <div className='flex items-center gap-1.5'>
-                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>2K</Badge>
+                <Badge
+                  variant='outline'
+                  className='text-muted-foreground px-1.5 py-0 text-[10px] font-semibold uppercase'
+                >
+                  2K
+                </Badge>
                 <span className='text-sm font-medium'>$0.045 / image</span>
               </div>
             </div>
@@ -305,13 +327,23 @@ function ModelPriceCells(props: {
       return (
         <>
           <TableCell colSpan={4} className='px-3 py-3.5 text-center'>
-            <div className='flex items-center justify-center gap-4 flex-wrap'>
+            <div className='flex flex-wrap items-center justify-center gap-4'>
               <div className='flex items-center gap-1.5'>
-                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>1K</Badge>
+                <Badge
+                  variant='outline'
+                  className='text-muted-foreground px-1.5 py-0 text-[10px] font-semibold uppercase'
+                >
+                  1K
+                </Badge>
                 <span className='text-sm font-medium'>$0.025 / image</span>
               </div>
               <div className='flex items-center gap-1.5'>
-                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>2K</Badge>
+                <Badge
+                  variant='outline'
+                  className='text-muted-foreground px-1.5 py-0 text-[10px] font-semibold uppercase'
+                >
+                  2K
+                </Badge>
                 <span className='text-sm font-medium'>$0.035 / image</span>
               </div>
             </div>
@@ -328,15 +360,31 @@ function ModelPriceCells(props: {
           <TableCell colSpan={4} className='px-3 py-3.5 text-center'>
             <div className='flex flex-col items-center justify-center gap-2'>
               <div className='flex items-center gap-1.5'>
-                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>480p</Badge>
+                <Badge
+                  variant='outline'
+                  className='text-muted-foreground px-1.5 py-0 text-[10px] font-semibold uppercase'
+                >
+                  480p
+                </Badge>
                 <span className='text-sm font-medium'>
-                  $0.025 / s <span className='text-xs font-normal text-muted-foreground ml-1'>(Default: 8s, Configurable: 1-15s)</span>
+                  $0.025 / s{' '}
+                  <span className='text-muted-foreground ml-1 text-xs font-normal'>
+                    (Default: 8s, Configurable: 1-15s)
+                  </span>
                 </span>
               </div>
               <div className='flex items-center gap-1.5'>
-                <Badge variant='outline' className='text-[10px] uppercase text-muted-foreground font-semibold px-1.5 py-0'>720p</Badge>
+                <Badge
+                  variant='outline'
+                  className='text-muted-foreground px-1.5 py-0 text-[10px] font-semibold uppercase'
+                >
+                  720p
+                </Badge>
                 <span className='text-sm font-medium'>
-                  $0.035 / s <span className='text-xs font-normal text-muted-foreground ml-1'>(Default: 8s, Configurable: 1-15s)</span>
+                  $0.035 / s{' '}
+                  <span className='text-muted-foreground ml-1 text-xs font-normal'>
+                    (Default: 8s, Configurable: 1-15s)
+                  </span>
                 </span>
               </div>
             </div>
@@ -477,7 +525,7 @@ function SavingsPill(props: { savings: number | null }) {
   // Fixed English copy — never i18n: "85% off"
   const label = `${props.savings}%\u00A0off`
   return (
-    <span className='inline-flex items-center whitespace-nowrap rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold tracking-tight text-red-600 tabular-nums ring-1 ring-red-100 dark:bg-red-950/40 dark:text-red-400 dark:ring-red-900/40'>
+    <span className='inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold tracking-tight whitespace-nowrap text-red-600 tabular-nums ring-1 ring-red-100 dark:bg-red-950/40 dark:text-red-400 dark:ring-red-900/40'>
       {label}
     </span>
   )

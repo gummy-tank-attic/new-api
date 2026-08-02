@@ -236,7 +236,9 @@ function BaseUrlSection() {
           </thead>
           <tbody className='divide-y'>
             <tr>
-              <td className='px-4 py-3'>{t('OpenAI SDK / Cursor / most apps')}</td>
+              <td className='px-4 py-3'>
+                {t('OpenAI SDK / Cursor / most apps')}
+              </td>
               <td className='px-4 py-3 font-mono text-xs'>{API_BASE_URL}</td>
               <td className='text-muted-foreground px-4 py-3 text-xs'>
                 {t('Includes /v1')}
@@ -262,9 +264,7 @@ function BaseUrlSection() {
             </tr>
             <tr>
               <td className='px-4 py-3'>{t('API Key')}</td>
-              <td className='px-4 py-3 font-mono text-xs'>
-                {EXAMPLE_API_KEY}
-              </td>
+              <td className='px-4 py-3 font-mono text-xs'>{EXAMPLE_API_KEY}</td>
               <td className='text-muted-foreground px-4 py-3 text-xs'>
                 {t('Create in Console → API Keys')}
               </td>
@@ -407,14 +407,20 @@ function ImagesSection() {
               <td className='px-4 py-3'>{t('SDK Base URL')}</td>
               <td className='px-4 py-3 font-mono text-xs'>{API_BASE_URL}</td>
               <td className='text-muted-foreground px-4 py-3 text-xs'>
-                {t('For Python / Node.js OpenAI SDKs (auto-appends /images/generations)')}
+                {t(
+                  'For Python / Node.js OpenAI SDKs (auto-appends /images/generations)'
+                )}
               </td>
             </tr>
             <tr>
               <td className='px-4 py-3'>{t('Direct Endpoint')}</td>
-              <td className='px-4 py-3 font-mono text-xs'>{IMAGE_GENERATIONS_ENDPOINT}</td>
+              <td className='px-4 py-3 font-mono text-xs'>
+                {IMAGE_GENERATIONS_ENDPOINT}
+              </td>
               <td className='text-muted-foreground px-4 py-3 text-xs'>
-                {t('For raw HTTP POST requests, cURL, webhooks, or custom tools')}
+                {t(
+                  'For raw HTTP POST requests, cURL, webhooks, or custom tools'
+                )}
               </td>
             </tr>
           </tbody>
@@ -493,7 +499,9 @@ console.log("Image URL:", response.data[0].url);`}
       </div>
 
       <div className='space-y-4'>
-        <h2 className='text-xl font-bold'>{t('Video Generation (Grok Video)')}</h2>
+        <h2 className='text-xl font-bold'>
+          {t('Video Generation (Grok Video)')}
+        </h2>
         <p className='text-muted-foreground text-sm leading-relaxed'>
           {t(
             'Generate videos using grok-imagine-video. Submit POST requests to the same endpoint with duration and resolution.'
@@ -532,48 +540,70 @@ console.log("Image URL:", response.data[0].url);`}
             <tbody className='divide-y'>
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>model</td>
-                <td className='text-muted-foreground px-4 py-3 text-xs'>string (required)</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>
+                  string (required)
+                </td>
                 <td className='px-4 py-3 text-xs'>
-                  {t('e.g. grok-imagine-image-quality, grok-imagine-video, dall-e-3')}
+                  {t(
+                    'e.g. grok-imagine-image-quality, grok-imagine-video, dall-e-3'
+                  )}
                 </td>
               </tr>
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>prompt</td>
-                <td className='text-muted-foreground px-4 py-3 text-xs'>string (required)</td>
-                <td className='px-4 py-3 text-xs'>{t('Text description of the desired image or video')}</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>
+                  string (required)
+                </td>
+                <td className='px-4 py-3 text-xs'>
+                  {t('Text description of the desired image or video')}
+                </td>
               </tr>
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>size</td>
-                <td className='text-muted-foreground px-4 py-3 text-xs'>string (optional)</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>
+                  string (optional)
+                </td>
                 <td className='px-4 py-3 text-xs'>
-                  {t('Image resolution (e.g. 1024x1024 for 1K, 2048x2048 for 2K)')}
+                  {t(
+                    'Image resolution (e.g. 1024x1024 for 1K, 2048x2048 for 2K)'
+                  )}
                 </td>
               </tr>
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>duration</td>
-                <td className='text-muted-foreground px-4 py-3 text-xs'>integer (video)</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>
+                  integer (video)
+                </td>
                 <td className='px-4 py-3 text-xs'>
                   {t('Video duration in seconds (5–10 seconds, default 8)')}
                 </td>
               </tr>
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>resolution</td>
-                <td className='text-muted-foreground px-4 py-3 text-xs'>string (video)</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>
+                  string (video)
+                </td>
                 <td className='px-4 py-3 text-xs'>
                   {t('Video resolution: "480p" or "720p"')}
                 </td>
               </tr>
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>aspect_ratio</td>
-                <td className='text-muted-foreground px-4 py-3 text-xs'>string (video)</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>
+                  string (video)
+                </td>
                 <td className='px-4 py-3 text-xs'>
                   {t('Aspect ratio: "16:9", "9:16", or "1:1"')}
                 </td>
               </tr>
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>n</td>
-                <td className='text-muted-foreground px-4 py-3 text-xs'>integer (optional)</td>
-                <td className='px-4 py-3 text-xs'>{t('Number of images to generate (default 1)')}</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>
+                  integer (optional)
+                </td>
+                <td className='px-4 py-3 text-xs'>
+                  {t('Number of images to generate (default 1)')}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -639,7 +669,9 @@ claude`}
       </div>
 
       <div className='space-y-3'>
-        <h2 className='text-lg font-bold'>{t('Persist for the current user')}</h2>
+        <h2 className='text-lg font-bold'>
+          {t('Persist for the current user')}
+        </h2>
         <p className='text-muted-foreground text-sm'>
           {t(
             'Add the same exports to your shell profile (~/.zshrc, ~/.bashrc) or Windows User environment variables so they survive restarts.'
@@ -819,9 +851,7 @@ function ClientsSection() {
           <li>
             {t('API Key')}: <InlineCode>{EXAMPLE_API_KEY}</InlineCode>
           </li>
-          <li>
-            {t('API format')}: OpenAI Chat Completions
-          </li>
+          <li>{t('API format')}: OpenAI Chat Completions</li>
         </ul>
       </div>
     </div>

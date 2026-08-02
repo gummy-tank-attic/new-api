@@ -77,8 +77,7 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
           lookupGroupMapValue(MANUAL_GROUP_SAVINGS_OFF, group)
         )
         // Fixed English copy — never i18n: "85% off"
-        const offLabel =
-          savingsOff != null ? `${savingsOff}%\u00A0off` : null
+        const offLabel = savingsOff != null ? `${savingsOff}%\u00A0off` : null
 
         return (
           <button
@@ -95,7 +94,7 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
                 : 'bg-background border-border/70 hover:border-border hover:bg-muted/50'
             )}
           >
-            <span className='text-foreground whitespace-nowrap text-[15px] font-medium tracking-tight'>
+            <span className='text-foreground text-[15px] font-medium tracking-tight whitespace-nowrap'>
               {group}
             </span>
             {zhe ? (
@@ -111,7 +110,7 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
               </span>
             ) : null}
             {offLabel ? (
-              <span className='shrink-0 whitespace-nowrap text-xs font-semibold leading-none tracking-tight text-red-600 dark:text-red-400'>
+              <span className='shrink-0 text-xs leading-none font-semibold tracking-tight whitespace-nowrap text-red-600 dark:text-red-400'>
                 {offLabel}
               </span>
             ) : null}

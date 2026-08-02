@@ -34,7 +34,9 @@ let telegramCallbackSequence = 0
 
 export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
   const { t } = useTranslation()
-  const [widgetContainer, setWidgetContainer] = useState<HTMLDivElement | null>(null)
+  const [widgetContainer, setWidgetContainer] = useState<HTMLDivElement | null>(
+    null
+  )
   const widgetContainerRef = useCallback((node: HTMLDivElement | null) => {
     setWidgetContainer(node)
   }, [])

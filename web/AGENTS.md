@@ -99,10 +99,10 @@ Radix UI 的 `<Dialog>`（及所有基于 `Portal` 的浮层组件）内容在 `
 const containerRef = useRef<HTMLDivElement | null>(null)
 
 useEffect(() => {
-  const container = containerRef.current   // ← Portal 挂载完成前始终是 null
+  const container = containerRef.current // ← Portal 挂载完成前始终是 null
   if (!container) return
-  injectThirdPartyWidget(container)        // ← 永远不会执行
-}, [props.open])                            // ← props.open 变化时 ref 还未填充
+  injectThirdPartyWidget(container) // ← 永远不会执行
+}, [props.open]) // ← props.open 变化时 ref 还未填充
 
 return <div ref={containerRef} />
 ```
@@ -112,13 +112,13 @@ return <div ref={containerRef} />
 ```tsx
 const [container, setContainer] = useState<HTMLDivElement | null>(null)
 const containerRef = useCallback((node: HTMLDivElement | null) => {
-  setContainer(node)   // DOM 节点挂载/卸载时触发 state 更新 → re-render
+  setContainer(node) // DOM 节点挂载/卸载时触发 state 更新 → re-render
 }, [])
 
 useEffect(() => {
   if (!container) return
-  injectThirdPartyWidget(container)   // ← container 有值时才执行，时序正确
-}, [container, props.open])         // ← container（state）纳入依赖
+  injectThirdPartyWidget(container) // ← container 有值时才执行，时序正确
+}, [container, props.open]) // ← container（state）纳入依赖
 
 return <div ref={containerRef} />
 ```

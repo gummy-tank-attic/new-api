@@ -16,12 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-
 /** OpenAI-compatible base (includes /v1). */
 export const API_BASE_URL = 'https://api.metartr.com/v1'
 
 /** OpenAI-compatible image and video generation direct endpoint. */
-export const API_IMAGES_ENDPOINT = 'https://api.metartr.com/v1/images/generations'
+export const API_IMAGES_ENDPOINT =
+  'https://api.metartr.com/v1/images/generations'
 
 /**
  * Host without /v1 — for Anthropic-style clients that append paths themselves
@@ -120,7 +120,9 @@ export const EXAMPLE_MODEL_VIDEO = 'grok-imagine-video'
 export const EXAMPLE_API_KEY = 'sk-metartr-your-api-key'
 export const IMAGE_GENERATIONS_ENDPOINT = `${API_BASE_URL}/images/generations`
 
-export function isDocsSectionId(value: string | undefined): value is DocsSectionId {
+export function isDocsSectionId(
+  value: string | undefined
+): value is DocsSectionId {
   return (
     value !== undefined &&
     (DOCS_SECTION_IDS as readonly string[]).includes(value)
