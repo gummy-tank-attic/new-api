@@ -5444,6 +5444,8 @@
     "Aspect ratio: \"16:9\", \"9:16\", or \"1:1\"": "Aspect ratio: \"16:9\", \"9:16\", or \"1:1\"",
     "Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.": "Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.",
     "Image & Video Endpoint": "Image & Video Endpoint",
-    "Copy Endpoint": "Copy Endpoint"
+    "Copy Endpoint": "Copy Endpoint",
+    "Chat, Coding & SDKs": "Chat, Coding & SDKs",
+    "Images Generations & Grok Video": "Images Generations & Grok Video"
   }
 }

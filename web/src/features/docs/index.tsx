@@ -78,48 +78,50 @@ export function Docs() {
   return (
     <PublicLayout>
       <div className='mx-auto max-w-6xl px-4 py-8 sm:py-10'>
-        <div className='mb-8 space-y-4'>
-          <div className='flex flex-wrap items-center gap-2'>
-            <div className='bg-primary/10 text-primary inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold'>
-              <Code className='size-3.5' />
-              <span>{t('API Documentation')}</span>
+        <div className='mb-8 space-y-6'>
+          <div className='space-y-2.5'>
+            <div className='flex flex-wrap items-center gap-2'>
+              <div className='bg-primary/10 text-primary inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold'>
+                <Code className='size-3.5' />
+                <span>{t('API Documentation')}</span>
+              </div>
+              <span className='text-muted-foreground text-xs'>
+                {t('OpenAI API Compatible')}
+              </span>
             </div>
-            <span className='text-muted-foreground text-xs'>
-              {t('OpenAI API Compatible')}
-            </span>
+            <h1 className='text-3xl font-extrabold tracking-tight sm:text-4xl'>
+              {t('MetaRtr Docs')}
+            </h1>
+            <p className='text-muted-foreground max-w-3xl text-sm sm:text-base'>
+              {t(
+                'Guides for Base URL, API keys, Claude Code, Codex, Cursor, and OpenAI-compatible SDKs.'
+              )}
+            </p>
           </div>
-          <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
-            <div className='max-w-xl space-y-2'>
-              <h1 className='text-3xl font-extrabold tracking-tight sm:text-4xl'>
-                {t('MetaRtr Docs')}
-              </h1>
-              <p className='text-muted-foreground text-sm sm:text-base'>
-                {t(
-                  'Guides for Base URL, API keys, Claude Code, Codex, Cursor, and OpenAI-compatible SDKs.'
-                )}
-              </p>
-            </div>
-            <div className='flex flex-col gap-2.5 sm:flex-row lg:flex-col xl:flex-row'>
-              {/* Card 1: Base URL */}
-              <div
-                className={cn(
-                  'bg-card flex flex-col gap-3 rounded-2xl border p-3.5 shadow-sm sm:flex-row sm:items-center sm:justify-between'
-                )}
-              >
-                <div className='flex items-center gap-3'>
-                  <div className='bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-xl shadow-sm shrink-0'>
+
+          {/* Dual Endpoints Balanced Grid */}
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+            {/* Card 1: Base URL */}
+            <div
+              className={cn(
+                'bg-card flex flex-col justify-between gap-3.5 rounded-2xl border p-4 shadow-sm transition-all hover:border-primary/40'
+              )}
+            >
+              <div className='flex items-center justify-between gap-2'>
+                <div className='flex items-center gap-2.5'>
+                  <div className='bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-xl shadow-sm shrink-0'>
                     <Server className='size-4' />
                   </div>
                   <div>
-                    <div className='text-muted-foreground text-[10px] font-semibold tracking-wider uppercase'>
+                    <div className='text-muted-foreground text-[11px] font-bold tracking-wider uppercase'>
                       {t('Base URL')}
                     </div>
-                    <div className='text-primary font-mono text-xs font-bold sm:text-sm'>
-                      {API_BASE_URL}
+                    <div className='text-muted-foreground text-xs'>
+                      {t('Chat, Coding & SDKs')}
                     </div>
                   </div>
                 </div>
-                <Button onClick={handleCopyBaseUrl} size='sm' className='gap-1.5 sm:shrink-0'>
+                <Button onClick={handleCopyBaseUrl} size='sm' className='gap-1.5 shrink-0'>
                   {copiedBase ? (
                     <Check className='size-3.5 text-emerald-400' />
                   ) : (
@@ -128,27 +130,32 @@ export function Docs() {
                   <span>{copiedBase ? t('Copied') : t('Copy Base URL')}</span>
                 </Button>
               </div>
+              <div className='bg-muted/60 text-primary flex items-center justify-between rounded-xl px-3.5 py-2.5 font-mono text-xs font-semibold sm:text-sm'>
+                <span className='truncate'>{API_BASE_URL}</span>
+              </div>
+            </div>
 
-              {/* Card 2: Image & Video Endpoint */}
-              <div
-                className={cn(
-                  'bg-card flex flex-col gap-3 rounded-2xl border p-3.5 shadow-sm sm:flex-row sm:items-center sm:justify-between'
-                )}
-              >
-                <div className='flex items-center gap-3'>
-                  <div className='bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex size-9 items-center justify-center rounded-xl shadow-sm shrink-0'>
+            {/* Card 2: Image & Video Endpoint */}
+            <div
+              className={cn(
+                'bg-card flex flex-col justify-between gap-3.5 rounded-2xl border p-4 shadow-sm transition-all hover:border-violet-500/40'
+              )}
+            >
+              <div className='flex items-center justify-between gap-2'>
+                <div className='flex items-center gap-2.5'>
+                  <div className='bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex size-8 items-center justify-center rounded-xl shadow-sm shrink-0'>
                     <ImageIcon className='size-4' />
                   </div>
                   <div>
-                    <div className='text-muted-foreground text-[10px] font-semibold tracking-wider uppercase'>
+                    <div className='text-muted-foreground text-[11px] font-bold tracking-wider uppercase'>
                       {t('Image & Video Endpoint')}
                     </div>
-                    <div className='text-primary font-mono text-xs font-bold sm:text-sm'>
-                      {API_IMAGES_ENDPOINT}
+                    <div className='text-muted-foreground text-xs'>
+                      {t('Images Generations & Grok Video')}
                     </div>
                   </div>
                 </div>
-                <Button onClick={handleCopyImagesUrl} size='sm' variant='outline' className='gap-1.5 sm:shrink-0 hover:bg-primary/5 hover:text-primary'>
+                <Button onClick={handleCopyImagesUrl} size='sm' variant='outline' className='gap-1.5 shrink-0 hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-400'>
                   {copiedImages ? (
                     <Check className='size-3.5 text-emerald-500' />
                   ) : (
@@ -156,6 +163,9 @@ export function Docs() {
                   )}
                   <span>{copiedImages ? t('Copied') : t('Copy Endpoint')}</span>
                 </Button>
+              </div>
+              <div className='bg-muted/60 text-violet-600 dark:text-violet-400 flex items-center justify-between rounded-xl px-3.5 py-2.5 font-mono text-xs font-semibold sm:text-sm'>
+                <span className='truncate'>{API_IMAGES_ENDPOINT}</span>
               </div>
             </div>
           </div>
