@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { getRouteApi, Link } from '@tanstack/react-router'
-import { Check, Code, Copy, Menu, Server } from 'lucide-react'
+import { Check, Code, Copy, Image as ImageIcon, Menu, Server } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -36,6 +36,7 @@ import { DocsNav } from './components/docs-nav'
 import { SectionContent } from './components/section-content'
 import {
   API_BASE_URL,
+  API_IMAGES_ENDPOINT,
   DEFAULT_DOCS_SECTION,
   DOCS_NAV,
   isDocsSectionId,
@@ -51,7 +52,8 @@ export function Docs() {
     ? search.s
     : DEFAULT_DOCS_SECTION
 
-  const [copied, setCopied] = useState(false)
+  const [copiedBase, setCopiedBase] = useState(false)
+  const [copiedImages, setCopiedImages] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
@@ -60,8 +62,14 @@ export function Docs() {
 
   const handleCopyBaseUrl = () => {
     void navigator.clipboard.writeText(API_BASE_URL)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setCopiedBase(true)
+    setTimeout(() => setCopiedBase(false), 2000)
+  }
+
+  const handleCopyImagesUrl = () => {
+    void navigator.clipboard.writeText(API_IMAGES_ENDPOINT)
+    setCopiedImages(true)
+    setTimeout(() => setCopiedImages(false), 2000)
   }
 
   const activeLabel =
@@ -80,8 +88,8 @@ export function Docs() {
               {t('OpenAI API Compatible')}
             </span>
           </div>
-          <div className='flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between'>
-            <div className='max-w-2xl space-y-2'>
+          <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
+            <div className='max-w-xl space-y-2'>
               <h1 className='text-3xl font-extrabold tracking-tight sm:text-4xl'>
                 {t('MetaRtr Docs')}
               </h1>
@@ -91,32 +99,64 @@ export function Docs() {
                 )}
               </p>
             </div>
-            <div
-              className={cn(
-                'bg-card flex flex-col gap-3 rounded-2xl border p-4 shadow-sm sm:flex-row sm:items-center'
-              )}
-            >
-              <div className='flex items-center gap-3'>
-                <div className='bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-xl shadow-md'>
-                  <Server className='size-5' />
-                </div>
-                <div>
-                  <div className='text-muted-foreground text-[11px] font-semibold tracking-wider uppercase'>
-                    {t('Base URL')}
-                  </div>
-                  <div className='text-primary font-mono text-sm font-bold sm:text-base'>
-                    {API_BASE_URL}
-                  </div>
-                </div>
-              </div>
-              <Button onClick={handleCopyBaseUrl} className='gap-2 sm:shrink-0'>
-                {copied ? (
-                  <Check className='size-4 text-emerald-400' />
-                ) : (
-                  <Copy className='size-4' />
+            <div className='flex flex-col gap-2.5 sm:flex-row lg:flex-col xl:flex-row'>
+              {/* Card 1: Base URL */}
+              <div
+                className={cn(
+                  'bg-card flex flex-col gap-3 rounded-2xl border p-3.5 shadow-sm sm:flex-row sm:items-center sm:justify-between'
                 )}
-                <span>{copied ? t('Copied') : t('Copy Base URL')}</span>
-              </Button>
+              >
+                <div className='flex items-center gap-3'>
+                  <div className='bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-xl shadow-sm shrink-0'>
+                    <Server className='size-4' />
+                  </div>
+                  <div>
+                    <div className='text-muted-foreground text-[10px] font-semibold tracking-wider uppercase'>
+                      {t('Base URL')}
+                    </div>
+                    <div className='text-primary font-mono text-xs font-bold sm:text-sm'>
+                      {API_BASE_URL}
+                    </div>
+                  </div>
+                </div>
+                <Button onClick={handleCopyBaseUrl} size='sm' className='gap-1.5 sm:shrink-0'>
+                  {copiedBase ? (
+                    <Check className='size-3.5 text-emerald-400' />
+                  ) : (
+                    <Copy className='size-3.5' />
+                  )}
+                  <span>{copiedBase ? t('Copied') : t('Copy Base URL')}</span>
+                </Button>
+              </div>
+
+              {/* Card 2: Image & Video Endpoint */}
+              <div
+                className={cn(
+                  'bg-card flex flex-col gap-3 rounded-2xl border p-3.5 shadow-sm sm:flex-row sm:items-center sm:justify-between'
+                )}
+              >
+                <div className='flex items-center gap-3'>
+                  <div className='bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex size-9 items-center justify-center rounded-xl shadow-sm shrink-0'>
+                    <ImageIcon className='size-4' />
+                  </div>
+                  <div>
+                    <div className='text-muted-foreground text-[10px] font-semibold tracking-wider uppercase'>
+                      {t('Image & Video Endpoint')}
+                    </div>
+                    <div className='text-primary font-mono text-xs font-bold sm:text-sm'>
+                      {API_IMAGES_ENDPOINT}
+                    </div>
+                  </div>
+                </div>
+                <Button onClick={handleCopyImagesUrl} size='sm' variant='outline' className='gap-1.5 sm:shrink-0 hover:bg-primary/5 hover:text-primary'>
+                  {copiedImages ? (
+                    <Check className='size-3.5 text-emerald-500' />
+                  ) : (
+                    <Copy className='size-3.5' />
+                  )}
+                  <span>{copiedImages ? t('Copied') : t('Copy Endpoint')}</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>

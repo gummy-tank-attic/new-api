@@ -5442,6 +5442,8 @@
     "Video duration in seconds (5–10 seconds, default 8)": "動画の長さ（秒、5〜10秒、デフォルト 8）",
     "Video resolution: \"480p\" or \"720p\"": "動画の解像度：\"480p\" または \"720p\"",
     "Aspect ratio: \"16:9\", \"9:16\", or \"1:1\"": "アスペクト比：\"16:9\"、\"9:16\"、または \"1:1\"",
-    "Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.": "OpenAI 互換の /v1/images/generations エンドポイント経由で画像および動画マルチメディアアセットを生成します。Grok Image、DALL-E 3、Flux、Grok Video をフルサポート。"
+    "Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.": "OpenAI 互換の /v1/images/generations エンドポイント経由で画像および動画マルチメディアアセットを生成します。Grok Image、DALL-E 3、Flux、Grok Video をフルサポート。",
+    "Image & Video Endpoint": "画像・動画エンドポイント",
+    "Copy Endpoint": "エンドポイントをコピー"
   }
 }

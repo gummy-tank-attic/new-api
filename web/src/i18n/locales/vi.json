@@ -5442,6 +5442,8 @@
     "Video duration in seconds (5–10 seconds, default 8)": "Thời lượng video tính bằng giây (5–10 giây, mặc định 8)",
     "Video resolution: \"480p\" or \"720p\"": "Độ phân giải video: \"480p\" hoặc \"720p\"",
     "Aspect ratio: \"16:9\", \"9:16\", or \"1:1\"": "Tỷ lệ khung hình: \"16:9\", \"9:16\" hoặc \"1:1\"",
-    "Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.": "Tạo tài nguyên đa phương tiện hình ảnh và video qua điểm cuối /v1/images/generations tương thích với OpenAI, hỗ trợ đầy đủ Grok Image, DALL-E 3, Flux và Grok Video."
+    "Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.": "Tạo tài nguyên đa phương tiện hình ảnh và video qua điểm cuối /v1/images/generations tương thích với OpenAI, hỗ trợ đầy đủ Grok Image, DALL-E 3, Flux và Grok Video.",
+    "Image & Video Endpoint": "Điểm cuối hình ảnh & video",
+    "Copy Endpoint": "Sao chép điểm cuối"
   }
 }

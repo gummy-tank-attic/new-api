@@ -20,6 +20,9 @@ For commercial licensing, please contact support@quantumnous.com
 /** OpenAI-compatible base (includes /v1). */
 export const API_BASE_URL = 'https://api.metartr.com/v1'
 
+/** OpenAI-compatible image and video generation direct endpoint. */
+export const API_IMAGES_ENDPOINT = 'https://api.metartr.com/v1/images/generations'
+
 /**
  * Host without /v1 — for Anthropic-style clients that append paths themselves
  * (e.g. Claude Code → /v1/messages).

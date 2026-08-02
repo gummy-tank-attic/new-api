@@ -5442,6 +5442,8 @@
     "Video duration in seconds (5–10 seconds, default 8)": "Durée de la vidéo en secondes (5–10 secondes, 8 par défaut)",
     "Video resolution: \"480p\" or \"720p\"": "Résolution vidéo : \"480p\" ou \"720p\"",
     "Aspect ratio: \"16:9\", \"9:16\", or \"1:1\"": "Format d'image : \"16:9\", \"9:16\" ou \"1:1\"",
-    "Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.": "Générez des images et vidéos via le point de terminaison /v1/images/generations compatible OpenAI, prenant en charge Grok Image, DALL-E 3, Flux et Grok Video."
+    "Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.": "Générez des images et vidéos via le point de terminaison /v1/images/generations compatible OpenAI, prenant en charge Grok Image, DALL-E 3, Flux et Grok Video.",
+    "Image & Video Endpoint": "Point de terminaison image et vidéo",
+    "Copy Endpoint": "Copier l'endpoint"
   }
 }

@@ -5442,6 +5442,8 @@
     "Video duration in seconds (5–10 seconds, default 8)": "影片時長（秒，5–10 秒，預設 8）",
     "Video resolution: \"480p\" or \"720p\"": "影片解析度：\"480p\" 或 \"720p\"",
     "Aspect ratio: \"16:9\", \"9:16\", or \"1:1\"": "畫面比例：\"16:9\"、\"9:16\" 或 \"1:1\"",
-    "Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.": "透過相容 OpenAI 標準的 /v1/images/generations 接口生成圖像與影片多模態資產，全面支援 Grok Image、DALL-E 3、Flux 及 Grok Video。"
+    "Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.": "透過相容 OpenAI 標準的 /v1/images/generations 接口生成圖像與影片多模態資產，全面支援 Grok Image、DALL-E 3、Flux 及 Grok Video。",
+    "Image & Video Endpoint": "圖像與多模態直連端點",
+    "Copy Endpoint": "複製直連端點"
   }
 }
