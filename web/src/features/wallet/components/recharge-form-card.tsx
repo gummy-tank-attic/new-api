@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Gift, ExternalLink, Loader2, Receipt, WalletCards } from 'lucide-react'
+import { AlertCircle, Gift, ExternalLink, Loader2, Receipt, WalletCards } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -474,6 +474,16 @@ export function RechargeFormCard({
                     </div>
                   </div>
                 )}
+
+              {/* Non-refundable Policy Notice */}
+              <div className='flex items-start gap-2.5 rounded-xl border border-red-200/80 bg-red-50/70 p-3 text-xs text-red-600 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400'>
+                <AlertCircle className='mt-0.5 size-4 shrink-0 text-red-500' />
+                <span className='font-medium leading-relaxed'>
+                  {t(
+                    'Due to the nature of digital goods and virtual resources, topped-up balances are non-refundable. To protect your rights and interests, we strongly recommend conducting a small-amount test first and recharging on demand once your requirements are confirmed.'
+                  )}
+                </span>
+              </div>
             </>
           )}
         </div>
