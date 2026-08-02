@@ -63,6 +63,7 @@
   - 即使父组件已使用 `useTranslation()`，子组件仍应自行使用，以保证独立性。
 - **专有名词**：品牌、产品、技术术语等可保留英文（如 API、React、TypeScript）；若有约定俗成的译法则使用翻译。
 - **翻译键**：使用有层级、语义清晰的键名，如 `dashboard.overview.title`，并保持命名一致。
+- **语言包 JSON 必须嵌套在 `translation` 命名空间内部**：所有 7 语 `locales/*.json` 文件必须包裹在 `{ "translation": { ... } }` 对象中，**严禁**在 JSON 最外层平铺添加 key，否则 i18next 将无法识别并静默回退显示英文 key。
 
 - **枚举与文案（常量中的 i18n）**
   各 feature 的 `constants.ts` 中常出现「枚举/状态 + 展示文案」或「成功/错误消息」，须统一约定以免遗漏 i18n、用法混乱：
@@ -216,6 +217,7 @@ return <div ref={containerRef} />
 - 使用 Rsbuild，配置见 `rsbuild.config.ts`；脚本以 `package.json` 为准（如 `bun run dev`、`bun run build`、`bun run typecheck`、`bun run lint`、`bun run format`），包管理见 [3.15 依赖管理](#315-依赖管理)。
 - 代码分割与懒加载策略见 [3.4 性能](#34-性能)；资源使用合适格式与压缩，环境变量用 `.env` 且以 `VITE_` 前缀，不在代码中硬编码。
 - **发布前**：执行 typecheck、lint、format 检查，完成生产构建并检查产物体积与环境变量配置。
+- **发布后验证**：部署完成后必须调用 Cloudflare API 检查真实部署状态，确认当前活跃部署已绑定 `aliases: ['https://www.metartr.com']`，禁止仅凭 CI 绿色状态判定成功。
 
 ---
 
@@ -235,3 +237,4 @@ return <div ref={containerRef} />
 - **2026-01-31**：在 3.2 中补充「类型检查」要求：改动 TS/TSX 后须执行 typecheck 并修复至无错。
 - **2026-06-21**：在 3.2 中补充「Lint 检查」要求：完成代码改动前须修复所涉及文件的所有 lint error。
 - **2026-08-02**：在 3.3 中补充「Dialog / Portal 内使用 ref」规范：必须使用 callback ref（`useState + useCallback`），禁止在 Portal 浮层内使用 `useRef` 触发副作用，防止因 Portal 延迟挂载导致 `ref.current === null` 而跳过注入逻辑。
+- **2026-08-02**：在 3.1 中补充「语言包嵌套命名空间」规范：7 语 JSON 文件必须严格包裹在 `translation` 对象内，避免前端回退英文；在 3.16 中补充「生产别名绑定核验」规范，确立部署双保险与闭环核验机制。
