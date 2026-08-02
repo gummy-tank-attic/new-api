@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
@@ -34,7 +34,10 @@ let telegramCallbackSequence = 0
 
 export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
   const { t } = useTranslation()
-  const widgetContainer = useRef<HTMLDivElement | null>(null)
+  const [widgetContainer, setWidgetContainer] = useState<HTMLDivElement | null>(null)
+  const widgetContainerRef = useCallback((node: HTMLDivElement | null) => {
+    setWidgetContainer(node)
+  }, [])
   const authorizationHandler = useRef(props.onAuthorization)
   const [callbackName] = useState(
     () => `newApiTelegramLogin${++telegramCallbackSequence}`
@@ -48,7 +51,7 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
   }, [props.onAuthorization])
 
   useEffect(() => {
-    const container = widgetContainer.current
+    const container = widgetContainer
     // 去掉 @ 前缀，upstream 原始代码未去 @ 是已知 bug
     const botName = props.botName.trim().replace(/^@/, '')
     if (!props.open || !container || !botName) return
@@ -80,7 +83,7 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
       container.replaceChildren()
       delete browserWindow[callbackName]
     }
-  }, [callbackName, props.botName, props.open])
+  }, [callbackName, props.botName, props.open, widgetContainer])
 
   return (
     <Dialog
@@ -101,10 +104,8 @@ export function TelegramLoginDialog(props: TelegramLoginDialogProps) {
           <p className='text-destructive text-sm'>{t('Login failed')}</p>
         )}
         <div
-          ref={widgetContainer}
-          className={
-            widgetState === 'ready' && !props.pending ? 'block' : 'hidden'
-          }
+          ref={widgetContainerRef}
+          className='flex min-h-10 justify-center'
         />
       </div>
     </Dialog>

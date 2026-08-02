@@ -171,3 +171,86 @@ Proof 同时绑定用户、登录会话、用户鉴权版本、会话版本和 s
 - Redis 限流从近似滑动窗口改为原子固定窗口，存在明确的边界双倍突发语义。
 - 用户级模型成功请求限流的 UTC 时间戳在滚动升级期间存在一个窗口的混合格式过渡，期间可能临时误放行或误拒绝。
 - 自建客户端应按新的 AuthBundle、`flow_token` 和 Security Proof 契约升级；PAT 客户端可直接移除 `New-Api-User`。
+
+## Telegram 登录：前端 Widget 机制与已知陷阱
+
+### 工作原理
+
+Telegram 登录流程分两路：
+
+| 场景 | 组件 | 触发方式 |
+|------|------|---------|
+| 注册 / 直接登录 | `TelegramLoginDialog` | 用户点击「使用 Telegram 继续」→ 弹窗显示 widget |
+| 已登录用户绑定账号 | `TelegramBindDialog` | 进入个人资料 → 绑定 Telegram |
+
+两者共用同一个上游脚本 `https://telegram.org/js/telegram-widget.js`。前者通过 `data-onauth` JS 回调（登录 flow），后者通过 `data-auth-url` 重定向（绑定 flow）。
+
+### Telegram Script 的可见性检查机制
+
+`telegram-widget.js` 在执行时会同步调用 `getComputedStyle()` 检查宿主元素的 `display`、`visibility` 和 `getBoundingClientRect()`。**若容器处于 `display:none` 或尺寸为 0×0，脚本会静默跳过 iframe 注入**，页面上不显示任何按钮，也不产生任何报错。
+
+因此，widget 脚本必须在宿主容器**已挂载且可见**时才能注入，不可先注入再显示。
+
+> 注意：这是 Telegram 脚本自身的设计行为，与下文的「Dialog Portal 时序问题」是相互独立的两个问题。
+
+### ⚠️ 已知 Bug：Dialog Portal 内 `useRef` 时序问题
+
+**现象**：打开 `TelegramLoginDialog` 后，对话框内容空白，没有 Telegram 按钮。
+
+**根因**：
+
+```
+props.open: false → true
+         │
+         ▼
+    useEffect 运行（依赖 props.open 变化）
+         │
+         ├─ widgetContainer.current === null   ← Portal 尚未挂载
+         └─ 提前 return，脚本永远不被注入
+
+    Portal 内 <div> 挂载完成（下一渲染周期）
+         │
+         └─ ref 被填充，但 useEffect 不再运行（依赖没变）
+```
+
+Radix UI `<Dialog>` 内容由内部 `Presence` 组件控制，`open` 变为 `true` 后 Portal 内容可能延迟到**下一个渲染周期**才真正挂载。`useRef` 值更新不触发 re-render，导致 `useEffect` 错过 ref 被填充的时机。
+
+**修复（2026-08）**：将 `useRef` 改为 `useState + useCallback` 的 callback ref 模式：
+
+```tsx
+// ❌ 错误：useRef 在 Portal 中不可靠
+const widgetContainer = useRef<HTMLDivElement | null>(null)
+useEffect(() => {
+  const container = widgetContainer.current  // Portal 挂载前为 null
+  if (!container) return
+  // ...
+}, [props.open])
+
+// ✅ 正确：callback ref 在 DOM 节点挂载时触发 state 更新 → re-render → effect 重跑
+const [widgetContainer, setWidgetContainer] = useState<HTMLDivElement | null>(null)
+const widgetContainerRef = useCallback((node: HTMLDivElement | null) => {
+  setWidgetContainer(node)
+}, [])
+useEffect(() => {
+  const container = widgetContainer  // state，有值时才执行
+  if (!container) return
+  // ...
+}, [widgetContainer, props.open])  // container 纳入依赖；勿用 ...otherDeps（TS 中不合法）
+```
+
+> 参见前端规范 [web/AGENTS.md § 3.3](../web/AGENTS.md) 的「Dialog / Portal 内使用 ref」条目。
+
+### Telegram Login API 迁移说明（2025+ 新版）
+
+Telegram 在 2025 年推出了新的 OIDC 登录流（`oauth.telegram.org/js/telegram-login.js`），旧 iframe widget（`telegram.org/js/telegram-widget.js`）被标记为 **legacy**，目前仍可用但随时可能废弃。
+
+| 项目 | 旧版（当前使用） | 新版 OIDC |
+|------|--------------|---------|
+| 脚本 | `telegram.org/js/telegram-widget.js`（当前使用） | `oauth.telegram.org/js/telegram-login.js` |
+| Bot 识别 | `data-telegram-login="bot_name"` | `client_id`（数字 ID，BotFather 提供） |
+| 交互方式 | iframe 嵌入 widget | `Telegram.Login.open()` 弹出 popup |
+| 回调数据 | `{id, first_name, hash, auth_date}` | OIDC `id_token`（JWT，RS256 签名） |
+| BotFather 配置 | `/setdomain` | Bot Settings > Web Login > Allowed URLs |
+| 后端验证 | HMAC-SHA256 | JWT RS256（需从 JWKS 获取公钥） |
+
+如需迁移，后端需新增 JWT 验证逻辑（替换 `verifyTelegramAuthorization`），前端仅需替换 script 加载和调用方式，不涉及路由变更。已绑定用户的 `telegram_id` 不受影响。

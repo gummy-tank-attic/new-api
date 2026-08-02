@@ -6,51 +6,12 @@ DO NOT send optional commentary
 
 This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI providers (OpenAI, Claude, Gemini, Azure, AWS Bedrock, etc.) behind a unified API, with user management, billing, rate limiting, and an admin dashboard.
 
-## Tech Stack
+## Project Reference
 
-- **Backend**: Go 1.22+, Gin web framework, GORM v2 ORM
-- **Frontend**: React 19, TypeScript, Rsbuild, Base UI, Tailwind CSS
-- **Databases**: SQLite, MySQL, PostgreSQL (all three must be supported)
-- **Cache**: Redis (go-redis) + in-memory cache
-- **Auth**: JWT, WebAuthn/Passkeys, OAuth (GitHub, Discord, OIDC, etc.)
-- **Frontend package manager**: Bun (preferred over npm/yarn/pnpm)
+> Before any change, read **`d:\workplace\我的相关项目\中转站\newapi\README.md`** — it contains the full tech stack, directory layout, `.env` key index, Cloudflare account split, domain topology, and all project-level conventions.
 
-## Architecture
+Tech stack snapshot: Go 1.22+ / Gin / GORM · React 19 / TypeScript / Rsbuild / Bun · MySQL + Redis · i18n via `go-i18n` (backend) and `i18next` (frontend, 7 locales).
 
-Layered architecture: Router -> Controller -> Service -> Model
-
-```
-router/        — HTTP routing (API, relay, dashboard, web)
-controller/    — Request handlers
-service/       — Business logic
-model/         — Data models and DB access (GORM)
-relay/         — AI API relay/proxy with provider adapters
-  relay/channel/ — Provider-specific adapters (openai/, claude/, gemini/, aws/, etc.)
-middleware/    — Auth, rate limiting, CORS, logging, distribution
-setting/       — Configuration management (ratio, model, operation, system, performance)
-common/        — Shared utilities (JSON, crypto, Redis, env, rate-limit, etc.)
-dto/           — Data transfer objects (request/response structs)
-constant/      — Constants (API types, channel types, context keys)
-types/         — Type definitions (relay formats, file sources, errors)
-i18n/          — Backend internationalization (go-i18n, en/zh)
-oauth/         — OAuth provider implementations
-pkg/           — Internal packages (cachex, ionet)
-web/           — Frontend (React 19, Rsbuild, Base UI, Tailwind)
-  src/i18n/    — Frontend internationalization (i18next, en/zh/zh-TW/fr/ru/ja/vi)
-```
-
-## Internationalization (i18n)
-
-### Backend (`i18n/`)
-- Library: `nicksnyder/go-i18n/v2`
-- Languages: en, zh
-
-### Frontend (`web/src/i18n/`)
-- Library: `i18next` + `react-i18next` + `i18next-browser-languagedetector`
-- Languages: en (base), zh (fallback), zh-TW, fr, ru, ja, vi
-- Translation files: `web/src/i18n/locales/{lang}.json` — flat JSON, keys are English source strings
-- Usage: `useTranslation()` hook, call `t('English key')` in components
-- CLI tools: `bun run i18n:sync` (from `web/`)
 
 ## Rules
 
@@ -136,6 +97,7 @@ Do NOT directly import or call `encoding/json` in business code. `json.RawMessag
   - `bun run i18n:*` for i18n tooling
 - Frontend UI text must support i18n with `i18next`/`react-i18next`. Use flat JSON locale files in `web/src/i18n/locales/{lang}.json`, with English source strings as keys.
 - In React components, use `useTranslation()` and call `t('English key')` for user-facing text.
+- **Dialog / Portal ref timing:** Use `useState + useCallback` callback ref (not `useRef`) whenever a `useEffect` must fire after a Portal-mounted DOM node is available. `useRef` updates silently without re-render; inside Radix `<Dialog>` the Portal may mount one render cycle late, so `ref.current` will be `null` on the first effect run. See `README.md §` "Frontend Known Gotchas" for the full pattern and background.
 - Follow `web/AGENTS.md` for detailed frontend conventions, including TypeScript, component structure, styling, accessibility, testing, and build checks.
 
 ### Project Governance

@@ -85,6 +85,47 @@
 - **Props 使用**：组件 props 非必要不要解构，直接使用 `props.xxx` 访问属性，保持代码清晰（详见 [3.2 代码风格与类型](#32-代码风格与类型)）。
 - 单文件超过约 200 行时考虑拆分子组件或将逻辑抽到自定义 Hooks；类型定义可与组件同文件或放在同模块的 `types` 中。
 
+**Portal 浮层内需要对 DOM 节点执行副作用时，必须使用 callback ref，而非 useRef**
+
+Radix UI 的 `<Dialog>`（及所有基于 `Portal` 的浮层组件）内容在 `open` 变为 `true` 后，由内部 `Presence` 组件控制实际 DOM 挂载，**可能延迟到下一个渲染周期才完成**。
+
+`useRef` 的值更新**不会触发 re-render**，导致 `useEffect` 在依赖未变化时不会重新执行，错过 ref 被填充的时机，典型症状是 effect 内 `container.current === null` 而提前退出。
+
+**错误模式（❌ 不可用）：**
+
+```tsx
+// 在 Dialog 内部的子组件中
+const containerRef = useRef<HTMLDivElement | null>(null)
+
+useEffect(() => {
+  const container = containerRef.current   // ← Portal 挂载完成前始终是 null
+  if (!container) return
+  injectThirdPartyWidget(container)        // ← 永远不会执行
+}, [props.open])                            // ← props.open 变化时 ref 还未填充
+
+return <div ref={containerRef} />
+```
+
+**正确模式（✅ 必须使用）：**
+
+```tsx
+const [container, setContainer] = useState<HTMLDivElement | null>(null)
+const containerRef = useCallback((node: HTMLDivElement | null) => {
+  setContainer(node)   // DOM 节点挂载/卸载时触发 state 更新 → re-render
+}, [])
+
+useEffect(() => {
+  if (!container) return
+  injectThirdPartyWidget(container)   // ← container 有值时才执行，时序正确
+}, [container, props.open])         // ← container（state）纳入依赖
+
+return <div ref={containerRef} />
+```
+
+**规则：** 需要在 ref 对应 DOM 节点挂载后立即执行副作用（注入第三方脚本/widget、测量 DOM、绑定库实例等）时，必须使用 `useState + useCallback` 的 callback ref 模式。`useRef` 仍可用于纯读取（如在事件处理函数中访问最新值），但不得依赖其值变化触发 `useEffect`。
+
+> **背景**：2026-08 排查 Telegram 登录 widget 空白问题时，定位到此根因。`telegram-login-dialog.tsx` 原先使用 `useRef`，Telegram 脚本在 Dialog Portal 挂载完成前就尝试注入，因 `container === null` 而跳过，导致 widget 始终不渲染。改为 callback ref 后立即修复。**注：Telegram 登录已于 2026-08 关闭（原因：Widget 及新版 OIDC 均在浏览器无 web.telegram.org session 时强制要求手机号输入），此规则仍适用于其它 Dialog 内 widget 注入场景。**
+
 ### 3.4 性能
 
 - **React**：合理使用 `useMemo`、`useCallback` 减少无效重渲染；避免在渲染路径中创建新对象/数组；必要时使用 `React.memo`。
@@ -193,3 +234,4 @@
 - **2026-01-29**：重组文档结构，合并重复内容，明确主次与交叉引用。
 - **2026-01-31**：在 3.2 中补充「类型检查」要求：改动 TS/TSX 后须执行 typecheck 并修复至无错。
 - **2026-06-21**：在 3.2 中补充「Lint 检查」要求：完成代码改动前须修复所涉及文件的所有 lint error。
+- **2026-08-02**：在 3.3 中补充「Dialog / Portal 内使用 ref」规范：必须使用 callback ref（`useState + useCallback`），禁止在 Portal 浮层内使用 `useRef` 触发副作用，防止因 Portal 延迟挂载导致 `ref.current === null` 而跳过注入逻辑。

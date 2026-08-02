@@ -35,6 +35,7 @@ export const DOCS_SECTION_IDS = [
   'quickstart',
   'base-url',
   'sdk',
+  'images',
   'claude-code',
   'codex',
   'cursor',
@@ -66,6 +67,11 @@ export const DOCS_NAV: ReadonlyArray<{
   {
     id: 'sdk',
     labelKey: 'SDK & cURL',
+    groupKey: 'Getting started',
+  },
+  {
+    id: 'images',
+    labelKey: 'Image & Video',
     groupKey: 'Getting started',
   },
   {
@@ -106,7 +112,10 @@ export const DOCS_NAV: ReadonlyArray<{
  */
 export const EXAMPLE_MODEL_OPENAI = 'gpt-5.4'
 export const EXAMPLE_MODEL_ANTHROPIC = 'claude-sonnet-4-6'
+export const EXAMPLE_MODEL_IMAGE = 'grok-imagine-image-quality'
+export const EXAMPLE_MODEL_VIDEO = 'grok-imagine-video'
 export const EXAMPLE_API_KEY = 'sk-metartr-your-api-key'
+export const IMAGE_GENERATIONS_ENDPOINT = `${API_BASE_URL}/images/generations`
 
 export function isDocsSectionId(value: string | undefined): value is DocsSectionId {
   return (

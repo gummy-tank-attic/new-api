@@ -34,7 +34,10 @@ import {
   API_HOST,
   EXAMPLE_API_KEY,
   EXAMPLE_MODEL_ANTHROPIC,
+  EXAMPLE_MODEL_IMAGE,
   EXAMPLE_MODEL_OPENAI,
+  EXAMPLE_MODEL_VIDEO,
+  IMAGE_GENERATIONS_ENDPOINT,
   PRICING_PATH,
   SITE_URL,
   type DocsSectionId,
@@ -372,6 +375,214 @@ console.log(response.choices[0].message.content);`}
       <Callout title={t('Model IDs')}>
         {t(
           'Model names must match Model Square exactly (case-sensitive). Prefer live IDs from {{path}} over outdated tutorial names.',
+          { path: PRICING_PATH }
+        )}
+      </Callout>
+    </div>
+  )
+}
+
+function ImagesSection() {
+  const { t } = useTranslation()
+  return (
+    <div className='space-y-8'>
+      <SectionTitle
+        title={t('Image & Video')}
+        description={t(
+          'Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.'
+        )}
+      />
+
+      <div className='overflow-x-auto rounded-xl border'>
+        <table className='w-full min-w-[520px] text-left text-sm'>
+          <thead className='bg-muted/50 border-b'>
+            <tr>
+              <th className='px-4 py-3 font-semibold'>{t('Type')}</th>
+              <th className='px-4 py-3 font-semibold'>{t('URL / Endpoint')}</th>
+              <th className='px-4 py-3 font-semibold'>{t('Usage')}</th>
+            </tr>
+          </thead>
+          <tbody className='divide-y'>
+            <tr>
+              <td className='px-4 py-3'>{t('SDK Base URL')}</td>
+              <td className='px-4 py-3 font-mono text-xs'>{API_BASE_URL}</td>
+              <td className='text-muted-foreground px-4 py-3 text-xs'>
+                {t('For Python / Node.js OpenAI SDKs (auto-appends /images/generations)')}
+              </td>
+            </tr>
+            <tr>
+              <td className='px-4 py-3'>{t('Direct Endpoint')}</td>
+              <td className='px-4 py-3 font-mono text-xs'>{IMAGE_GENERATIONS_ENDPOINT}</td>
+              <td className='text-muted-foreground px-4 py-3 text-xs'>
+                {t('For raw HTTP POST requests, cURL, webhooks, or custom tools')}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div className='space-y-4'>
+        <h2 className='text-xl font-bold'>{t('Image Generation')}</h2>
+        <p className='text-muted-foreground text-sm leading-relaxed'>
+          {t(
+            'Compatible with standard OpenAI client.images.generate. Models: grok-imagine-image-quality, grok-imagine-image, gpt-image-2, dall-e-3, etc.'
+          )}
+        </p>
+
+        <div className='space-y-3'>
+          <h3 className='text-sm font-semibold'>{t('Python SDK')}</h3>
+          <CodeBlock
+            title='Python'
+            code={`from openai import OpenAI
+
+client = OpenAI(
+    api_key="${EXAMPLE_API_KEY}",
+    base_url="${API_BASE_URL}",
+)
+
+# Standard image generation
+response = client.images.generate(
+    model="${EXAMPLE_MODEL_IMAGE}",  # e.g. grok-imagine-image-quality, grok-imagine-image, dall-e-3
+    prompt="A futuristic neon cyberpunk city with flying vehicles, ultra-detailed 8k",
+    n=1,
+    size="1024x1024",  # 1024x1024 (1K tier) or 2048x2048 (2K tier)
+)
+
+image_url = response.data[0].url
+print("Image URL:", image_url)`}
+          />
+        </div>
+
+        <div className='space-y-3'>
+          <h3 className='text-sm font-semibold'>{t('Node.js SDK')}</h3>
+          <CodeBlock
+            title='JavaScript'
+            code={`import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.METARTR_API_KEY,
+  baseURL: "${API_BASE_URL}",
+});
+
+const response = await client.images.generate({
+  model: "${EXAMPLE_MODEL_IMAGE}",
+  prompt: "A futuristic neon cyberpunk city with flying vehicles, ultra-detailed 8k",
+  n: 1,
+  size: "1024x1024",
+});
+
+console.log("Image URL:", response.data[0].url);`}
+          />
+        </div>
+
+        <div className='space-y-3'>
+          <h3 className='text-sm font-semibold'>cURL</h3>
+          <CodeBlock
+            title='bash'
+            code={`curl ${IMAGE_GENERATIONS_ENDPOINT} \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer ${EXAMPLE_API_KEY}" \\
+  -d '{
+    "model": "${EXAMPLE_MODEL_IMAGE}",
+    "prompt": "A futuristic neon cyberpunk city with flying vehicles, ultra-detailed 8k",
+    "size": "1024x1024",
+    "n": 1
+  }'`}
+          />
+        </div>
+      </div>
+
+      <div className='space-y-4'>
+        <h2 className='text-xl font-bold'>{t('Video Generation (Grok Video)')}</h2>
+        <p className='text-muted-foreground text-sm leading-relaxed'>
+          {t(
+            'Generate videos using grok-imagine-video. Submit POST requests to the same endpoint with duration and resolution.'
+          )}
+        </p>
+
+        <div className='space-y-3'>
+          <h3 className='text-sm font-semibold'>cURL (Video Generation)</h3>
+          <CodeBlock
+            title='bash'
+            code={`curl ${IMAGE_GENERATIONS_ENDPOINT} \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer ${EXAMPLE_API_KEY}" \\
+  -d '{
+    "model": "${EXAMPLE_MODEL_VIDEO}",
+    "prompt": "A cinematic drone shot through futuristic neon skyscrapers at sunset",
+    "duration": 5,
+    "resolution": "480p",
+    "aspect_ratio": "16:9"
+  }'`}
+          />
+        </div>
+      </div>
+
+      <div className='space-y-3'>
+        <h2 className='text-lg font-bold'>{t('Parameters Reference')}</h2>
+        <div className='overflow-x-auto rounded-xl border'>
+          <table className='w-full min-w-[520px] text-left text-sm'>
+            <thead className='bg-muted/50 border-b'>
+              <tr>
+                <th className='px-4 py-3 font-semibold'>{t('Parameter')}</th>
+                <th className='px-4 py-3 font-semibold'>{t('Type')}</th>
+                <th className='px-4 py-3 font-semibold'>{t('Description')}</th>
+              </tr>
+            </thead>
+            <tbody className='divide-y'>
+              <tr>
+                <td className='px-4 py-3 font-mono text-xs'>model</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>string (required)</td>
+                <td className='px-4 py-3 text-xs'>
+                  {t('e.g. grok-imagine-image-quality, grok-imagine-video, dall-e-3')}
+                </td>
+              </tr>
+              <tr>
+                <td className='px-4 py-3 font-mono text-xs'>prompt</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>string (required)</td>
+                <td className='px-4 py-3 text-xs'>{t('Text description of the desired image or video')}</td>
+              </tr>
+              <tr>
+                <td className='px-4 py-3 font-mono text-xs'>size</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>string (optional)</td>
+                <td className='px-4 py-3 text-xs'>
+                  {t('Image resolution (e.g. 1024x1024 for 1K, 2048x2048 for 2K)')}
+                </td>
+              </tr>
+              <tr>
+                <td className='px-4 py-3 font-mono text-xs'>duration</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>integer (video)</td>
+                <td className='px-4 py-3 text-xs'>
+                  {t('Video duration in seconds (5–10 seconds, default 8)')}
+                </td>
+              </tr>
+              <tr>
+                <td className='px-4 py-3 font-mono text-xs'>resolution</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>string (video)</td>
+                <td className='px-4 py-3 text-xs'>
+                  {t('Video resolution: "480p" or "720p"')}
+                </td>
+              </tr>
+              <tr>
+                <td className='px-4 py-3 font-mono text-xs'>aspect_ratio</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>string (video)</td>
+                <td className='px-4 py-3 text-xs'>
+                  {t('Aspect ratio: "16:9", "9:16", or "1:1"')}
+                </td>
+              </tr>
+              <tr>
+                <td className='px-4 py-3 font-mono text-xs'>n</td>
+                <td className='text-muted-foreground px-4 py-3 text-xs'>integer (optional)</td>
+                <td className='px-4 py-3 text-xs'>{t('Number of images to generate (default 1)')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Callout title={t('Image & Video Models')}>
+        {t(
+          'Check Model Square at {{path}} for supported image and video model IDs, pricing rates, and token ratios.',
           { path: PRICING_PATH }
         )}
       </Callout>
@@ -754,6 +965,8 @@ export function SectionContent(props: SectionContentProps) {
       return <BaseUrlSection />
     case 'sdk':
       return <SdkSection />
+    case 'images':
+      return <ImagesSection />
     case 'claude-code':
       return <ClaudeCodeSection />
     case 'codex':
