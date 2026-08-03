@@ -217,11 +217,11 @@ return <div ref={containerRef} />
 - 使用 Rsbuild，配置见 `rsbuild.config.ts`；脚本以 `package.json` 为准（如 `bun run dev`、`bun run build`、`bun run typecheck`、`bun run lint`、`bun run format`），包管理见 [3.15 依赖管理](#315-依赖管理)。
 - 代码分割与懒加载策略见 [3.4 性能](#34-性能)；资源使用合适格式与压缩，环境变量用 `.env` 且以 `VITE_` 前缀，不在代码中硬编码。
 - **发布前**：执行 typecheck、lint、format 检查，完成生产构建并检查产物体积与环境变量配置。依赖安装用干净 `npm ci --legacy-peer-deps`；若 `node_modules` 无 `.bin` 或关键包 invalid，先改名坏目录再 `npm ci`，禁止对损坏树反复 `npm install`。
-- **发布路径**（与项目根 `README.md` §7.2、`docs/PRODUCTION_DEPLOY_STATE.md` §7.4 一致）：
-  1. **主通道**：`git push` → GitHub Actions `deploy-pages.yml` → Cloudflare Pages `metartr-web` / `production`。
-  2. **双保险**（仅 GHA 假绿/不可用）：项目根 `python scratch/test_deploy_cf.py`（`.env` 的 `CF_ACCOUNT_1_*`）。
-  3. **禁止**：`web/deploy.ps1`；把「改 GitHub Secrets / device login」当作发布步骤。
-- **发布后验证**：必须用 Account 1 调 Cloudflare API，确认当前活跃部署已绑定 `aliases` 含 `https://www.metartr.com`，禁止仅凭 CI 绿色状态判定成功。
+- **发布路径**（唯一口径：项目根 `README.md` §7.2、`docs/PRODUCTION_DEPLOY_STATE.md` §7.4）：
+  1. **主通道**：`git push` → GitHub Actions → Pages `metartr-web` / `production`。
+  2. **双保险**（仅 GHA 无法正确落 www）：项目根 `python scratch/test_deploy_cf.py`（`CF_ACCOUNT_1_*`）。
+  3. **禁用**：`web/deploy.ps1`；混用非 Account 1 凭证。
+- **发布后验证**：Account 1 调 CF API，确认 `aliases` 含 `https://www.metartr.com`；禁止仅凭 CI 绿灯。
 
 ---
 
@@ -242,4 +242,4 @@ return <div ref={containerRef} />
 - **2026-06-21**：在 3.2 中补充「Lint 检查」要求：完成代码改动前须修复所涉及文件的所有 lint error。
 - **2026-08-02**：在 3.3 中补充「Dialog / Portal 内使用 ref」规范：必须使用 callback ref（`useState + useCallback`），禁止在 Portal 浮层内使用 `useRef` 触发副作用，防止因 Portal 延迟挂载导致 `ref.current === null` 而跳过注入逻辑。
 - **2026-08-02**：在 3.1 中补充「语言包嵌套命名空间」规范：7 语 JSON 文件必须严格包裹在 `translation` 对象内，避免前端回退英文；在 3.16 中补充「生产别名绑定核验」规范，确立部署双保险与闭环核验机制。
-- **2026-08-03**：在 3.16 明确主通道 GHA vs 双保险 `scratch/test_deploy_cf.py`（Account 1），禁止把 GitHub device login / 改 Secrets 当作发布路径；补充损坏 `node_modules` 处理。
+- **2026-08-03**：在 3.16 固定唯一发版口径（GHA 主通道 + Account 1 双保险 + www 别名核验）；补充损坏 `node_modules` 处理。

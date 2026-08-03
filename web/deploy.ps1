@@ -1,33 +1,32 @@
 <#
 .SYNOPSIS
-Deprecated local deploy entrypoint for the MetaRtr frontend.
+Deprecated entrypoint. Does not deploy.
 
 .DESCRIPTION
-Frontend production deployment is handled by GitHub Actions.
-This script intentionally fails fast to prevent accidental local Cloudflare Pages
-deployments with stale or uncommitted code.
+Production frontend release is documented in the project-root README §7.2:
 
-Correct flow:
-  cd newapi源码
-  git add .
-  git commit -m "fix: your change"
-  git push
+  Primary:  git push → GitHub Actions → Cloudflare Pages metartr-web
+  Dual insurance (GHA blocked / wrong secrets only):
+            python scratch/test_deploy_cf.py   # from project root newapi/
 
-The push triggers .github/workflows/deploy-pages.yml for main, production,
-and metartr/* branches when files under web/** changed.
+This script always fails so operators do not use a stale local shortcut.
 #>
 
 $ErrorActionPreference = 'Stop'
 
 throw @'
-Local frontend deployment is disabled.
+web/deploy.ps1 is disabled.
 
-Use the GitHub Actions deployment flow documented in the project README:
+Use the project-root docs (README §7.2 / docs/PRODUCTION_DEPLOY_STATE.md §7.4):
 
-  cd newapi源码
-  git add .
-  git commit -m "fix: your change"
-  git push
+  Primary:
+    cd newapi源码
+    git push origin production
 
-Do not run deploy.ps1 or wrangler locally for production Pages deploys.
+  Dual insurance only (Account 1 .env, when GHA cannot land on www):
+    cd <project-root newapi>
+    python scratch/test_deploy_cf.py
+
+After any path: verify Cloudflare aliases include https://www.metartr.com
+(do not trust Actions green alone).
 '@
