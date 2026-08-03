@@ -1,5 +1,6 @@
 name: Deploy Frontend to Cloudflare Pages
-# last-trigger: 2026-08-01 with correct CF_API_TOKEN (Pages Write)
+# Must deploy to CF Account 1 project metartr-web (www.metartr.com).
+# Secrets CF_API_TOKEN + CF_ACCOUNT_ID must match that account (Pages Write token, not Global API Key).
 
 on:
   push:
@@ -10,7 +11,7 @@ on:
     paths:
       - 'web/**'
       - '.github/workflows/deploy-pages.yml'
-  workflow_dispatch:    
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -39,9 +40,107 @@ jobs:
         working-directory: web
         run: npm run build
 
+      - name: Assert Cloudflare secrets present
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "::error::CF_API_TOKEN and CF_ACCOUNT_ID must be set to Account 1 (metartr-web / www.metartr.com)."
+            exit 1
+          fi
+          # Reject obviously wrong Global API Key shape used as Bearer (usually 37 chars, not token format).
+          if [ "${#CLOUDFLARE_API_TOKEN}" -lt 30 ]; then
+            echo "::error::CF_API_TOKEN looks too short; use a Cloudflare API Token with Pages:Edit."
+            exit 1
+          fi
+
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
         run: |
-          npx wrangler pages deploy web/dist --project-name=metartr-web --branch=production --commit-dirty=true
+          set -euo pipefail
+          npx wrangler@4 pages deploy web/dist \
+            --project-name=metartr-web \
+            --branch=production \
+            --commit-hash="${GITHUB_SHA}" \
+            --commit-message="gha:${GITHUB_SHA:0:7}" \
+            --commit-dirty=true
+
+      - name: Verify production deployment (www alias + commit)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          # GHA green is not enough: confirm Account hosting www got this commit.
+          python3 - <<'PY'
+          import json, os, sys, urllib.request
+
+          token = os.environ["CLOUDFLARE_API_TOKEN"]
+          account = os.environ["CLOUDFLARE_ACCOUNT_ID"]
+          sha = os.environ["GITHUB_SHA"]
+          url = (
+              f"https://api.cloudflare.com/client/v4/accounts/{account}"
+              f"/pages/projects/metartr-web/deployments?per_page=10"
+          )
+          req = urllib.request.Request(
+              url,
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Content-Type": "application/json",
+              },
+          )
+          with urllib.request.urlopen(req, timeout=60) as resp:
+              body = json.load(resp)
+
+          if not body.get("success"):
+              print("Cloudflare API error:", body, file=sys.stderr)
+              sys.exit(1)
+
+          deployments = body.get("result") or []
+          if not deployments:
+              print("No deployments returned for metartr-web", file=sys.stderr)
+              sys.exit(1)
+
+          expected_alias = "https://www.metartr.com"
+          matched = None
+          for dep in deployments:
+              meta = (dep.get("deployment_trigger") or {}).get("metadata") or {}
+              commit = meta.get("commit_hash") or ""
+              aliases = dep.get("aliases") or []
+              stage = ((dep.get("latest_stage") or {}).get("status")) or ""
+              print(
+                  f"- id={dep.get('id','')[:8]} stage={stage} "
+                  f"commit={commit[:7] if commit else '(empty)'} aliases={aliases}"
+              )
+              if commit == sha and expected_alias in aliases:
+                  matched = dep
+                  break
+
+          if not matched:
+              # Fallback: newest production deployment must at least own www.
+              newest = deployments[0]
+              aliases = newest.get("aliases") or []
+              meta = (newest.get("deployment_trigger") or {}).get("metadata") or {}
+              commit = meta.get("commit_hash") or ""
+              print(
+                  f"::error::Deploy verification failed. "
+                  f"Expected commit {sha[:7]} with alias {expected_alias}. "
+                  f"Newest is commit={commit[:7] if commit else '(empty)'} aliases={aliases}",
+                  file=sys.stderr,
+              )
+              print(
+                  "Fix GitHub secrets CF_API_TOKEN / CF_ACCOUNT_ID to Cloudflare Account 1 "
+                  "(project metartr-web, domain www.metartr.com).",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+
+          print(
+              f"OK: production alias {expected_alias} bound to commit {sha[:7]} "
+              f"(deployment {matched.get('id')})"
+          )
+          PY
