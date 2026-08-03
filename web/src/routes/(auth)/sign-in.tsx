@@ -21,6 +21,7 @@ import { z } from 'zod'
 
 import { sanitizeAuthRedirect } from '@/features/auth/lib/auth-redirect'
 import { SignIn } from '@/features/auth/sign-in'
+import { bootstrapAuthentication } from '@/lib/auth-session'
 import { useAuthStore } from '@/stores/auth-store'
 
 const searchSchema = z.object({
@@ -31,6 +32,7 @@ export const Route = createFileRoute('/(auth)/sign-in')({
   component: SignIn,
   validateSearch: searchSchema,
   beforeLoad: async ({ search }) => {
+    await bootstrapAuthentication()
     const { auth } = useAuthStore.getState()
 
     // 如果已经有用户信息，说明已登录

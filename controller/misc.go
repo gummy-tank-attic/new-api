@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,6 +23,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+// homePageContentHash returns a short SHA-256 prefix for client SWR cache invalidation.
+func homePageContentHash(content string) string {
+	sum := sha256.Sum256([]byte(content))
+	return hex.EncodeToString(sum[:8])
+}
 
 func TestStatus(c *gin.Context) {
 	err := model.PingDB()
@@ -123,6 +131,9 @@ func GetStatus(c *gin.Context) {
 		"user_agreement_enabled":      legalSetting.UserAgreement != "",
 		"privacy_policy_enabled":      legalSetting.PrivacyPolicy != "",
 		"checkin_enabled":             operation_setting.GetCheckinSetting().Enabled,
+		// Short hash of custom home content so the SPA can drop stale localStorage
+		// without waiting on /api/home_page_content.
+		"home_page_content_hash": homePageContentHash(common.OptionMap["HomePageContent"]),
 	}
 
 	// 根据启用状态注入可选内容
@@ -226,10 +237,12 @@ func GetMidjourney(c *gin.Context) {
 func GetHomePageContent(c *gin.Context) {
 	common.OptionMapRWMutex.RLock()
 	defer common.OptionMapRWMutex.RUnlock()
+	content := common.OptionMap["HomePageContent"]
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
-		"data":    common.OptionMap["HomePageContent"],
+		"data":    content,
+		"hash":    homePageContentHash(content),
 	})
 	return
 }

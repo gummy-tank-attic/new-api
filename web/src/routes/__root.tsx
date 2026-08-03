@@ -146,38 +146,36 @@ let setupStatusChecked = getSetupStatusFromCache()
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
 }>()({
-  // 应用初始化与路由解析前统一校验会话
+  // Start session restore early, but do NOT block public routes (e.g. home) on
+  // auth refresh. Authenticated / sign-in routes await bootstrap themselves.
   beforeLoad: async ({ location }) => {
     const legacyTarget = resolveLegacyRoute(location.href)
     if (legacyTarget) {
       throw redirect({ href: legacyTarget, replace: true })
     }
 
+    // Fire-and-forget: warms refresh for protected routes that will await the
+    // shared promise. Public pages can paint without waiting on the network.
+    void bootstrapAuthentication()
+
     const pathname = location?.pathname || ''
     const needsSetupCheck =
       !setupStatusChecked && !pathname.startsWith('/setup')
-    const authBootstrap = bootstrapAuthentication()
 
-    // 只检查 setup 状态（如果需要）
     if (needsSetupCheck) {
-      const [status] = await Promise.all([
-        getSetupStatus().catch((error) => {
-          if (import.meta.env.DEV) {
-            // eslint-disable-next-line no-console
-            console.warn('[root.beforeLoad] setup status check failed', error)
-          }
-          return null
-        }),
-        authBootstrap,
-      ])
+      const status = await getSetupStatus().catch((error) => {
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.warn('[root.beforeLoad] setup status check failed', error)
+        }
+        return null
+      })
 
       if (status?.success && status.data && !status.data.status) {
         throw redirect({ to: '/setup' })
       }
       setupStatusChecked = true
       setSetupStatusCache(true)
-    } else {
-      await authBootstrap
     }
   },
   component: RootComponent,

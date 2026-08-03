@@ -21,41 +21,43 @@ import { useEffect, useState } from 'react'
 import { isHttpUrl } from '@/lib/content-format'
 
 import { getHomePageContent } from '../api'
+import {
+  clearHomePageContentCache,
+  readHomePageContentCache,
+  writeHomePageContentCache,
+} from '../lib/home-content-cache'
 import type { HomePageContentResult } from '../types'
 
-const STORAGE_KEY = 'home_page_content'
-
 /**
- * Hook to load and manage custom home page content
- * Supports both Markdown/HTML content and iframe URLs
+ * Hook to load and manage custom home page content.
+ * Supports both Markdown/HTML content and iframe URLs.
+ *
+ * SWR: if localStorage has a previous value (and status hash still matches),
+ * first paint uses it and revalidates in the background. First visit without
+ * cache still waits on the API (or falls through to the default home on failure).
  */
 export function useHomePageContent(): HomePageContentResult {
-  const [content, setContent] = useState<string>('')
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [snapshot] = useState(readHomePageContentCache)
+  const [content, setContent] = useState(snapshot.content)
+  const [isLoaded, setIsLoaded] = useState(snapshot.hasCache)
 
   useEffect(() => {
     let mounted = true
 
-    const loadContent = async () => {
-      // Load from localStorage first for immediate display
-      const cached = localStorage.getItem(STORAGE_KEY)
-      if (cached && mounted) {
-        setContent(cached)
-      }
-
+    const revalidate = async () => {
       try {
         const response = await getHomePageContent()
-        const { success, data } = response
+        const { success, data, hash } = response
 
         if (!mounted) return
 
         if (success && data) {
           setContent(data)
-          localStorage.setItem(STORAGE_KEY, data)
-        } else {
-          // Clear content if API returns empty
+          writeHomePageContentCache(data, hash)
+        } else if (success) {
+          // Explicit empty from server: show default home and drop stale cache.
           setContent('')
-          localStorage.removeItem(STORAGE_KEY)
+          clearHomePageContentCache()
         }
       } catch (error) {
         if (!mounted) return
@@ -70,7 +72,7 @@ export function useHomePageContent(): HomePageContentResult {
       }
     }
 
-    loadContent()
+    void revalidate()
 
     return () => {
       mounted = false

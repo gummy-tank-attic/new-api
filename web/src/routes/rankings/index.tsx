@@ -20,6 +20,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import z from 'zod'
 
 import { Rankings } from '@/features/rankings'
+import { bootstrapAuthentication } from '@/lib/auth-session'
 import { getFreshModuleAccess } from '@/lib/nav-modules'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -38,6 +39,7 @@ export const Route = createFileRoute('/rankings/')({
       throw redirect({ to: '/' })
     }
     if (access.requireAuth) {
+      await bootstrapAuthentication()
       const { auth } = useAuthStore.getState()
       if (!auth.user) {
         throw redirect({

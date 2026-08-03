@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { useQuery } from '@tanstack/react-query'
 
 import type { SystemStatus } from '@/features/auth/types'
+import { invalidateHomePageContentCacheIfHashMismatch } from '@/features/home/lib/home-content-cache'
 import { getStatus } from '@/lib/api'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 
@@ -70,6 +71,10 @@ export function useStatus() {
       try {
         if (typeof window !== 'undefined' && status) {
           window.localStorage.setItem('status', JSON.stringify(status))
+          // Drop stale custom home body when admin changed/cleared content.
+          invalidateHomePageContentCacheIfHashMismatch(
+            status.home_page_content_hash
+          )
         }
       } catch {
         /* empty */

@@ -45,3 +45,49 @@ func TestGetStatusAdvertisesDefaultDashboard(t *testing.T) {
 	assert.True(t, payload.Success)
 	assert.Equal(t, "default", payload.Data["theme"])
 }
+
+func TestGetStatusIncludesHomePageContentHash(t *testing.T) {
+	previousMap := common.OptionMap
+	common.OptionMap = map[string]string{
+		"HomePageContent": "# hello",
+	}
+	t.Cleanup(func() { common.OptionMap = previousMap })
+
+	response := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(response)
+	context.Request = httptest.NewRequest(http.MethodGet, "/api/status", nil)
+
+	GetStatus(context)
+
+	var payload struct {
+		Success bool           `json:"success"`
+		Data    map[string]any `json:"data"`
+	}
+	require.NoError(t, common.Unmarshal(response.Body.Bytes(), &payload))
+	assert.True(t, payload.Success)
+	assert.Equal(t, homePageContentHash("# hello"), payload.Data["home_page_content_hash"])
+}
+
+func TestGetHomePageContentIncludesHash(t *testing.T) {
+	previousMap := common.OptionMap
+	common.OptionMap = map[string]string{
+		"HomePageContent": "custom",
+	}
+	t.Cleanup(func() { common.OptionMap = previousMap })
+
+	response := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(response)
+	context.Request = httptest.NewRequest(http.MethodGet, "/api/home_page_content", nil)
+
+	GetHomePageContent(context)
+
+	var payload struct {
+		Success bool   `json:"success"`
+		Data    string `json:"data"`
+		Hash    string `json:"hash"`
+	}
+	require.NoError(t, common.Unmarshal(response.Body.Bytes(), &payload))
+	assert.True(t, payload.Success)
+	assert.Equal(t, "custom", payload.Data)
+	assert.Equal(t, homePageContentHash("custom"), payload.Hash)
+}

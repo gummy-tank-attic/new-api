@@ -19,10 +19,14 @@ For commercial licensing, please contact support@quantumnous.com
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
 import { AuthenticatedLayout } from '@/components/layout'
+import { bootstrapAuthentication } from '@/lib/auth-session'
 import { useAuthStore } from '@/stores/auth-store'
 
 export const Route = createFileRoute('/_authenticated')({
-  beforeLoad: ({ location }) => {
+  beforeLoad: async ({ location }) => {
+    // Root no longer awaits bootstrap so public pages stay fast; restore the
+    // cookie session here before deciding sign-in vs. app shell.
+    await bootstrapAuthentication()
     const { auth } = useAuthStore.getState()
 
     if (!auth.user || !auth.accessToken) {

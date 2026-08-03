@@ -27,6 +27,8 @@ export interface HomePageContentResponse {
   success: boolean
   message?: string
   data?: string
+  /** Short SHA-256 prefix from the API for SWR cache invalidation. */
+  hash?: string
 }
 
 /**
