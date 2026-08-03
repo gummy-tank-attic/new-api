@@ -126,12 +126,18 @@ export const EXCLUDED_GROUPS = ['', 'auto']
  * Vendors not listed appear after these, sorted by name.
  * When changing order or adding vendors: update this array AND the design doc.
  */
+/**
+ * 供应商 Tab 固定顺序（产品规定 · 长期有效）。
+ * 完整表：docs/PRICING_PAGE_DESIGN.md §2.3
+ */
 export const VENDOR_TAB_ORDER = [
   'Anthropic',
   'OpenAI',
   'xAI',
   'DeepSeek',
   'ZHIPU',
+  'Moonshot',
+  'MiniMax',
 ] as const
 
 /** Aliases → canonical key used in VENDOR_TAB_ORDER matching */
@@ -144,6 +150,9 @@ export const VENDOR_NAME_ALIASES: Record<string, string> = {
   'zhipu ai': 'ZHIPU',
   智谱: 'ZHIPU',
   智谱ai: 'ZHIPU',
+  moonshot: 'Moonshot',
+  kimi: 'Moonshot',
+  minimax: 'MiniMax',
 }
 
 /** Rank for vendor tabs / table sort (lower first). Unknown vendors share the last bucket. */
@@ -163,17 +172,15 @@ export function getVendorTabRank(name: string): number {
 }
 
 /**
- * Preferred model row order on the pricing table (product convention).
- * Matched against model_name (case-insensitive). Listed models appear first
- * in this order within their vendor; unlisted models follow with natural sort.
- * Doc: docs/PRICING_PAGE_DESIGN.md §2.4
- * When changing order or adding models: update this array AND the design doc.
- *
- * Note: cross-vendor order still follows VENDOR_TAB_ORDER; this list only
- * controls relative order among models that share the same vendor filter.
+ * 模型行固定顺序（产品规定 · 长期有效）。
+ * 与后台 model_name / GET /api/pricing 完全一致（大小写不敏感匹配）。
+ * 完整对照表：docs/PRICING_PAGE_DESIGN.md §2.4
+ * 未列入：排在已列入之后，再按 model_name 升序（numeric）。
+ * 跨供应商仍先按 VENDOR_TAB_ORDER。
+ * 改序/增模型：只改本数组 + 同步设计文档；禁止在组件写死。
  */
 export const MODEL_DISPLAY_ORDER = [
-  // Anthropic（自上而下）
+  // —— Anthropic ——
   'claude-fable-5',
   'claude-opus-5',
   'claude-opus-4-8',
@@ -183,7 +190,7 @@ export const MODEL_DISPLAY_ORDER = [
   'claude-sonnet-5',
   'claude-sonnet-4-6',
   'claude-haiku-4-5',
-  // OpenAI（自上而下）
+  // —— OpenAI ——
   'gpt-5.6-sol',
   'gpt-5.6-terra',
   'gpt-5.6-luna',
@@ -191,7 +198,7 @@ export const MODEL_DISPLAY_ORDER = [
   'gpt-5.4',
   'gpt-5.3-codex-spark',
   'gpt-image-2',
-  // xAI / Grok（自上而下：主推 → 系列 → 工具/生图视频）
+  // —— xAI / Grok：主推 → 4.x 系列 → build → imagine ——
   'grok-4.5',
   'grok-4.3',
   'grok-4.20-multi-agent-0309',
@@ -201,17 +208,17 @@ export const MODEL_DISPLAY_ORDER = [
   'grok-imagine-image-quality',
   'grok-imagine-image',
   'grok-imagine-video',
-  // DeepSeek
+  // —— DeepSeek ——
   'deepseek-v4-pro',
   'deepseek-v4-flash',
-  // 智谱
+  // —— 智谱 ——
   'glm-5.2',
   'glm-5.1',
-  // Kimi（自上而下）
+  // —— Moonshot / Kimi ——
   'kimi-k3',
   'kimi-k2.7-code',
   'kimi-k2.6',
-  // MiniMax（自上而下）
+  // —— MiniMax ——
   'minimax-m3',
   'minimax-m2.7',
   'minimax-m2.5',
@@ -252,18 +259,14 @@ export type ViewMode = (typeof VIEW_MODES)[keyof typeof VIEW_MODES]
 export const DEFAULT_PRICING_PAGE_SIZE = 20
 
 /**
- * Preferred pricing-group card order (product convention).
- * Matched against admin「分组定价」/ usable_group names (full/half-width
- * parentheses and case are normalized — see normalizeGroupName).
- * Doc: docs/PRICING_PAGE_DESIGN.md §2.5
- * Unlisted groups appear after these (then by ratio, then name).
- * When changing order: update this array AND the design doc.
- *
- * 约定：各供应商 Sale/便宜档在前；Claude 内 Premium 紧跟 Sale。
- * 名称与线上 group_ratio 对齐（Claude/Codex 常用中文全角括号）。
+ * 分组卡片固定顺序（产品规定 · 长期有效）。
+ * 匹配后台「分组定价」名；全角/半角括号等价（normalizeGroupName）。
+ * 完整表：docs/PRICING_PAGE_DESIGN.md §2.5
+ * 规则：Claude 内 Sale → Premium → Max(CLI) → Max(External)；
+ * Grok 主分组 → Beta → image video；未列入排在后（倍率→名称）。
  */
 export const GROUP_DISPLAY_ORDER = [
-  // Anthropic — Sale → Premium → Max(CLI Only) → Max(External)
+  // Anthropic
   'Claude lite（Sale）',
   'Claude Plus（Premium）',
   'Claude Max（CLI Only）',
@@ -271,13 +274,19 @@ export const GROUP_DISPLAY_ORDER = [
   // OpenAI / Codex
   'Codex Pro(Codex Only)',
   'Codex Pro（External）',
-  // 其它供应商
+  'Codex Pro (image)',
+  // DeepSeek
   'DeepSeek',
+  // xAI / Grok（与定价页胶囊一致）
   'Grok',
   'Grok（Enterprise）',
   'Grok Enterprise',
   'Grok（Beta）',
+  'Grok (image video)',
+  // 国模 / 其它
   'Zhipu',
+  'Kimi',
+  'MiniMax',
 ] as const
 
 /**
