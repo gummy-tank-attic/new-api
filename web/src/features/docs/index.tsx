@@ -17,14 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { getRouteApi, Link } from '@tanstack/react-router'
-import {
-  Check,
-  Code,
-  Copy,
-  Image as ImageIcon,
-  Menu,
-  Server,
-} from 'lucide-react'
+import { Check, Code, Copy, Menu, Server } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -43,7 +36,6 @@ import { DocsNav } from './components/docs-nav'
 import { SectionContent } from './components/section-content'
 import {
   API_BASE_URL,
-  API_IMAGES_ENDPOINT,
   DEFAULT_DOCS_SECTION,
   DOCS_NAV,
   isDocsSectionId,
@@ -60,7 +52,6 @@ export function Docs() {
     : DEFAULT_DOCS_SECTION
 
   const [copiedBase, setCopiedBase] = useState(false)
-  const [copiedImages, setCopiedImages] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
@@ -71,12 +62,6 @@ export function Docs() {
     void navigator.clipboard.writeText(API_BASE_URL)
     setCopiedBase(true)
     setTimeout(() => setCopiedBase(false), 2000)
-  }
-
-  const handleCopyImagesUrl = () => {
-    void navigator.clipboard.writeText(API_IMAGES_ENDPOINT)
-    setCopiedImages(true)
-    setTimeout(() => setCopiedImages(false), 2000)
   }
 
   const activeLabel =
@@ -107,85 +92,38 @@ export function Docs() {
             </p>
           </div>
 
-          {/* Dual Endpoints Balanced Grid */}
-          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-            {/* Card 1: Base URL */}
-            <div
-              className={cn(
-                'bg-card flex flex-col justify-between gap-3.5 rounded-2xl border p-4 shadow-sm transition-all hover:border-violet-500/40'
-              )}
-            >
-              <div className='flex items-center justify-between gap-2'>
-                <div className='flex items-center gap-2.5'>
-                  <div className='flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-sm'>
-                    <Server className='size-4' />
-                  </div>
-                  <div>
-                    <div className='text-muted-foreground text-[11px] font-bold tracking-wider uppercase'>
-                      {t('Base URL')}
-                    </div>
-                    <div className='text-muted-foreground text-xs'>
-                      {t('Chat, Coding & SDKs')}
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  onClick={handleCopyBaseUrl}
-                  size='sm'
-                  variant='outline'
-                  className='shrink-0 gap-1.5 hover:border-violet-400 hover:bg-violet-500/10 hover:text-violet-600'
-                >
-                  {copiedBase ? (
-                    <Check className='size-3.5 text-emerald-500' />
-                  ) : (
-                    <Copy className='size-3.5' />
-                  )}
-                  <span>{copiedBase ? t('Copied') : t('Copy Base URL')}</span>
-                </Button>
+          {/* Base URL Quick Copy Banner */}
+          <div
+            className={cn(
+              'bg-card flex flex-col justify-between gap-4 rounded-2xl border p-4 shadow-sm sm:flex-row sm:items-center'
+            )}
+          >
+            <div className='flex items-center gap-3'>
+              <div className='flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-sm'>
+                <Server className='size-5' />
               </div>
-              <div className='bg-muted/60 flex items-center justify-between rounded-xl px-3.5 py-2.5 font-mono text-xs font-semibold text-violet-600 sm:text-sm dark:text-violet-400'>
-                <span className='truncate'>{API_BASE_URL}</span>
+              <div className='min-w-0'>
+                <div className='text-muted-foreground text-xs font-semibold uppercase tracking-wider'>
+                  {t('Base URL')}
+                </div>
+                <div className='truncate font-mono text-sm font-semibold text-violet-600 dark:text-violet-400'>
+                  {API_BASE_URL}
+                </div>
               </div>
             </div>
-
-            {/* Card 2: Image & Video Endpoint */}
-            <div
-              className={cn(
-                'bg-card flex flex-col justify-between gap-3.5 rounded-2xl border p-4 shadow-sm transition-all hover:border-violet-500/40'
-              )}
+            <Button
+              onClick={handleCopyBaseUrl}
+              size='sm'
+              variant='outline'
+              className='shrink-0 gap-1.5 hover:border-violet-400 hover:bg-violet-500/10 hover:text-violet-600'
             >
-              <div className='flex items-center justify-between gap-2'>
-                <div className='flex items-center gap-2.5'>
-                  <div className='flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-sm'>
-                    <ImageIcon className='size-4' />
-                  </div>
-                  <div>
-                    <div className='text-muted-foreground text-[11px] font-bold tracking-wider uppercase'>
-                      {t('Image & Video Endpoint')}
-                    </div>
-                    <div className='text-muted-foreground text-xs'>
-                      {t('Images Generations & Grok Video')}
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  onClick={handleCopyImagesUrl}
-                  size='sm'
-                  variant='outline'
-                  className='shrink-0 gap-1.5 hover:border-violet-400 hover:bg-violet-500/10 hover:text-violet-600'
-                >
-                  {copiedImages ? (
-                    <Check className='size-3.5 text-emerald-500' />
-                  ) : (
-                    <Copy className='size-3.5' />
-                  )}
-                  <span>{copiedImages ? t('Copied') : t('Copy Endpoint')}</span>
-                </Button>
-              </div>
-              <div className='bg-muted/60 flex items-center justify-between rounded-xl px-3.5 py-2.5 font-mono text-xs font-semibold text-violet-600 sm:text-sm dark:text-violet-400'>
-                <span className='truncate'>{API_IMAGES_ENDPOINT}</span>
-              </div>
-            </div>
+              {copiedBase ? (
+                <Check className='size-3.5 text-emerald-500' />
+              ) : (
+                <Copy className='size-3.5' />
+              )}
+              <span>{copiedBase ? t('Copied') : t('Copy Base URL')}</span>
+            </Button>
           </div>
         </div>
 
