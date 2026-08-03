@@ -190,6 +190,23 @@ export const MODEL_DISPLAY_ORDER = [
   'gpt-5.5',
   'gpt-5.4',
   'gpt-5.3-codex-spark',
+  'gpt-image-2',
+  // xAI / Grok（自上而下：主推 → 系列 → 工具/生图视频）
+  'grok-4.5',
+  'grok-4.3',
+  'grok-4.20-multi-agent-0309',
+  'grok-4.20-0309-reasoning',
+  'grok-4.20-0309-non-reasoning',
+  'grok-build-0.1',
+  'grok-imagine-image-quality',
+  'grok-imagine-image',
+  'grok-imagine-video',
+  // DeepSeek
+  'deepseek-v4-pro',
+  'deepseek-v4-flash',
+  // 智谱
+  'glm-5.2',
+  'glm-5.1',
   // Kimi（自上而下）
   'kimi-k3',
   'kimi-k2.7-code',
