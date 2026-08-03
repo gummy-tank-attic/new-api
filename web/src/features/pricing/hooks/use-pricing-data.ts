@@ -22,6 +22,7 @@ import { useMemo } from 'react'
 import { useStatus } from '@/hooks/use-status'
 
 import { getPricing } from '../api'
+import { readPricingCache, writePricingCache } from '../lib/pricing-cache'
 import type { PricingVendor } from '../types'
 
 const EMPTY_VENDORS: PricingVendor[] = []
@@ -30,14 +31,28 @@ const EMPTY_USABLE: Record<string, string> = {}
 const EMPTY_ENDPOINT: Record<string, unknown> = {}
 const EMPTY_AUTO: string[] = []
 
+/** Module-level snapshot so hard refresh still has a sync placeholder once read. */
+let memoryPricingCache = readPricingCache()
+
 export function usePricingData() {
   const { status } = useStatus()
 
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['pricing'],
-    queryFn: getPricing,
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data, isPending, isFetching, isError, error, refetch, isPlaceholderData } =
+    useQuery({
+      queryKey: ['pricing'],
+      queryFn: async () => {
+        const fresh = await getPricing()
+        writePricingCache(fresh)
+        memoryPricingCache = fresh
+        return fresh
+      },
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      // Soft-fail network: keep showing last good data when available
+      placeholderData: () => memoryPricingCache ?? readPricingCache(),
+      retry: 1,
+      retryDelay: 800,
+    })
 
   // Ensure rates never reach zero to prevent division errors
   const priceRate = useMemo(
@@ -50,9 +65,9 @@ export function usePricingData() {
   )
 
   const models = useMemo(() => {
-    if (!data?.data || !data?.vendors) return []
+    if (!data?.data?.length) return []
 
-    const vendorMap = new Map(data.vendors.map((v) => [v.id, v]))
+    const vendorMap = new Map((data.vendors ?? []).map((v) => [v.id, v]))
 
     return data.data.map((model) => {
       const vendor = model.vendor_id
@@ -69,6 +84,12 @@ export function usePricingData() {
     })
   }, [data])
 
+  const hasModels = models.length > 0
+  // Full-page blocking only when we have nothing to show yet
+  const isLoading = isPending && !hasModels
+  // Soft background refresh (SWR / window focus)
+  const isRefreshing = isFetching && hasModels
+
   return {
     models,
     vendors: data?.vendors ?? EMPTY_VENDORS,
@@ -79,7 +100,10 @@ export function usePricingData() {
     endpointMap: data?.supported_endpoint ?? EMPTY_ENDPOINT,
     autoGroups: data?.auto_groups ?? EMPTY_AUTO,
     isLoading,
-    error,
+    isRefreshing,
+    isPlaceholderData,
+    // Error only matters when we cannot show a table
+    error: hasModels ? null : isError ? error : null,
     refetch,
     priceRate,
     usdExchangeRate,

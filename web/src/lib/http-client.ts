@@ -46,9 +46,13 @@ const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ||
   (import.meta.env.PROD ? 'https://api.metartr.com' : '')
 
+/** Default request timeout (ms). Prevents infinite pending skeleton on hung Tunnel/API. */
+export const DEFAULT_API_TIMEOUT_MS = 20_000
+
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: DEFAULT_API_TIMEOUT_MS,
   headers: {
     'Cache-Control': 'no-store',
   },

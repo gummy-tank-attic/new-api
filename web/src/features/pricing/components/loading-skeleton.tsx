@@ -22,17 +22,25 @@ import { VIEW_MODES, type ViewMode } from '../constants'
 
 export interface LoadingSkeletonProps {
   viewMode?: ViewMode
+  /**
+   * `full` — title + filters + table (legacy full-page block).
+   * `content` — filters + table only; page header stays real (preferred).
+   */
+  variant?: 'full' | 'content'
 }
 
 export function LoadingSkeleton(props: LoadingSkeletonProps) {
   const viewMode = props.viewMode ?? VIEW_MODES.CARD
+  const variant = props.variant ?? 'full'
 
   return (
     <div className='space-y-5'>
-      <div className='space-y-1.5'>
-        <Skeleton className='h-8 w-40' />
-        <Skeleton className='h-4 w-52' />
-      </div>
+      {variant === 'full' ? (
+        <div className='space-y-1.5'>
+          <Skeleton className='h-8 w-40' />
+          <Skeleton className='h-4 w-52' />
+        </div>
+      ) : null}
       <Skeleton className='h-10 w-full rounded-lg' />
       <FilterBarSkeleton />
       {viewMode === VIEW_MODES.TABLE ? (

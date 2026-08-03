@@ -24,8 +24,12 @@ import type { PricingData } from './types'
 // Pricing APIs
 // ----------------------------------------------------------------------------
 
-// Get model pricing data
+// Get model pricing data (public; no auth refresh — avoids 401→refresh stall on Model Square)
 export async function getPricing(): Promise<PricingData> {
-  const res = await api.get('/api/pricing')
+  const res = await api.get('/api/pricing', {
+    skipAuthRefresh: true,
+    skipBusinessError: true,
+    timeout: 15_000,
+  })
   return res.data
 }

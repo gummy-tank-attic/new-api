@@ -56,6 +56,7 @@ export function Pricing() {
     endpointMap,
     autoGroups,
     isLoading,
+    isRefreshing,
     error,
     refetch,
     priceRate,
@@ -180,89 +181,95 @@ export function Pricing() {
 
   const hasActiveFilters = vendor !== FILTER_ALL || Boolean(groupFromUrl)
 
-  if (isLoading) {
-    return (
-      <PublicLayout showMainContainer={false}>
-        <div className='mx-auto w-full max-w-[1200px] px-3 pt-16 pb-8 sm:px-6 sm:pt-20 sm:pb-10'>
-          <LoadingSkeleton viewMode={VIEW_MODES.TABLE} />
-        </div>
-      </PublicLayout>
-    )
-  }
-
-  if (error) {
-    return (
-      <PublicLayout showMainContainer={false}>
-        <div className='mx-auto flex w-full max-w-[1200px] flex-col items-center px-3 pt-24 pb-8 text-center sm:px-6'>
-          <h1 className='text-foreground text-lg font-semibold'>
-            {t('Failed to load pricing')}
-          </h1>
-          <p className='text-muted-foreground mt-2 max-w-md text-sm'>
-            {t('Could not load price data. Please try again.')}
-          </p>
-          <Button className='mt-4' variant='outline' onClick={() => refetch()}>
-            {t('Retry')}
-          </Button>
-        </div>
-      </PublicLayout>
-    )
-  }
-
+  // Always paint chrome (title). Only block the pricing body while first load
+  // has no cache — avoids full-page "frozen" grey on every hard refresh.
   return (
     <PublicLayout showMainContainer={false}>
       <PageTransition className='relative mx-auto w-full max-w-[1200px] px-4 pt-16 pb-12 sm:px-6 sm:pt-20 sm:pb-14'>
-        {/* Type: Display 30/36 · Body 16. Color: foreground / muted only. */}
         <header className='mb-7 sm:mb-8'>
-          <h1 className='text-foreground text-3xl font-semibold tracking-tight sm:text-4xl sm:leading-tight'>
-            {t('Model Square')}
-          </h1>
-          <p className='text-muted-foreground mt-2.5 text-base leading-relaxed'>
-            {t('This site currently has {{count}} models enabled', {
-              count: allModels.length,
-            })}
-          </p>
+          <div className='flex flex-wrap items-end justify-between gap-3'>
+            <div>
+              <h1 className='text-foreground text-3xl font-semibold tracking-tight sm:text-4xl sm:leading-tight'>
+                {t('Model Square')}
+              </h1>
+              <p className='text-muted-foreground mt-2.5 text-base leading-relaxed'>
+                {isLoading
+                  ? t('Loading model prices…')
+                  : t('This site currently has {{count}} models enabled', {
+                      count: allModels.length,
+                    })}
+              </p>
+            </div>
+            {isRefreshing ? (
+              <p className='text-muted-foreground text-xs sm:text-sm'>
+                {t('Updating…')}
+              </p>
+            ) : null}
+          </div>
         </header>
 
-        <SupplierPricingLayout
-          vendorOptions={vendorOptions}
-          vendor={vendor}
-          onVendorChange={handleVendorChange}
-          groups={groups}
-          selectedGroup={selectedGroup}
-          onGroupChange={handleGroupChange}
-          groupRatio={groupRatio || {}}
-          usableGroup={usableGroupMap}
-          priceMode={priceMode}
-          onPriceModeChange={setPriceMode}
-          models={tableModels}
-          priceRate={priceRate ?? 1}
-          usdExchangeRate={usdExchangeRate ?? 1}
-          onModelClick={handleModelClick}
-          onClearFilters={handleClearFilters}
-          hasActiveFilters={hasActiveFilters}
-        />
+        {error && !isLoading ? (
+          <div className='flex flex-col items-center py-16 text-center'>
+            <h2 className='text-foreground text-lg font-semibold'>
+              {t('Failed to load pricing')}
+            </h2>
+            <p className='text-muted-foreground mt-2 max-w-md text-sm'>
+              {t('Could not load price data. Please try again.')}
+            </p>
+            <Button
+              className='mt-4'
+              variant='outline'
+              onClick={() => void refetch()}
+            >
+              {t('Retry')}
+            </Button>
+          </div>
+        ) : isLoading ? (
+          <LoadingSkeleton viewMode={VIEW_MODES.TABLE} variant='content' />
+        ) : (
+          <>
+            <SupplierPricingLayout
+              vendorOptions={vendorOptions}
+              vendor={vendor}
+              onVendorChange={handleVendorChange}
+              groups={groups}
+              selectedGroup={selectedGroup}
+              onGroupChange={handleGroupChange}
+              groupRatio={groupRatio || {}}
+              usableGroup={usableGroupMap}
+              priceMode={priceMode}
+              onPriceModeChange={setPriceMode}
+              models={tableModels}
+              priceRate={priceRate ?? 1}
+              usdExchangeRate={usdExchangeRate ?? 1}
+              onModelClick={handleModelClick}
+              onClearFilters={handleClearFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
 
-        {selectedModel && (
-          <ModelDetailsDrawer
-            open={Boolean(selectedModel)}
-            onOpenChange={(open) => {
-              if (!open) setSelectedModelName(null)
-            }}
-            model={selectedModel}
-            groupRatio={groupRatio || {}}
-            usableGroup={usableGroupMap}
-            endpointMap={
-              (endpointMap as Record<
-                string,
-                { path?: string; method?: string }
-              >) || {}
-            }
-            autoGroups={autoGroups || []}
-            priceRate={priceRate ?? 1}
-            usdExchangeRate={usdExchangeRate ?? 1}
-            tokenUnit='M'
-            showRechargePrice={false}
-          />
+            {selectedModel && (
+              <ModelDetailsDrawer
+                open={Boolean(selectedModel)}
+                onOpenChange={(open) => {
+                  if (!open) setSelectedModelName(null)
+                }}
+                model={selectedModel}
+                groupRatio={groupRatio || {}}
+                usableGroup={usableGroupMap}
+                endpointMap={
+                  (endpointMap as Record<
+                    string,
+                    { path?: string; method?: string }
+                  >) || {}
+                }
+                autoGroups={autoGroups || []}
+                priceRate={priceRate ?? 1}
+                usdExchangeRate={usdExchangeRate ?? 1}
+                tokenUnit='M'
+                showRechargePrice={false}
+              />
+            )}
+          </>
         )}
       </PageTransition>
     </PublicLayout>
