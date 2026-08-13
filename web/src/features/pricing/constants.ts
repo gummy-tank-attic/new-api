@@ -202,6 +202,7 @@ export const MODEL_DISPLAY_ORDER = [
   'gpt-5.3-codex-spark',
   'gpt-image-2',
   // —— xAI / Grok：主推 → 4.x 系列 → build → imagine ——
+  'grok-4.6',
   'grok-4.5',
   'grok-4.3',
   'grok-4.20-multi-agent-0309',
