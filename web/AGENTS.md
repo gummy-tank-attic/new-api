@@ -217,7 +217,7 @@ return <div ref={containerRef} />
 - 使用 Rsbuild，配置见 `rsbuild.config.ts`；脚本以 `package.json` 为准（如 `bun run dev`、`bun run build`、`bun run typecheck`、`bun run lint`、`bun run format`），包管理见 [3.15 依赖管理](#315-依赖管理)。
 - 代码分割与懒加载策略见 [3.4 性能](#34-性能)；资源使用合适格式与压缩，环境变量用 `.env` 且以 `VITE_` 前缀，不在代码中硬编码。
 - **发布前**：执行 typecheck、lint、format 检查，完成生产构建并检查产物体积与环境变量配置。依赖安装用干净 `npm ci --legacy-peer-deps`；若 `node_modules` 无 `.bin` 或关键包 invalid，先改名坏目录再 `npm ci`，禁止对损坏树反复 `npm install`。
-- **发布路径**（唯一口径：项目根 `README.md` §7.2、`docs/PRODUCTION_DEPLOY_STATE.md` §7.4）：
+- **发布路径**（唯一口径：项目根 `docs/RELEASE_RULES.md`、根 `README.md` 铁律）：
   1. **主通道**：`git push` → GitHub Actions → Pages `metartr-web` / `production`。
   2. **双保险**（仅 GHA 无法正确落 www）：项目根 `python scratch/test_deploy_cf.py`（`CF_ACCOUNT_1_*`）。
   3. **禁用**：`web/deploy.ps1`；混用非 Account 1 凭证。

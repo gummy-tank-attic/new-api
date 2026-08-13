@@ -44,6 +44,8 @@ const GROUP_INTRO_I18N_BY_NORMALIZED: Record<string, string> = {
   moonshot: 'pricingGroupIntro.kimi',
   minimax: 'pricingGroupIntro.minimax',
   'minimax(sale)': 'pricingGroupIntro.minimax',
+  gemini: 'pricingGroupIntro.gemini',
+  google: 'pricingGroupIntro.gemini',
 }
 
 /** Resolve i18n key for a pricing group intro, or null if none curated. */

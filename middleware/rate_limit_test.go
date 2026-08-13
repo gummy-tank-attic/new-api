@@ -45,6 +45,44 @@ func performRateLimitRequest(router http.Handler, path string, remoteAddr string
 	return recorder
 }
 
+func TestCriticalIPWhitelistBypassesLimit(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	useRateLimitMiniRedis(t)
+
+	previousEnable := common.CriticalRateLimitEnable
+	previousNum := common.CriticalRateLimitNum
+	previousDuration := common.CriticalRateLimitDuration
+	previousWhitelist := common.CriticalRateLimitIPWhitelist
+	common.CriticalRateLimitEnable = true
+	common.CriticalRateLimitNum = 1
+	common.CriticalRateLimitDuration = 60
+	common.CriticalRateLimitIPWhitelist = []string{"192.0.2.50"}
+	t.Cleanup(func() {
+		common.CriticalRateLimitEnable = previousEnable
+		common.CriticalRateLimitNum = previousNum
+		common.CriticalRateLimitDuration = previousDuration
+		common.CriticalRateLimitIPWhitelist = previousWhitelist
+	})
+
+	router := gin.New()
+	require.NoError(t, router.SetTrustedProxies(nil))
+	router.GET("/auth", AuthCriticalRateLimit(), func(c *gin.Context) { c.Status(http.StatusNoContent) })
+	router.GET("/crit", CriticalRateLimit(), func(c *gin.Context) { c.Status(http.StatusNoContent) })
+
+	// Whitelisted IP never 429s
+	for i := 0; i < 5; i++ {
+		assert.Equal(t, http.StatusNoContent, performRateLimitRequest(router, "/auth", "192.0.2.50:1").Code)
+		assert.Equal(t, http.StatusNoContent, performRateLimitRequest(router, "/crit", "192.0.2.50:1").Code)
+	}
+
+	// Other IP hits AuthCritical after limit
+	assert.Equal(t, http.StatusNoContent, performRateLimitRequest(router, "/auth", "198.51.100.1:1").Code)
+	assert.Equal(t, http.StatusTooManyRequests, performRateLimitRequest(router, "/auth", "198.51.100.1:1").Code)
+	// Separate CTA vs CT buckets: still allowed once on CT
+	assert.Equal(t, http.StatusNoContent, performRateLimitRequest(router, "/crit", "198.51.100.1:1").Code)
+	assert.Equal(t, http.StatusTooManyRequests, performRateLimitRequest(router, "/crit", "198.51.100.1:1").Code)
+}
+
 func TestRedisIPRateLimiterThresholdTTLAndNamespace(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	redisServer, _ := useRateLimitMiniRedis(t)

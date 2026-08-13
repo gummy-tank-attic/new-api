@@ -170,8 +170,10 @@ export function HeaderNavigationSection({
     },
     {
       key: 'about',
-      title: t('About'),
-      description: t('Static page describing the platform.'),
+      title: t('Customer Service'),
+      description: t(
+        'Customer service page: Telegram support, channel, and intro (route /about).'
+      ),
     },
   ]
 

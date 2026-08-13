@@ -356,11 +356,11 @@ export function RechargeFormCard({
                           className='min-h-14 min-w-0 justify-start gap-2 rounded-lg px-3 py-2 text-left'
                         >
                           {paymentLoading === method.type ? (
-                            <Loader2 className='h-4 w-4 animate-spin' />
+                            <Loader2 className='h-6 w-6 animate-spin' />
                           ) : (
                             getPaymentIcon(
                               method.type,
-                              'h-4 w-4',
+                              'h-6 w-6',
                               method.icon,
                               method.name
                             )
@@ -424,18 +424,15 @@ export function RechargeFormCard({
                           ? `${t('Minimum:')} ${waffoMin}`
                           : undefined
 
-                        let methodIcon = getPaymentIcon('waffo')
+                        let methodIcon = getPaymentIcon(
+                          method.payMethodType || 'waffo',
+                          'h-6 w-6',
+                          method.icon,
+                          method.name
+                        )
                         if (paymentLoading === loadingKey) {
                           methodIcon = (
-                            <Loader2 className='h-4 w-4 animate-spin' />
-                          )
-                        } else if (method.icon) {
-                          methodIcon = (
-                            <img
-                              src={method.icon}
-                              alt={method.name}
-                              className='h-4 w-4 object-contain'
-                            />
+                            <Loader2 className='h-6 w-6 animate-spin' />
                           )
                         }
 

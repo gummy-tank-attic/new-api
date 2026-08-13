@@ -17,106 +17,89 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
-import { Construction } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { PublicLayout } from '@/components/layout'
 import { RichContent } from '@/components/rich-content'
-import { Skeleton } from '@/components/ui/skeleton'
+import { useSystemConfig } from '@/hooks/use-system-config'
 import { isHttpUrl, isLikelyHtml } from '@/lib/content-format'
+import { cn } from '@/lib/utils'
 
 import { getAboutContent } from './api'
+import { ContactSection } from './components/contact-section'
 
-function EmptyAboutState() {
+function AboutHero() {
   const { t } = useTranslation()
-  const currentYear = new Date().getFullYear()
+  const { systemName, logo } = useSystemConfig()
+  const brand = systemName || 'MetaRtr'
 
   return (
-    <div className='flex min-h-[60vh] items-center justify-center p-8'>
-      <div className='max-w-2xl space-y-6 text-center'>
-        <div className='flex justify-center'>
-          <Construction className='text-muted-foreground h-24 w-24' />
-        </div>
-        <div className='space-y-2'>
-          <h2 className='text-2xl font-bold'>{t('No About Content Set')}</h2>
-          <p className='text-muted-foreground'>
-            {t(
-              'The administrator has not configured any about content yet. You can set it in the settings page, supporting HTML or URL.'
-            )}
+    <header className='border-border/50 mb-12 space-y-5 border-b pb-10 text-center sm:mb-14 sm:pb-12 sm:text-left'>
+      <div className='flex flex-col items-center gap-4 sm:flex-row sm:items-center'>
+        {logo ? (
+          <img
+            src={logo}
+            alt={brand}
+            className='border-border/60 size-14 rounded-2xl border object-contain shadow-sm sm:size-16'
+            // Avoid a hung remote logo blocking first paint perception.
+            loading='eager'
+            decoding='async'
+            referrerPolicy='no-referrer'
+          />
+        ) : null}
+        <div className='space-y-1.5'>
+          <p className='text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase'>
+            {t('About')}
           </p>
-        </div>
-        <div className='space-y-4 text-sm'>
-          <p>
-            {t('New API Project Repository:')}{' '}
-            <a
-              href='https://github.com/QuantumNous/new-api'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('https://github.com/QuantumNous/new-api')}
-            </a>
-          </p>
-          <p className='text-muted-foreground'>
-            <a
-              href='https://github.com/QuantumNous/new-api'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('NewAPI')}
-            </a>{' '}
-            © {currentYear}{' '}
-            <a
-              href='https://github.com/QuantumNous'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('QuantumNous')}
-            </a>{' '}
-            {t('| Based on')}{' '}
-            <a
-              href='https://github.com/songquanpeng/one-api'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('One API')}
-            </a>{' '}
-            © 2023{' '}
-            <a
-              href='https://github.com/songquanpeng'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('JustSong')}
-            </a>
-          </p>
-          <p className='text-muted-foreground'>
-            {t('This project must be used in compliance with the')}{' '}
-            <a
-              href='https://github.com/QuantumNous/new-api/blob/main/LICENSE'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('AGPL v3.0 License')}
-            </a>
-            .
-          </p>
+          <h1 className='text-foreground text-3xl font-semibold tracking-tight sm:text-4xl'>
+            {brand}
+          </h1>
         </div>
       </div>
-    </div>
+      <p className='text-muted-foreground mx-auto max-w-2xl text-base leading-relaxed sm:mx-0 sm:text-lg'>
+        {t(
+          'MetaRtr is a unified AI API gateway — one endpoint for multiple models, transparent pricing, and reliable routing for builders.'
+        )}
+      </p>
+    </header>
+  )
+}
+
+function AboutShell(props: {
+  children?: ReactNode
+  showDefaultIntro?: boolean
+  className?: string
+}) {
+  return (
+    <PublicLayout showMainContainer={false} showFooter={false}>
+      <div
+        className={cn(
+          'mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14',
+          props.className
+        )}
+      >
+        {props.showDefaultIntro !== false ? <AboutHero /> : null}
+        {props.children}
+        <div className={props.children ? 'mt-14 sm:mt-16' : undefined}>
+          <ContactSection />
+        </div>
+      </div>
+    </PublicLayout>
   )
 }
 
 export function About() {
   const { t } = useTranslation()
-  const { data, isLoading } = useQuery({
+  // Do not gate first paint on /api/about (empty for MetaRtr). CMS content
+  // only upgrades the page when present; failures fall back to brand shell.
+  const { data } = useQuery({
     queryKey: ['about-content'],
     queryFn: getAboutContent,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: 0,
+    refetchOnWindowFocus: false,
   })
 
   const rawContent = data?.data?.trim() ?? ''
@@ -124,62 +107,47 @@ export function About() {
   const isUrl = hasContent && isHttpUrl(rawContent)
   const contentIsHtml = hasContent && isLikelyHtml(rawContent)
 
-  if (isLoading) {
-    return (
-      <PublicLayout>
-        <div className='mx-auto flex max-w-4xl flex-col gap-4 py-12'>
-          <Skeleton className='h-8 w-[45%]' />
-          <Skeleton className='h-4 w-full' />
-          <Skeleton className='h-4 w-[90%]' />
-          <Skeleton className='h-4 w-[80%]' />
-        </div>
-      </PublicLayout>
-    )
-  }
-
-  if (!hasContent) {
-    return (
-      <PublicLayout>
-        <EmptyAboutState />
-      </PublicLayout>
-    )
-  }
-
   if (isUrl) {
     return (
-      <PublicLayout showMainContainer={false}>
+      <PublicLayout showMainContainer={false} showFooter={false}>
         <iframe
           src={rawContent}
-          className='h-[calc(100vh-3.5rem)] w-full border-0'
+          className='h-[calc(100vh-3.5rem-12rem)] w-full border-0'
           title={t('About')}
           sandbox='allow-forms allow-popups allow-popups-to-escape-sandbox allow-scripts'
         />
+        <div className='border-border/50 border-t px-4 py-10 sm:px-6'>
+          <ContactSection />
+        </div>
       </PublicLayout>
     )
   }
 
   if (contentIsHtml) {
     return (
-      <PublicLayout showMainContainer={false}>
+      <AboutShell showDefaultIntro={false}>
         <RichContent
           mode='html'
           htmlVariant='isolated'
           content={rawContent}
           className='prose-neutral dark:prose-invert max-w-none'
         />
-      </PublicLayout>
+      </AboutShell>
     )
   }
 
-  return (
-    <PublicLayout>
-      <div className='mx-auto max-w-6xl px-4 py-8'>
+  if (hasContent) {
+    return (
+      <AboutShell showDefaultIntro={false}>
         <RichContent
           mode='markdown'
           content={rawContent}
           className='prose-neutral dark:prose-invert max-w-none'
         />
-      </div>
-    </PublicLayout>
-  )
+      </AboutShell>
+    )
+  }
+
+  // Default MetaRtr about + contact: paints immediately (no skeleton wait).
+  return <AboutShell />
 }

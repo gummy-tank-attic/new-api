@@ -28,6 +28,6 @@ security fixes forward selectively, then reapply MetaRtr frontend changes.
 
 The snapshot branch is the rollback baseline for local source state. Before a
 future upgrade, capture production VPS evidence and Cloudflare Pages deployment
-identifiers using the project-level `docs/ONLINE_ALIGNMENT_CAPTURE.md` procedure.
+identifiers using the project-level `docs/history/ONLINE_ALIGNMENT_CAPTURE.md` procedure.
 The production branch is `production`; do not treat `main` or an arbitrary Pages
 preview as the live frontend.

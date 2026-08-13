@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
 import type { SystemStatus } from '@/features/auth/types'
 import { invalidateHomePageContentCacheIfHashMismatch } from '@/features/home/lib/home-content-cache'
@@ -44,37 +45,37 @@ function getInitialStatus(): SystemStatus | undefined {
   return undefined
 }
 
+function syncStatusToSystemConfig(status: unknown) {
+  if (!status || typeof status !== 'object') return
+  try {
+    const { setConfig, setLoading } = useSystemConfigStore.getState()
+    setConfig(mapStatusDataToConfig(status as Record<string, unknown>))
+    // Status is the sole brand-config loader on production Pages;
+    // clear the store loading flag so header logo/name are not stuck
+    // on skeletons forever (useSystemConfig autoLoad is disabled).
+    setLoading(false)
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.warn('[useStatus] Failed to sync status to system config', err)
+    }
+  }
+}
+
 export function useStatus() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['status'],
     queryFn: async () => {
       const status = await getStatus()
-      try {
-        if (status) {
-          const { setConfig, setLoading } = useSystemConfigStore.getState()
-          setConfig(mapStatusDataToConfig(status))
-          // Status is the sole brand-config loader on production Pages;
-          // clear the store loading flag so header logo/name are not stuck
-          // on skeletons forever (useSystemConfig autoLoad is disabled).
-          setLoading(false)
-        }
-      } catch (err) {
-        if (import.meta.env.DEV) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            '[useStatus] Failed to sync status to system config',
-            err
-          )
-        }
-      }
+      syncStatusToSystemConfig(status)
       // Save to localStorage
       try {
         if (typeof window !== 'undefined' && status) {
           window.localStorage.setItem('status', JSON.stringify(status))
           // Drop stale custom home body when admin changed/cleared content.
-          invalidateHomePageContentCacheIfHashMismatch(
-            status.home_page_content_hash
-          )
+          const hash = (status as { home_page_content_hash?: string })
+            .home_page_content_hash
+          invalidateHomePageContentCacheIfHashMismatch(hash)
         }
       } catch {
         /* empty */
@@ -88,6 +89,12 @@ export function useStatus() {
     // Cache expires after 30 minutes
     gcTime: 30 * 60 * 1000,
   })
+
+  // Sync placeholder/cached status into brand store (footer, logo, name).
+  // queryFn already syncs network results; this covers first paint from cache.
+  useEffect(() => {
+    if (data) syncStatusToSystemConfig(data)
+  }, [data])
 
   return {
     status: data ?? null,

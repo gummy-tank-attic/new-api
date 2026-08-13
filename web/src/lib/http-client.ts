@@ -34,6 +34,8 @@ declare module 'axios' {
     skipErrorHandler?: boolean
     disableDuplicate?: boolean
     skipAuthRefresh?: boolean
+    /** Do not attach Authorization (public endpoints that must ignore stale tokens). */
+    skipAuth?: boolean
     authRetry?: boolean
     acceptAuthRotation?: boolean
   }
@@ -86,6 +88,65 @@ function redirectToSignIn(): void {
   }
 }
 
+/** Marketing / auth entry routes: never spam "session expired" toasts. */
+function isPublicAppPath(pathname: string): boolean {
+  const p = pathname.replace(/\/+$/, '') || '/'
+  if (p === '/') return true
+  const prefixes = [
+    '/pricing',
+    '/about',
+    '/docs',
+    '/rankings',
+    '/user-agreement',
+    '/privacy-policy',
+    '/sign-in',
+    '/sign-up',
+    '/forgot-password',
+    '/reset-password',
+    '/reset-password-confirm',
+    '/otp',
+    '/oauth',
+    '/setup',
+    '/401',
+    '/403',
+    '/404',
+    '/500',
+    '/503',
+  ]
+  return prefixes.some(
+    (prefix) => p === prefix || p.startsWith(`${prefix}/`)
+  )
+}
+
+function isOnPublicAppPage(): boolean {
+  return typeof window !== 'undefined' && isPublicAppPath(window.location.pathname)
+}
+
+/**
+ * Session is gone (expired / revoked / refresh failed).
+ * - Public pages: demote to guest quietly (no toast, no hard redirect).
+ * - Console / authenticated app: toast + send user to sign-in.
+ */
+function handleSessionLost(options: {
+  skipErrorHandler?: boolean
+  /** When true, redirect to sign-in on non-public pages. */
+  redirectToSignIn?: boolean
+}): void {
+  // Ensure local UI does not keep showing a ghost logged-in avatar.
+  clearAuthentication(false)
+
+  if (isOnPublicAppPage()) {
+    return
+  }
+
+  if (!options.skipErrorHandler) {
+    toast.error(t('Session expired!'))
+  }
+  if (options.redirectToSignIn !== false) {
+    redirectToSignIn()
+  }
+}
+
 api.interceptors.response.use(
   (response) => {
     if (response.config.acceptAuthRotation && response.data?.success === true) {
@@ -127,15 +188,28 @@ api.interceptors.response.use(
         }
 
         if (outcome.kind === 'anonymous' || outcome.kind === 'out_of_sync') {
-          if (!skipErrorHandler) toast.error(t('Session expired!'))
-          redirectToSignIn()
+          // Silent on public pages; console still gets toast + sign-in.
+          handleSessionLost({
+            skipErrorHandler,
+            redirectToSignIn: true,
+          })
         }
+        // transient_error: do not toast "session expired" — may be network blip
       } else if (config?.authRetry) {
-        clearAuthentication(false)
-        if (!skipErrorHandler) toast.error(t('Session expired!'))
-        redirectToSignIn()
-      } else if (!skipErrorHandler) {
-        toast.error(t('Session expired!'))
+        handleSessionLost({
+          skipErrorHandler,
+          redirectToSignIn: true,
+        })
+      } else {
+        // skipAuthRefresh: public APIs often 401 on stale bearer (TryUserAuth).
+        // Never toast on public pages; soft-clear ghost session if present.
+        if (isOnPublicAppPage()) {
+          if (useAuthStore.getState().auth.user) {
+            clearAuthentication(false)
+          }
+        } else if (!skipErrorHandler) {
+          toast.error(t('Session expired!'))
+        }
       }
     } else if (!skipErrorHandler) {
       const messageKey = getServerErrorMessageKey(error)
@@ -151,6 +225,13 @@ api.interceptors.response.use(
 )
 
 api.interceptors.request.use((config) => {
+  if (config.skipAuth) {
+    if (config.headers) {
+      delete (config.headers as Record<string, unknown>).Authorization
+      delete (config.headers as Record<string, unknown>).authorization
+    }
+    return config
+  }
   const accessToken = useAuthStore.getState().auth.accessToken
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`

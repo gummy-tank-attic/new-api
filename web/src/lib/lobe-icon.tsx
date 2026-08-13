@@ -18,15 +18,13 @@ For commercial licensing, please contact support@quantumnous.com
 */
 /**
  * LobeHub Icon Loader
- * Dynamically load and render icons from @lobehub/icons
  *
- * Supports:
- * - Basic: "OpenAI", "OpenAI.Color"
- * - Chained properties: "OpenAI.Avatar.type={'platform'}"
- * - Size parameter: getLobeIcon("OpenAI", 20)
+ * @lobehub/icons is multi-MB if star-imported into the entry graph.
+ * Load the package once via dynamic import so the initial route shell
+ * (home / layout) does not pay for every vendor glyph up front.
  */
-import * as LobeIcons from '@lobehub/icons'
 import type React from 'react'
+import { useEffect, useState } from 'react'
 
 import { IconSub2api } from '@/assets/custom/icon-sub2api'
 
@@ -34,22 +32,29 @@ const CUSTOM_ICONS: Record<string, React.ComponentType<{ size?: number }>> = {
   Sub2API: IconSub2api,
 }
 
-/**
- * Parse a property value from string to appropriate type
- * @param raw - Raw string value
- * @returns Parsed value (boolean, number, or string)
- */
+type LobeModule = Record<string, unknown>
+
+let lobeIconsPromise: Promise<LobeModule> | null = null
+
+function loadLobeIcons(): Promise<LobeModule> {
+  if (!lobeIconsPromise) {
+    lobeIconsPromise = import(
+      /* webpackChunkName: "vendor-lobehub-icons" */
+      '@lobehub/icons'
+    ).then((mod) => mod as unknown as LobeModule)
+  }
+  return lobeIconsPromise
+}
+
 function parseValue(raw: string | undefined | null): string | number | boolean {
   if (raw == null) return true
 
   let v = String(raw).trim()
 
-  // Remove curly braces
   if (v.startsWith('{') && v.endsWith('}')) {
     v = v.slice(1, -1).trim()
   }
 
-  // Remove quotes
   if (
     (v.startsWith('"') && v.endsWith('"')) ||
     (v.startsWith("'") && v.endsWith("'"))
@@ -57,65 +62,49 @@ function parseValue(raw: string | undefined | null): string | number | boolean {
     return v.slice(1, -1)
   }
 
-  // Boolean
   if (v === 'true') return true
   if (v === 'false') return false
 
-  // Number
   if (/^-?\d+(?:\.\d+)?$/.test(v)) return Number(v)
 
-  // Return as string
   return v
 }
 
-/**
- * Get LobeHub icon component by name
- * @param iconName - Icon name/description (e.g., "OpenAI", "OpenAI.Color", "Claude.Avatar")
- * @param size - Icon size (default: 20)
- * @returns Icon component or fallback
- *
- * @example
- * getLobeIcon("OpenAI", 24)
- * getLobeIcon("OpenAI.Color", 20)
- * getLobeIcon("Claude.Avatar.type={'platform'}", 32)
- */
-export function getLobeIcon(
-  iconName: string | undefined | null,
-  size: number = 20
-): React.ReactNode {
-  if (!iconName || typeof iconName !== 'string') {
-    return (
-      <div
-        className='bg-muted text-muted-foreground flex items-center justify-center rounded-full text-xs font-medium'
-        style={{ width: size, height: size }}
-      >
-        ?
-      </div>
-    )
-  }
+function LetterFallback({
+  letter,
+  size,
+}: {
+  letter: string
+  size: number
+}) {
+  return (
+    <div
+      className='bg-muted text-muted-foreground flex items-center justify-center rounded-full text-xs font-medium'
+      style={{ width: size, height: size }}
+    >
+      {letter}
+    </div>
+  )
+}
 
+function resolveIcon(
+  LobeIcons: LobeModule,
+  iconName: string,
+  size: number
+): React.ReactNode {
   const trimmedName = iconName.trim()
   if (!trimmedName) {
-    return (
-      <div
-        className='bg-muted text-muted-foreground flex items-center justify-center rounded-full text-xs font-medium'
-        style={{ width: size, height: size }}
-      >
-        ?
-      </div>
-    )
+    return <LetterFallback letter='?' size={size} />
   }
 
-  // Parse component path and chained properties
   const segments = trimmedName.split('.')
   const baseKey = segments[0]
   const CustomIcon = CUSTOM_ICONS[baseKey]
   if (CustomIcon) {
     return <CustomIcon size={size} />
   }
-  const BaseIcon = (LobeIcons as Record<string, unknown>)[baseKey] as
-    | Record<string, unknown>
-    | undefined
+
+  const BaseIcon = LobeIcons[baseKey] as Record<string, unknown> | undefined
 
   let IconComponent: React.ComponentType<Record<string, unknown>> | undefined
   let propStartIndex: number
@@ -126,29 +115,21 @@ export function getLobeIcon(
     >
     propStartIndex = 2
   } else {
-    IconComponent = (LobeIcons as Record<string, unknown>)[baseKey] as
+    IconComponent = LobeIcons[baseKey] as
       | React.ComponentType<Record<string, unknown>>
       | undefined
     propStartIndex = segments.length > 1 && /^[A-Z]/.test(segments[1]) ? 2 : 1
   }
 
-  // Fallback if icon not found
   if (
     !IconComponent ||
     (typeof IconComponent !== 'function' && typeof IconComponent !== 'object')
   ) {
-    const firstLetter = trimmedName.charAt(0).toUpperCase()
     return (
-      <div
-        className='bg-muted text-muted-foreground flex items-center justify-center rounded-full text-xs font-medium'
-        style={{ width: size, height: size }}
-      >
-        {firstLetter}
-      </div>
+      <LetterFallback letter={trimmedName.charAt(0).toUpperCase()} size={size} />
     )
   }
 
-  // Parse chained properties (e.g., "type={'platform'}", "shape='square'")
   const props: Record<string, string | number | boolean> = {}
 
   for (let i = propStartIndex; i < segments.length; i++) {
@@ -166,10 +147,63 @@ export function getLobeIcon(
     props[key] = parseValue(valRaw)
   }
 
-  // Set size if not explicitly specified in the string
   if (props.size == null && size != null) {
     props.size = size
   }
 
   return <IconComponent {...props} />
+}
+
+export function LobeIcon({
+  iconName,
+  size = 20,
+}: {
+  iconName?: string | null
+  size?: number
+}) {
+  const [mod, setMod] = useState<LobeModule | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    void loadLobeIcons().then((m) => {
+      if (!cancelled) setMod(m)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (!iconName || typeof iconName !== 'string') {
+    return <LetterFallback letter='?' size={size} />
+  }
+
+  const trimmed = iconName.trim()
+  if (!trimmed) {
+    return <LetterFallback letter='?' size={size} />
+  }
+
+  const baseKey = trimmed.split('.')[0]
+  const CustomIcon = CUSTOM_ICONS[baseKey]
+  if (CustomIcon) {
+    return <CustomIcon size={size} />
+  }
+
+  if (!mod) {
+    return (
+      <LetterFallback letter={trimmed.charAt(0).toUpperCase()} size={size} />
+    )
+  }
+
+  return <>{resolveIcon(mod, trimmed, size)}</>
+}
+
+/**
+ * Sync API used across pricing/home tables — returns a node that loads
+ * @lobehub/icons asynchronously (does not block the main entry chunk).
+ */
+export function getLobeIcon(
+  iconName: string | undefined | null,
+  size: number = 20
+): React.ReactNode {
+  return <LobeIcon iconName={iconName} size={size} />
 }

@@ -116,11 +116,11 @@ export function isTokenBasedModel(model: PricingModel): boolean {
 
 /**
  * Natural model-name compare (version-aware, descending):
- * Larger numbers sort first (top), e.g. minimax-m3 before minimax-m2.7 before minimax-m2.5.
+ * Larger numbers sort first (top), e.g. gemini-3.6 before gemini-2.5, minimax-m3 before m2.5.
  */
-/** Unlisted models: ascending natural order (numeric-aware). */
+/** Unlisted models: descending natural order (numeric-aware). */
 export function compareModelNames(a: string, b: string): number {
-  return (a || '').localeCompare(b || '', undefined, {
+  return (b || '').localeCompare(a || '', undefined, {
     numeric: true,
     sensitivity: 'base',
   })

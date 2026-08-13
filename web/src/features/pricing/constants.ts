@@ -134,6 +134,7 @@ export const VENDOR_TAB_ORDER = [
   'Anthropic',
   'OpenAI',
   'xAI',
+  'Google',
   'DeepSeek',
   'ZHIPU',
   'Moonshot',
@@ -145,6 +146,8 @@ export const VENDOR_NAME_ALIASES: Record<string, string> = {
   anthropic: 'Anthropic',
   openai: 'OpenAI',
   xai: 'xAI',
+  google: 'Google',
+  gemini: 'Google',
   deepseek: 'DeepSeek',
   zhipu: 'ZHIPU',
   'zhipu ai': 'ZHIPU',
@@ -175,7 +178,7 @@ export function getVendorTabRank(name: string): number {
  * 模型行固定顺序（产品规定 · 长期有效）。
  * 与后台 model_name / GET /api/pricing 完全一致（大小写不敏感匹配）。
  * 完整对照表：docs/PRICING_PAGE_DESIGN.md §2.4
- * 未列入：排在已列入之后，再按 model_name 升序（numeric）。
+ * 未列入：排在已列入之后，再按 model_name 降序（numeric，版本号大的在上）。
  * 跨供应商仍先按 VENDOR_TAB_ORDER。
  * 改序/增模型：只改本数组 + 同步设计文档；禁止在组件写死。
  */
@@ -208,6 +211,19 @@ export const MODEL_DISPLAY_ORDER = [
   'grok-imagine-image-quality',
   'grok-imagine-image',
   'grok-imagine-video',
+  // —— Google / Gemini：版本号大的在上 ——
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-3.1-pro-preview',
+  'gemini-3.1-pro',
+  'gemini-3.1-flash-lite-preview',
+  'gemini-3.1-flash-lite',
+  'gemini-3-pro-preview',
+  'gemini-3-flash-preview',
+  'gemini-3-flash',
+  'gemini-2.5-pro',
+  'gemini-2.5-flash-lite',
+  'gemini-2.5-flash',
   // —— DeepSeek ——
   'deepseek-v4-pro',
   'deepseek-v4-flash',
@@ -283,6 +299,8 @@ export const GROUP_DISPLAY_ORDER = [
   'Grok Enterprise',
   'Grok（Beta）',
   'Grok (image video)',
+  // Google / Gemini
+  'Gemini',
   // 国模 / 其它
   'Zhipu',
   'Kimi',

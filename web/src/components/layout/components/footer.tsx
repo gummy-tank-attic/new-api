@@ -20,9 +20,41 @@ import { Link } from '@tanstack/react-router'
 import { Fragment, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { IconTelegramBrand } from '@/assets/brand-icons'
+import { HtmlContent } from '@/components/html-content'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
+import { isLikelyHtml } from '@/lib/content-format'
+import { CONTACT } from '@/lib/contact-links'
 import { cn } from '@/lib/utils'
+
+function resolveCustomFooterHtml(
+  footerHtml: string | undefined,
+  status: Record<string, unknown> | null | undefined
+): string {
+  const fromStore = footerHtml?.trim()
+  if (fromStore) return fromStore
+
+  const raw = status?.footer_html
+  if (typeof raw === 'string' && raw.trim()) return raw.trim()
+
+  return ''
+}
+
+function CustomFooterContent(props: { content: string }) {
+  if (isLikelyHtml(props.content)) {
+    return (
+      <HtmlContent
+        content={props.content}
+        className='custom-footer prose-p:my-0'
+        variant='inline'
+      />
+    )
+  }
+
+  // Plain admin text (no tags) — avoid relying on HTML sanitizer path only.
+  return <p className='custom-footer m-0'>{props.content}</p>
+}
 
 interface FooterLink {
   text: string
@@ -41,9 +73,6 @@ interface FooterProps {
   copyright?: string
   className?: string
 }
-
-const TELEGRAM_SUPPORT_URL = 'https://t.me/MetaRtrSupport_bot'
-const TELEGRAM_CHANNEL_URL = 'https://t.me/MetaRtr'
 
 function FooterLinkItem(props: { link: FooterLink }) {
   const { t } = useTranslation()
@@ -149,20 +178,22 @@ function TelegramFooterLinks(props: { className?: string }) {
       )}
     >
       <a
-        href={TELEGRAM_SUPPORT_URL}
+        href={CONTACT.supportTelegram.href}
         target='_blank'
         rel='noopener noreferrer'
-        className='text-foreground/80 hover:text-foreground underline underline-offset-4 transition-colors'
+        className='text-foreground/80 hover:text-foreground inline-flex items-center gap-1.5 underline underline-offset-4 transition-colors'
       >
-        Telegram Support：MetaRtrSupport_bot
+        <IconTelegramBrand className='size-3.5 shrink-0 text-[#2AABEE]' />
+        Telegram Support：{CONTACT.supportTelegram.label}
       </a>
       <a
-        href={TELEGRAM_CHANNEL_URL}
+        href={CONTACT.channelTelegram.href}
         target='_blank'
         rel='noopener noreferrer'
-        className='text-foreground/80 hover:text-foreground break-all underline underline-offset-4 transition-colors'
+        className='text-foreground/80 hover:text-foreground inline-flex items-center gap-1.5 break-all underline underline-offset-4 transition-colors'
       >
-        Telegram Channel：https://t.me/MetaRtr
+        <IconTelegramBrand className='size-3.5 shrink-0 text-[#2AABEE]' />
+        Telegram Channel：{CONTACT.channelTelegram.href}
       </a>
     </div>
   )
@@ -170,12 +201,22 @@ function TelegramFooterLinks(props: { className?: string }) {
 
 export function Footer(props: FooterProps) {
   const { t } = useTranslation()
-  const { systemName, logo: systemLogo, demoSiteEnabled } = useSystemConfig()
+  const { status } = useStatus()
+  const {
+    systemName,
+    logo: systemLogo,
+    footerHtml,
+    demoSiteEnabled,
+  } = useSystemConfig()
 
   const displayLogo = systemLogo || props.logo || '/logo.png'
   const displayName = systemName || props.name || 'MetaRtr'
   const isDemoSiteMode = Boolean(demoSiteEnabled)
   const currentYear = new Date().getFullYear()
+  const customFooter = resolveCustomFooterHtml(
+    footerHtml,
+    status as Record<string, unknown> | null | undefined
+  )
 
   const fallbackColumns = useMemo<FooterColumnProps[]>(
     () => [
@@ -236,22 +277,35 @@ export function Footer(props: FooterProps) {
 
   const displayColumns = props.columns ?? fallbackColumns
 
-  // Compact bar used on MetaRtr (brand + Telegram + legal).
+  // Compact bar used on MetaRtr (Telegram + legal + brand).
+  // System Settings → Footer is rendered as a dedicated row when configured.
   return (
     <footer
       className={cn('border-border/40 relative z-10 border-t', props.className)}
+      data-site-footer='true'
     >
       <div className='mx-auto w-full max-w-6xl px-6 py-5'>
-        <div className='bg-muted/20 border-border/50 flex flex-col items-center justify-between gap-4 rounded-2xl border px-4 py-4 backdrop-blur-sm sm:flex-row sm:items-center sm:px-5'>
-          <TelegramFooterLinks className='text-center sm:text-left' />
-          <div className='border-border/60 text-muted-foreground/45 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-4 text-xs sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5'>
-            <LegalLinks />
-            <BrandAttribution
-              currentYear={currentYear}
-              brandName={displayName}
-              inline
-            />
+        <div className='bg-muted/20 border-border/50 flex flex-col gap-4 rounded-2xl border px-4 py-4 backdrop-blur-sm sm:px-5'>
+          <div className='flex flex-col items-center justify-between gap-4 sm:flex-row sm:items-center'>
+            <TelegramFooterLinks className='text-center sm:text-left' />
+            <div className='border-border/60 text-muted-foreground/45 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-4 text-xs sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5'>
+              <LegalLinks />
+              <BrandAttribution
+                currentYear={currentYear}
+                brandName={displayName}
+                inline
+              />
+            </div>
           </div>
+
+          {customFooter ? (
+            <div
+              className='border-border/50 text-muted-foreground border-t pt-3 text-center text-sm leading-relaxed'
+              data-custom-footer='true'
+            >
+              <CustomFooterContent content={customFooter} />
+            </div>
+          ) : null}
         </div>
 
         {/* Keep full multi-column footer only in demo-site mode */}

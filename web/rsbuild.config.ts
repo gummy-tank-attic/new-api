@@ -74,6 +74,14 @@ export default defineConfig(({ envMode }) => {
           priority: 0,
           enforce: true,
         },
+        // Multi-MB icon pack — only via dynamic import in lobe-icon.tsx
+        'vendor-lobehub-icons': {
+          test: /node_modules[\\/]@lobehub[\\/]icons[\\/]/,
+          name: 'vendor-lobehub-icons',
+          chunks: 'async',
+          priority: 10,
+          enforce: true,
+        },
       },
     },
     source: {

@@ -1,5 +1,6 @@
 {
   "/ {{unit}} tokens": "/ {{unit}} tokens",
+  "403 / insufficient_user_quota": "403 / insufficient_user_quota",
   "Base URL": "Base URL",
   "Claude Code": "Claude Code",
   "Copy the model ID into your client or SDK.": "Copy the model ID into your client or SDK.",
@@ -15,6 +16,8 @@
   "macOS / Linux / WSL": "macOS / Linux / WSL",
   "Model ID": "Model ID",
   "Model not found / no available channel": "Model not found / no available channel",
+  "New API": "MetaRtr",
+  "New API &lt;noreply@example.com&gt;": "MetaRtr &lt;noreply@metartr.com&gt;",
   "No pricing groups available for this vendor": "No pricing groups available for this vendor",
   "Node.js SDK": "Node.js SDK",
   "Note the group you are allowed to use (Sale, Premium, Max, …).": "Note the group you are allowed to use (Sale, Premium, Max, …).",
@@ -22,17 +25,18 @@
   "Official price is the site baseline after ratio sync, not a live fetch.": "Official price is the site baseline after ratio sync, not a live fetch.",
   "Official prices use $1 = {{symbol}}{{rate}}": "Official prices use $1 = {{symbol}}{{rate}}",
   "Official prices use the site model baseline (ratio 1.0)": "Official prices use the site model baseline (ratio 1.0)",
+  "OpenAI Realtime WebSocket": "OpenAI Realtime WebSocket",
   "Price list": "Price list",
   "Price mode": "Price mode",
   "Pricing rules": "Pricing rules",
   "Python SDK": "Python SDK",
   "Save {{percent}}%": "Save {{percent}}%",
   "Savings": "Savings",
+  "SDK Base URL": "SDK Base URL",
   "Select a group to view prices": "Select a group to view prices",
   "UI labels such as “85% off” are marketing display. Billing uses the group ratio configured in the backend for your account/token group.": "UI labels such as “85% off” are marketing display. Billing uses the group ratio configured in the backend for your account/token group.",
   "Use an exact Model Square ID, confirm your group can access it, and that the model is enabled.": "Use an exact Model Square ID, confirm your group can access it, and that the model is enabled.",
   "Vendors": "Vendors",
   "Windows PowerShell": "Windows PowerShell",
-  "wire_api / responses": "wire_api / responses",
-  "SDK Base URL": "SDK Base URL"
+  "wire_api / responses": "wire_api / responses"
 }

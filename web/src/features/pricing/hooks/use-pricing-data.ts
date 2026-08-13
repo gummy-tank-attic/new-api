@@ -46,12 +46,18 @@ export function usePricingData() {
         memoryPricingCache = fresh
         return fresh
       },
-      staleTime: 5 * 60 * 1000,
+      // Prices change in admin often — never treat as fresh for 5 minutes.
+      staleTime: 0,
       gcTime: 30 * 60 * 1000,
-      // Soft-fail network: keep showing last good data when available
+      refetchOnMount: 'always',
+      refetchOnWindowFocus: true,
+      // First paint only; network must always revalidate after.
       placeholderData: () => memoryPricingCache ?? readPricingCache(),
+      // getPricing already does authed → public fallback; one network retry is enough.
       retry: 1,
-      retryDelay: 800,
+      retryDelay: 600,
+      // Surface failures quickly instead of an endless skeleton.
+      networkMode: 'always',
     })
 
   // Ensure rates never reach zero to prevent division errors
@@ -89,6 +95,8 @@ export function usePricingData() {
   const isLoading = isPending && !hasModels
   // Soft background refresh (SWR / window focus)
   const isRefreshing = isFetching && hasModels
+  // Stale cache still on screen while network fails — surface it
+  const showStaleWarning = Boolean(isPlaceholderData && isError && hasModels)
 
   return {
     models,
@@ -102,7 +110,8 @@ export function usePricingData() {
     isLoading,
     isRefreshing,
     isPlaceholderData,
-    // Error only matters when we cannot show a table
+    showStaleWarning,
+    // Hard error only when we cannot show a table at all
     error: hasModels ? null : isError ? error : null,
     refetch,
     priceRate,

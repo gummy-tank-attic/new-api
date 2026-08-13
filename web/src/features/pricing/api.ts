@@ -24,12 +24,44 @@ import type { PricingData } from './types'
 // Pricing APIs
 // ----------------------------------------------------------------------------
 
-// Get model pricing data (public; no auth refresh — avoids 401→refresh stall on Model Square)
-export async function getPricing(): Promise<PricingData> {
+function isPricingPayload(value: unknown): value is PricingData {
+  if (!value || typeof value !== 'object') return false
+  const v = value as PricingData
+  return Array.isArray(v.data) && Array.isArray(v.vendors)
+}
+
+async function fetchPricingOnce(options?: {
+  skipAuth?: boolean
+}): Promise<PricingData> {
   const res = await api.get('/api/pricing', {
+    // Avoid 401 → refresh loops hanging Model Square; we fall back anonymously below.
     skipAuthRefresh: true,
     skipBusinessError: true,
-    timeout: 15_000,
+    skipErrorHandler: true,
+    disableDuplicate: true,
+    skipAuth: options?.skipAuth,
+    timeout: 12_000,
   })
+  if (!isPricingPayload(res.data)) {
+    throw new Error('Invalid pricing response')
+  }
   return res.data
+}
+
+/**
+ * Get model pricing data.
+ * Prefer the session (group-personalized list); if the token is expired/broken or
+ * the authenticated request fails, fall back to the public list so the page never
+ * sticks on the skeleton forever.
+ */
+export async function getPricing(): Promise<PricingData> {
+  try {
+    return await fetchPricingOnce()
+  } catch (authenticatedError) {
+    try {
+      return await fetchPricingOnce({ skipAuth: true })
+    } catch {
+      throw authenticatedError
+    }
+  }
 }

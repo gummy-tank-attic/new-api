@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"strconv"
 
@@ -171,9 +172,41 @@ func GlobalAPIRateLimit() func(c *gin.Context) {
 	return defNext
 }
 
+// isCriticalIPWhitelisted reports whether ClientIP is in CRITICAL_RATE_LIMIT_IP_WHITELIST.
+func isCriticalIPWhitelisted(c *gin.Context) bool {
+	if len(common.CriticalRateLimitIPWhitelist) == 0 {
+		return false
+	}
+	ip := net.ParseIP(c.ClientIP())
+	if ip == nil {
+		return false
+	}
+	return common.IsIpInCIDRList(ip, common.CriticalRateLimitIPWhitelist)
+}
+
+func wrapCriticalIPRateLimit(mark string) func(c *gin.Context) {
+	limiter := rateLimitFactory(common.CriticalRateLimitNum, common.CriticalRateLimitDuration, mark)
+	return func(c *gin.Context) {
+		if isCriticalIPWhitelisted(c) {
+			return
+		}
+		limiter(c)
+	}
+}
+
+// CriticalRateLimit protects sensitive non-auth writes (pay, refresh, ratio_config, …). Mark: CT.
 func CriticalRateLimit() func(c *gin.Context) {
 	if common.CriticalRateLimitEnable {
-		return rateLimitFactory(common.CriticalRateLimitNum, common.CriticalRateLimitDuration, "CT")
+		return wrapCriticalIPRateLimit("CT")
+	}
+	return defNext
+}
+
+// AuthCriticalRateLimit is a separate bucket for login/register/reset/oauth entry. Mark: CTA.
+// Avoids pricing/refresh traffic exhausting the login quota (and vice versa).
+func AuthCriticalRateLimit() func(c *gin.Context) {
+	if common.CriticalRateLimitEnable {
+		return wrapCriticalIPRateLimit("CTA")
 	}
 	return defNext
 }

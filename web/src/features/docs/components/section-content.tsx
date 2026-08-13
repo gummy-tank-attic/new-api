@@ -210,6 +210,30 @@ print(response.choices[0].message.content)`}
           'Model Square shows reference prices for each plan. Your final charges depend on the API key and plan assigned to your account—always confirm in the console.'
         )}
       </Callout>
+
+      <div className='space-y-3'>
+        <h2 className='text-lg font-bold'>{t('If it fails, check these 5 first')}</h2>
+        <StepList
+          steps={[
+            t(
+              'Base URL: OpenAI clients use {{withV1}}; Claude Code / ANTHROPIC_BASE_URL uses {{host}} (no /v1).',
+              { withV1: API_BASE_URL, host: API_HOST }
+            ),
+            t(
+              'Model ID: copy the exact string from Model Square — doc examples are placeholders only.'
+            ),
+            t(
+              'Auth header matches the protocol: OpenAI uses Authorization Bearer; Claude native uses x-api-key + anthropic-version; Gemini native uses x-goog-api-key.'
+            ),
+            t(
+              'Wallet / quota is positive and the API key is enabled in Console → API Keys.'
+            ),
+            t(
+              'Save the request id from the error message or response headers before contacting support.'
+            ),
+          ]}
+        />
+      </div>
     </div>
   )
 }
@@ -258,7 +282,7 @@ function BaseUrlSection() {
               <td className='px-4 py-3 font-mono text-xs'>{SITE_URL}</td>
               <td className='text-muted-foreground px-4 py-3 text-xs'>
                 {t(
-                  'Prefer www after cookie-domain rollout; until then auto-detect may fail.'
+                  'Site URL for login-based tools only — not for SDK Base URL.'
                 )}
               </td>
             </tr>
@@ -282,8 +306,8 @@ function BaseUrlSection() {
 
       <Callout tone='warn' title={t('Third-party account managers')}>
         {t(
-          'All API Hub (after full rollout): site URL {{www}}, sign in there first. OpenAI Base URL / SDK still use {{host}}. If auto-detect still fails, cookie-domain may not be live on the API yet — use a dedicated revocable API key or wait for ops. Never paste admin passwords or production secrets into extensions.',
-          { host: API_HOST, www: SITE_URL }
+          'Login-based tools (e.g. All API Hub): open {{www}} and sign in first. SDK / OpenAI Base URL still use {{host}} (or {{withV1}}). Prefer a dedicated revocable API key. Never paste console passwords or secrets into browser extensions.',
+          { host: API_HOST, www: SITE_URL, withV1: API_BASE_URL }
         )}
       </Callout>
 
@@ -296,6 +320,102 @@ function BaseUrlSection() {
         <p className='text-muted-foreground text-sm'>
           {t(
             'Never commit keys to git. Prefer environment variables or the tool’s secret store.'
+          )}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function ProtocolsSection() {
+  const { t } = useTranslation()
+  return (
+    <div className='space-y-8'>
+      <SectionTitle
+        title={t('Protocols & auth')}
+        description={t(
+          'MetaRtr is a multi-protocol gateway. Prefer OpenAI-compatible for most apps; use Claude or Gemini native when the client requires that wire format.'
+        )}
+      />
+
+      <div className='overflow-x-auto rounded-xl border'>
+        <table className='w-full min-w-[560px] text-left text-sm'>
+          <thead className='bg-muted/50 border-b'>
+            <tr>
+              <th className='px-4 py-3 font-semibold'>{t('Protocol')}</th>
+              <th className='px-4 py-3 font-semibold'>{t('Base / path')}</th>
+              <th className='px-4 py-3 font-semibold'>{t('Auth')}</th>
+            </tr>
+          </thead>
+          <tbody className='divide-y'>
+            <tr>
+              <td className='px-4 py-3'>{t('OpenAI compatible')}</td>
+              <td className='px-4 py-3 font-mono text-xs'>{API_BASE_URL}</td>
+              <td className='px-4 py-3 font-mono text-xs'>
+                Authorization: Bearer …
+              </td>
+            </tr>
+            <tr>
+              <td className='px-4 py-3'>{t('Claude native (Messages)')}</td>
+              <td className='px-4 py-3 font-mono text-xs'>
+                {API_HOST}/v1/messages
+              </td>
+              <td className='px-4 py-3 font-mono text-xs'>
+                x-api-key + anthropic-version
+              </td>
+            </tr>
+            <tr>
+              <td className='px-4 py-3'>{t('Gemini native')}</td>
+              <td className='px-4 py-3 font-mono text-xs'>
+                {`${API_HOST}/v1beta/models/{model}:generateContent`}
+              </td>
+              <td className='px-4 py-3 font-mono text-xs'>x-goog-api-key</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <Callout title={t('When to use which')}>
+        {t(
+          'Most SDKs and IDEs: OpenAI compatible. Keep Anthropic request body (tools, system blocks): Claude native. Keep Google contents format or Gemini SDK: Gemini native. Claude Code env vars still use ANTHROPIC_BASE_URL={{host}} without /v1.',
+          { host: API_HOST }
+        )}
+      </Callout>
+
+      <div className='space-y-3'>
+        <h2 className='text-lg font-bold'>{t('Claude native example')}</h2>
+        <CodeBlock
+          title='bash'
+          code={`curl ${API_HOST}/v1/messages \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: ${EXAMPLE_API_KEY}" \\
+  -H "anthropic-version: 2023-06-01" \\
+  -d '{
+    "model": "${EXAMPLE_MODEL_ANTHROPIC}",
+    "max_tokens": 1024,
+    "messages": [
+      {"role": "user", "content": "Summarize MetaRtr in one sentence."}
+    ]
+  }'`}
+        />
+      </div>
+
+      <div className='space-y-3'>
+        <h2 className='text-lg font-bold'>{t('Gemini native example')}</h2>
+        <CodeBlock
+          title='bash'
+          code={`curl "${API_HOST}/v1beta/models/{model}:generateContent" \\
+  -H "Content-Type: application/json" \\
+  -H "x-goog-api-key: ${EXAMPLE_API_KEY}" \\
+  -d '{
+    "contents": [
+      {"role": "user", "parts": [{"text": "One practical API testing tip."}]}
+    ]
+  }'`}
+        />
+        <p className='text-muted-foreground text-sm'>
+          {t(
+            'Replace {model} with a live Gemini model ID from Model Square. Some clients accept ?key=… instead of x-goog-api-key.'
           )}
         </p>
       </div>
@@ -372,12 +492,172 @@ console.log(response.choices[0].message.content);`}
         />
       </div>
 
+      <div className='space-y-3'>
+        <h2 className='text-lg font-bold'>{t('Streaming')}</h2>
+        <p className='text-muted-foreground text-sm leading-relaxed'>
+          {t(
+            'Set stream=true (or stream=True). Clients should raise read timeouts for long answers. Final usage may appear in the stream or only in non-stream mode depending on the model path.'
+          )}
+        </p>
+        <CodeBlock
+          title='Python'
+          code={`from openai import OpenAI
+
+client = OpenAI(
+    api_key="${EXAMPLE_API_KEY}",
+    base_url="${API_BASE_URL}",
+)
+
+stream = client.chat.completions.create(
+    model="${EXAMPLE_MODEL_OPENAI}",
+    messages=[{"role": "user", "content": "Write a 50-word joke."}],
+    stream=True,
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta.content or ""
+    print(delta, end="", flush=True)`}
+        />
+      </div>
+
       <Callout title={t('Model IDs')}>
         {t(
           'Model names must match Model Square exactly (case-sensitive). Prefer live IDs from {{path}} over outdated tutorial names.',
           { path: PRICING_PATH }
         )}
       </Callout>
+    </div>
+  )
+}
+
+function EndpointsSection() {
+  const { t } = useTranslation()
+
+  /** Public product surface only — do not list internal/niche task routes. */
+  const groups: Array<{
+    title: string
+    rows: Array<{ method: string; path: string; note: string }>
+  }> = [
+    {
+      title: t('Chat & protocols'),
+      rows: [
+        {
+          method: 'POST',
+          path: '/v1/chat/completions',
+          note: t('OpenAI chat, streaming, and tool calls (default path)'),
+        },
+        {
+          method: 'POST',
+          path: '/v1/responses',
+          note: t('OpenAI Responses API (agents / multi-step)'),
+        },
+        {
+          method: 'POST',
+          path: '/v1/messages',
+          note: t('Claude Messages API (x-api-key + anthropic-version)'),
+        },
+        {
+          method: 'POST',
+          path: '/v1beta/models/{model}:generateContent',
+          note: t('Gemini generateContent (x-goog-api-key)'),
+        },
+      ],
+    },
+    {
+      title: t('Media & embeddings'),
+      rows: [
+        {
+          method: 'POST',
+          path: '/v1/images/generations',
+          note: t('Image generation (some video models use this path too)'),
+        },
+        {
+          method: 'POST',
+          path: '/v1/embeddings',
+          note: t('Text embeddings — only if the model is on Model Square'),
+        },
+      ],
+    },
+    {
+      title: t('Models'),
+      rows: [
+        {
+          method: 'GET',
+          path: '/v1/models',
+          note: t('List models available to the current API key'),
+        },
+      ],
+    },
+  ]
+
+  return (
+    <div className='space-y-8'>
+      <SectionTitle
+        title={t('Endpoints')}
+        description={t(
+          'Common public paths relative to {{host}}. OpenAI SDK base_url already includes /v1 — do not duplicate /v1 in method paths.',
+          { host: API_HOST }
+        )}
+      />
+
+      <Callout title={t('Availability')}>
+        {t(
+          'This list is the supported product surface, not an internal route dump. A call works only when the model appears on Model Square for your plan and key. Prefer Model Square over guessing extra paths.'
+        )}
+      </Callout>
+
+      {groups.map((group) => (
+        <div key={group.title} className='space-y-3'>
+          <h2 className='text-lg font-bold'>{group.title}</h2>
+          <div className='overflow-x-auto rounded-xl border'>
+            <table className='w-full min-w-[560px] text-left text-sm'>
+              <thead className='bg-muted/50 border-b'>
+                <tr>
+                  <th className='px-4 py-3 font-semibold'>{t('Method')}</th>
+                  <th className='px-4 py-3 font-semibold'>{t('Path')}</th>
+                  <th className='px-4 py-3 font-semibold'>{t('Notes')}</th>
+                </tr>
+              </thead>
+              <tbody className='divide-y'>
+                {group.rows.map((row) => (
+                  <tr key={row.path}>
+                    <td className='px-4 py-3 font-mono text-xs'>
+                      {row.method}
+                    </td>
+                    <td className='px-4 py-3 font-mono text-xs'>{row.path}</td>
+                    <td className='text-muted-foreground px-4 py-3 text-xs'>
+                      {row.note}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ))}
+
+      <div className='space-y-3'>
+        <h2 className='text-lg font-bold'>{t('List models')}</h2>
+        <CodeBlock
+          title='bash'
+          code={`curl ${API_BASE_URL}/models \\
+  -H "Authorization: Bearer ${EXAMPLE_API_KEY}"`}
+        />
+      </div>
+
+      <div className='space-y-3'>
+        <h2 className='text-lg font-bold'>{t('Responses API example')}</h2>
+        <CodeBlock
+          title='bash'
+          code={`curl ${API_BASE_URL}/responses \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer ${EXAMPLE_API_KEY}" \\
+  -d '{
+    "model": "${EXAMPLE_MODEL_OPENAI}",
+    "input": "Draft a short internal note about API gateways."
+  }'`}
+        />
+      </div>
     </div>
   )
 }
@@ -389,7 +669,7 @@ function ImagesSection() {
       <SectionTitle
         title={t('Image & Video')}
         description={t(
-          'Generate images and video multimedia assets via OpenAI-compatible /v1/images/generations endpoint, supporting Grok Image, DALL-E 3, Flux, and Grok Video.'
+          'Generate images and video via the OpenAI-compatible /v1/images/generations endpoint. Use exact model IDs from Model Square — examples below are placeholders only.'
         )}
       />
 
@@ -431,7 +711,7 @@ function ImagesSection() {
         <h2 className='text-xl font-bold'>{t('Image Generation')}</h2>
         <p className='text-muted-foreground text-sm leading-relaxed'>
           {t(
-            'Compatible with standard OpenAI client.images.generate. Models: grok-imagine-image-quality, grok-imagine-image, gpt-image-2, dall-e-3, etc.'
+            'Compatible with standard OpenAI client.images.generate. Copy the image model ID from Model Square (examples in code are placeholders).'
           )}
         </p>
 
@@ -448,10 +728,10 @@ client = OpenAI(
 
 # Standard image generation
 response = client.images.generate(
-    model="${EXAMPLE_MODEL_IMAGE}",  # e.g. grok-imagine-image-quality, grok-imagine-image, dall-e-3
+    model="${EXAMPLE_MODEL_IMAGE}",  # placeholder — copy live ID from Model Square
     prompt="A futuristic neon cyberpunk city with flying vehicles, ultra-detailed 8k",
     n=1,
-    size="1024x1024",  # 1024x1024 (1K tier) or 2048x2048 (2K tier)
+    size="1024x1024",
 )
 
 image_url = response.data[0].url
@@ -500,11 +780,11 @@ console.log("Image URL:", response.data[0].url);`}
 
       <div className='space-y-4'>
         <h2 className='text-xl font-bold'>
-          {t('Video Generation (Grok Video)')}
+          {t('Video generation')}
         </h2>
         <p className='text-muted-foreground text-sm leading-relaxed'>
           {t(
-            'Generate videos using grok-imagine-video. Submit POST requests to the same endpoint with duration and resolution.'
+            'Some video models accept POST on the same /v1/images/generations path with duration and resolution. Use the live video model ID from Model Square.'
           )}
         </p>
 
@@ -544,9 +824,7 @@ console.log("Image URL:", response.data[0].url);`}
                   string (required)
                 </td>
                 <td className='px-4 py-3 text-xs'>
-                  {t(
-                    'e.g. grok-imagine-image-quality, grok-imagine-video, dall-e-3'
-                  )}
+                  {t('Exact model ID from Model Square (placeholder in examples)')}
                 </td>
               </tr>
               <tr>
@@ -575,7 +853,7 @@ console.log("Image URL:", response.data[0].url);`}
                   integer (video)
                 </td>
                 <td className='px-4 py-3 text-xs'>
-                  {t('Video duration in seconds (5–10 seconds, default 8)')}
+                  {t('Video duration in seconds (model-dependent)')}
                 </td>
               </tr>
               <tr>
@@ -584,7 +862,7 @@ console.log("Image URL:", response.data[0].url);`}
                   string (video)
                 </td>
                 <td className='px-4 py-3 text-xs'>
-                  {t('Video resolution: "480p" or "720p"')}
+                  {t('Video resolution (model-dependent; example: 480p)')}
                 </td>
               </tr>
               <tr>
@@ -593,7 +871,7 @@ console.log("Image URL:", response.data[0].url);`}
                   string (video)
                 </td>
                 <td className='px-4 py-3 text-xs'>
-                  {t('Aspect ratio: "16:9", "9:16", or "1:1"')}
+                  {t('Aspect ratio (model-dependent; example: 16:9)')}
                 </td>
               </tr>
               <tr>
@@ -612,7 +890,7 @@ console.log("Image URL:", response.data[0].url);`}
 
       <Callout title={t('Image & Video Models')}>
         {t(
-          'Check Model Square at {{path}} for supported image and video model IDs, pricing rates, and token ratios.',
+          'Check Model Square at {{path}} for supported image and video model IDs and list prices.',
           { path: PRICING_PATH }
         )}
       </Callout>
@@ -865,7 +1143,7 @@ function ModelsSection() {
       <SectionTitle
         title={t('Models & pricing')}
         description={t(
-          'Model Square lists live model IDs, group prices, and cache rates. Always copy IDs from there.'
+          'Model Square lists live model IDs and list prices for your selection. Always copy IDs from there.'
         )}
       />
 
@@ -892,6 +1170,26 @@ function ModelsSection() {
       </Callout>
 
       <div className='space-y-3'>
+        <h2 className='text-lg font-bold'>{t('Billing & usage')}</h2>
+        <p className='text-muted-foreground text-sm leading-relaxed'>
+          {t(
+            'Successful calls (and many failed ones) appear in Console logs with model, token usage, and charged amount. Model Square list prices are guidance; final charges follow your plan and key settings.'
+          )}
+        </p>
+        <StepList
+          steps={[
+            t('Open Console → Logs (or usage) after a test call.'),
+            t(
+              'Match rows by time or by the request id shown in errors / response headers.'
+            ),
+            t(
+              'Top up the wallet when balance or quota is insufficient; disabled keys will not spend.'
+            ),
+          ]}
+        />
+      </div>
+
+      <div className='space-y-3'>
         <h2 className='text-lg font-bold'>{t('Example model IDs')}</h2>
         <p className='text-muted-foreground text-sm'>
           {t(
@@ -914,7 +1212,13 @@ function TroubleshootingSection() {
     {
       problem: t('401 Unauthorized'),
       fix: t(
-        'Check Bearer token, key status (disabled/expired), and that you copied the full key.'
+        'Missing/wrong key, disabled key, or auth header does not match the protocol (Bearer vs x-api-key vs x-goog-api-key).'
+      ),
+    },
+    {
+      problem: t('403 / insufficient quota'),
+      fix: t(
+        'Balance or plan quota is insufficient. Top up, check plan limits, and confirm your key can use that model.'
       ),
     },
     {
@@ -924,32 +1228,28 @@ function TroubleshootingSection() {
       ),
     },
     {
-      problem: t('Account manager auto-detect fails / returns HTML'),
+      problem: t('model_not_found / model not allowed'),
       fix: t(
-        'Sign in at {{www}}, use site URL {{www}} (not {{host}}). After ops enables shared cookies, log in again. If detect still fails, use a dedicated revocable API key — never admin keys.',
-        { www: SITE_URL, host: API_HOST }
+        'Copy the exact Model Square ID, confirm the model is online for your plan, or GET /v1/models with the same key.'
       ),
-    },
-    {
-      problem: t('Model not found / not allowed'),
-      fix: t(
-        'Use an exact Model Square ID, confirm your plan includes that model, and that the key is active.'
-      ),
-    },
-    {
-      problem: t('Insufficient quota / balance'),
-      fix: t('Top up in the console wallet and retry with the same key.'),
     },
     {
       problem: t('429 Too Many Requests'),
       fix: t(
-        'You hit rate limits. Slow down, use a dedicated key, or contact support for higher limits.'
+        'Rate limited. Back off with retries, lower concurrency, or use a dedicated key / contact support.'
       ),
     },
     {
-      problem: t('Stream disconnects / timeout'),
+      problem: t('5xx / stream interrupt'),
       fix: t(
-        'Long generations may need higher client timeouts. Retry; if persistent, check status and support.'
+        'Temporary gateway or model-side timeout. Retry once; if it repeats, send support the request id from the error or response headers.'
+      ),
+    },
+    {
+      problem: t('Account manager auto-detect fails / returns HTML'),
+      fix: t(
+        'Sign in at {{www}} and use site URL {{www}} (not the API host). Prefer a dedicated revocable API key for tools — never paste console passwords into extensions.',
+        { www: SITE_URL }
       ),
     },
   ]
@@ -959,9 +1259,29 @@ function TroubleshootingSection() {
       <SectionTitle
         title={t('Troubleshooting')}
         description={t(
-          'Fast checks before opening a ticket. Most issues are Base URL, model ID, or quota.'
+          'Prefer HTTP status, error code, and request id before opening a ticket. Most issues are Base URL, model ID, auth header, or quota.'
         )}
       />
+
+      <div className='space-y-3'>
+        <h2 className='text-lg font-bold'>{t('Error body shape')}</h2>
+        <p className='text-muted-foreground text-sm leading-relaxed'>
+          {t(
+            'Errors are usually OpenAI-style JSON. The message may include “(request id: …)”. Copy that id (also present on response headers) when contacting support.'
+          )}
+        </p>
+        <CodeBlock
+          title='JSON'
+          code={`{
+  "error": {
+    "message": "model not found or not available (request id: …)",
+    "type": "invalid_request_error",
+    "param": "model",
+    "code": "model_not_found"
+  }
+}`}
+        />
+      </div>
 
       <div className='space-y-3'>
         {rows.map((row) => (
@@ -975,13 +1295,44 @@ function TroubleshootingSection() {
       </div>
 
       <Callout title={t('Support')}>
-        {t('Contact')}:{' '}
-        <a
-          className='text-primary font-medium hover:underline'
-          href='mailto:support@metartr.com'
-        >
-          support@metartr.com
-        </a>
+        <div className='space-y-1.5'>
+          <p>
+            {t('Contact')}:{' '}
+            <a
+              className='text-primary font-medium hover:underline'
+              href='mailto:support@metartr.com'
+            >
+              support@metartr.com
+            </a>
+          </p>
+          <p>
+            Telegram Support：
+            <a
+              className='text-primary font-medium hover:underline'
+              href='https://t.me/MetaRtrSupport_bot'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              MetaRtrSupport_bot
+            </a>
+          </p>
+          <p>
+            Telegram Channel：
+            <a
+              className='text-primary font-medium hover:underline'
+              href='https://t.me/MetaRtr'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              https://t.me/MetaRtr
+            </a>
+          </p>
+          <p className='text-muted-foreground text-xs'>
+            {t(
+              'Include request id, model id, Base URL you used, and approximate time (UTC).'
+            )}
+          </p>
+        </div>
       </Callout>
     </div>
   )
@@ -993,8 +1344,12 @@ export function SectionContent(props: SectionContentProps) {
       return <QuickstartSection />
     case 'base-url':
       return <BaseUrlSection />
+    case 'protocols':
+      return <ProtocolsSection />
     case 'sdk':
       return <SdkSection />
+    case 'endpoints':
+      return <EndpointsSection />
     case 'images':
       return <ImagesSection />
     case 'claude-code':

@@ -87,23 +87,18 @@ export function deriveGroupsForVendor(options: {
   })
 }
 
-/** Prefer lowest ratio (special price); tie-break by name. */
+/**
+ * Pick default group for vendor:
+ * `groups` is already sorted by `deriveGroupsForVendor` according to `GROUP_DISPLAY_ORDER`
+ * (e.g. Grok before Grok（Beta）, Claude lite before Claude Max).
+ * Returns the primary curated group (groups[0]).
+ */
 export function pickDefaultGroup(
   groups: string[],
-  groupRatio: Record<string, number>
+  _groupRatio: Record<string, number>
 ): string | null {
   if (groups.length === 0) return null
-  let best = groups[0]
-  let bestRatio = getConfiguredGroupRatio(groupRatio, best)
-  for (let i = 1; i < groups.length; i++) {
-    const g = groups[i]
-    const r = getConfiguredGroupRatio(groupRatio, g)
-    if (r < bestRatio || (r === bestRatio && g.localeCompare(best) < 0)) {
-      best = g
-      bestRatio = r
-    }
-  }
-  return best
+  return groups[0]
 }
 
 export function filterModelsByVendorAndGroup(

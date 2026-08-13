@@ -36,6 +36,11 @@ describe('getGroupIntroI18nKey', () => {
   it('returns null for unmapped groups', () => {
     expect(getGroupIntroI18nKey('unknown-group')).toBeNull()
   })
+
+  it('maps Gemini group', () => {
+    expect(getGroupIntroI18nKey('Gemini')).toBe('pricingGroupIntro.gemini')
+    expect(getGroupIntroI18nKey('gemini')).toBe('pricingGroupIntro.gemini')
+  })
 })
 
 describe('resolveGroupDescription', () => {

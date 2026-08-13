@@ -57,6 +57,7 @@ export function Pricing() {
     autoGroups,
     isLoading,
     isRefreshing,
+    showStaleWarning,
     error,
     refetch,
     priceRate,
@@ -206,6 +207,18 @@ export function Pricing() {
               </p>
             ) : null}
           </div>
+          {showStaleWarning ? (
+            <p className='text-destructive mt-2 text-sm'>
+              {t('Showing cached prices; refresh failed. Tap Retry.')}{' '}
+              <button
+                type='button'
+                className='underline underline-offset-2'
+                onClick={() => void refetch()}
+              >
+                {t('Retry')}
+              </button>
+            </p>
+          ) : null}
         </header>
 
         {error && !isLoading ? (

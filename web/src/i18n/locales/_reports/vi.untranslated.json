@@ -8,6 +8,8 @@
   "Official price is the site baseline after ratio sync, not a live fetch.": "Official price is the site baseline after ratio sync, not a live fetch.",
   "Official prices use the site model baseline (ratio 1.0)": "Official prices use the site model baseline (ratio 1.0)",
   "Select a group to view prices": "Select a group to view prices",
+  "Speech to text": "Speech to text",
+  "Text to speech": "Text to speech",
   "UI labels such as “85% off” are marketing display. Billing uses the group ratio configured in the backend for your account/token group.": "UI labels such as “85% off” are marketing display. Billing uses the group ratio configured in the backend for your account/token group.",
   "Use an exact Model Square ID, confirm your group can access it, and that the model is enabled.": "Use an exact Model Square ID, confirm your group can access it, and that the model is enabled."
 }

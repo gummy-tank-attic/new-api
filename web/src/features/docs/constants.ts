@@ -37,12 +37,14 @@ export const PRICING_PATH = '/pricing'
 export const DOCS_SECTION_IDS = [
   'quickstart',
   'base-url',
+  'protocols',
   'sdk',
   'images',
   'claude-code',
   'codex',
   'cursor',
   'clients',
+  'endpoints',
   'models',
   'troubleshooting',
 ] as const
@@ -65,6 +67,11 @@ export const DOCS_NAV: ReadonlyArray<{
   {
     id: 'base-url',
     labelKey: 'Base URL & API Key',
+    groupKey: 'Getting started',
+  },
+  {
+    id: 'protocols',
+    labelKey: 'Protocols & auth',
     groupKey: 'Getting started',
   },
   {
@@ -98,6 +105,11 @@ export const DOCS_NAV: ReadonlyArray<{
     groupKey: 'Coding tools',
   },
   {
+    id: 'endpoints',
+    labelKey: 'Endpoints',
+    groupKey: 'Reference',
+  },
+  {
     id: 'models',
     labelKey: 'Models & pricing',
     groupKey: 'Reference',
@@ -115,8 +127,9 @@ export const DOCS_NAV: ReadonlyArray<{
  */
 export const EXAMPLE_MODEL_OPENAI = 'gpt-5.4'
 export const EXAMPLE_MODEL_ANTHROPIC = 'claude-sonnet-4-6'
-export const EXAMPLE_MODEL_IMAGE = 'grok-imagine-image-quality'
-export const EXAMPLE_MODEL_VIDEO = 'grok-imagine-video'
+/** Placeholders only — never imply a live catalog or supplier. */
+export const EXAMPLE_MODEL_IMAGE = 'your-image-model-id'
+export const EXAMPLE_MODEL_VIDEO = 'your-video-model-id'
 export const EXAMPLE_API_KEY = 'sk-metartr-your-api-key'
 export const IMAGE_GENERATIONS_ENDPOINT = `${API_BASE_URL}/images/generations`
 

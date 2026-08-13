@@ -186,13 +186,16 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((model) => (
+          {rows.map((model, index) => (
             <TableRow
               key={model.model_name}
-              className='hover:bg-muted/25 border-border/50 cursor-pointer transition-colors'
+              className={cn(
+                'border-border/50 cursor-pointer transition-colors hover:bg-muted/80',
+                index % 2 === 1 ? 'bg-muted/60 dark:bg-muted/30' : 'bg-background'
+              )}
               onClick={() => props.onModelClick?.(model.model_name)}
             >
-              <TableCell className='px-4 py-3.5'>
+              <TableCell className='px-4 py-3'>
                 <div className='flex max-w-[20rem] items-center gap-2'>
                   <span className='text-foreground truncate font-mono text-[15px] font-medium tracking-tight'>
                     {model.model_name}
@@ -525,8 +528,9 @@ function SavingsPill(props: { savings: number | null }) {
   // Fixed English copy — never i18n: "85% off"
   const label = `${props.savings}%\u00A0off`
   return (
-    <span className='inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold tracking-tight whitespace-nowrap text-red-600 tabular-nums ring-1 ring-red-100 dark:bg-red-950/40 dark:text-red-400 dark:ring-red-900/40'>
-      {label}
+    <span className='inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold tracking-tight whitespace-nowrap text-emerald-600 ring-1 ring-emerald-500/20 dark:bg-emerald-950/40 dark:text-emerald-400 dark:ring-emerald-900/40 tabular-nums'>
+      <span className='text-[10px]'>⚡</span>
+      <span>{label}</span>
     </span>
   )
 }

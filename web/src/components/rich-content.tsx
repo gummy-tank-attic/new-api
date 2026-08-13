@@ -16,8 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { HtmlContent, type HtmlContentVariant } from '@/components/html-content'
-import { Markdown } from '@/components/ui/markdown'
+import { lazy, Suspense } from 'react'
+
+import type { HtmlContentVariant } from '@/components/html-content'
 
 type RichContentMode = 'markdown' | 'html'
 
@@ -29,20 +30,40 @@ interface RichContentProps {
   htmlVariant?: HtmlContentVariant
 }
 
+// Markdown pulls marked + katex; keep off the critical path until content needs it.
+const Markdown = lazy(() =>
+  import('@/components/ui/markdown').then((m) => ({ default: m.Markdown }))
+)
+const HtmlContent = lazy(() =>
+  import('@/components/html-content').then((m) => ({ default: m.HtmlContent }))
+)
+
+function ContentFallback({ className }: { className?: string }) {
+  return (
+    <div className={className}>
+      <div className='bg-muted/40 h-24 animate-pulse rounded-md' />
+    </div>
+  )
+}
+
 export function RichContent(props: RichContentProps) {
   if (props.mode === 'html') {
     return (
-      <HtmlContent
-        content={props.content}
-        className={props.className}
-        variant={props.htmlVariant}
-      />
+      <Suspense fallback={<ContentFallback className={props.className} />}>
+        <HtmlContent
+          content={props.content}
+          className={props.className}
+          variant={props.htmlVariant}
+        />
+      </Suspense>
     )
   }
 
   return (
-    <Markdown breaks={props.breaks} className={props.className}>
-      {props.content}
-    </Markdown>
+    <Suspense fallback={<ContentFallback className={props.className} />}>
+      <Markdown breaks={props.breaks} className={props.className}>
+        {props.content}
+      </Markdown>
+    </Suspense>
   )
 }

@@ -16,17 +16,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { api } from '@/lib/api'
 
-import type { AboutResponse } from './types'
-
-/** Public about blob; never block UI on auth refresh if the request fails. */
-export async function getAboutContent() {
-  const res = await api.get<AboutResponse>('/api/about', {
-    skipAuthRefresh: true,
-    skipBusinessError: true,
-    skipErrorHandler: true,
-    timeout: 8_000,
-  })
-  return res.data
-}
+/** Public MetaRtr contact channels (footer, about, docs). */
+export const CONTACT = {
+  supportTelegram: {
+    href: 'https://t.me/MetaRtrSupport_bot',
+    handle: '@MetaRtrSupport_bot',
+    label: 'MetaRtrSupport_bot',
+  },
+  channelTelegram: {
+    href: 'https://t.me/MetaRtr',
+    handle: '@MetaRtr',
+    label: 't.me/MetaRtr',
+  },
+  email: {
+    href: 'mailto:support@metartr.com',
+    handle: 'support@metartr.com',
+    label: 'support@metartr.com',
+  },
+} as const

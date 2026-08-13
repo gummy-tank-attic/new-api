@@ -205,8 +205,10 @@ var (
 	GlobalWebRateLimitDuration int64
 
 	CriticalRateLimitEnable   bool
-	CriticalRateLimitNum            = 20
+	CriticalRateLimitNum            = 40
 	CriticalRateLimitDuration int64 = 20 * 60
+	// CriticalRateLimitIPWhitelist skips Critical + AuthCritical IP limits (IPs or CIDRs).
+	CriticalRateLimitIPWhitelist []string
 
 	UploadRateLimitNum            = 10
 	UploadRateLimitDuration int64 = 60

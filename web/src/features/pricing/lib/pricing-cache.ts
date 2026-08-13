@@ -18,9 +18,9 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import type { PricingData } from '../types'
 
-const STORAGE_KEY = 'metartr.pricing.cache.v1'
-/** Keep snapshot for hard-refresh SWR; longer than query staleTime. */
-const MAX_AGE_MS = 30 * 60 * 1000
+const STORAGE_KEY = 'metartr.pricing.cache.v2'
+/** Short first-paint only; live prices always revalidated (staleTime: 0). */
+const MAX_AGE_MS = 5 * 60 * 1000
 
 type CachedPayload = {
   savedAt: number

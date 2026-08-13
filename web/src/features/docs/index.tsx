@@ -87,7 +87,7 @@ export function Docs() {
             </h1>
             <p className='text-muted-foreground max-w-3xl text-sm sm:text-base'>
               {t(
-                'Guides for Base URL, API keys, Claude Code, Codex, Cursor, and OpenAI-compatible SDKs.'
+                'Base URL, multi-protocol auth (OpenAI / Claude / Gemini), endpoints, coding tools, and troubleshooting — copy IDs from Model Square.'
               )}
             </p>
           </div>

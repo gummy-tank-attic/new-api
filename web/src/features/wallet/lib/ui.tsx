@@ -87,7 +87,7 @@ export function getPaymentIcon(
     return (
       <ReactIconByName
         name={iconValue}
-        className={className}
+        className={`${className} scale-125 transform`}
         title={altName || paymentType || iconValue}
       />
     )

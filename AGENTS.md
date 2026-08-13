@@ -2,15 +2,40 @@
 
 DO NOT send optional commentary
 
+## 回复风格（Franco · 硬性）
+
+- 先结论；默认极短（约 3～5 句）；禁止长铺垫 / 长表 / 大段对照。
+- 除非用户说「展开 / 详细」，否则不写背景和长推理。
+- 全局细则见 `C:\Users\Franco\.grok\Agents.md`。
+
 ## Overview
 
 This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI providers (OpenAI, Claude, Gemini, Azure, AWS Bedrock, etc.) behind a unified API, with user management, billing, rate limiting, and an admin dashboard.
 
 ## Project Reference
 
-> Before any change, read **`d:\workplace\我的相关项目\中转站\newapi\README.md`** — it contains the full tech stack, directory layout, `.env` key index, Cloudflare account split, domain topology, and all project-level conventions.
+> **MUST** open the **parent MetaRtr project** (not only this repo folder):
+> `d:\workplace\我的相关项目\中转站\newapi\README.md`
+>
+> That README starts with **「AI / 人 · 必读」** — even if you only read the README, obey those iron rules.
+> Full release rules: `../docs/RELEASE_RULES.md` (path relative to parent `newapi/`).
 
-Tech stack snapshot: Go 1.22+ / Gin / GORM · React 19 / TypeScript / Rsbuild / Bun · MySQL + Redis · i18n via `go-i18n` (backend) and `i18next` (frontend, 7 locales).
+### MetaRtr ops iron rules (inline — do not skip)
+
+| Rule | Do this |
+|------|---------|
+| Frontend production deploy | From parent `newapi/`: `.\scripts\deploy-web.ps1` → success = `OK: live https://www.metartr.com` → hard-refresh browser |
+| `git push` / GHA green | **NOT** enough for production www; never claim shipped without www alias check |
+| Default `npm ci` | **Forbidden** for routine deploys; only `deploy-web.ps1 -Install` when node_modules is broken |
+| Secrets | Only parent `.env` / VPS `/opt/newapi/.env` — never commit secrets or paste into docs/chat |
+| Domains | **www** = static Pages; **api** = API + payment webhooks; apex unused |
+| Pricing display order | Only `web/src/features/pricing/constants.ts` (`MODEL_DISPLAY_ORDER` etc.); must redeploy frontend after change |
+| Where to edit | Go/web code = **this** tree (`newapi源码/`); ops docs/compose/deploy scripts = **parent** `newapi/` |
+| Critical rate limit | Login/register/reset/oauth entry = mark **CTA**; pay/refresh/ratio_config/etc = **CT**; whitelist env `CRITICAL_RATE_LIMIT_IP_WHITELIST`; do not disable Critical long-term (parent PRODUCTION §3) |
+| About / contact | `/about` contact cards; links only in `web/src/lib/contact-links.ts`; About uses `showFooter={false}`; do not block paint on empty `/api/about` (parent PRODUCTION §7.9) |
+| Pricing nav label | i18n key still `Model Square` → zh **价格**; route `/pricing` |
+
+Tech stack snapshot: Go 1.22+ / Gin / GORM · React 19 / TypeScript / Rsbuild / Bun · PG/MySQL/SQLite + Redis · i18n via `go-i18n` (backend) and `i18next` (frontend, 7 locales).
 
 
 ## Rules
