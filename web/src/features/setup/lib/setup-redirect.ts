@@ -16,25 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-// ============================================================================
-// Home Page Types
-// ============================================================================
+import type { SystemStatus } from '@/features/auth/types'
 
-/**
- * Response from home page content API
- */
-export interface HomePageContentResponse {
-  success: boolean
-  message?: string
-  data?: string
-  /** Short SHA-256 prefix from the API for SWR cache invalidation. */
-  hash?: string
-}
-
-/**
- * Home page content result from hook
- */
-export interface HomePageContentResult {
-  content: string
-  isUrl: boolean
+export function shouldRedirectToSetup(
+  status: SystemStatus | null,
+  pathname: string
+): boolean {
+  return status?.setup === false && !pathname.startsWith('/setup')
 }

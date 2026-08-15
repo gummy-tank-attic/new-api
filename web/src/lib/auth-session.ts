@@ -73,14 +73,14 @@ const API_BASE_URL =
 const authClient = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  headers: {
-    'Cache-Control': 'no-store',
-  },
 })
 
 const refreshRaceDelays = [80, 200, 500] as const
+const refreshSkewMs = 60_000
 let refreshPromise: Promise<RefreshOutcome> | null = null
+let refreshTimer: ReturnType<typeof setTimeout> | null = null
 let authEpoch = 0
+let visibilityRefreshBound = false
 
 class AuthRefreshSupersededError extends Error {
   constructor() {
@@ -149,6 +149,37 @@ function isAuthTokenRotation(value: unknown): value is AuthTokenRotation {
   )
 }
 
+function clearScheduledAccessTokenRefresh(): void {
+  if (refreshTimer === null) return
+  globalThis.clearTimeout(refreshTimer)
+  refreshTimer = null
+}
+
+function scheduleAccessTokenRefresh(expiresAt: number): void {
+  clearScheduledAccessTokenRefresh()
+  if (!Number.isFinite(expiresAt) || expiresAt <= 0) return
+  const delayMs = Math.max(0, expiresAt * 1000 - Date.now() - refreshSkewMs)
+  refreshTimer = globalThis.setTimeout(() => {
+    refreshTimer = null
+    void refreshAuthentication()
+  }, delayMs)
+}
+
+function bindVisibilityRefresh(): void {
+  if (visibilityRefreshBound || typeof document === 'undefined') return
+  visibilityRefreshBound = true
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return
+    const auth = useAuthStore.getState().auth
+    if (!auth.user || !auth.accessExpiresAt) return
+    if (
+      auth.accessExpiresAt <= Math.floor((Date.now() + refreshSkewMs) / 1000)
+    ) {
+      void refreshAuthentication()
+    }
+  })
+}
+
 export function applyAuthBundle(
   bundle: AuthBundle,
   synchronizeTabs = true
@@ -156,6 +187,8 @@ export function applyAuthBundle(
   const previousSID = useAuthStore.getState().auth.session?.sid
   authEpoch += 1
   useAuthStore.getState().auth.setBundle(bundle)
+  scheduleAccessTokenRefresh(bundle.access_expires_at)
+  bindVisibilityRefresh()
   if (synchronizeTabs && previousSID !== bundle.session.sid) {
     publishAuthSessionEvent('authenticated', bundle.session.sid)
   }
@@ -192,6 +225,7 @@ export function clearAuthentication(
 ): void {
   const sid = useAuthStore.getState().auth.session?.sid
   authEpoch += 1
+  clearScheduledAccessTokenRefresh()
   useAuthStore.getState().auth.reset(bootstrapState)
   if (synchronizeTabs && sid) {
     publishAuthSessionEvent('signed_out', sid)
@@ -368,6 +402,8 @@ export async function bootstrapAuthentication(): Promise<RefreshOutcome> {
   const bundle = currentValidAuthBundle()
   if (bundle) {
     useAuthStore.getState().auth.setBootstrapState('complete')
+    scheduleAccessTokenRefresh(bundle.access_expires_at)
+    bindVisibilityRefresh()
     return { kind: 'authenticated', bundle }
   }
 

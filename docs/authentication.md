@@ -70,6 +70,8 @@
 
 前端将冷启动状态与登录状态分开管理。网络或服务端临时故障允许后续导航重试 refresh；服务端确认 Refresh Cookie 无效时才进入已完成的匿名状态。内存 SID 与 Cookie SID 不一致时，客户端清除旧内存身份并在不携带旧 SID 的情况下重试一次。
 
+Access Token 到期前约 60 秒应静默调用 refresh。价格页、首页、About 等公开接口使用 `skipAuthRefresh` 时，401 **不得** `clearAuthentication`：过期 Bearer 打 `TryUserAuth` 会 401，这只表示该请求应按匿名降级，Refresh Cookie 仍有效。违反这条会在约 15 分钟后把用户踢出（MetaRtr 2026-08-13 生产事故）。`/api/user/auth/logout` 除外。
+
 ## Session 签发限额与保留策略
 
 服务端在所有登录方式的统一 Session 签发出口执行两级账户限制：

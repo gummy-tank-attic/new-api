@@ -17,16 +17,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { api } from '@/lib/api'
+import { PUBLIC_API_REQUEST_CONFIG } from '@/lib/http-client'
 
 import type { SetupFormValues, SetupResponse } from './types'
 
 export async function getSetupStatus(): Promise<SetupResponse> {
-  const res = await api.get('/api/setup', {
-    // We want fresh status on every visit.
-    params: {
-      t: Date.now(),
-    },
-  })
+  const res = await api.get('/api/setup', PUBLIC_API_REQUEST_CONFIG)
   return res.data
 }
 

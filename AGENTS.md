@@ -32,6 +32,7 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 | Pricing display order | Only `web/src/features/pricing/constants.ts` (`MODEL_DISPLAY_ORDER` etc.); must redeploy frontend after change |
 | Where to edit | Go/web code = **this** tree (`newapi源码/`); ops docs/compose/deploy scripts = **parent** `newapi/` |
 | Critical rate limit | Login/register/reset/oauth entry = mark **CTA**; pay/refresh/ratio_config/etc = **CT**; whitelist env `CRITICAL_RATE_LIMIT_IP_WHITELIST`; do not disable Critical long-term (parent PRODUCTION §3) |
+| Session / 401 | `skipAuthRefresh` 401 must **not** `clearAuthentication`; silent refresh only (except logout). Access TTL 15m; keep-alive in `auth-session.ts`. Parent PRODUCTION §9 |
 | About / contact | `/about` contact cards; links only in `web/src/lib/contact-links.ts`; About uses `showFooter={false}`; do not block paint on empty `/api/about` (parent PRODUCTION §7.9) |
 | Pricing nav label | i18n key still `Model Square` → zh **价格**; route `/pricing` |
 

@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { api } from '@/lib/http-client'
+import { api, PUBLIC_API_REQUEST_CONFIG } from '@/lib/http-client'
 
 export {
   applyAuthBundle,
@@ -68,7 +68,7 @@ export async function getUserGroups(): Promise<{
 // ============================================================================
 
 export async function getStatus() {
-  const res = await api.get('/api/status')
+  const res = await api.get('/api/status', PUBLIC_API_REQUEST_CONFIG)
   return res.data?.data as Record<string, unknown>
 }
 
@@ -77,7 +77,7 @@ export async function getNotice(): Promise<{
   message?: string
   data?: string
 }> {
-  const res = await api.get('/api/notice')
+  const res = await api.get('/api/notice', PUBLIC_API_REQUEST_CONFIG)
   return res.data
 }
 

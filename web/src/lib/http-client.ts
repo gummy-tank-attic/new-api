@@ -55,9 +55,12 @@ export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
   timeout: DEFAULT_API_TIMEOUT_MS,
-  headers: {
-    'Cache-Control': 'no-store',
-  },
+})
+
+/** Public reads must stay CORS-simple on anonymous page loads. */
+export const PUBLIC_API_REQUEST_CONFIG: ApiRequestConfig = Object.freeze({
+  skipAuth: true,
+  skipErrorHandler: true,
 })
 
 const inFlightGet = new Map<string, Promise<unknown>>()
@@ -113,13 +116,13 @@ function isPublicAppPath(pathname: string): boolean {
     '/500',
     '/503',
   ]
-  return prefixes.some(
-    (prefix) => p === prefix || p.startsWith(`${prefix}/`)
-  )
+  return prefixes.some((prefix) => p === prefix || p.startsWith(`${prefix}/`))
 }
 
 function isOnPublicAppPage(): boolean {
-  return typeof window !== 'undefined' && isPublicAppPath(window.location.pathname)
+  return (
+    typeof window !== 'undefined' && isPublicAppPath(window.location.pathname)
+  )
 }
 
 /**
@@ -201,13 +204,16 @@ api.interceptors.response.use(
           redirectToSignIn: true,
         })
       } else {
-        // skipAuthRefresh: public APIs often 401 on stale bearer (TryUserAuth).
-        // Never toast on public pages; soft-clear ghost session if present.
-        if (isOnPublicAppPage()) {
-          if (useAuthStore.getState().auth.user) {
-            clearAuthentication(false)
-          }
-        } else if (!skipErrorHandler) {
+        // skipAuthRefresh 401 must not log the user out. Pricing/home attach a
+        // stale Bearer and opt out of refresh so the page can fall back to the
+        // public payload; the HttpOnly refresh cookie is still valid.
+        const requestUrl = String(config?.url ?? '')
+        if (
+          useAuthStore.getState().auth.user &&
+          !requestUrl.includes('/auth/logout')
+        ) {
+          void refreshAuthentication()
+        } else if (!skipErrorHandler && !isOnPublicAppPage()) {
           toast.error(t('Session expired!'))
         }
       }

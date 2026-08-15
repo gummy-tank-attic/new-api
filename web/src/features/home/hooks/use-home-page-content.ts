@@ -34,12 +34,11 @@ import type { HomePageContentResult } from '../types'
  *
  * SWR: if localStorage has a previous value (and status hash still matches),
  * first paint uses it and revalidates in the background. First visit without
- * cache still waits on the API (or falls through to the default home on failure).
+ * cache paints the default home immediately and swaps only if custom content exists.
  */
 export function useHomePageContent(): HomePageContentResult {
   const [snapshot] = useState(readHomePageContentCache)
   const [content, setContent] = useState(snapshot.content)
-  const [isLoaded, setIsLoaded] = useState(snapshot.hasCache)
 
   useEffect(() => {
     let mounted = true
@@ -65,10 +64,6 @@ export function useHomePageContent(): HomePageContentResult {
         // made homepage reloads feel broken). Empty default home still works.
         // eslint-disable-next-line no-console
         console.warn('Failed to load home page content:', error)
-      } finally {
-        if (mounted) {
-          setIsLoaded(true)
-        }
       }
     }
 
@@ -81,5 +76,5 @@ export function useHomePageContent(): HomePageContentResult {
 
   const isUrl = isHttpUrl(content)
 
-  return { content, isLoaded, isUrl }
+  return { content, isUrl }
 }

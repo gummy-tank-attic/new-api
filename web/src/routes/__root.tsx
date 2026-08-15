@@ -22,6 +22,7 @@ import {
   Outlet,
   redirect,
   useNavigate,
+  useRouterState,
 } from '@tanstack/react-router'
 import { lazy, Suspense, useEffect } from 'react'
 
@@ -31,7 +32,7 @@ import { ThemeCustomizationProvider } from '@/context/theme-customization-provid
 import { saveAffiliateCode } from '@/features/auth/lib/storage'
 import { GeneralError } from '@/features/errors/general-error'
 import { NotFoundError } from '@/features/errors/not-found-error'
-import { getSetupStatus } from '@/features/setup/api'
+import { shouldRedirectToSetup } from '@/features/setup/lib/setup-redirect'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import {
@@ -45,12 +46,11 @@ import { useAuthStore } from '@/stores/auth-store'
 
 /** Dev-only tooling — dynamic so production entry never pulls these packages. */
 const DevtoolsLazy = lazy(async () => {
-  const [{ ReactQueryDevtools }, { TanStackRouterDevtools }] = await Promise.all(
-    [
+  const [{ ReactQueryDevtools }, { TanStackRouterDevtools }] =
+    await Promise.all([
       import('@tanstack/react-query-devtools'),
       import('@tanstack/react-router-devtools'),
-    ]
-  )
+    ])
   return {
     default: function Devtools() {
       return (
@@ -69,9 +69,17 @@ function RootComponent() {
 
   // Single /api/status load (react-query, correct API host). Syncs brand config into the store.
   // Do NOT useSystemConfig({ autoLoad: true }) — that used relative /api/status and hit Pages HTML.
-  useStatus()
+  const { status } = useStatus()
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
   // Read store + preload logo only; no second status request.
   useSystemConfig({ autoLoad: false })
+
+  useEffect(() => {
+    if (!shouldRedirectToSetup(status, pathname)) return
+    void navigate({ to: '/setup', replace: true })
+  }, [navigate, pathname, status])
 
   useEffect(() => {
     const aff = new URLSearchParams(window.location.search).get('aff')?.trim()
@@ -128,38 +136,6 @@ function RootComponent() {
   )
 }
 
-// 缓存 setup 状态检查结果，避免每次导航都重复调用 API
-// 使用 localStorage 持久化，避免页面刷新后重复检查
-const SETUP_CHECKED_KEY = 'setup_status_checked'
-
-function getSetupStatusFromCache(): boolean {
-  try {
-    if (typeof window !== 'undefined') {
-      return window.localStorage.getItem(SETUP_CHECKED_KEY) === 'true'
-    }
-  } catch {
-    /* empty */
-  }
-  return false
-}
-
-function setSetupStatusCache(value: boolean): void {
-  try {
-    if (typeof window !== 'undefined') {
-      if (value) {
-        window.localStorage.setItem(SETUP_CHECKED_KEY, 'true')
-      } else {
-        window.localStorage.removeItem(SETUP_CHECKED_KEY)
-      }
-    }
-  } catch {
-    /* empty */
-  }
-}
-
-// 内存中的标记，避免同一会话中重复检查
-let setupStatusChecked = getSetupStatusFromCache()
-
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
 }>()({
@@ -174,26 +150,6 @@ export const Route = createRootRouteWithContext<{
     // Fire-and-forget: warms refresh for protected routes that will await the
     // shared promise. Public pages can paint without waiting on the network.
     void bootstrapAuthentication()
-
-    const pathname = location?.pathname || ''
-    const needsSetupCheck =
-      !setupStatusChecked && !pathname.startsWith('/setup')
-
-    if (needsSetupCheck) {
-      const status = await getSetupStatus().catch((error) => {
-        if (import.meta.env.DEV) {
-          // eslint-disable-next-line no-console
-          console.warn('[root.beforeLoad] setup status check failed', error)
-        }
-        return null
-      })
-
-      if (status?.success && status.data && !status.data.status) {
-        throw redirect({ to: '/setup' })
-      }
-      setupStatusChecked = true
-      setSetupStatusCache(true)
-    }
   },
   component: RootComponent,
   notFoundComponent: NotFoundError,

@@ -12,6 +12,13 @@ Before merging or deploying an upstream update, preserve and regression-check:
 - pricing page grouping, ordering, presentation, group descriptions, and i18n;
 - production API origin (`https://api.metartr.com`) and the existing
   authentication/session flow;
+- `skipAuthRefresh` 401 on public pages must **not** call `clearAuthentication`
+  (that logs users out ~15 minutes after Access Token expiry);
+- anonymous startup reads must remain CORS-simple: do not add global
+  `Cache-Control` request headers or attach stale authorization to public APIs;
+- the root route must not block first paint on `/api/setup`, notices, custom
+  home content, or unused locale packs;
+- above-the-fold content must not auto-cycle after paint and reset LCP;
 - public asset and cache behavior needed by Cloudflare Pages.
 
 Do not replace `web/` wholesale with an upstream directory. Bring backend and
@@ -19,15 +26,24 @@ security fixes forward selectively, then reapply MetaRtr frontend changes.
 
 ## Required release gate
 
-1. Build the candidate frontend and deploy it to a Cloudflare Pages preview.
-2. Compare the preview with production on desktop and mobile for the protected
+1. Commit the candidate on its upgrade branch; production must never depend on
+   an uncommitted working tree except during an incident hotfix, which must be
+   committed immediately after recovery.
+2. Run `npm run build:check`. Its startup policy and bundle budgets are release
+   blockers, including the production-entry check for invalid undefined calls.
+3. Deploy the candidate frontend to a Cloudflare Pages preview.
+4. Compare the preview with production on desktop and mobile for the protected
    contract above.
-3. Run frontend typecheck, targeted tests, and production build.
-4. Deploy production only after the operator accepts any intentional visual
+5. Treat `NO_FCP`, an empty `#root`, console startup errors, or a mismatched
+   entry asset as a failed release even when HTTP status and Pages alias checks
+   pass.
+6. Deploy production only after the operator accepts any intentional visual
    change.
 
 The snapshot branch is the rollback baseline for local source state. Before a
 future upgrade, capture production VPS evidence and Cloudflare Pages deployment
-identifiers using the project-level `docs/history/ONLINE_ALIGNMENT_CAPTURE.md` procedure.
+identifiers using the project-level
+`docs/history/ONLINE_ALIGNMENT_CAPTURE.md` procedure.
 The production branch is `production`; do not treat `main` or an arbitrary Pages
-preview as the live frontend.
+preview as the live frontend. After acceptance, merge the tested upgrade commit
+into `production` and verify that the deployed entry asset belongs to that commit.

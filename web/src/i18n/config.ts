@@ -21,10 +21,10 @@ For commercial licensing, please contact support@quantumnous.com
  *
  * - Detect language from localStorage / navigator *before* init.
  * - Load only that pack + `en` fallback, then render.
- * - Preload the rest after idle so switchers stay fast.
+ * - Load other languages only when the user selects them.
  * - Never init with temporary `en` while waiting for zh/etc (see FRONTEND_I18N.md).
  */
-import i18n from 'i18next'
+import i18n, { type Resource } from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import { initReactI18next } from 'react-i18next'
 
@@ -90,12 +90,12 @@ export function detectPreferredLanguage(): InterfaceLanguageCode {
 
   try {
     if (typeof navigator !== 'undefined') {
-      const list =
-        navigator.languages?.length > 0
-          ? [...navigator.languages]
-          : navigator.language
-            ? [navigator.language]
-            : []
+      let list: string[] = []
+      if (navigator.languages?.length > 0) {
+        list = [...navigator.languages]
+      } else if (navigator.language) {
+        list = [navigator.language]
+      }
       for (const tag of list) {
         return resolveInterfaceLanguage(tag)
       }
@@ -107,7 +107,9 @@ export function detectPreferredLanguage(): InterfaceLanguageCode {
   return 'en'
 }
 
-async function loadLocaleFile(code: InterfaceLanguageCode): Promise<LocaleFile> {
+async function loadLocaleFile(
+  code: InterfaceLanguageCode
+): Promise<LocaleFile> {
   const mod = await localeLoaders[code]()
   return mod.default
 }
@@ -146,27 +148,30 @@ export function initI18n(): Promise<typeof i18n> {
       resources[lng] = preferredFile
     }
 
-    await i18n.use(LanguageDetector).use(initReactI18next).init({
-      resources: resources as any,
-      lng,
-      fallbackLng: 'en',
-      supportedLngs: [...SUPPORTED_LANGS],
-      nonExplicitSupportedLngs: true,
-      load: 'currentOnly',
-      nsSeparator: false,
-      debug: import.meta.env.DEV,
-      interpolation: {
-        escapeValue: false,
-      },
-      detection: {
-        order: ['localStorage', 'navigator'],
-        caches: ['localStorage'],
-        convertDetectedLanguage,
-      },
-      react: {
-        useSuspense: false,
-      },
-    })
+    await i18n
+      .use(LanguageDetector)
+      .use(initReactI18next)
+      .init({
+        resources: resources as Resource,
+        lng,
+        fallbackLng: 'en',
+        supportedLngs: [...SUPPORTED_LANGS],
+        nonExplicitSupportedLngs: true,
+        load: 'currentOnly',
+        nsSeparator: false,
+        debug: import.meta.env.DEV,
+        interpolation: {
+          escapeValue: false,
+        },
+        detection: {
+          order: ['localStorage', 'navigator'],
+          caches: ['localStorage'],
+          convertDetectedLanguage,
+        },
+        react: {
+          useSuspense: false,
+        },
+      })
 
     try {
       if (typeof window !== 'undefined') {
@@ -184,25 +189,6 @@ export function initI18n(): Promise<typeof i18n> {
       )
       await ensureLocaleLoaded(resolved)
       return originalChangeLanguage(resolved, callback)
-    }
-
-    const preloadRest = () => {
-      void (async () => {
-        for (const code of SUPPORTED_LANGS) {
-          if (code === 'en' || code === lng) continue
-          try {
-            await ensureLocaleLoaded(code)
-          } catch {
-            /* ignore */
-          }
-        }
-      })()
-    }
-
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      window.requestIdleCallback(() => preloadRest(), { timeout: 5000 })
-    } else {
-      setTimeout(preloadRest, 1500)
     }
 
     return i18n

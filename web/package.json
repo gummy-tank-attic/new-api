@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "rsbuild build",
-    "build:check": "tsgo -b && rsbuild build",
+    "build": "rsbuild build && node scripts/check-performance-regressions.mjs",
+    "build:check": "npm run test:regression && tsgo -b && rsbuild build && node scripts/check-performance-regressions.mjs",
+    "test:regression": "node --test src/lib/__tests__/public-request-policy.test.ts src/features/setup/lib/__tests__/setup-redirect.test.ts",
     "typecheck": "tsgo -b",
     "lint": "oxlint -c .oxlintrc.json .",
     "lint:fix": "oxlint -c .oxlintrc.json . --fix",
@@ -15,6 +16,7 @@
     "format": "node scripts/format-with-protected-headers.mjs --write",
     "copyright:check": "node scripts/add-copyright.mjs --check",
     "copyright": "node scripts/add-copyright.mjs",
+    "performance:check": "node scripts/check-performance-regressions.mjs",
     "i18n:sync": "node scripts/sync-i18n.mjs",
     "knip": "knip"
   },
