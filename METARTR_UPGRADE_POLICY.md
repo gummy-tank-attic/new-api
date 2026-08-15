@@ -47,3 +47,19 @@ identifiers using the project-level
 The production branch is `production`; do not treat `main` or an arbitrary Pages
 preview as the live frontend. After acceptance, merge the tested upgrade commit
 into `production` and verify that the deployed entry asset belongs to that commit.
+
+## Branch hygiene and upstream alignment
+
+- `production` is the authoritative MetaRtr release branch. Because GitHub uses
+  `main` as the default branch, `origin/main` mirrors the accepted `production`
+  commit for a clear repository landing page; deployment rules still refer to
+  `production` explicitly.
+- Use a short-lived `upgrade/<version>` branch while integrating upstream. After
+  it is tested and merged, tag the accepted production commit and delete the
+  completed upgrade branch.
+- Keep named recovery and dated snapshot branches until their rollback window
+  expires. They are baselines, not active development branches.
+- "Aligned" has two separate meanings: Git/Pages alignment requires the live
+  entry asset to match the `production` build; upstream alignment requires a
+  deliberate merge of the reviewed upstream release. Never infer the latter
+  merely because `git fetch` succeeded.
