@@ -229,6 +229,7 @@ export const MODEL_DISPLAY_ORDER = [
   'deepseek-v4-pro',
   'deepseek-v4-flash',
   // —— 智谱 ——
+  'glm-5.3',
   'glm-5.2',
   'glm-5.1',
   // —— Moonshot / Kimi ——
