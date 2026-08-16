@@ -213,6 +213,7 @@ export const MODEL_DISPLAY_ORDER = [
   'grok-imagine-image',
   'grok-imagine-video',
   // —— Google / Gemini：版本号大的在上 ——
+  'gemini-3.7-flash',
   'gemini-3.6-flash',
   'gemini-3.5-flash',
   'gemini-3.1-pro-preview',
