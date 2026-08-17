@@ -25,10 +25,11 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 | Rule | Do this |
 |------|---------|
 | Frontend production deploy | From parent `newapi/`: `.\scripts\deploy-web.ps1` → success = `OK: live https://www.metartr.com` → hard-refresh browser |
-| `git push` / GHA green | **NOT** enough for production www; never claim shipped without www alias check |
+| `git push` / GHA green | **NOT** enough for production www; never claim shipped without `deploy-web.ps1` OK |
 | Default `npm ci` | **Forbidden** for routine deploys; only `deploy-web.ps1 -Install` when node_modules is broken |
 | Secrets | Only parent `.env` / VPS `/opt/newapi/.env` — never commit secrets or paste into docs/chat |
-| Domains | **www** = static Pages; **api** = API + payment webhooks; apex unused |
+| Domains | **www** = VPS nginx static; **api** = API + payment webhooks; apex unused |
+| Public Base URL | Only `https://api.metartr.com` (no `/v1`, no www). Parent PRODUCTION §4.2 |
 | Pricing display order | Only `web/src/features/pricing/constants.ts` (`MODEL_DISPLAY_ORDER` etc.); must redeploy frontend after change |
 | Where to edit | Go/web code = **this** tree (`newapi源码/`); ops docs/compose/deploy scripts = **parent** `newapi/` |
 | Critical rate limit | Login/register/reset/oauth entry = mark **CTA**; pay/refresh/ratio_config/etc = **CT**; whitelist env `CRITICAL_RATE_LIMIT_IP_WHITELIST`; do not disable Critical long-term (parent PRODUCTION §3) |

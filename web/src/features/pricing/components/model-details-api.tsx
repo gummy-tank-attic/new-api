@@ -38,7 +38,7 @@ import {
 } from '@/components/data-table'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useStatus } from '@/hooks/use-status'
+import { API_BASE_URL } from '@/features/docs/constants'
 
 import {
   buildRateLimits,
@@ -118,7 +118,7 @@ function buildChatSample(lang: Lang, ctx: SampleContext): string {
       'from openai import OpenAI',
       '',
       'client = OpenAI(',
-      `    base_url="${ctx.baseUrl}/v1",`,
+      `    base_url="${ctx.baseUrl}",`,
       `    api_key="<YOUR_API_KEY>",`,
       ')',
       '',
@@ -133,7 +133,7 @@ function buildChatSample(lang: Lang, ctx: SampleContext): string {
       `import OpenAI from 'openai'`,
       '',
       `const client = new OpenAI({`,
-      `  baseURL: '${ctx.baseUrl}/v1',`,
+      `  baseURL: '${ctx.baseUrl}',`,
       `  apiKey: process.env.${ctx.apiKeyEnv},`,
       `})`,
       '',
@@ -306,7 +306,7 @@ function buildEmbeddingSample(lang: Lang, ctx: SampleContext): string {
     return [
       'from openai import OpenAI',
       '',
-      `client = OpenAI(base_url="${ctx.baseUrl}/v1", api_key="<YOUR_API_KEY>")`,
+      `client = OpenAI(base_url="${ctx.baseUrl}", api_key="<YOUR_API_KEY>")`,
       '',
       'response = client.embeddings.create(',
       `    model="${ctx.modelName}",`,
@@ -321,7 +321,7 @@ function buildEmbeddingSample(lang: Lang, ctx: SampleContext): string {
       `import OpenAI from 'openai'`,
       '',
       `const client = new OpenAI({`,
-      `  baseURL: '${ctx.baseUrl}/v1',`,
+      `  baseURL: '${ctx.baseUrl}',`,
       `  apiKey: process.env.${ctx.apiKeyEnv},`,
       `})`,
       '',
@@ -372,7 +372,7 @@ function buildImageSample(lang: Lang, ctx: SampleContext): string {
     return [
       'from openai import OpenAI',
       '',
-      `client = OpenAI(base_url="${ctx.baseUrl}/v1", api_key="<YOUR_API_KEY>")`,
+      `client = OpenAI(base_url="${ctx.baseUrl}", api_key="<YOUR_API_KEY>")`,
       '',
       'response = client.images.generate(',
       `    model="${ctx.modelName}",`,
@@ -389,7 +389,7 @@ function buildImageSample(lang: Lang, ctx: SampleContext): string {
       `import OpenAI from 'openai'`,
       '',
       `const client = new OpenAI({`,
-      `  baseURL: '${ctx.baseUrl}/v1',`,
+      `  baseURL: '${ctx.baseUrl}',`,
       `  apiKey: process.env.${ctx.apiKeyEnv},`,
       `})`,
       '',
@@ -445,20 +445,7 @@ function CodeSamplesSection(props: {
   endpointMap: Record<string, { path?: string; method?: string }>
 }) {
   const { t } = useTranslation()
-  const { status } = useStatus()
-
-  const baseUrl = useMemo(() => {
-    const candidate =
-      (status as Record<string, unknown> | null)?.server_address ??
-      (status as Record<string, unknown> | null)?.serverAddress ??
-      (status?.data as Record<string, unknown> | undefined)?.server_address ??
-      (status?.data as Record<string, unknown> | undefined)?.serverAddress
-    if (candidate && typeof candidate === 'string') {
-      return candidate.replace(/\/$/, '')
-    }
-    if (typeof window !== 'undefined') return window.location.origin
-    return 'https://api.example.com'
-  }, [status])
+  const baseUrl = API_BASE_URL
 
   const endpoints = useMemo(() => {
     const types = props.model.supported_endpoint_types || []

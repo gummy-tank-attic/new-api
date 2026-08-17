@@ -16,20 +16,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-/** OpenAI-compatible base (includes /v1). */
-export const API_BASE_URL = 'https://api.metartr.com/v1'
+/** The only public Base URL. Paste this in every client. */
+export const API_BASE_URL = 'https://api.metartr.com'
+
+/** Origin alias — same host as API_BASE_URL; used to compose full request paths. */
+export const API_HOST = API_BASE_URL
 
 /** OpenAI-compatible image and video generation direct endpoint. */
 export const API_IMAGES_ENDPOINT =
   'https://api.metartr.com/v1/images/generations'
 
-/**
- * Host without /v1 — for Anthropic-style clients that append paths themselves
- * (e.g. Claude Code → /v1/messages).
- */
-export const API_HOST = 'https://api.metartr.com'
-
-/** Public website (Pages only — not for API clients or account-manager tools). */
+/** Public website (not for API clients or account-manager tools). */
 export const SITE_URL = 'https://www.metartr.com'
 
 export const PRICING_PATH = '/pricing'
@@ -131,7 +128,7 @@ export const EXAMPLE_MODEL_ANTHROPIC = 'claude-sonnet-4-6'
 export const EXAMPLE_MODEL_IMAGE = 'your-image-model-id'
 export const EXAMPLE_MODEL_VIDEO = 'your-video-model-id'
 export const EXAMPLE_API_KEY = 'sk-metartr-your-api-key'
-export const IMAGE_GENERATIONS_ENDPOINT = `${API_BASE_URL}/images/generations`
+export const IMAGE_GENERATIONS_ENDPOINT = API_IMAGES_ENDPOINT
 
 export function isDocsSectionId(
   value: string | undefined

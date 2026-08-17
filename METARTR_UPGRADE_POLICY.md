@@ -19,7 +19,7 @@ Before merging or deploying an upstream update, preserve and regression-check:
 - the root route must not block first paint on `/api/setup`, notices, custom
   home content, or unused locale packs;
 - above-the-fold content must not auto-cycle after paint and reset LCP;
-- public asset and cache behavior needed by Cloudflare Pages.
+- public asset and cache behavior needed by VPS nginx + CF orange-cloud.
 
 Do not replace `web/` wholesale with an upstream directory. Bring backend and
 security fixes forward selectively, then reapply MetaRtr frontend changes.
@@ -31,22 +31,20 @@ security fixes forward selectively, then reapply MetaRtr frontend changes.
    committed immediately after recovery.
 2. Run `npm run build:check`. Its startup policy and bundle budgets are release
    blockers, including the production-entry check for invalid undefined calls.
-3. Deploy the candidate frontend to a Cloudflare Pages preview.
-4. Compare the preview with production on desktop and mobile for the protected
-   contract above.
+3. There is **no Pages preview**. Verify locally (`npm run build` + `npm run
+   dev` against the protected contract on desktop and mobile) first.
+4. Deploy the accepted candidate with parent `scripts/deploy-web.ps1`.
 5. Treat `NO_FCP`, an empty `#root`, console startup errors, or a mismatched
-   entry asset as a failed release even when HTTP status and Pages alias checks
-   pass.
-6. Deploy production only after the operator accepts any intentional visual
-   change.
+   entry asset as a failed release even when HTTP status is 200.
+6. After deploy, confirm live `www` bundle hash; revert the `current` symlink
+   if the operator rejects a visual change.
 
 The snapshot branch is the rollback baseline for local source state. Before a
-future upgrade, capture production VPS evidence and Cloudflare Pages deployment
-identifiers using the project-level
+future upgrade, capture production VPS evidence using the project-level
 `docs/history/ONLINE_ALIGNMENT_CAPTURE.md` procedure.
-The production branch is `production`; do not treat `main` or an arbitrary Pages
-preview as the live frontend. After acceptance, merge the tested upgrade commit
-into `production` and verify that the deployed entry asset belongs to that commit.
+The production branch is `production`; do not treat `main` as the live
+frontend. After acceptance, merge the tested upgrade commit into `production`
+and verify the live `www` bundle hash belongs to that commit.
 
 ## Branch hygiene and upstream alignment
 
@@ -59,7 +57,7 @@ into `production` and verify that the deployed entry asset belongs to that commi
   completed upgrade branch.
 - Keep named recovery and dated snapshot branches until their rollback window
   expires. They are baselines, not active development branches.
-- "Aligned" has two separate meanings: Git/Pages alignment requires the live
-  entry asset to match the `production` build; upstream alignment requires a
-  deliberate merge of the reviewed upstream release. Never infer the latter
-  merely because `git fetch` succeeded.
+- "Aligned" has two separate meanings: Git/live alignment requires the live
+  `www` bundle hash to match the `production` build; upstream alignment
+  requires a deliberate merge of the reviewed upstream release. Never infer
+  the latter merely because `git fetch` succeeded.

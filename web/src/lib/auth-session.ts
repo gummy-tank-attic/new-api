@@ -67,8 +67,7 @@ export class AuthRotationError extends Error {
 }
 
 const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ||
-  (import.meta.env.PROD ? 'https://api.metartr.com' : '')
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || ''
 
 const authClient = axios.create({
   baseURL: API_BASE_URL,

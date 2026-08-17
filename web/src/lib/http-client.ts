@@ -43,10 +43,9 @@ declare module 'axios' {
 
 export type ApiRequestConfig = AxiosRequestConfig
 
-/** MetaRtr production: static site on www, API on api (no Pages BFF). */
+/** Same-origin after www self-host. Override with VITE_API_BASE_URL if needed. */
 const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ||
-  (import.meta.env.PROD ? 'https://api.metartr.com' : '')
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || ''
 
 /** Default request timeout (ms). Prevents infinite pending skeleton on hung Tunnel/API. */
 export const DEFAULT_API_TIMEOUT_MS = 20_000

@@ -176,10 +176,7 @@ function QuickstartSection() {
           steps={[
             t('Sign up and top up or obtain trial quota if available.'),
             t('Create an API key in Console → API Keys.'),
-            t(
-              'Set Base URL to {{url}} (include /v1 for OpenAI-compatible clients).',
-              { url: API_BASE_URL }
-            ),
+            t('Set Base URL to {{url}}.', { url: API_BASE_URL }),
             t(
               'Send a chat completion with a model ID from Model Square, e.g. {{model}}.',
               { model: EXAMPLE_MODEL_OPENAI }
@@ -215,10 +212,9 @@ print(response.choices[0].message.content)`}
         <h2 className='text-lg font-bold'>{t('If it fails, check these 5 first')}</h2>
         <StepList
           steps={[
-            t(
-              'Base URL: OpenAI clients use {{withV1}}; Claude Code / ANTHROPIC_BASE_URL uses {{host}} (no /v1).',
-              { withV1: API_BASE_URL, host: API_HOST }
-            ),
+            t('Base URL is {{url}} for every client.', {
+              url: API_BASE_URL,
+            }),
             t(
               'Model ID: copy the exact string from Model Square — doc examples are placeholders only.'
             ),
@@ -245,7 +241,7 @@ function BaseUrlSection() {
       <SectionTitle
         title={t('Base URL & API Key')}
         description={t(
-          'Most integration failures come from a wrong Base URL shape or a missing /v1. Use the values below by client type.'
+          'Paste this Base URL in every client. Do not use www.'
         )}
       />
 
@@ -260,19 +256,12 @@ function BaseUrlSection() {
           </thead>
           <tbody className='divide-y'>
             <tr>
-              <td className='px-4 py-3'>
-                {t('OpenAI SDK / Cursor / most apps')}
-              </td>
+              <td className='px-4 py-3'>{t('Base URL')}</td>
               <td className='px-4 py-3 font-mono text-xs'>{API_BASE_URL}</td>
               <td className='text-muted-foreground px-4 py-3 text-xs'>
-                {t('Includes /v1')}
-              </td>
-            </tr>
-            <tr>
-              <td className='px-4 py-3'>{t('Claude Code (Anthropic env)')}</td>
-              <td className='px-4 py-3 font-mono text-xs'>{API_HOST}</td>
-              <td className='text-muted-foreground px-4 py-3 text-xs'>
-                {t('No trailing /v1 — client appends /v1/messages')}
+                {t(
+                  'All clients (OpenAI, Claude Code, Gemini, Cursor, Codex)'
+                )}
               </td>
             </tr>
             <tr>
@@ -297,17 +286,10 @@ function BaseUrlSection() {
         </table>
       </div>
 
-      <Callout title={t('Do not mix host and /v1')}>
-        {t(
-          'If a tool asks for “OpenAI Base URL”, use {{withV1}}. If it asks for Anthropic Base URL / ANTHROPIC_BASE_URL, use {{host}} without /v1.',
-          { withV1: API_BASE_URL, host: API_HOST }
-        )}
-      </Callout>
-
       <Callout tone='warn' title={t('Third-party account managers')}>
         {t(
-          'Login-based tools (e.g. All API Hub): open {{www}} and sign in first. SDK / OpenAI Base URL still use {{host}} (or {{withV1}}). Prefer a dedicated revocable API key. Never paste console passwords or secrets into browser extensions.',
-          { host: API_HOST, www: SITE_URL, withV1: API_BASE_URL }
+          'Login-based tools (e.g. All API Hub): open {{www}} and sign in first. SDK Base URL is {{url}}. Prefer a dedicated revocable API key. Never paste console passwords or secrets into browser extensions.',
+          { www: SITE_URL, url: API_BASE_URL }
         )}
       </Callout>
 
@@ -358,7 +340,7 @@ function ProtocolsSection() {
             <tr>
               <td className='px-4 py-3'>{t('Claude native (Messages)')}</td>
               <td className='px-4 py-3 font-mono text-xs'>
-                {API_HOST}/v1/messages
+                {API_BASE_URL}/v1/messages
               </td>
               <td className='px-4 py-3 font-mono text-xs'>
                 x-api-key + anthropic-version
@@ -377,8 +359,8 @@ function ProtocolsSection() {
 
       <Callout title={t('When to use which')}>
         {t(
-          'Most SDKs and IDEs: OpenAI compatible. Keep Anthropic request body (tools, system blocks): Claude native. Keep Google contents format or Gemini SDK: Gemini native. Claude Code env vars still use ANTHROPIC_BASE_URL={{host}} without /v1.',
-          { host: API_HOST }
+          'Most SDKs and IDEs: OpenAI compatible. Keep Anthropic request body (tools, system blocks): Claude native. Keep Google contents format or Gemini SDK: Gemini native. Set Base URL to {{url}} in every case.',
+          { url: API_BASE_URL }
         )}
       </Callout>
 
@@ -595,7 +577,7 @@ function EndpointsSection() {
       <SectionTitle
         title={t('Endpoints')}
         description={t(
-          'Common public paths relative to {{host}}. OpenAI SDK base_url already includes /v1 — do not duplicate /v1 in method paths.',
+          'Common public paths on {{host}}. OpenAI SDK uses the same Base URL and appends these paths.',
           { host: API_HOST }
         )}
       />
@@ -905,7 +887,7 @@ function ClaudeCodeSection() {
       <SectionTitle
         title={t('Claude Code')}
         description={t(
-          'Point Anthropic CLI environment variables at MetaRtr. Use the host without /v1.'
+          'Point Anthropic CLI environment variables at MetaRtr.'
         )}
       />
 
@@ -925,7 +907,7 @@ function ClaudeCodeSection() {
         <h2 className='text-lg font-bold'>{t('macOS / Linux / WSL')}</h2>
         <CodeBlock
           title='bash'
-          code={`export ANTHROPIC_BASE_URL="${API_HOST}"
+          code={`export ANTHROPIC_BASE_URL="${API_BASE_URL}"
 export ANTHROPIC_AUTH_TOKEN="${EXAMPLE_API_KEY}"
 
 # Optional defaults (use exact IDs from Model Square)
@@ -940,7 +922,7 @@ claude`}
         <h2 className='text-lg font-bold'>{t('Windows PowerShell')}</h2>
         <CodeBlock
           title='PowerShell'
-          code={`$env:ANTHROPIC_BASE_URL = "${API_HOST}"
+          code={`$env:ANTHROPIC_BASE_URL = "${API_BASE_URL}"
 $env:ANTHROPIC_AUTH_TOKEN = "${EXAMPLE_API_KEY}"
 claude`}
         />
@@ -957,11 +939,10 @@ claude`}
         </p>
       </div>
 
-      <Callout tone='warn' title={t('Common pitfall')}>
-        {t(
-          'Do not set ANTHROPIC_BASE_URL to {{withV1}}. Use {{host}} only. Wrong path shapes usually show as 404 on /v1/v1/messages.',
-          { withV1: API_BASE_URL, host: API_HOST }
-        )}
+      <Callout title={t('Same Base URL')}>
+        {t('Use the same Base URL {{url}} as every other client.', {
+          url: API_BASE_URL,
+        })}
       </Callout>
     </div>
   )
@@ -1078,7 +1059,8 @@ Model:    ${EXAMPLE_MODEL_OPENAI}   # example — copy from Model Square`}
 
       <Callout title={t('Tip')}>
         {t(
-          'If the IDE silently falls back to built-in providers, double-check that override is enabled and the Base URL includes /v1.'
+          'If the IDE silently falls back to built-in providers, double-check that override is enabled and the Base URL is {{url}}.',
+          { url: API_BASE_URL }
         )}
       </Callout>
     </div>
@@ -1222,10 +1204,8 @@ function TroubleshootingSection() {
       ),
     },
     {
-      problem: t('404 or /v1/v1/... path errors'),
-      fix: t(
-        'Wrong Base URL shape. OpenAI clients need /v1; Claude Code ANTHROPIC_BASE_URL must not include /v1.'
-      ),
+      problem: t('404 or HTML instead of JSON'),
+      fix: t('Use {{url}}. Do not use www.', { url: API_BASE_URL }),
     },
     {
       problem: t('model_not_found / model not allowed'),
