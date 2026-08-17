@@ -42,6 +42,7 @@ import {
 } from '@/lib/auth-session'
 import { subscribeAuthSessionEvents } from '@/lib/auth-session-sync'
 import { resolveLegacyRoute } from '@/lib/legacy-route'
+import { applySessionQuerySync } from '@/lib/session-query-sync'
 import { useAuthStore } from '@/stores/auth-store'
 
 /** Dev-only tooling — dynamic so production entry never pulls these packages. */
@@ -91,11 +92,11 @@ function RootComponent() {
   useEffect(
     () =>
       useAuthStore.subscribe((state, previousState) => {
-        const sid = state.auth.session?.sid
-        const previousSID = previousState.auth.session?.sid
-        if (sid !== previousSID) {
-          queryClient.clear()
-        }
+        applySessionQuerySync(
+          queryClient,
+          previousState.auth.session?.sid,
+          state.auth.session?.sid
+        )
       }),
     [queryClient]
   )

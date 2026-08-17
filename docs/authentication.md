@@ -72,6 +72,8 @@
 
 Access Token 到期前约 60 秒应静默调用 refresh。价格页、首页、About 等公开接口使用 `skipAuthRefresh` 时，401 **不得** `clearAuthentication`：过期 Bearer 打 `TryUserAuth` 会 401，这只表示该请求应按匿名降级，Refresh Cookie 仍有效。违反这条会在约 15 分钟后把用户踢出（MetaRtr 2026-08-13 生产事故）。`/api/user/auth/logout` 除外。
 
+根路由在 SID 变化时必须走 `applySessionQuerySync`（`web/src/lib/session-query-sync.ts`）：冷启动 `undefined → sid` 只 `invalidateQueries`，换身份才 `resetQueries`。**禁止**在此路径 `queryClient.clear()`。Access Token 不落盘，已登录 Ctrl+F5 会先匿名拉公开接口再恢复会话；`clear()` 会 silent cancel 进行中的请求，价格/排行榜等不订阅 auth 的页面会永远停在骨架屏（MetaRtr 2026-08-17）。不要为消掉这次多余请求而去等 bootstrap 完成再发公开请求，公开页不得重新阻塞在 refresh / Web Lock 上。回归：`npm run test:regression` 含 `session-query-sync.test.ts`。登出仍可用 `clearAuthenticatedClientState`（会 `clear()`），但必须随即离开当前页。
+
 ## Session 签发限额与保留策略
 
 服务端在所有登录方式的统一 Session 签发出口执行两级账户限制：

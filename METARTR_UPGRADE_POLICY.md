@@ -14,6 +14,9 @@ Before merging or deploying an upstream update, preserve and regression-check:
   authentication/session flow;
 - `skipAuthRefresh` 401 on public pages must **not** call `clearAuthentication`
   (that logs users out ~15 minutes after Access Token expiry);
+- SID restore (`undefined → sid`) must use `applySessionQuerySync` /
+  `invalidateQueries`, never `queryClient.clear()` (that leaves /pricing and
+  /rankings on an infinite skeleton after logged-in Ctrl+F5);
 - anonymous startup reads must remain CORS-simple: do not add global
   `Cache-Control` request headers or attach stale authorization to public APIs;
 - the root route must not block first paint on `/api/setup`, notices, custom

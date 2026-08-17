@@ -16,44 +16,64 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { PricingData } from '../types'
+import type { RankingsResponse } from '../api'
+import type { RankingPeriod } from '../types'
 
-const STORAGE_KEY = 'metartr.pricing.cache.v2'
-/** First-paint placeholder only; live prices always revalidated (staleTime: 0). */
+export type RankingsPayload = RankingsResponse
+
+const STORAGE_KEY = 'metartr.rankings.cache.v1'
+/** First-paint placeholder only. */
 const MAX_AGE_MS = 24 * 60 * 60 * 1000
 
 type CachedPayload = {
   savedAt: number
-  data: PricingData
+  byPeriod: Partial<Record<RankingPeriod, RankingsPayload>>
 }
 
-function isPricingData(value: unknown): value is PricingData {
+export function isRankingsPayload(value: unknown): value is RankingsPayload {
   if (!value || typeof value !== 'object') return false
-  const v = value as PricingData
-  return Array.isArray(v.data) && Array.isArray(v.vendors)
+  const v = value as RankingsPayload
+  return Boolean(
+    v.data &&
+      Array.isArray(v.data.models) &&
+      Array.isArray(v.data.vendors)
+  )
 }
 
-/** Read last successful pricing payload for placeholder / SWR. */
-export function readPricingCache(): PricingData | undefined {
+function readStore(): CachedPayload | undefined {
   try {
     if (typeof window === 'undefined') return undefined
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) return undefined
     const parsed = JSON.parse(raw) as CachedPayload
-    if (!parsed?.savedAt || !isPricingData(parsed.data)) return undefined
+    if (!parsed?.savedAt || typeof parsed.byPeriod !== 'object') return undefined
     if (Date.now() - parsed.savedAt > MAX_AGE_MS) return undefined
-    return parsed.data
+    return parsed
   } catch {
     return undefined
   }
 }
 
-/** Persist pricing after a successful network fetch. */
-export function writePricingCache(data: PricingData): void {
+export function readRankingsCache(
+  period: RankingPeriod
+): RankingsPayload | undefined {
+  const store = readStore()
+  const data = store?.byPeriod[period]
+  return isRankingsPayload(data) ? data : undefined
+}
+
+export function writeRankingsCache(
+  period: RankingPeriod,
+  data: RankingsPayload
+): void {
   try {
     if (typeof window === 'undefined') return
-    if (!isPricingData(data)) return
-    const payload: CachedPayload = { savedAt: Date.now(), data }
+    if (!isRankingsPayload(data)) return
+    const existing = readStore()
+    const payload: CachedPayload = {
+      savedAt: Date.now(),
+      byPeriod: { ...(existing?.byPeriod ?? {}), [period]: data },
+    }
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   } catch {
     /* quota / private mode */

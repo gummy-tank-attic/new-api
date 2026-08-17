@@ -20,6 +20,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
 import { useStatus } from '@/hooks/use-status'
+import { useAuthStore } from '@/stores/auth-store'
 
 import { getPricing } from '../api'
 import { readPricingCache, writePricingCache } from '../lib/pricing-cache'
@@ -36,10 +37,11 @@ let memoryPricingCache = readPricingCache()
 
 export function usePricingData() {
   const { status } = useStatus()
+  const sessionSid = useAuthStore((state) => state.auth.session?.sid)
 
   const { data, isPending, isFetching, isError, error, refetch, isPlaceholderData } =
     useQuery({
-      queryKey: ['pricing'],
+      queryKey: ['pricing', sessionSid ?? 'anon'],
       queryFn: async () => {
         const fresh = await getPricing()
         writePricingCache(fresh)
@@ -51,8 +53,9 @@ export function usePricingData() {
       gcTime: 30 * 60 * 1000,
       refetchOnMount: 'always',
       refetchOnWindowFocus: true,
-      // First paint only; network must always revalidate after.
-      placeholderData: () => memoryPricingCache ?? readPricingCache(),
+      // Keep last payload across anon → session so bootstrap cannot blank the table.
+      placeholderData: (previousData) =>
+        previousData ?? memoryPricingCache ?? readPricingCache(),
       // getPricing already does authed → public fallback; one network retry is enough.
       retry: 1,
       retryDelay: 600,

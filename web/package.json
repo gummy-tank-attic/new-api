@@ -7,7 +7,7 @@
     "dev": "rsbuild dev",
     "build": "rsbuild build && node scripts/check-performance-regressions.mjs",
     "build:check": "npm run test:regression && tsgo -b && rsbuild build && node scripts/check-performance-regressions.mjs",
-    "test:regression": "node --test src/lib/__tests__/public-request-policy.test.ts src/features/setup/lib/__tests__/setup-redirect.test.ts",
+    "test:regression": "node --test src/lib/__tests__/public-request-policy.test.ts src/lib/__tests__/session-query-sync.test.ts src/features/setup/lib/__tests__/setup-redirect.test.ts src/i18n/__tests__/detect-language.test.ts",
     "typecheck": "tsgo -b",
     "lint": "oxlint -c .oxlintrc.json .",
     "lint:fix": "oxlint -c .oxlintrc.json . --fix",

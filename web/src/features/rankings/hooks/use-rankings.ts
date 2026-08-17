@@ -18,13 +18,40 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
 
+import { useAuthStore } from '@/stores/auth-store'
+
 import { getRankings } from '../api'
+import {
+  readRankingsCache,
+  writeRankingsCache,
+} from '../lib/rankings-cache'
 import type { RankingPeriod } from '../types'
 
+const memoryRankingsCache: Partial<
+  Record<RankingPeriod, ReturnType<typeof readRankingsCache>>
+> = {}
+
 export function useRankings(period: RankingPeriod) {
+  const sessionSid = useAuthStore((state) => state.auth.session?.sid)
+
   return useQuery({
-    queryKey: ['rankings', period],
-    queryFn: () => getRankings(period),
+    queryKey: ['rankings', period, sessionSid ?? 'anon'],
+    queryFn: async () => {
+      const fresh = await getRankings(period)
+      writeRankingsCache(period, fresh)
+      memoryRankingsCache[period] = fresh
+      return fresh
+    },
     staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+    retryDelay: 600,
+    networkMode: 'always',
+    placeholderData: (previousData, previousQuery) => {
+      if (previousQuery?.queryKey[1] === period && previousData) {
+        return previousData
+      }
+      return memoryRankingsCache[period] ?? readRankingsCache(period)
+    },
   })
 }

@@ -72,6 +72,9 @@ const API_BASE_URL =
 const authClient = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  // Same cap as http-client. Authenticated routes await bootstrap; no timeout
+  // leaves Ctrl+F5 hanging on a stuck refresh / Web Lock.
+  timeout: 20_000,
 })
 
 const refreshRaceDelays = [80, 200, 500] as const

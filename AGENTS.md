@@ -32,8 +32,9 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 | Public Base URL | Only `https://api.metartr.com` (no `/v1`, no www). Parent PRODUCTION §4.2 |
 | Pricing display order | Only `web/src/features/pricing/constants.ts` (`MODEL_DISPLAY_ORDER` etc.); must redeploy frontend after change |
 | Where to edit | Go/web code = **this** tree (`newapi源码/`); ops docs/compose/deploy scripts = **parent** `newapi/` |
+| Upstream upgrade | Parent README 铁律 11–12 + `METARTR_UPGRADE_POLICY.md`. Never replace `web/` wholesale. Merge on `upgrade/<ver>`. Do not `deploy-web.ps1` until `/` still shows MetaRtr home |
 | Critical rate limit | Login/register/reset/oauth entry = mark **CTA**; pay/refresh/ratio_config/etc = **CT**; whitelist env `CRITICAL_RATE_LIMIT_IP_WHITELIST`; do not disable Critical long-term (parent PRODUCTION §3) |
-| Session / 401 | `skipAuthRefresh` 401 must **not** `clearAuthentication`; silent refresh only (except logout). Access TTL 15m; keep-alive in `auth-session.ts`. Parent PRODUCTION §9 |
+| Session / 401 | `skipAuthRefresh` 401 must **not** `clearAuthentication`; silent refresh only (except logout). Access TTL 15m; keep-alive in `auth-session.ts`. SID restore must **not** `queryClient.clear()` — use `applySessionQuerySync`. Parent PRODUCTION §9 / `docs/authentication.md` |
 | About / contact | `/about` contact cards; links only in `web/src/lib/contact-links.ts`; About uses `showFooter={false}`; do not block paint on empty `/api/about` (parent PRODUCTION §7.9) |
 | Pricing nav label | i18n key still `Model Square` → zh **价格**; route `/pricing` |
 
@@ -122,7 +123,7 @@ Do NOT directly import or call `encoding/json` in business code. `json.RawMessag
   - `bun run dev` for development server
   - `bun run build` for production build
   - `bun run i18n:*` for i18n tooling
-- Frontend UI text must support i18n with `i18next`/`react-i18next`. Use flat JSON locale files in `web/src/i18n/locales/{lang}.json`, with English source strings as keys.
+- Frontend UI text must support i18n with `i18next`/`react-i18next`. Use flat JSON locale files in `web/src/i18n/locales/{lang}.json`, with English source strings as keys. Boot: `index.html` prefetches `/locales/{lang}.json` in parallel with JS; do not bundle all 7 locales into the main JS, and do not use `i18next-browser-languagedetector`. See repo `docs/FRONTEND_I18N.md`.
 - In React components, use `useTranslation()` and call `t('English key')` for user-facing text.
 - **Dialog / Portal ref timing:** Use `useState + useCallback` callback ref (not `useRef`) whenever a `useEffect` must fire after a Portal-mounted DOM node is available. `useRef` updates silently without re-render; inside Radix `<Dialog>` the Portal may mount one render cycle late, so `ref.current` will be `null` on the first effect run. See `README.md §` "Frontend Known Gotchas" for the full pattern and background.
 - Follow `web/AGENTS.md` for detailed frontend conventions, including TypeScript, component structure, styling, accessibility, testing, and build checks.
