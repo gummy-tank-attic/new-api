@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
@@ -36,7 +36,11 @@ import {
   lookupGroupMapValue,
   MANUAL_GROUP_SAVINGS_OFF,
 } from '../constants'
-import { isDynamicPricingModel } from '../lib/dynamic-price'
+import {
+  formatDynamicUnitPrice,
+  getDynamicPricingTiers,
+  isDynamicPricingModel,
+} from '../lib/dynamic-price'
 import { resolveGroupSavingsOffPercent } from '../lib/group-discount'
 import {
   getConfiguredGroupRatio,
@@ -65,6 +69,53 @@ export interface SupplierPriceTableProps {
 
 function isEmptyPrice(value: string): boolean {
   return value === '-' || value === '—' || value === ''
+}
+
+function isTimeTieredModel(model: PricingModel): boolean {
+  const name = model.model_name.toLowerCase()
+  return name.includes('deepseek-v4') || name.startsWith('deepseek')
+}
+
+function getModelUnitPrice(
+  model: PricingModel,
+  type: PriceType,
+  ratioMultiplier: number,
+  tokenUnit: TokenUnit,
+  priceRate = 1,
+  usdExchangeRate = 1,
+  selectedGroup?: string
+): string {
+  if (isDynamicPricingModel(model)) {
+    const tiers = getDynamicPricingTiers(model)
+    if (tiers.length > 0) {
+      const tier = tiers[0]
+      let val = 0
+      if (type === 'input') val = tier.inputPrice || 0
+      else if (type === 'output') val = tier.outputPrice || 0
+      else if (type === 'cache') val = tier.cacheReadPrice || 0
+      else if (type === 'create_cache') val = tier.cacheCreatePrice || 0
+
+      if (val > 0) {
+        return formatDynamicUnitPrice(val, {
+          tokenUnit,
+          priceRate,
+          usdExchangeRate,
+          groupRatioMultiplier: ratioMultiplier,
+        })
+      }
+    }
+  }
+
+  return formatPrice(
+    model,
+    type,
+    tokenUnit,
+    false,
+    priceRate,
+    usdExchangeRate,
+    selectedGroup,
+    ratioMultiplier
+  )
 }
 
 /**
@@ -133,6 +184,10 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
   }, [isGroupMode, props.selectedGroup, props.groupRatio])
 
   const rows = useMemo(() => props.models, [props.models])
+  const isTimeTieredTable = useMemo(
+    () => rows.length > 0 && rows.some(isTimeTieredModel),
+    [rows]
+  )
 
   if (rows.length === 0) {
     return (
@@ -141,6 +196,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
       </div>
     )
   }
+
+  const baseRatio = getConfiguredGroupRatio(props.groupRatio, selectedGroup)
 
   return (
     <div
@@ -156,6 +213,11 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
             <TableHead className='text-muted-foreground h-11 min-w-[11rem] px-4 font-medium tracking-wide'>
               {t('Model ID')}
             </TableHead>
+            {isTimeTieredTable ? (
+              <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
+                {t('Billing Period', '计费时段')}
+              </TableHead>
+            ) : null}
             <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
               {t('Input price')}
               <span className='text-muted-foreground/50 ml-1 font-normal'>
@@ -168,12 +230,14 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 {t('/ {{unit}} tokens', { unit: unitHint })}
               </span>
             </TableHead>
-            <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
-              {t('Cache Write')}
-              <span className='text-muted-foreground/50 ml-1 font-normal'>
-                {t('/ {{unit}} tokens', { unit: unitHint })}
-              </span>
-            </TableHead>
+            {!isTimeTieredTable ? (
+              <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
+                {t('Cache Write')}
+                <span className='text-muted-foreground/50 ml-1 font-normal'>
+                  {t('/ {{unit}} tokens', { unit: unitHint })}
+                </span>
+              </TableHead>
+            ) : null}
             <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
               {t('Cache Read')}
               <span className='text-muted-foreground/50 ml-1 font-normal'>
@@ -186,47 +250,281 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((model, index) => (
-            <TableRow
-              key={model.model_name}
-              className={cn(
-                'border-border/50 cursor-pointer transition-colors hover:bg-muted/80',
-                index % 2 === 1 ? 'bg-muted/60 dark:bg-muted/30' : 'bg-background'
-              )}
-              onClick={() => props.onModelClick?.(model.model_name)}
-            >
-              <TableCell className='px-4 py-3'>
-                <div className='flex max-w-[20rem] items-center gap-2'>
-                  <span className='text-foreground truncate font-mono text-[15px] font-medium tracking-tight'>
-                    {model.model_name}
-                  </span>
-                  <span
-                    className='inline-flex'
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => e.stopPropagation()}
+          {rows.map((model, index) => {
+            if (isTimeTieredModel(model)) {
+              // Off-peak prices (0.5x half price)
+              const offPeakInputGroup = getModelUnitPrice(
+                model,
+                'input',
+                baseRatio * 0.5,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate,
+                selectedGroup
+              )
+              const offPeakInputOfficial = getModelUnitPrice(
+                model,
+                'input',
+                0.5,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate
+              )
+              const offPeakOutputGroup = getModelUnitPrice(
+                model,
+                'output',
+                baseRatio * 0.5,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate,
+                selectedGroup
+              )
+              const offPeakOutputOfficial = getModelUnitPrice(
+                model,
+                'output',
+                0.5,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate
+              )
+              const offPeakCacheGroup = getModelUnitPrice(
+                model,
+                'cache',
+                baseRatio * 0.5,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate,
+                selectedGroup
+              )
+              const offPeakCacheOfficial = getModelUnitPrice(
+                model,
+                'cache',
+                0.5,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate
+              )
+
+              const offPeakInput = resolvePrices(
+                offPeakInputGroup,
+                offPeakInputOfficial,
+                isGroupMode,
+                Boolean(selectedGroup)
+              )
+              const offPeakOutput = resolvePrices(
+                offPeakOutputGroup,
+                offPeakOutputOfficial,
+                isGroupMode,
+                Boolean(selectedGroup)
+              )
+              const offPeakCache = resolvePrices(
+                offPeakCacheGroup,
+                offPeakCacheOfficial,
+                isGroupMode,
+                Boolean(selectedGroup)
+              )
+
+              // Peak prices (1.0x baseline price)
+              const peakInputGroup = getModelUnitPrice(
+                model,
+                'input',
+                baseRatio,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate,
+                selectedGroup
+              )
+              const peakInputOfficial = getModelUnitPrice(
+                model,
+                'input',
+                1,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate
+              )
+              const peakOutputGroup = getModelUnitPrice(
+                model,
+                'output',
+                baseRatio,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate,
+                selectedGroup
+              )
+              const peakOutputOfficial = getModelUnitPrice(
+                model,
+                'output',
+                1,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate
+              )
+              const peakCacheGroup = getModelUnitPrice(
+                model,
+                'cache',
+                baseRatio,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate,
+                selectedGroup
+              )
+              const peakCacheOfficial = getModelUnitPrice(
+                model,
+                'cache',
+                1,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate
+              )
+
+              const peakInput = resolvePrices(
+                peakInputGroup,
+                peakInputOfficial,
+                isGroupMode,
+                Boolean(selectedGroup)
+              )
+              const peakOutput = resolvePrices(
+                peakOutputGroup,
+                peakOutputOfficial,
+                isGroupMode,
+                Boolean(selectedGroup)
+              )
+              const peakCache = resolvePrices(
+                peakCacheGroup,
+                peakCacheOfficial,
+                isGroupMode,
+                Boolean(selectedGroup)
+              )
+
+              return (
+                <Fragment key={model.model_name}>
+                  {/* Row 1: 空闲时段 */}
+                  <TableRow
+                    className={cn(
+                      'border-border/50 transition-colors hover:bg-muted/80',
+                      index % 2 === 1 ? 'bg-muted/60 dark:bg-muted/30' : 'bg-background'
+                    )}
                   >
-                    <CopyButton
-                      value={model.model_name}
-                      size='icon'
-                      variant='ghost'
-                      className='text-muted-foreground/55 hover:text-muted-foreground size-8 shrink-0'
-                      iconClassName='size-3.5'
-                    />
-                  </span>
-                </div>
-              </TableCell>
-              <ModelPriceCells
-                model={model}
-                tokenUnit={tokenUnit}
-                priceRate={priceRate}
-                usdExchangeRate={usdExchangeRate}
-                selectedGroup={selectedGroup}
-                isGroupMode={isGroupMode}
-                savings={savings}
-                t={t}
-              />
-            </TableRow>
-          ))}
+                    <TableCell
+                      rowSpan={2}
+                      className='px-4 py-3 align-middle border-r border-border/40 cursor-pointer'
+                      onClick={() => props.onModelClick?.(model.model_name)}
+                    >
+                      <div className='flex max-w-[20rem] items-center gap-2'>
+                        <span className='text-foreground truncate font-mono text-[15px] font-medium tracking-tight'>
+                          {model.model_name}
+                        </span>
+                        <span
+                          className='inline-flex'
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        >
+                          <CopyButton
+                            value={model.model_name}
+                            size='icon'
+                            variant='ghost'
+                            className='text-muted-foreground/55 hover:text-muted-foreground size-8 shrink-0'
+                            iconClassName='size-3.5'
+                          />
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className='px-3 py-3 text-center'>
+                      <span
+                        title={t('Beijing Time: 00:00-09:00, 12:00-14:00, 18:00-24:00', '北京时间 00:00-09:00、12:00-14:00、18:00-24:00')}
+                        className='inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11.5px] font-medium text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 cursor-help'
+                      >
+                        {t('Off-peak', '空闲时段')}
+                      </span>
+                    </TableCell>
+                    <TableCell className='px-3 py-3 text-center'>
+                      <DualPriceCell primary={offPeakInput.primary} official={offPeakInput.official} />
+                    </TableCell>
+                    <TableCell className='px-3 py-3 text-center'>
+                      <DualPriceCell primary={offPeakOutput.primary} official={offPeakOutput.official} />
+                    </TableCell>
+                    <TableCell className='px-3 py-3 text-center'>
+                      <DualPriceCell primary={offPeakCache.primary} official={offPeakCache.official} />
+                    </TableCell>
+                    <TableCell
+                      rowSpan={2}
+                      className='px-3 py-3 text-center align-middle border-l border-border/40'
+                    >
+                      <SavingsPill savings={savings} />
+                    </TableCell>
+                  </TableRow>
+
+                  {/* Row 2: 高峰时段 */}
+                  <TableRow
+                    className={cn(
+                      'border-border/50 border-t border-border/30 transition-colors hover:bg-muted/80',
+                      index % 2 === 1 ? 'bg-muted/60 dark:bg-muted/30' : 'bg-background'
+                    )}
+                  >
+                    <TableCell className='px-3 py-3 text-center'>
+                      <span
+                        title={t('Beijing Time: 09:00-12:00, 14:00-18:00', '北京时间 09:00-12:00、14:00-18:00')}
+                        className='inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11.5px] font-medium text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 cursor-help'
+                      >
+                        {t('Peak', '高峰时段')}
+                      </span>
+                    </TableCell>
+                    <TableCell className='px-3 py-3 text-center'>
+                      <DualPriceCell primary={peakInput.primary} official={peakInput.official} />
+                    </TableCell>
+                    <TableCell className='px-3 py-3 text-center'>
+                      <DualPriceCell primary={peakOutput.primary} official={peakOutput.official} />
+                    </TableCell>
+                    <TableCell className='px-3 py-3 text-center'>
+                      <DualPriceCell primary={peakCache.primary} official={peakCache.official} />
+                    </TableCell>
+                  </TableRow>
+                </Fragment>
+              )
+            }
+
+            return (
+              <TableRow
+                key={model.model_name}
+                className={cn(
+                  'border-border/50 cursor-pointer transition-colors hover:bg-muted/80',
+                  index % 2 === 1 ? 'bg-muted/60 dark:bg-muted/30' : 'bg-background'
+                )}
+                onClick={() => props.onModelClick?.(model.model_name)}
+              >
+                <TableCell className='px-4 py-3'>
+                  <div className='flex max-w-[20rem] items-center gap-2'>
+                    <span className='text-foreground truncate font-mono text-[15px] font-medium tracking-tight'>
+                      {model.model_name}
+                    </span>
+                    <span
+                      className='inline-flex'
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => e.stopPropagation()}
+                    >
+                      <CopyButton
+                        value={model.model_name}
+                        size='icon'
+                        variant='ghost'
+                        className='text-muted-foreground/55 hover:text-muted-foreground size-8 shrink-0'
+                        iconClassName='size-3.5'
+                      />
+                    </span>
+                  </div>
+                </TableCell>
+                <ModelPriceCells
+                  model={model}
+                  tokenUnit={tokenUnit}
+                  priceRate={priceRate}
+                  usdExchangeRate={usdExchangeRate}
+                  selectedGroup={selectedGroup}
+                  isGroupMode={isGroupMode}
+                  savings={savings}
+                  t={t}
+                />
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
     </div>
