@@ -2143,7 +2143,7 @@
     "footer.columns.related.links.oneApi": "Один API",
     "footer.columns.related.title": "Связанные проекты",
     "footer.defaultCopyright": "Все права защищены.",
-    "footer.new\u0061pi.projectAttributionSuffix": "Все права защищены. Разработано участниками проекта.",
+    "footer.newapi.projectAttributionSuffix": "Все права защищены. Разработано участниками проекта.",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "Для каналов, добавленных после 10 мая 2025 г., не нужно удалять \".\" из имён моделей при развёртывании",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "Для несрочных вопросов. Обычно отвечаем в течение 1–2 рабочих дней.",
     "For private deployments, format: https://fastgpt.run/api/openapi": "Для частных развертываний, формат: https://fastgpt.run/api/openapi",
@@ -5593,6 +5593,11 @@
     "Zero-Log Privacy": "Конфиденциальность без логов",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Billing Period": "Период тарификации",
+    "Off-peak": "Вне пика",
+    "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC (all other hours are off-peak)": "Пиковые часы: 01:00–04:00 и 06:00–10:00 UTC (в остальное время — вне пика)",
+    "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC": "Пиковые часы: 01:00–04:00 и 06:00–10:00 UTC",
+    "All other hours are off-peak": "В остальное время — вне пика"
   }
 }

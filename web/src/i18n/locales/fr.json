@@ -2143,7 +2143,7 @@
     "footer.columns.related.links.oneApi": "One API",
     "footer.columns.related.title": "Projets liés",
     "footer.defaultCopyright": "Tous droits réservés.",
-    "footer.new\u0061pi.projectAttributionSuffix": "Tous droits réservés. Conçu et développé par les contributeurs du projet.",
+    "footer.newapi.projectAttributionSuffix": "Tous droits réservés. Conçu et développé par les contributeurs du projet.",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "Pour les canaux ajoutés après le 10 mai 2025, pas besoin de supprimer \".\" des noms de modèles lors du déploiement",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "Pour les demandes non urgentes. Réponse sous 1 à 2 jours ouvrés en général.",
     "For private deployments, format: https://fastgpt.run/api/openapi": "Pour les déploiements privés, format : https://fastgpt.run/api/openapi",
@@ -3546,7 +3546,7 @@
     "Payment type key": "Clé de type de paiement",
     "Payment type key is required": "La clé de type de paiement est requise",
     "Payment, redemption codes, subscription plans, and invitation rewards are locked until the root administrator confirms the compliance terms.": "Les paiements, codes de兑换, forfaits d’abonnement et récompenses d’invitation sont verrouillés jusqu’à ce que l’administrateur racine confirme les conditions de conformité.",
-    "Peak": "Pic",
+    "Peak": "Heures pleines",
     "Peak throughput": "Débit de pointe",
     "Penalises repetition of frequent tokens": "Pénalise la répétition des jetons fréquents",
     "pending": "en attente",
@@ -5593,6 +5593,11 @@
     "Zero-Log Privacy": "Confidentialité zéro journal",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Billing Period": "Période de facturation",
+    "Off-peak": "Heures creuses",
+    "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC (all other hours are off-peak)": "Heures pleines : 01:00–04:00 et 06:00–10:00 UTC (toutes les autres heures sont des heures creuses)",
+    "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC": "Heures pleines : 01:00–04:00 et 06:00–10:00 UTC",
+    "All other hours are off-peak": "Toutes les autres heures sont des heures creuses"
   }
 }

@@ -2143,7 +2143,7 @@
     "footer.columns.related.links.oneApi": "One API",
     "footer.columns.related.title": "相關項目",
     "footer.defaultCopyright": "版權所有。",
-    "footer.new\u0061pi.projectAttributionSuffix": "版權所有，由項目貢獻者設計與開發。",
+    "footer.newapi.projectAttributionSuffix": "版權所有，由項目貢獻者設計與開發。",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "對於 2025 年 5 月 10 日之後新增的渠道，在部署時無需從模型名稱中移除 \".\"",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "非緊急事項請寄信，一般 1–2 個工作天內回覆。",
     "For private deployments, format: https://fastgpt.run/api/openapi": "對於私有部署，格式為：https://fastgpt.run/api/openapi",
@@ -5593,6 +5593,11 @@
     "Zero-Log Privacy": "零日誌隱私",
     "Zhipu": "智譜",
     "Zhipu V4": "智譜 V4",
-    "Zoom": "縮放"
+    "Zoom": "縮放",
+    "Billing Period": "計費時段",
+    "Off-peak": "空閒",
+    "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC (all other hours are off-peak)": "高峰時段：01:00–04:00 與 06:00–10:00 UTC（其餘時間為空閒）",
+    "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC": "高峰時段：01:00–04:00 與 06:00–10:00 UTC",
+    "All other hours are off-peak": "其餘時間為空閒"
   }
 }

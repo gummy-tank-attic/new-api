@@ -2143,7 +2143,7 @@
     "footer.columns.related.links.oneApi": "One API",
     "footer.columns.related.title": "Related Projects",
     "footer.defaultCopyright": "All rights reserved.",
-    "footer.new\u0061pi.projectAttributionSuffix": "All rights reserved. Designed and developed by the project contributors.",
+    "footer.newapi.projectAttributionSuffix": "All rights reserved. Designed and developed by the project contributors.",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "For non-urgent inquiries. We typically reply within 1–2 business days.",
     "For private deployments, format: https://fastgpt.run/api/openapi": "For private deployments, format: https://fastgpt.run/api/openapi",
@@ -5593,6 +5593,11 @@
     "Zero-Log Privacy": "Zero-Log Privacy",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Billing Period": "Billing Period",
+    "Off-peak": "Off-peak",
+    "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC (all other hours are off-peak)": "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC (all other hours are off-peak)",
+    "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC": "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC",
+    "All other hours are off-peak": "All other hours are off-peak"
   }
 }

@@ -112,6 +112,18 @@ export default defineConfig(({ envMode }) => {
       distPath: {
         root: 'dist',
       },
+      copy: [
+        'en.json',
+        'zh.json',
+        'zh-TW.json',
+        'fr.json',
+        'ja.json',
+        'ru.json',
+        'vi.json',
+      ].map((file) => ({
+        from: path.resolve(__dirname, 'src/i18n/locales', file),
+        to: path.join('locales', file),
+      })),
       // Rely on Rsbuild default legalComments ("linked" → per-chunk *.LICENSE.txt) in all modes.
       // Do not set "none" in production: that strips minifier-preserved third-party notices and
       // extracted license files, which some distributions require for open-source compliance.

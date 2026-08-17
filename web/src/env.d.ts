@@ -18,6 +18,21 @@ For commercial licensing, please contact support@quantumnous.com
 */
 /// <reference types="@rsbuild/core/types" />
 
+interface Window {
+  /** Started by the inline boot script in index.html; consumed by initI18n. */
+  __MR_I18N__?: {
+    lng: string
+    preferred: Promise<{
+      translation?: Record<string, unknown>
+      [key: string]: unknown
+    }>
+    en?: Promise<{
+      translation?: Record<string, unknown>
+      [key: string]: unknown
+    }>
+  }
+}
+
 declare module '@visactor/react-vchart' {
   export const VChart: React.ComponentType<Record<string, unknown>>
 }

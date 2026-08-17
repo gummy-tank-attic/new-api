@@ -37,7 +37,7 @@ import { handleServerError } from '@/lib/handle-server-error'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'
-// i18n: preferred-locale-first (see i18n/config.ts initI18n)
+// i18n: consume HTML-prefetch (see i18n/config.ts initI18n)
 import { initI18n } from './i18n/config'
 // Generated Routes
 import { routeTree } from './routeTree.gen'

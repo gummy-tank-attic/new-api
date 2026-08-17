@@ -26,6 +26,11 @@ const sourceChecks = [
     message: 'unused locale packs must not preload during startup',
   },
   {
+    file: 'src/i18n/config.ts',
+    forbidden: "i18next-browser-languagedetector",
+    message: 'LanguageDetector must not persist a temporary en locale',
+  },
+  {
     file: 'src/features/home/index.tsx',
     forbidden: 'if (!isLoaded)',
     message: 'the default home must paint before custom-content revalidation',
@@ -113,6 +118,27 @@ if (!fs.existsSync(htmlPath)) {
   }
   if (totalBytes > limits.totalBytes) {
     fail(`initial asset gzip ${totalBytes} exceeds ${limits.totalBytes} bytes`)
+  }
+
+  const htmlSource = fs.readFileSync(htmlPath, 'utf8')
+  if (!htmlSource.includes('__MR_I18N__')) {
+    fail('index.html must start locale fetches before the app bundle')
+  }
+
+  const localeFiles = [
+    'en.json',
+    'zh.json',
+    'zh-TW.json',
+    'fr.json',
+    'ja.json',
+    'ru.json',
+    'vi.json',
+  ]
+  for (const file of localeFiles) {
+    const localePath = path.join(root, 'dist', 'locales', file)
+    if (!fs.existsSync(localePath)) {
+      fail(`dist/locales/${file} is missing from the production build`)
+    }
   }
 
   console.log(

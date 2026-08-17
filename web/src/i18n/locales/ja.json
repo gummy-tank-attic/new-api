@@ -2143,7 +2143,7 @@
     "footer.columns.related.links.oneApi": "1つのAPI",
     "footer.columns.related.title": "関連プロジェクト",
     "footer.defaultCopyright": "すべての権利を留保します。",
-    "footer.new\u0061pi.projectAttributionSuffix": "すべての権利を留保します。プロジェクトコントリビューターにより設計・開発されています。",
+    "footer.newapi.projectAttributionSuffix": "すべての権利を留保します。プロジェクトコントリビューターにより設計・開発されています。",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "2025 年 5 月 10 日以降に追加されたチャネルの場合、デプロイ時にモデル名から「.」を削除する必要はありません",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "緊急でないお問い合わせはメールで。通常 1〜2 営業日以内に返信します。",
     "For private deployments, format: https://fastgpt.run/api/openapi": "プライベートデプロイメントの場合、形式: https://fastgpt.run/api/openapi",
@@ -5593,6 +5593,11 @@
     "Zero-Log Privacy": "ゼロログ・プライバシー",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V 4",
-    "Zoom": "ズーム"
+    "Zoom": "ズーム",
+    "Billing Period": "課金時間帯",
+    "Off-peak": "オフピーク",
+    "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC (all other hours are off-peak)": "ピーク時間帯: 01:00–04:00 および 06:00–10:00 UTC（その他の時間はオフピーク）",
+    "Peak Hours: 01:00–04:00 and 06:00–10:00 UTC": "ピーク時間帯: 01:00–04:00 および 06:00–10:00 UTC",
+    "All other hours are off-peak": "その他の時間はオフピーク"
   }
 }

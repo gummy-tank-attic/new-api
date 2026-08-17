@@ -15,7 +15,7 @@
 | 数据与请求 | @tanstack/react-query、axios、Zustand                             |
 | 路由       | @tanstack/react-router                                            |
 | 表格与列表 | @tanstack/react-table、@tanstack/react-virtual                    |
-| 国际化     | i18next、react-i18next、i18next-browser-languagedetector          |
+| 国际化     | i18next、react-i18next（`index.html` 定语言 + `/locales/*.json` 并行预取；**不用** LanguageDetector） |
 | 日期       | Day.js                                                            |
 | UI 与样式  | Base UI、Hugeicons、Tailwind CSS、clsx / class-variance-authority |
 | 表单       | React Hook Form、Zod                                              |
@@ -64,6 +64,7 @@
 - **专有名词**：品牌、产品、技术术语等可保留英文（如 API、React、TypeScript）；若有约定俗成的译法则使用翻译。
 - **翻译键**：使用有层级、语义清晰的键名，如 `dashboard.overview.title`，并保持命名一致。
 - **语言包 JSON 必须嵌套在 `translation` 命名空间内部**：所有 7 语 `locales/*.json` 文件必须包裹在 `{ "translation": { ... } }` 对象中，**严禁**在 JSON 最外层平铺添加 key，否则 i18next 将无法识别并静默回退显示英文 key。
+- **启动：** `index.html` 检测语言并并行 `fetch /locales/{当前语}.json`；`initI18n()` 只消费该预取。禁止 7 语进主包、禁止主包下完再拉当前语、禁止 `i18next-browser-languagedetector`。权威：仓库 `docs/FRONTEND_I18N.md`。
 
 - **枚举与文案（常量中的 i18n）**
   各 feature 的 `constants.ts` 中常出现「枚举/状态 + 展示文案」或「成功/错误消息」，须统一约定以免遗漏 i18n、用法混乱：

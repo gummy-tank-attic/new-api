@@ -206,6 +206,18 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
         props.className
       )}
     >
+      {isTimeTieredTable ? (
+        <div className='flex items-center gap-2 border-b border-border/50 bg-muted/25 px-4 py-2 text-xs text-muted-foreground'>
+          <span className='inline-block size-1.5 rounded-full bg-indigo-500/70 shrink-0' />
+          <span>
+            {t(
+              'Peak Hours: 01:00–04:00 and 06:00–10:00 UTC (all other hours are off-peak)',
+              '高峰时段：01:00–04:00 与 06:00–10:00 UTC（其余时间为空闲）'
+            )}
+          </span>
+        </div>
+      ) : null}
+
       {/* Scale: head 12 · body 15 · price 18/12. Drop forced equal text-sm. */}
       <Table className='[&_td]:text-[15px] [&_td_*]:text-[length:inherit] [&_th]:text-xs [&_th_*]:text-xs'>
         <TableHeader>
@@ -398,7 +410,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
 
               return (
                 <Fragment key={model.model_name}>
-                  {/* Row 1: 空闲时段 */}
+                  {/* Row 1: 空闲 */}
                   <TableRow
                     className={cn(
                       'border-border/50 transition-colors hover:bg-muted/80',
@@ -431,10 +443,10 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     </TableCell>
                     <TableCell className='px-3 py-3 text-center'>
                       <span
-                        title={t('Beijing Time: 00:00-09:00, 12:00-14:00, 18:00-24:00', '北京时间 00:00-09:00、12:00-14:00、18:00-24:00')}
-                        className='inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11.5px] font-medium text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 cursor-help'
+                        title={t('All other hours are off-peak', '其余时间为空闲')}
+                        className='inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11.5px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-500/15 cursor-help'
                       >
-                        {t('Off-peak', '空闲时段')}
+                        {t('Off-peak', '空闲')}
                       </span>
                     </TableCell>
                     <TableCell className='px-3 py-3 text-center'>
@@ -454,7 +466,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     </TableCell>
                   </TableRow>
 
-                  {/* Row 2: 高峰时段 */}
+                  {/* Row 2: 峰值 */}
                   <TableRow
                     className={cn(
                       'border-border/50 border-t border-border/30 transition-colors hover:bg-muted/80',
@@ -463,10 +475,10 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                   >
                     <TableCell className='px-3 py-3 text-center'>
                       <span
-                        title={t('Beijing Time: 09:00-12:00, 14:00-18:00', '北京时间 09:00-12:00、14:00-18:00')}
-                        className='inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11.5px] font-medium text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 cursor-help'
+                        title={t('Peak Hours: 01:00–04:00 and 06:00–10:00 UTC', '高峰时段：01:00–04:00 与 06:00–10:00 UTC')}
+                        className='inline-flex items-center rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-[11.5px] font-medium text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-500/15 cursor-help'
                       >
-                        {t('Peak', '高峰时段')}
+                        {t('Peak', '峰值')}
                       </span>
                     </TableCell>
                     <TableCell className='px-3 py-3 text-center'>

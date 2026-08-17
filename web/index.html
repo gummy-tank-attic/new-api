@@ -15,6 +15,95 @@
     />
 
     <meta name="theme-color" content="#fff" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #fafafa;
+      }
+      @media (prefers-color-scheme: dark) {
+        html,
+        body {
+          background: #0a0a0a;
+        }
+      }
+    </style>
+    <!-- Must stay in sync with detectPreferredLanguage / convertDetectedLanguage. -->
+    <script>
+      ;(function () {
+        var FILES = {
+          en: 'en',
+          zhCN: 'zh',
+          zhTW: 'zh-TW',
+          fr: 'fr',
+          ja: 'ja',
+          ru: 'ru',
+          vi: 'vi',
+        }
+        function convert(raw) {
+          var lower = String(raw || '')
+            .trim()
+            .replace(/_/g, '-')
+            .toLowerCase()
+          if (lower.indexOf('zh') !== 0) return raw
+          if (
+            lower === 'zh-tw' ||
+            lower === 'zh-hk' ||
+            lower === 'zh-mo' ||
+            lower.indexOf('zh-hant') === 0
+          ) {
+            return 'zhTW'
+          }
+          return 'zhCN'
+        }
+        function resolve(raw) {
+          if (!raw) return 'en'
+          var trimmed = String(raw).trim()
+          var converted = convert(trimmed)
+          if (FILES[converted]) return converted
+          if (FILES[trimmed]) return trimmed
+          var lower = String(converted)
+            .replace(/_/g, '-')
+            .toLowerCase()
+          if (lower.indexOf('zh') === 0) {
+            return convert(converted) === 'zhTW' ? 'zhTW' : 'zhCN'
+          }
+          var base = lower.split('-')[0]
+          return FILES[base] ? base : 'en'
+        }
+        function detect() {
+          try {
+            var stored = localStorage.getItem('i18nextLng')
+            if (stored) return resolve(stored)
+          } catch (e) {}
+          try {
+            var list =
+              navigator.languages && navigator.languages.length
+                ? navigator.languages
+                : navigator.language
+                  ? [navigator.language]
+                  : []
+            if (list.length) return resolve(list[0])
+          } catch (e) {}
+          return 'en'
+        }
+        function load(name) {
+          return fetch('/locales/' + name + '.json', {
+            credentials: 'same-origin',
+          }).then(function (res) {
+            if (!res.ok) throw new Error('locale ' + res.status)
+            return res.json()
+          })
+        }
+        var lng = detect()
+        try {
+          localStorage.setItem('i18nextLng', lng)
+        } catch (e) {}
+        var boot = { lng: lng, preferred: load(FILES[lng]) }
+        if (lng !== 'en') boot.en = load('en')
+        window.__MR_I18N__ = boot
+      })()
+    </script>
     <!--umami-->
     <!--Google Analytics-->
   </head>
