@@ -90,10 +90,10 @@ function getModelUnitPrice(
     if (tiers.length > 0) {
       const tier = tiers[0]
       let val = 0
-      if (type === 'input') val = tier.inputPrice || 0
-      else if (type === 'output') val = tier.outputPrice || 0
-      else if (type === 'cache') val = tier.cacheReadPrice || 0
-      else if (type === 'create_cache') val = tier.cacheCreatePrice || 0
+      if (type === 'input') val = Number(tier.inputPrice) || 0
+      else if (type === 'output') val = Number(tier.outputPrice) || 0
+      else if (type === 'cache') val = Number(tier.cacheReadPrice) || 0
+      else if (type === 'create_cache') val = Number(tier.cacheCreatePrice) || 0
 
       if (val > 0) {
         return formatDynamicUnitPrice(val, {
@@ -197,7 +197,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
     )
   }
 
-  const baseRatio = getConfiguredGroupRatio(props.groupRatio, selectedGroup)
+  const baseRatio = getConfiguredGroupRatio(props.groupRatio, selectedGroup || '')
 
   return (
     <div
