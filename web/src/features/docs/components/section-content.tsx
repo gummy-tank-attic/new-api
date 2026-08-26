@@ -978,7 +978,8 @@ model = "${EXAMPLE_MODEL_OPENAI}"
 
 [model_providers.metartr]
 name = "MetaRtr"
-base_url = "${API_BASE_URL}"
+base_url = "${API_BASE_URL}/v1"
+wire_api = "responses"
 env_key = "METARTR_API_KEY"`}
         />
       </div>
@@ -1318,12 +1319,85 @@ function TroubleshootingSection() {
   )
 }
 
+function SwitchGroupSection() {
+  const { t } = useTranslation()
+  return (
+    <div className='space-y-8'>
+      <SectionTitle
+        title={t('Switch groups')}
+        description={t(
+          'Change the group of an existing key on the web console — the key and client configuration stay unchanged.'
+        )}
+      />
+
+      <StepList
+        steps={[
+          t('Open Console → API Keys.'),
+          t(
+            'Click the group badge on the key row and pick the target group; each option shows its description and price ratio.'
+          ),
+          t(
+            'Confirm the change. The next request is billed by the new group; the key and client configuration stay the same.'
+          ),
+        ]}
+      />
+
+      <Callout title={t('Same model, different price')}>
+        {t(
+          'The same model can have different price ratios in different groups. The confirmation dialog always shows the before and after ratios.'
+        )}
+      </Callout>
+
+      <Callout tone='warn' title={t('Switching vendors')}>
+        {t(
+          'If the new group serves different models, also change the model name in your client; chat clients need to refresh their model list.'
+        )}
+      </Callout>
+
+      <Callout tone='warn' title={t('CLI Only groups')}>
+        {t(
+          'Groups marked CLI Only can only be used inside Claude Code or Codex CLI; do not switch a key used by a GUI client to them.'
+        )}
+      </Callout>
+
+      <div className='space-y-3'>
+        <h2 className='text-lg font-bold'>
+          {t('Advanced: switch groups from a script')}
+        </h2>
+        <p className='text-muted-foreground text-sm'>
+          {t(
+            'Generate a system access token in Console → Personal Settings, then call the same API the web dropdown uses. The update is a full overwrite — always send every existing field of the token.'
+          )}
+        </p>
+        <CodeBlock
+          title='bash'
+          code={`ACCESS_TOKEN="<your system access token>"  # Console -> Personal Settings
+TOKEN_ID=123                                # key id shown in the API Keys list
+
+# 1) Read the token's current fields
+curl -s ${API_BASE_URL}/api/token/$TOKEN_ID \\
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+
+# 2) PUT the FULL object back with only "group" changed.
+#    Missing fields are treated as empty and will wipe that setting.
+curl -s -X PUT ${API_BASE_URL}/api/token/ \\
+  -H "Authorization: Bearer $ACCESS_TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{"id":123,"name":"my-key","group":"Claude Plus(Premium)","remain_quota":0,"unlimited_quota":true,"expired_time":-1,"model_limits_enabled":false,"model_limits":"","allow_ips":"","auto_groups":[],"cross_group_retry":false}'`}
+        />
+      </div>
+    </div>
+  )
+}
+
 export function SectionContent(props: SectionContentProps) {
   switch (props.section) {
     case 'quickstart':
       return <QuickstartSection />
     case 'base-url':
       return <BaseUrlSection />
+    case 'switch-group':
+      return <SwitchGroupSection />
     case 'protocols':
       return <ProtocolsSection />
     case 'sdk':

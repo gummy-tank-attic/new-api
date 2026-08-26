@@ -34,6 +34,7 @@ export const PRICING_PATH = '/pricing'
 export const DOCS_SECTION_IDS = [
   'quickstart',
   'base-url',
+  'switch-group',
   'protocols',
   'sdk',
   'images',
@@ -64,6 +65,11 @@ export const DOCS_NAV: ReadonlyArray<{
   {
     id: 'base-url',
     labelKey: 'Base URL & API Key',
+    groupKey: 'Getting started',
+  },
+  {
+    id: 'switch-group',
+    labelKey: 'Switch groups',
     groupKey: 'Getting started',
   },
   {
