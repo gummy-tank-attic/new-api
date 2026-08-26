@@ -198,6 +198,7 @@ export function useApiKeysColumns(now: number): ColumnDef<ApiKey>[] {
         const group = row.getValue('group') as string
         return (
           <ApiKeyGroupCell
+            apiKey={apiKey}
             group={group}
             ratio={groupRatios[group]}
             crossGroupRetry={apiKey.cross_group_retry}

@@ -16,138 +16,112 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { render } from '@testing-library/react'
 import { describe, expect, test } from 'vitest'
 
-const { createInstance } = await import('i18next')
-const { I18nextProvider, initReactI18next } = await import('react-i18next')
-const { TooltipProvider } = await import('@/components/ui/tooltip')
-const { ApiKeyGroupCell } = await import('../api-key-group-cell')
+import type { ApiKey } from '../../types'
+import {
+  buildGroupSwitchPayload,
+  checkGroupModelCompatibility,
+} from '../api-key-group-cell'
 
-const i18n = createInstance()
-await i18n.use(initReactI18next).init({
-  lng: 'en',
-  resources: {
-    en: {
-      translation: {
-        Auto: 'Auto',
-        'Cross-group': 'Cross-group',
-        Ratio: 'Ratio',
-        'Automatically selects the best available group with circuit breaker mechanism':
-          'Automatically selects the best available group with circuit breaker mechanism',
-      },
+describe('checkGroupModelCompatibility', () => {
+  const samplePricingModels = [
+    {
+      model_name: 'claude-3-5-sonnet',
+      enable_groups: ['Claude lite（Sale）', 'Claude Plus（Premium）'],
     },
-  },
+    {
+      model_name: 'claude-3-opus',
+      enable_groups: ['Claude Plus（Premium）'],
+    },
+    {
+      model_name: 'gpt-4o',
+      enable_groups: ['default', 'vip'],
+    },
+  ]
+
+  test('returns compatible when new group includes all old group models', () => {
+    const result = checkGroupModelCompatibility(
+      'Claude lite（Sale）',
+      'Claude Plus（Premium）',
+      samplePricingModels
+    )
+    expect(result.type).toBe('compatible')
+  })
+
+  test('returns partial when new group includes only some old group models', () => {
+    const result = checkGroupModelCompatibility(
+      'Claude Plus（Premium）',
+      'Claude lite（Sale）',
+      samplePricingModels
+    )
+    expect(result.type).toBe('partial')
+  })
+
+  test('returns incompatible when model sets are completely disjoint', () => {
+    const result = checkGroupModelCompatibility(
+      'Claude Plus（Premium）',
+      'vip',
+      samplePricingModels
+    )
+    expect(result.type).toBe('incompatible')
+  })
+
+  test('returns compatible when groups are identical or empty', () => {
+    expect(
+      checkGroupModelCompatibility('vip', 'vip', samplePricingModels).type
+    ).toBe('compatible')
+    expect(
+      checkGroupModelCompatibility('', 'vip', samplePricingModels).type
+    ).toBe('compatible')
+  })
 })
 
-function CellHarness(props: {
-  group: string
-  ratio?: number | string
-  crossGroupRetry?: boolean
-  shouldReduceMotion?: boolean
-}) {
-  return (
-    <I18nextProvider i18n={i18n}>
-      <TooltipProvider>
-        <ApiKeyGroupCell
-          group={props.group}
-          ratio={props.ratio}
-          crossGroupRetry={props.crossGroupRetry ?? false}
-          shouldReduceMotion={props.shouldReduceMotion ?? false}
-        />
-      </TooltipProvider>
-    </I18nextProvider>
-  )
-}
+describe('buildGroupSwitchPayload', () => {
+  const apiKey: ApiKey = {
+    id: 7,
+    name: 'my key',
+    key: 'sk-masked',
+    status: 1,
+    remain_quota: 12345,
+    used_quota: 42,
+    unlimited_quota: false,
+    expired_time: 1700000000,
+    created_time: 1,
+    accessed_time: 2,
+    group: 'vip',
+    auto_groups: ['vip', 'default'],
+    cross_group_retry: true,
+    model_limits_enabled: true,
+    model_limits: 'gpt-4o,claude-3-5-sonnet',
+    allow_ips: '1.2.3.4',
+  }
 
-describe('API key group table cell', () => {
-  test('renders an unclipped ring and a localized Auto ratio when API data uses a nonlocalized string', () => {
-    const { container } = render(
-      <CellHarness
-        group='auto'
-        ratio='自动'
-        crossGroupRetry
-        shouldReduceMotion={false}
-      />
-    )
+  test('preserves every existing token field and only changes group', () => {
+    // UpdateToken 非 status_only 分支是全量覆盖：漏传任何字段都会清空对应设置
+    expect(buildGroupSwitchPayload(apiKey, 'default')).toEqual({
+      id: 7,
+      name: 'my key',
+      remain_quota: 12345,
+      expired_time: 1700000000,
+      unlimited_quota: false,
+      model_limits_enabled: true,
+      model_limits: 'gpt-4o,claude-3-5-sonnet',
+      allow_ips: '1.2.3.4',
+      group: 'default',
+      auto_groups: [],
+      cross_group_retry: false,
+    })
+  })
 
-    const badgeCell = container.querySelector<HTMLElement>(
-      '[data-api-key-group-cell="auto"]'
-    )
-    expect(badgeCell).toHaveClass('overflow-visible')
-    expect(badgeCell).not.toHaveClass('overflow-hidden')
-
-    const frames = container.querySelectorAll('[data-auto-group-frame]')
-    const movingRings = container.querySelectorAll(
-      '[data-auto-group-flow-border]'
-    )
-    expect(frames.length).toBe(1)
-    expect(movingRings.length).toBe(1)
-    for (const frame of frames) {
-      expect(frame).toHaveClass(
-        'relative',
-        'overflow-visible',
-        'rounded-4xl',
-        'p-px'
-      )
+  test('normalizes nullish optional fields to empty strings', () => {
+    const sparse = {
+      ...apiKey,
+      model_limits: '',
+      allow_ips: null as unknown as string,
     }
-
-    const ratio = container.querySelector<HTMLElement>(
-      '[data-auto-group-effect="ratio"]'
-    )
-    expect(ratio).toHaveTextContent('Auto Ratio')
-    expect(ratio).not.toHaveTextContent('x')
-    expect(container).not.toHaveTextContent('自动')
-    expect(container).toHaveTextContent('Cross-group')
-
-    const crossGroupBadge = [
-      ...container.querySelectorAll<HTMLElement>('[data-slot="status-badge"]'),
-    ].find((badge) => badge.textContent === 'Cross-group')
-    expect(crossGroupBadge).not.toBeUndefined()
-    expect(crossGroupBadge?.closest('[data-auto-group-frame]')).toBeNull()
-  })
-
-  test('keeps the static Auto ratio frame but omits its moving layer for reduced motion', () => {
-    const { container } = render(
-      <CellHarness group='auto' ratio='Auto' shouldReduceMotion />
-    )
-
-    expect(container.querySelectorAll('[data-auto-group-frame]').length).toBe(1)
-    expect(
-      container.querySelectorAll('[data-auto-group-flow-border]').length
-    ).toBe(0)
-  })
-
-  test('shows only the cross-group badge when ratio data is unavailable', () => {
-    const { container } = render(
-      <CellHarness group='auto' shouldReduceMotion={false} />
-    )
-
-    expect(container.querySelectorAll('[data-auto-group-frame]').length).toBe(0)
-    expect(
-      container.querySelectorAll('[data-auto-group-flow-border]').length
-    ).toBe(0)
-    expect(container.querySelector('[data-auto-group-effect="ratio"]')).toBe(
-      null
-    )
-    expect(container).toHaveTextContent('Cross-group')
-    expect(container).not.toHaveTextContent('Auto')
-    expect(container).not.toHaveTextContent('Ratio')
-  })
-
-  test('narrows normal group ratios to numbers and never applies Auto rings', () => {
-    const { container, rerender } = render(
-      <CellHarness group='vip' ratio='自动' shouldReduceMotion={false} />
-    )
-
-    expect(container).toHaveTextContent('vip')
-    expect(container).not.toHaveTextContent('自动')
-    expect(container.querySelector('[data-auto-group-frame]')).toBe(null)
-    expect(container.querySelector('[data-auto-group-flow-border]')).toBe(null)
-
-    rerender(<CellHarness group='vip' ratio={3} shouldReduceMotion={false} />)
-
-    expect(container).toHaveTextContent('3x')
-    expect(container.querySelector('[data-auto-group-frame]')).toBe(null)
+    const payload = buildGroupSwitchPayload(sparse, 'default')
+    expect(payload.model_limits).toBe('')
+    expect(payload.allow_ips).toBe('')
   })
 })

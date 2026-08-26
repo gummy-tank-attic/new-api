@@ -19,22 +19,6 @@ For commercial licensing, please contact support@quantumnous.com
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, test } from 'vitest'
 
-let shouldReduceMotion = false
-const reducedMotionMediaQuery = window.matchMedia('(prefers-reduced-motion)')
-Object.defineProperty(reducedMotionMediaQuery, 'matches', {
-  configurable: true,
-  get: () => shouldReduceMotion,
-})
-Object.defineProperty(window, 'matchMedia', {
-  configurable: true,
-  value: () => reducedMotionMediaQuery,
-})
-
-function setReducedMotion(value: boolean) {
-  shouldReduceMotion = value
-  reducedMotionMediaQuery.dispatchEvent(new Event('change'))
-}
-
 const { useState } = await import('react')
 const { createInstance } = await import('i18next')
 const { I18nextProvider, initReactI18next } = await import('react-i18next')
@@ -46,25 +30,24 @@ await i18n.use(initReactI18next).init({
   resources: {
     en: {
       translation: {
-        Auto: 'Auto',
-        Ratio: 'Ratio',
         'Search...': 'Search...',
         'No group found.': 'No group found.',
         'Select a group': 'Select a group',
+        'Claude Code / Codex CLI only': 'Claude Code / Codex CLI only',
       },
     },
   },
 })
 
 const options = [
-  {
-    value: 'auto',
-    label: 'auto',
-    desc: 'Global automatic routing',
-    ratio: '自动',
-  },
   { value: 'default', label: 'default', desc: 'User group', ratio: 1 },
   { value: 'vip', label: 'vip', desc: 'Priority group', ratio: 3 },
+  {
+    value: 'Claude Max(CLI Only)',
+    label: 'Claude Max(CLI Only)',
+    desc: 'Official Max, CLI clients only',
+    ratio: 2,
+  },
 ]
 
 function Harness(props: { initialValue: string }) {
@@ -96,74 +79,26 @@ function getCommandItem(label: string): HTMLElement {
   return item
 }
 
-describe('API key group combobox Auto effect', () => {
-  test('rings the selected Auto trigger and its localized ratio without rendering the API ratio text', () => {
-    setReducedMotion(false)
-    render(<Harness initialValue='auto' />)
+describe('API key group combobox (T1)', () => {
+  test('shows placeholder when empty and renders name, description, and ratio badge per option', () => {
+    render(<Harness initialValue='' />)
 
     const trigger = getTrigger()
-    expect(trigger).toHaveAttribute('aria-expanded', 'false')
-    expect(trigger).toHaveAttribute('data-auto-group-effect', 'trigger')
-    expect(trigger).not.toHaveClass('bg-linear-to-r', 'overflow-hidden')
-    expect(trigger).toHaveClass('overflow-visible')
-
-    const triggerFlowBorder = trigger.querySelector<HTMLElement>(
-      '[data-auto-group-flow-border]'
-    )
-    expect(triggerFlowBorder).toHaveAttribute('aria-hidden', 'true')
-    expect(triggerFlowBorder).toHaveClass(
-      'pointer-events-none',
-      'auto-group-flow-border'
-    )
-
-    const triggerRatio = trigger.querySelector<HTMLElement>(
-      '[data-auto-group-effect="ratio"]'
-    )
-    expect(triggerRatio).toHaveTextContent('Auto Ratio')
-    expect(triggerRatio).not.toHaveTextContent('x')
-    expect(trigger).not.toHaveTextContent('自动')
-    expect(triggerRatio).toHaveClass(
-      'relative',
-      'overflow-visible',
-      'rounded-4xl'
-    )
-    expect(
-      triggerRatio?.querySelector('[data-auto-group-flow-border]')
-    ).toBeInTheDocument()
+    expect(trigger).toHaveTextContent('Select a group')
 
     fireEvent.click(trigger)
     expect(trigger).toHaveAttribute('aria-expanded', 'true')
 
-    const autoOption = getCommandItem('Global automatic routing')
-    expect(autoOption).toHaveAttribute('data-auto-group-effect', 'option')
-    expect(autoOption).toHaveAttribute('aria-selected', 'true')
-    expect(autoOption).not.toHaveClass('bg-linear-to-r')
-    expect(autoOption).toHaveClass('overflow-visible')
-    expect(
-      autoOption.querySelector('[data-auto-group-flow-border]')
-    ).toBeInTheDocument()
-    const optionRatio = autoOption.querySelector<HTMLElement>(
-      '[data-auto-group-effect="ratio"]'
-    )
-    expect(optionRatio).toHaveTextContent('Auto Ratio')
-    expect(
-      optionRatio?.querySelector('[data-auto-group-flow-border]')
-    ).toBeInTheDocument()
+    const vipOption = getCommandItem('vip')
+    expect(vipOption).toHaveTextContent('Priority group')
+    expect(vipOption).toHaveTextContent('×3')
 
     const defaultOption = getCommandItem('User group')
-    expect(defaultOption).not.toHaveAttribute('data-auto-group-effect')
-    expect(defaultOption.querySelector('[data-auto-group-flow-border]')).toBe(
-      null
-    )
-    expect(defaultOption).toHaveTextContent('1x Ratio')
-    expect(
-      defaultOption.querySelector('[data-auto-group-effect="ratio"]')
-    ).toBe(null)
+    expect(defaultOption).toHaveTextContent('×1')
   })
 
-  test('keeps search and selection behavior while leaving normal groups unstyled', async () => {
-    setReducedMotion(false)
-    const { container } = render(<Harness initialValue='auto' />)
+  test('selects a group, closes the list, and search filters options', () => {
+    const { container } = render(<Harness initialValue='' />)
 
     const trigger = getTrigger()
     fireEvent.click(trigger)
@@ -171,44 +106,38 @@ describe('API key group combobox Auto effect', () => {
     fireEvent.input(screen.getByPlaceholderText('Search...'), {
       target: { value: 'vip' },
     })
-
     const visibleOptions = [
       ...document.querySelectorAll<HTMLElement>('[data-slot="command-item"]'),
     ]
     expect(
-      visibleOptions.some((option) =>
-        option.textContent?.includes('Global automatic routing')
-      )
+      visibleOptions.some((option) => option.textContent?.includes('User group'))
     ).toBe(false)
-    const vipOption = getCommandItem('Priority group')
-    fireEvent.click(vipOption)
 
+    fireEvent.click(getCommandItem('Priority group'))
     expect(within(container).getByTestId('selected-group')).toHaveTextContent(
       'vip'
     )
     expect(trigger).toHaveAttribute('aria-expanded', 'false')
-    expect(trigger).not.toHaveAttribute('data-auto-group-effect')
-    expect(trigger.querySelector('[data-auto-group-flow-border]')).toBe(null)
+    expect(trigger).toHaveTextContent('vip')
+    expect(trigger).toHaveTextContent('Priority group')
   })
 
-  test('preserves the static Auto treatment but omits moving layers for reduced motion', async () => {
-    setReducedMotion(true)
+  test('keeps showing the raw current value when it is not among the options', () => {
     render(<Harness initialValue='auto' />)
 
     const trigger = getTrigger()
-    expect(trigger).toHaveAttribute('data-auto-group-effect', 'trigger')
-    expect(trigger.querySelector('[data-auto-group-flow-border]')).toBe(null)
-    expect(
-      trigger.querySelector('[data-auto-group-effect="ratio"]')
-    ).toBeInTheDocument()
+    expect(trigger).toHaveTextContent('auto')
+    expect(trigger).not.toHaveTextContent('Select a group')
+  })
 
-    fireEvent.click(trigger)
-    const autoOption = getCommandItem('Global automatic routing')
-    expect(autoOption).toHaveAttribute('data-auto-group-effect', 'option')
-    expect(autoOption.querySelector('[data-auto-group-flow-border]')).toBe(null)
-    expect(
-      autoOption.querySelector('[data-auto-group-effect="ratio"]')
-    ).toBeInTheDocument()
-    setReducedMotion(false)
+  test('marks CLI-only groups with the restriction badge', () => {
+    render(<Harness initialValue='' />)
+
+    fireEvent.click(getTrigger())
+    const cliOption = getCommandItem('Claude Max(CLI Only)')
+    expect(cliOption).toHaveTextContent('Claude Code / Codex CLI only')
+
+    const vipOption = getCommandItem('Priority group')
+    expect(vipOption).not.toHaveTextContent('Claude Code / Codex CLI only')
   })
 })
