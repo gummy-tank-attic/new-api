@@ -27,6 +27,7 @@ import {
   Copy,
   Link,
   Loader2,
+  Terminal,
 } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -266,6 +267,20 @@ export function DataTableRowActions<TData>({
           {t('Copy Connection Info')}
           <DropdownMenuShortcut>
             <Link size={16} />
+          </DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={async () => {
+            const realKey = await resolveRealKey(apiKey.id)
+            if (!realKey) return
+            setResolvedKey(realKey)
+            setCurrentRow(apiKey)
+            setOpen('connect')
+          }}
+        >
+          {t('View Connection Guide')}
+          <DropdownMenuShortcut>
+            <Terminal size={16} />
           </DropdownMenuShortcut>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
