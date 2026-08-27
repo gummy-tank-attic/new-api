@@ -185,6 +185,33 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     expect(copied).not.toMatch(/&#(?:x[\da-f]+|\d+);|&nbsp;/i)
   })
 
+  test('manual command selection copies only the full plain-text command', () => {
+    renderDialog('Claude Max（CLI Only）')
+    const commandBlock = document.querySelector('pre')
+    expect(commandBlock).not.toBeNull()
+    if (!commandBlock) throw new Error('Command block not found')
+
+    const clearData = vi.fn()
+    const setData = vi.fn()
+    fireEvent.copy(commandBlock, {
+      clipboardData: { clearData, setData },
+    })
+
+    expect(clearData).toHaveBeenCalledOnce()
+    expect(setData).toHaveBeenCalledOnce()
+    expect(setData).toHaveBeenCalledWith(
+      'text/plain',
+      expect.stringContaining(
+        "[Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', $metartrBaseUrl, 'Process')"
+      )
+    )
+    const copied = setData.mock.calls[0][1] as string
+    expect(copied).toContain("$metartrBaseUrl = 'https://api.metartr.com'")
+    expect(copied).not.toContain('\\_')
+    expect(copied).not.toContain('[https://')
+    expect(copied).not.toMatch(/&#(?:x[\da-f]+|\d+);|&nbsp;/i)
+  })
+
   test('copy-for-AI text never includes the real key or a second base URL', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {

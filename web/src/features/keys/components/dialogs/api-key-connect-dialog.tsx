@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { AppWindow, Check, Copy, ShieldCheck, Terminal } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { type ClipboardEvent, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
@@ -123,6 +123,21 @@ export function ApiKeyConnectDialog({
         setCopiedSection((prev) => (prev === sectionKey ? null : prev))
       }, 2000)
     }
+  }
+
+  const handleCommandSelectionCopy = (
+    event: ClipboardEvent<HTMLPreElement>,
+    text: string,
+    sectionKey: string
+  ) => {
+    event.preventDefault()
+    event.clipboardData.clearData()
+    event.clipboardData.setData('text/plain', text)
+    setCopiedSection(sectionKey)
+    toast.success(t('Copied'))
+    setTimeout(() => {
+      setCopiedSection((prev) => (prev === sectionKey ? null : prev))
+    }, 2000)
   }
 
   const claudeDone = t(
@@ -272,7 +287,12 @@ export function ApiKeyConnectDialog({
           <Copy className='size-4' />
         )}
       </Button>
-      <pre className='min-w-max p-5 pr-14 whitespace-pre select-all'>
+      <pre
+        className='min-w-max p-5 pr-14 whitespace-pre select-all'
+        onCopy={(event) =>
+          handleCommandSelectionCopy(event, commands[osType], sectionKey)
+        }
+      >
         {commands[osType]}
       </pre>
     </div>
