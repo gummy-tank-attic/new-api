@@ -65,34 +65,24 @@ function findGitBash(): string | null {
 }
 
 describe('setup command generation', () => {
-  test('PowerShell commands survive rich-text chat forwarding unchanged', () => {
+  test('PowerShell commands are readable plain text with fail-fast handling', () => {
     const claude = buildClaudePowerShellCommand({
       ...options,
       baseUrl: 'https://api.metartr.com',
     })
     const codex = buildCodexPowerShellCommand(options)
 
-    expect(claude).toContain(
-      "$metartrBaseName = 'ANTHROPIC' + [char]95 + 'BASE' + [char]95 + 'URL'"
-    )
+    expect(claude).toContain('ANTHROPIC_BASE_URL')
     expect(claude).toContain("'Process'")
     expect(claude).toContain("'User'")
-    expect(claude).toContain('$PSItem.Exception.Message')
     expect(codex).toContain('codex login --with-api-key')
-    expect(codex).toContain(
-      "$metartrProviderTable = '[model' + [char]95 + 'providers.metartr]'"
-    )
+    expect(codex).toContain('[model_providers.metartr]')
+    expect(codex).toContain('wire_api = "responses"')
     expect(codex).toContain("$ErrorActionPreference = 'Stop'")
     for (const command of [claude, codex]) {
-      expect(command).not.toContain('_')
-      expect(command).not.toContain('https://')
       expect(command).not.toContain('\\_')
       expect(command).not.toContain('[https://')
       expect(command).not.toMatch(/&#(?:x[\da-f]+|\d+);|&nbsp;/i)
-      const chatSerialized = command
-        .replaceAll(/https:\/\/\S+/g, (url) => `[${url}](${url})`)
-        .replaceAll('_', '\\_')
-      expect(chatSerialized).toBe(command)
     }
   })
 
