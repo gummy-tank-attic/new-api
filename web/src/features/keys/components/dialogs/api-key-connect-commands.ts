@@ -27,6 +27,27 @@ function psSingleQuoted(value: string): string {
   return `'${value.replaceAll("'", "''")}'`
 }
 
+function psRichTextSafeExpression(value: string): string {
+  const parts: string[] = []
+  let plain = ''
+  const flushPlain = () => {
+    if (!plain) return
+    parts.push(psSingleQuoted(plain))
+    plain = ''
+  }
+
+  for (const character of value) {
+    if (character === '_' || character === '/') {
+      flushPlain()
+      parts.push(`[char]${character.charCodeAt(0)}`)
+    } else {
+      plain += character
+    }
+  }
+  flushPlain()
+  return parts.length > 0 ? parts.join(' + ') : "''"
+}
+
 function shSingleQuoted(value: string): string {
   return `'${value.replaceAll("'", `'\\''`)}'`
 }
@@ -45,29 +66,32 @@ function assertPlainCommand(command: string): string {
 export function buildClaudePowerShellCommand(
   options: SetupCommandOptions
 ): string {
+  assertPlainCommand(Object.values(options).join('\n'))
   return assertPlainCommand(
     [
-      `$metartrBaseUrl = ${psSingleQuoted(options.baseUrl)}`,
-      `$metartrAuthToken = ${psSingleQuoted(options.apiKey)}`,
-      `$metartrFailureMessage = ${psSingleQuoted(options.failureMessage)}`,
+      `$metartrBaseName = ${psRichTextSafeExpression('ANTHROPIC_BASE_URL')}`,
+      `$metartrTokenName = ${psRichTextSafeExpression('ANTHROPIC_AUTH_TOKEN')}`,
+      `$metartrBaseUrl = ${psRichTextSafeExpression(options.baseUrl)}`,
+      `$metartrAuthToken = ${psRichTextSafeExpression(options.apiKey)}`,
+      `$metartrFailureMessage = ${psRichTextSafeExpression(options.failureMessage)}`,
       `$metartrPreviousErrorActionPreference = $ErrorActionPreference`,
       `$ErrorActionPreference = 'Stop'`,
       `try {`,
-      `  [Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', $metartrBaseUrl, 'Process')`,
-      `  [Environment]::SetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', $metartrAuthToken, 'Process')`,
-      `  [Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', $metartrBaseUrl, 'User')`,
-      `  [Environment]::SetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', $metartrAuthToken, 'User')`,
+      `  [Environment]::SetEnvironmentVariable($metartrBaseName, $metartrBaseUrl, 'Process')`,
+      `  [Environment]::SetEnvironmentVariable($metartrTokenName, $metartrAuthToken, 'Process')`,
+      `  [Environment]::SetEnvironmentVariable($metartrBaseName, $metartrBaseUrl, 'User')`,
+      `  [Environment]::SetEnvironmentVariable($metartrTokenName, $metartrAuthToken, 'User')`,
       `  if (`,
-      `    [Environment]::GetEnvironmentVariable('ANTHROPIC_BASE_URL', 'Process') -ne $metartrBaseUrl -or`,
-      `    [Environment]::GetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', 'Process') -ne $metartrAuthToken -or`,
-      `    [Environment]::GetEnvironmentVariable('ANTHROPIC_BASE_URL', 'User') -ne $metartrBaseUrl -or`,
-      `    [Environment]::GetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', 'User') -ne $metartrAuthToken`,
+      `    [Environment]::GetEnvironmentVariable($metartrBaseName, 'Process') -ne $metartrBaseUrl -or`,
+      `    [Environment]::GetEnvironmentVariable($metartrTokenName, 'Process') -ne $metartrAuthToken -or`,
+      `    [Environment]::GetEnvironmentVariable($metartrBaseName, 'User') -ne $metartrBaseUrl -or`,
+      `    [Environment]::GetEnvironmentVariable($metartrTokenName, 'User') -ne $metartrAuthToken`,
       `  ) {`,
       `    throw $metartrFailureMessage`,
       `  }`,
-      `  Write-Host ${psSingleQuoted(options.successMessage)} -ForegroundColor Green`,
+      `  Write-Host (${psRichTextSafeExpression(options.successMessage)}) -ForegroundColor Green`,
       `} catch {`,
-      `  throw ($metartrFailureMessage + ' ' + $_.Exception.Message)`,
+      `  throw ($metartrFailureMessage + ' ' + $PSItem.Exception.Message)`,
       `} finally {`,
       `  $ErrorActionPreference = $metartrPreviousErrorActionPreference`,
       `}`,
@@ -113,17 +137,29 @@ export function buildClaudePosixCommand(options: SetupCommandOptions): string {
 export function buildCodexPowerShellCommand(
   options: SetupCommandOptions
 ): string {
+  assertPlainCommand(Object.values(options).join('\n'))
   const managedStart = '# >>> MetaRtr managed configuration >>>'
   const managedEnd = '# <<< MetaRtr managed configuration <<<'
 
   return assertPlainCommand(
     [
-      `$metartrAuthToken = ${psSingleQuoted(options.apiKey)}`,
-      `$metartrFailureMessage = ${psSingleQuoted(options.failureMessage)}`,
+      `$metartrCodexHomeName = ${psRichTextSafeExpression('CODEX_HOME')}`,
+      `$metartrModelProviderKey = ${psRichTextSafeExpression('model_provider')}`,
+      `$metartrProviderTable = ${psRichTextSafeExpression('[model_providers.metartr]')}`,
+      `$metartrProviderHeaderPattern = ${psRichTextSafeExpression('^\\s*\\[model_providers\\.metartr(?:\\.[^\\]]+)?\\]\\s*$')}`,
+      `$metartrBaseUrlKey = ${psRichTextSafeExpression('base_url')}`,
+      `$metartrBaseUrl = ${psRichTextSafeExpression(options.baseUrl)}`,
+      `$metartrAuthToken = ${psRichTextSafeExpression(options.apiKey)}`,
+      `$metartrFailureMessage = ${psRichTextSafeExpression(options.failureMessage)}`,
+      `$metartrConfiguredProviderLine = $metartrModelProviderKey + ' = "metartr"'`,
+      `$metartrConfiguredBaseLine = $metartrBaseUrlKey + ' = "' + $metartrBaseUrl + '"'`,
+      `$metartrWireApiLine = ${psRichTextSafeExpression('wire_api = "responses"')}`,
+      `$metartrRequiresAuthLine = ${psRichTextSafeExpression('requires_openai_auth = true')}`,
       `$metartrPreviousErrorActionPreference = $ErrorActionPreference`,
       `$ErrorActionPreference = 'Stop'`,
       `try {`,
-      `  $metartrCodexDir = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $env:USERPROFILE '.codex' }`,
+      `  $metartrConfiguredCodexHome = [Environment]::GetEnvironmentVariable($metartrCodexHomeName, 'Process')`,
+      `  $metartrCodexDir = if ($metartrConfiguredCodexHome) { $metartrConfiguredCodexHome } else { Join-Path $env:USERPROFILE '.codex' }`,
       `  New-Item -ItemType Directory -Force $metartrCodexDir -ErrorAction Stop | Out-Null`,
       `  $metartrConfig = Join-Path $metartrCodexDir 'config.toml'`,
       `  $metartrAuthFile = Join-Path $metartrCodexDir 'auth.json'`,
@@ -154,32 +190,32 @@ export function buildCodexPowerShellCommand(
       `      if ($metartrLine -eq ${psSingleQuoted(managedEnd)}) { $metartrSkipManaged = $false }`,
       `      continue`,
       `    }`,
-      `    if ($metartrLine -match '^\\s*\\[model_providers\\.metartr(?:\\.[^\\]]+)?\\]\\s*$') { $metartrSkipProvider = $true; continue }`,
+      `    if ($metartrLine -match $metartrProviderHeaderPattern) { $metartrSkipProvider = $true; continue }`,
       `    if ($metartrSkipProvider) {`,
       `      if ($metartrLine -match '^\\s*\\[') { $metartrSkipProvider = $false } else { continue }`,
       `    }`,
       `    if ($metartrLine -match '^\\s*\\[') {`,
       `      if (!$metartrInTable -and !$metartrProviderSet) {`,
-      `        $metartrOutputLines.Add('model_provider = "metartr"')`,
+      `        $metartrOutputLines.Add($metartrConfiguredProviderLine)`,
       `        $metartrOutputLines.Add('')`,
       `        $metartrProviderSet = $true`,
       `      }`,
       `      $metartrInTable = $true`,
       `    }`,
-      `    if (!$metartrInTable -and $metartrLine -match '^\\s*model_provider\\s*=') {`,
-      `      if (!$metartrProviderSet) { $metartrOutputLines.Add('model_provider = "metartr"'); $metartrProviderSet = $true }`,
+      `    if (!$metartrInTable -and $metartrLine -match ('^\\s*' + [regex]::Escape($metartrModelProviderKey) + '\\s*=')) {`,
+      `      if (!$metartrProviderSet) { $metartrOutputLines.Add($metartrConfiguredProviderLine); $metartrProviderSet = $true }`,
       `      continue`,
       `    }`,
       `    $metartrOutputLines.Add($metartrLine)`,
       `  }`,
-      `  if (!$metartrProviderSet) { $metartrOutputLines.Add('model_provider = "metartr"') }`,
+      `  if (!$metartrProviderSet) { $metartrOutputLines.Add($metartrConfiguredProviderLine) }`,
       `  $metartrOutputLines.Add('')`,
       `  $metartrOutputLines.Add(${psSingleQuoted(managedStart)})`,
-      `  $metartrOutputLines.Add('[model_providers.metartr]')`,
+      `  $metartrOutputLines.Add($metartrProviderTable)`,
       `  $metartrOutputLines.Add('name = "MetaRtr"')`,
-      `  $metartrOutputLines.Add(${psSingleQuoted(`base_url = "${options.baseUrl}"`)})`,
-      `  $metartrOutputLines.Add('wire_api = "responses"')`,
-      `  $metartrOutputLines.Add('requires_openai_auth = true')`,
+      `  $metartrOutputLines.Add($metartrConfiguredBaseLine)`,
+      `  $metartrOutputLines.Add($metartrWireApiLine)`,
+      `  $metartrOutputLines.Add($metartrRequiresAuthLine)`,
       `  $metartrOutputLines.Add(${psSingleQuoted(managedEnd)})`,
       `  $metartrUtf8NoBom = [Text.UTF8Encoding]::new($false)`,
       `  $metartrTempConfig = $metartrConfig + '.metartr.tmp'`,
@@ -190,10 +226,10 @@ export function buildCodexPowerShellCommand(
       `  & codex login status | Out-Null`,
       `  if ($LASTEXITCODE -ne 0) { throw 'codex login status failed' }`,
       `  $metartrSavedConfig = [IO.File]::ReadAllText($metartrConfig)`,
-      `  if (!$metartrSavedConfig.Contains('model_provider = "metartr"') -or !$metartrSavedConfig.Contains(${psSingleQuoted(`base_url = "${options.baseUrl}"`)})) { throw 'config verification failed' }`,
-      `  Write-Host ${psSingleQuoted(options.successMessage)} -ForegroundColor Green`,
+      `  if (!$metartrSavedConfig.Contains($metartrConfiguredProviderLine) -or !$metartrSavedConfig.Contains($metartrConfiguredBaseLine)) { throw 'config verification failed' }`,
+      `  Write-Host (${psRichTextSafeExpression(options.successMessage)}) -ForegroundColor Green`,
       `} catch {`,
-      `  throw ($metartrFailureMessage + ' ' + $_.Exception.Message)`,
+      `  throw ($metartrFailureMessage + ' ' + $PSItem.Exception.Message)`,
       `} finally {`,
       `  $ErrorActionPreference = $metartrPreviousErrorActionPreference`,
       `}`,

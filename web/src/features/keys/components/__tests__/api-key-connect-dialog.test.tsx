@@ -153,7 +153,7 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     expect(screen.queryByRole('tab')).not.toBeInTheDocument()
     expect(screen.getByText('Claude Code only')).toBeInTheDocument()
     expect(screen.queryByText(/Codex CLI/)).not.toBeInTheDocument()
-    expect(screen.getByText(/ANTHROPIC_BASE_URL/)).toBeInTheDocument()
+    expect(screen.getByText(/metartrBaseName/)).toBeInTheDocument()
     expect(
       screen.getAllByText(
         'This command configures your API base URL and key for Claude Code.'
@@ -174,12 +174,16 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
     const copied = writeText.mock.calls[0][0] as string
     expect(copied).toContain(
-      "[Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', $metartrBaseUrl, 'Process')"
+      "[Environment]::SetEnvironmentVariable($metartrBaseName, $metartrBaseUrl, 'Process')"
     )
     expect(copied).toContain(
-      "[Environment]::SetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', $metartrAuthToken, 'User')"
+      "[Environment]::SetEnvironmentVariable($metartrTokenName, $metartrAuthToken, 'User')"
     )
-    expect(copied).toContain("$metartrBaseUrl = 'https://api.metartr.com'")
+    expect(copied).toContain(
+      "$metartrBaseUrl = 'https:' + [char]47 + [char]47 + 'api.metartr.com'"
+    )
+    expect(copied).not.toContain('_')
+    expect(copied).not.toContain('https://')
     expect(copied).not.toContain('\\_')
     expect(copied).not.toContain('[https://')
     expect(copied).not.toMatch(/&#(?:x[\da-f]+|\d+);|&nbsp;/i)
@@ -202,11 +206,15 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     expect(setData).toHaveBeenCalledWith(
       'text/plain',
       expect.stringContaining(
-        "[Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', $metartrBaseUrl, 'Process')"
+        "[Environment]::SetEnvironmentVariable($metartrBaseName, $metartrBaseUrl, 'Process')"
       )
     )
     const copied = setData.mock.calls[0][1] as string
-    expect(copied).toContain("$metartrBaseUrl = 'https://api.metartr.com'")
+    expect(copied).toContain(
+      "$metartrBaseUrl = 'https:' + [char]47 + [char]47 + 'api.metartr.com'"
+    )
+    expect(copied).not.toContain('_')
+    expect(copied).not.toContain('https://')
     expect(copied).not.toContain('\\_')
     expect(copied).not.toContain('[https://')
     expect(copied).not.toMatch(/&#(?:x[\da-f]+|\d+);|&nbsp;/i)
@@ -236,7 +244,7 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
   test('Claude lite (Sale) shows Claude Code only, no desktop-apps tab', () => {
     renderDialog('Claude lite（Sale）')
     expect(screen.queryByRole('tab')).not.toBeInTheDocument()
-    expect(screen.getByText(/ANTHROPIC_BASE_URL/)).toBeInTheDocument()
+    expect(screen.getByText(/metartrBaseName/)).toBeInTheDocument()
     expect(screen.queryByText('Desktop apps')).not.toBeInTheDocument()
     expect(
       screen.getByText(
