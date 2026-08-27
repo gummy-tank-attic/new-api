@@ -1,0 +1,111 @@
+$metartrPreviousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Stop'
+$metartrTempConfig = $null
+try {
+  if ([string]::IsNullOrWhiteSpace($env:MTRKEY)) {
+    throw 'API key is missing.'
+  }
+  Get-Command codex -ErrorAction Stop | Out-Null
+
+  $metartrAuthToken = $env:MTRKEY
+  $metartrCodexDir = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $env:USERPROFILE '.codex' }
+  New-Item -ItemType Directory -Force $metartrCodexDir -ErrorAction Stop | Out-Null
+  $metartrConfig = Join-Path $metartrCodexDir 'config.toml'
+  $metartrAuthFile = Join-Path $metartrCodexDir 'auth.json'
+  if ((Test-Path -LiteralPath $metartrConfig) -and !(Test-Path -LiteralPath $metartrConfig -PathType Leaf)) {
+    throw 'config.toml is not a file.'
+  }
+  if ((Test-Path -LiteralPath $metartrAuthFile) -and !(Test-Path -LiteralPath $metartrAuthFile -PathType Leaf)) {
+    throw 'auth.json is not a file.'
+  }
+
+  $metartrTimestamp = Get-Date -Format 'yyyyMMdd-HHmmssfff'
+  if (Test-Path -LiteralPath $metartrConfig -PathType Leaf) {
+    if (!(Test-Path -LiteralPath ($metartrConfig + '.metartr-original.bak'))) {
+      Copy-Item -LiteralPath $metartrConfig -Destination ($metartrConfig + '.metartr-original.bak') -ErrorAction Stop
+    }
+    Copy-Item -LiteralPath $metartrConfig -Destination ($metartrConfig + '.metartr-' + $metartrTimestamp + '.bak') -ErrorAction Stop
+  }
+  if (Test-Path -LiteralPath $metartrAuthFile -PathType Leaf) {
+    if (!(Test-Path -LiteralPath ($metartrAuthFile + '.metartr-original.bak'))) {
+      Copy-Item -LiteralPath $metartrAuthFile -Destination ($metartrAuthFile + '.metartr-original.bak') -ErrorAction Stop
+    }
+    Copy-Item -LiteralPath $metartrAuthFile -Destination ($metartrAuthFile + '.metartr-' + $metartrTimestamp + '.bak') -ErrorAction Stop
+  }
+
+  $metartrManagedStart = '# >>> MetaRtr managed configuration >>>'
+  $metartrManagedEnd = '# <<< MetaRtr managed configuration <<<'
+  $metartrInputLines = if (Test-Path -LiteralPath $metartrConfig -PathType Leaf) { [IO.File]::ReadAllLines($metartrConfig) } else { @() }
+  $metartrOutputLines = [Collections.Generic.List[string]]::new()
+  $metartrInTable = $false
+  $metartrSkipManaged = $false
+  $metartrSkipProvider = $false
+  $metartrProviderSet = $false
+
+  foreach ($metartrLine in $metartrInputLines) {
+    if ($metartrLine -eq $metartrManagedStart) { $metartrSkipManaged = $true; continue }
+    if ($metartrSkipManaged) {
+      if ($metartrLine -eq $metartrManagedEnd) { $metartrSkipManaged = $false }
+      continue
+    }
+    if ($metartrLine -match '^\s*\[model_providers\.metartr(?:\.[^\]]+)?\]\s*$') {
+      $metartrSkipProvider = $true
+      continue
+    }
+    if ($metartrSkipProvider) {
+      if ($metartrLine -match '^\s*\[') { $metartrSkipProvider = $false } else { continue }
+    }
+    if ($metartrLine -match '^\s*\[') {
+      if (!$metartrInTable -and !$metartrProviderSet) {
+        $metartrOutputLines.Add('model_provider = "metartr"')
+        $metartrOutputLines.Add('')
+        $metartrProviderSet = $true
+      }
+      $metartrInTable = $true
+    }
+    if (!$metartrInTable -and $metartrLine -match '^\s*model_provider\s*=') {
+      if (!$metartrProviderSet) {
+        $metartrOutputLines.Add('model_provider = "metartr"')
+        $metartrProviderSet = $true
+      }
+      continue
+    }
+    $metartrOutputLines.Add($metartrLine)
+  }
+  if (!$metartrProviderSet) { $metartrOutputLines.Add('model_provider = "metartr"') }
+  $metartrOutputLines.Add('')
+  $metartrOutputLines.Add($metartrManagedStart)
+  $metartrOutputLines.Add('[model_providers.metartr]')
+  $metartrOutputLines.Add('name = "MetaRtr"')
+  $metartrOutputLines.Add('base_url = "https://api.metartr.com/v1"')
+  $metartrOutputLines.Add('wire_api = "responses"')
+  $metartrOutputLines.Add('requires_openai_auth = true')
+  $metartrOutputLines.Add($metartrManagedEnd)
+
+  $metartrUtf8NoBom = [Text.UTF8Encoding]::new($false)
+  $metartrTempConfig = $metartrConfig + '.metartr.tmp'
+  [IO.File]::WriteAllLines($metartrTempConfig, $metartrOutputLines, $metartrUtf8NoBom)
+  Move-Item -LiteralPath $metartrTempConfig -Destination $metartrConfig -Force -ErrorAction Stop
+  $metartrTempConfig = $null
+
+  $metartrAuthToken | & codex login --with-api-key
+  if ($LASTEXITCODE -ne 0) { throw 'codex login failed.' }
+  & codex login status | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw 'codex login status failed.' }
+
+  $metartrSavedConfig = [IO.File]::ReadAllText($metartrConfig)
+  if (!$metartrSavedConfig.Contains('model_provider = "metartr"') -or !$metartrSavedConfig.Contains('base_url = "https://api.metartr.com/v1"')) {
+    throw 'config verification failed.'
+  }
+
+  Write-Host (([char]0x2705) + ' MetaRtr setup complete. Fully close and reopen PowerShell and Codex CLI.') -ForegroundColor Green
+} catch {
+  Write-Host ('ERROR: MetaRtr setup failed. ' + $_.Exception.Message) -ForegroundColor Red
+  throw
+} finally {
+  if ($metartrTempConfig -and (Test-Path -LiteralPath $metartrTempConfig)) {
+    Remove-Item -LiteralPath $metartrTempConfig -Force -ErrorAction SilentlyContinue
+  }
+  Remove-Item Env:\MTRKEY -ErrorAction SilentlyContinue
+  $ErrorActionPreference = $metartrPreviousErrorActionPreference
+}

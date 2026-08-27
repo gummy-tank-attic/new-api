@@ -41,7 +41,6 @@ import {
 import { resolveConnectPlan, type ConnectPlan } from './api-key-connect-plan'
 
 const BASE_API_URL = 'https://api.metartr.com'
-const OPENAI_API_URL = 'https://api.metartr.com/v1'
 
 function detectIsWindows(): boolean {
   if (typeof navigator === 'undefined') return true
@@ -140,52 +139,20 @@ export function ApiKeyConnectDialog({
     }, 2000)
   }
 
-  const claudeDone = t(
-    '✅ MetaRtr setup complete. Fully quit and restart the terminal and Claude Code.'
-  )
-  const setupVerificationFailed = t(
-    'MetaRtr setup failed. Check the error above and try again.'
-  )
-  const codexDone = t(
-    '✅ MetaRtr setup complete. Fully quit and restart the terminal and Codex CLI.'
-  )
-
   const claudeCodeCommands = useMemo<Record<OsType, string>>(
     () => ({
-      windows: buildClaudePowerShellCommand({
-        baseUrl: BASE_API_URL,
-        apiKey: cleanKey,
-        successMessage: claudeDone,
-        failureMessage: setupVerificationFailed,
-      }),
-      posix: buildClaudePosixCommand({
-        baseUrl: BASE_API_URL,
-        apiKey: cleanKey,
-        successMessage: claudeDone,
-        failureMessage: setupVerificationFailed,
-      }),
+      windows: buildClaudePowerShellCommand({ apiKey: cleanKey }),
+      posix: buildClaudePosixCommand({ apiKey: cleanKey }),
     }),
-    [cleanKey, claudeDone, setupVerificationFailed]
+    [cleanKey]
   )
 
-  // Codex CLI 走 ~/.codex/config.toml + auth.json（与本站渠道的 responses 协议匹配），
-  // 原有 config.toml 自动备份为 config.toml.bak。
   const codexCliCommands = useMemo<Record<OsType, string>>(
     () => ({
-      windows: buildCodexPowerShellCommand({
-        baseUrl: OPENAI_API_URL,
-        apiKey: cleanKey,
-        successMessage: codexDone,
-        failureMessage: setupVerificationFailed,
-      }),
-      posix: buildCodexPosixCommand({
-        baseUrl: OPENAI_API_URL,
-        apiKey: cleanKey,
-        successMessage: codexDone,
-        failureMessage: setupVerificationFailed,
-      }),
+      windows: buildCodexPowerShellCommand({ apiKey: cleanKey }),
+      posix: buildCodexPosixCommand({ apiKey: cleanKey }),
     }),
-    [cleanKey, codexDone, setupVerificationFailed]
+    [cleanKey]
   )
 
   const copyAllAiPrompt = () => {
@@ -246,8 +213,8 @@ export function ApiKeyConnectDialog({
   const osLabel = (
     <span className='text-muted-foreground min-w-0 text-base'>
       {osType === 'windows'
-        ? t('Windows PowerShell (Search PowerShell in Start Menu to open):')
-        : t('macOS / Linux (Terminal):')}
+        ? t('Windows PowerShell')
+        : t('macOS / Linux Terminal')}
     </span>
   )
 
@@ -273,29 +240,75 @@ export function ApiKeyConnectDialog({
     commands: Record<OsType, string>,
     sectionKey: string
   ) => (
-    <div className='relative max-w-full min-w-0 overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950 font-mono text-sm leading-6 text-zinc-100 dark:bg-zinc-900'>
-      <Button
-        size='icon'
-        variant='ghost'
-        aria-label={t('Copy')}
-        className='absolute top-2 right-2 z-10 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
-        onClick={() => handleCopy(commands[osType], sectionKey)}
-      >
-        {copiedSection === sectionKey ? (
-          <Check className='size-4 text-emerald-400' />
-        ) : (
-          <Copy className='size-4' />
-        )}
-      </Button>
-      <pre
-        className='min-w-max p-5 pr-14 whitespace-pre select-all'
-        onCopy={(event) =>
-          handleCommandSelectionCopy(event, commands[osType], sectionKey)
-        }
-      >
-        {commands[osType]}
-      </pre>
+    <div className='max-w-full min-w-0 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-100 dark:bg-zinc-900'>
+      <div className='flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-zinc-800 px-4 py-2'>
+        <span className='text-sm font-medium text-zinc-300'>
+          {t('One-line setup command')}
+        </span>
+        <Button
+          size='sm'
+          variant='ghost'
+          className='gap-1.5 text-zinc-200 hover:bg-zinc-800 hover:text-white'
+          onClick={() => handleCopy(commands[osType], sectionKey)}
+        >
+          {copiedSection === sectionKey ? (
+            <Check className='size-4 text-emerald-400' />
+          ) : (
+            <Copy className='size-4' />
+          )}
+          {copiedSection === sectionKey ? t('Copied') : t('Copy setup command')}
+        </Button>
+      </div>
+      <div className='max-w-full overflow-x-auto'>
+        <pre
+          className='min-w-max p-4 font-mono text-sm leading-6 whitespace-pre select-all'
+          onCopy={(event) =>
+            handleCommandSelectionCopy(event, commands[osType], sectionKey)
+          }
+        >
+          {commands[osType]}
+        </pre>
+      </div>
     </div>
+  )
+
+  const renderTerminalSteps = (client: 'Claude Code' | 'Codex CLI') => (
+    <div className='min-w-0 space-y-3'>
+      {tokenGroup && (
+        <p className='text-base font-medium'>
+          {t('Current group: {{group}}', { group: tokenGroup })}
+        </p>
+      )}
+      <ol className='text-muted-foreground list-inside list-decimal space-y-2 text-base'>
+        <li>{t('Click "Copy setup command" below.')}</li>
+        <li>
+          {osType === 'windows'
+            ? t(
+                'Open the Windows Start menu, type "PowerShell", then open Windows PowerShell.'
+              )
+            : t('Open the Terminal app from your applications menu.')}
+        </li>
+        <li>
+          {t(
+            'Paste into the terminal window and press Enter. Paste only the copied command; do not type the "PS C:\\Users\\...>" text.'
+          )}
+        </li>
+      </ol>
+      <p className='text-base font-medium text-emerald-700 dark:text-emerald-400'>
+        {t(
+          'When you see "✅ MetaRtr setup complete", fully close and reopen the terminal and {{client}}.',
+          { client }
+        )}
+      </p>
+    </div>
+  )
+
+  const renderSwitchGroupHelp = () => (
+    <p className='text-muted-foreground text-sm leading-6'>
+      {t(
+        "To switch groups later: Console → API Keys → find the target group's key → ⋯ → View Connection Guide → copy and run its command."
+      )}
+    </p>
   )
 
   const renderCopyRow = (label: string, value: string, sectionKey: string) => (
@@ -394,7 +407,14 @@ export function ApiKeyConnectDialog({
                   {osLabel}
                   {osSwitch}
                 </div>
+                {renderTerminalSteps('Claude Code')}
                 {renderCommandBlock(claudeCodeCommands, 'claude-code')}
+                <p className='text-muted-foreground text-sm leading-6'>
+                  {t(
+                    'This command automatically reads a fixed-version setup script from www.metartr.com; you do not need to download any file.'
+                  )}
+                </p>
+                {renderSwitchGroupHelp()}
               </TabsContent>
             )}
 
@@ -409,7 +429,14 @@ export function ApiKeyConnectDialog({
                   {osLabel}
                   {osSwitch}
                 </div>
+                {renderTerminalSteps('Codex CLI')}
                 {renderCommandBlock(codexCliCommands, 'codex-cli')}
+                <p className='text-muted-foreground text-sm leading-6'>
+                  {t(
+                    'This command automatically reads a fixed-version setup script from www.metartr.com; you do not need to download any file.'
+                  )}
+                </p>
+                {renderSwitchGroupHelp()}
               </TabsContent>
             )}
 

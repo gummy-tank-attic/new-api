@@ -1,0 +1,31 @@
+$metartrPreviousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Stop'
+try {
+  if ([string]::IsNullOrWhiteSpace($env:MTRKEY)) {
+    throw 'API key is missing.'
+  }
+
+  $metartrBaseUrl = 'https://api.metartr.com'
+  $metartrAuthToken = $env:MTRKEY
+  [Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', $metartrBaseUrl, 'Process')
+  [Environment]::SetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', $metartrAuthToken, 'Process')
+  [Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', $metartrBaseUrl, 'User')
+  [Environment]::SetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', $metartrAuthToken, 'User')
+
+  if (
+    [Environment]::GetEnvironmentVariable('ANTHROPIC_BASE_URL', 'Process') -ne $metartrBaseUrl -or
+    [Environment]::GetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', 'Process') -ne $metartrAuthToken -or
+    [Environment]::GetEnvironmentVariable('ANTHROPIC_BASE_URL', 'User') -ne $metartrBaseUrl -or
+    [Environment]::GetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', 'User') -ne $metartrAuthToken
+  ) {
+    throw 'Environment variable verification failed.'
+  }
+
+  Write-Host (([char]0x2705) + ' MetaRtr setup complete. Fully close and reopen PowerShell and Claude Code.') -ForegroundColor Green
+} catch {
+  Write-Host ('ERROR: MetaRtr setup failed. ' + $_.Exception.Message) -ForegroundColor Red
+  throw
+} finally {
+  Remove-Item Env:\MTRKEY -ErrorAction SilentlyContinue
+  $ErrorActionPreference = $metartrPreviousErrorActionPreference
+}

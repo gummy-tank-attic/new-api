@@ -1,0 +1,73 @@
+#!/bin/sh
+
+metartr_codex_setup() {
+  umask 077
+  [ -n "${MTRKEY:-}" ] || { printf '%s\n' 'ERROR: MetaRtr setup failed. API key is missing.' >&2; return 1; }
+  command -v codex >/dev/null 2>&1 || { printf '%s\n' 'ERROR: Codex CLI is not installed or is not in PATH.' >&2; return 1; }
+ metartr_auth_token=$MTRKEY
+ unset MTRKEY
+  case $metartr_auth_token in
+    *[!A-Za-z0-9._:/+_-]*) printf '%s\n' 'ERROR: MetaRtr setup failed. API key contains an unsupported character.' >&2; return 1 ;;
+  esac
+ metartr_codex_dir=${CODEX_HOME:-"$HOME/.codex"}
+  mkdir -p "$metartr_codex_dir" || return 1
+  metartr_config="$metartr_codex_dir/config.toml"
+  metartr_auth="$metartr_codex_dir/auth.json"
+  { [ ! -e "$metartr_config" ] || [ -f "$metartr_config" ]; } || return 1
+  { [ ! -e "$metartr_auth" ] || [ -f "$metartr_auth" ]; } || return 1
+
+  metartr_backup() {
+    metartr_source=$1
+    [ -f "$metartr_source" ] || return 0
+    if [ ! -e "$metartr_source.metartr-original.bak" ]; then
+      cp -p "$metartr_source" "$metartr_source.metartr-original.bak" || return 1
+    fi
+    metartr_stamp=$(date +%Y%m%d-%H%M%S) || return 1
+    metartr_backup_path="$metartr_source.metartr-$metartr_stamp.bak"
+    metartr_counter=0
+    while [ -e "$metartr_backup_path" ]; do
+      metartr_counter=$((metartr_counter + 1))
+      metartr_backup_path="$metartr_source.metartr-$metartr_stamp-$metartr_counter.bak"
+    done
+    cp -p "$metartr_source" "$metartr_backup_path" || return 1
+  }
+
+  metartr_backup "$metartr_config" || return 1
+  metartr_backup "$metartr_auth" || return 1
+  metartr_tmp=$(mktemp "$metartr_codex_dir/config.toml.metartr.XXXXXX") || return 1
+  metartr_input=/dev/null
+  [ ! -f "$metartr_config" ] || metartr_input=$metartr_config
+  awk '
+    BEGIN { in_table = 0; skip_managed = 0; skip_provider = 0; provider_set = 0 }
+    $0 == "# >>> MetaRtr managed configuration >>>" { skip_managed = 1; next }
+    skip_managed { if ($0 == "# <<< MetaRtr managed configuration <<<") skip_managed = 0; next }
+    /^[[:space:]]*\[model_providers\.metartr([.][^]]+)?\][[:space:]]*$/ { skip_provider = 1; next }
+    skip_provider && $0 !~ /^[[:space:]]*\[/ { next }
+    skip_provider { skip_provider = 0 }
+    /^[[:space:]]*\[/ {
+      if (!in_table && !provider_set) { print "model_provider = \"metartr\""; print ""; provider_set = 1 }
+      in_table = 1
+    }
+    !in_table && /^[[:space:]]*model_provider[[:space:]]*=/ {
+      if (!provider_set) { print "model_provider = \"metartr\""; provider_set = 1 }
+      next
+    }
+    { print }
+    END { if (!provider_set) print "model_provider = \"metartr\"" }
+  ' "$metartr_input" > "$metartr_tmp" || return 1
+  printf '\n%s\n' '# >>> MetaRtr managed configuration >>>' >> "$metartr_tmp" || return 1
+  printf '%s\n' '[model_providers.metartr]' 'name = "MetaRtr"' 'base_url = "https://api.metartr.com/v1"' 'wire_api = "responses"' 'requires_openai_auth = true' '# <<< MetaRtr managed configuration <<<' >> "$metartr_tmp" || return 1
+  mv "$metartr_tmp" "$metartr_config" || return 1
+  printf '%s\n' "$metartr_auth_token" | codex login --with-api-key || return 1
+  codex login status >/dev/null || return 1
+  grep -Fqx 'model_provider = "metartr"' "$metartr_config" || return 1
+  grep -Fqx 'base_url = "https://api.metartr.com/v1"' "$metartr_config" || return 1
+  if [ -f "$metartr_auth" ]; then chmod 600 "$metartr_auth" || return 1; fi
+}
+
+if metartr_codex_setup; then
+  printf '\342\234\205 %s\n' 'MetaRtr setup complete. Fully close and reopen Terminal and Codex CLI.'
+else
+  printf '%s\n' 'ERROR: MetaRtr setup failed. Check the error above and try again.' >&2
+  exit 1
+fi

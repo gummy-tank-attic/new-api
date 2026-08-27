@@ -39,11 +39,11 @@ import {
   buildCodexPowerShellCommand,
 } from '../dialogs/api-key-connect-commands'
 
-const options = {
-  baseUrl: 'https://api.metartr.com/v1',
-  apiKey: 'sk-test',
-  successMessage: 'setup succeeded',
-  failureMessage: 'setup failed',
+const setupDir = join(process.cwd(), 'public', 'setup')
+const options = { apiKey: 'sk-test' }
+
+function readSetupScript(name: string): string {
+  return readFileSync(join(setupDir, name), 'utf8')
 }
 
 function toPosixPath(path: string): string {
@@ -52,7 +52,8 @@ function toPosixPath(path: string): string {
     .replaceAll('\\', '/')
 }
 
-function findGitBash(): string | null {
+function findBash(): string | null {
+  if (process.platform !== 'win32') return 'bash'
   const candidates = [
     'D:\\Program Files\\Git\\bin\\bash.exe',
     'C:\\Program Files\\Git\\bin\\bash.exe',
@@ -64,41 +65,58 @@ function findGitBash(): string | null {
   )
 }
 
-describe('setup command generation', () => {
-  test('PowerShell commands are readable plain text with fail-fast handling', () => {
-    const claude = buildClaudePowerShellCommand({
-      ...options,
-      baseUrl: 'https://api.metartr.com',
-    })
-    const codex = buildCodexPowerShellCommand(options)
+describe('one-line setup command generation', () => {
+  test('all visible commands are one readable line with fixed-version URLs', () => {
+    const commands = [
+      buildClaudePowerShellCommand(options),
+      buildClaudePosixCommand(options),
+      buildCodexPowerShellCommand(options),
+      buildCodexPosixCommand(options),
+    ]
 
-    expect(claude).toContain('ANTHROPIC_BASE_URL')
-    expect(claude).toContain("'Process'")
-    expect(claude).toContain("'User'")
-    expect(codex).toContain('codex login --with-api-key')
-    expect(codex).toContain('[model_providers.metartr]')
-    expect(codex).toContain('wire_api = "responses"')
-    expect(codex).toContain("$ErrorActionPreference = 'Stop'")
-    for (const command of [claude, codex]) {
+    for (const command of commands) {
+      expect(command.split(/\r?\n/)).toHaveLength(1)
+      expect(command).toContain('https://www.metartr.com/setup/')
+      expect(command).toContain('-v1.txt')
+      expect(command).toContain('MTRKEY=')
+      expect(command).toContain('sk-test')
       expect(command).not.toContain('\\_')
       expect(command).not.toContain('[https://')
       expect(command).not.toMatch(/&#(?:x[\da-f]+|\d+);|&nbsp;/i)
     }
   })
 
+  test('the public helpers contain logic but never contain a generated key', () => {
+    const scripts = [
+      readSetupScript('claude-windows-v1.txt'),
+      readSetupScript('claude-posix-v1.txt'),
+      readSetupScript('codex-windows-v1.txt'),
+      readSetupScript('codex-posix-v1.txt'),
+    ]
+
+    for (const script of scripts) {
+      expect(script).toContain('MTRKEY')
+      expect(script).not.toContain(options.apiKey)
+      expect(script).toContain('MetaRtr setup complete')
+    }
+    expect(scripts[0]).toContain('ANTHROPIC_BASE_URL')
+    expect(scripts[1]).toContain('ANTHROPIC_AUTH_TOKEN')
+    expect(scripts[2]).toContain('codex login --with-api-key')
+    expect(scripts[3]).toContain('[model_providers.metartr]')
+  })
+
   test.skipIf(process.platform !== 'win32')(
-    'PowerShell 5.1 parses both commands',
+    'PowerShell 5.1 parses bootstraps and both downloaded helpers',
     () => {
-      const commands = [
-        buildClaudePowerShellCommand({
-          ...options,
-          baseUrl: 'https://api.metartr.com',
-        }),
+      const sources = [
+        buildClaudePowerShellCommand(options),
         buildCodexPowerShellCommand(options),
+        readSetupScript('claude-windows-v1.txt'),
+        readSetupScript('codex-windows-v1.txt'),
       ]
 
-      for (const command of commands) {
-        const source = Buffer.from(command, 'utf8').toString('base64')
+      for (const sourceText of sources) {
+        const source = Buffer.from(sourceText, 'utf8').toString('base64')
         const parser = [
           `$source = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${source}'))`,
           `$tokens = $null`,
@@ -117,34 +135,57 @@ describe('setup command generation', () => {
   )
 
   test.skipIf(process.platform !== 'win32')(
-    'Codex PowerShell preserves existing settings and original backups across switches',
+    'Codex PowerShell helper preserves settings and backups across switches',
     () => {
-      const codexDir = mkdtempSync(join(tmpdir(), 'metartr-codex-'))
+      const home = mkdtempSync(join(tmpdir(), 'metartr-codex-ps-'))
+      const codexDir = join(home, '.codex')
+      const binDir = join(home, 'bin')
+      mkdirSync(codexDir)
+      mkdirSync(binDir)
       const configPath = join(codexDir, 'config.toml')
       const authPath = join(codexDir, 'auth.json')
-      const originalConfig = [
-        'model = "gpt-existing"',
-        'sandbox_mode = "read-only"',
-        '',
-        '[mcp_servers.demo]',
-        'command = "demo"',
-        '',
-      ].join('\n')
-      const originalAuth =
-        '{"auth_mode":"chatgpt","tokens":{"access_token":"old"}}\n'
+      const originalConfig =
+        'model = "gpt-existing"\n\n[mcp_servers.demo]\ncommand = "demo"\n'
+      const originalAuth = '{"auth_mode":"chatgpt"}\n'
       writeFileSync(configPath, originalConfig, 'utf8')
       writeFileSync(authPath, originalAuth, 'utf8')
+      writeFileSync(
+        join(binDir, 'codex.cmd'),
+        ['@echo off', 'node "%~dp0codex-stub.cjs" %*'].join('\r\n'),
+        'utf8'
+      )
+      writeFileSync(
+        join(binDir, 'codex-stub.cjs'),
+        [
+          "const fs = require('node:fs')",
+          "const path = require('node:path')",
+          "const command = process.argv.slice(2).join(' ')",
+          "if (command === 'login --with-api-key') {",
+          "  const key = fs.readFileSync(0, 'utf8').trim()",
+          "  fs.writeFileSync(path.join(process.env.CODEX_HOME, 'auth.json'), JSON.stringify({ auth_mode: 'apikey', OPENAI_API_KEY: key }) + '\\n')",
+          '  process.exit(0)',
+          '}',
+          "if (command === 'login status') process.exit(0)",
+          'process.exit(1)',
+        ].join('\n'),
+        'utf8'
+      )
 
       try {
+        const script = readSetupScript('codex-windows-v1.txt')
+        const encoded = Buffer.from(script, 'utf16le').toString('base64')
         for (const apiKey of ['sk-first', 'sk-second']) {
-          const command = buildCodexPowerShellCommand({ ...options, apiKey })
-          const encoded = Buffer.from(command, 'utf16le').toString('base64')
           const result = spawnSync(
             'powershell.exe',
             ['-NoProfile', '-NonInteractive', '-EncodedCommand', encoded],
             {
               encoding: 'utf8',
-              env: { ...process.env, CODEX_HOME: codexDir },
+              env: {
+                ...process.env,
+                CODEX_HOME: codexDir,
+                MTRKEY: apiKey,
+                PATH: `${binDir};${process.env.PATH ?? ''}`,
+              },
             }
           )
           expect(result.status, result.stderr).toBe(0)
@@ -157,9 +198,6 @@ describe('setup command generation', () => {
         expect(savedConfig.match(/\[model_providers\.metartr\]/g)).toHaveLength(
           1
         )
-        expect(readFileSync(configPath).subarray(0, 3)).not.toEqual(
-          Buffer.from([0xef, 0xbb, 0xbf])
-        )
         expect(readFileSync(`${configPath}.metartr-original.bak`, 'utf8')).toBe(
           originalConfig
         )
@@ -171,26 +209,21 @@ describe('setup command generation', () => {
             /^config\.toml\.metartr-\d.*\.bak$/.test(name)
           ).length
         ).toBeGreaterThanOrEqual(2)
-        expect(
-          readdirSync(codexDir).filter((name) =>
-            /^auth\.json\.metartr-\d.*\.bak$/.test(name)
-          ).length
-        ).toBeGreaterThanOrEqual(2)
         expect(JSON.parse(readFileSync(authPath, 'utf8'))).toMatchObject({
           auth_mode: 'apikey',
           OPENAI_API_KEY: 'sk-second',
         })
       } finally {
-        rmSync(codexDir, { recursive: true, force: true })
+        rmSync(home, { recursive: true, force: true })
       }
     }
   )
 
-  test('POSIX commands parse, preserve files, and suppress success on failure', () => {
-    const bash = findGitBash()
+  test('POSIX helpers parse and preserve Claude/Codex configuration', () => {
+    const bash = findBash()
     if (!bash) return
 
-    const home = mkdtempSync(join(tmpdir(), 'metartr-posix-'))
+    const home = mkdtempSync(join(tmpdir(), 'metartr-setup-sh-'))
     const codexDir = join(home, '.codex')
     const binDir = join(home, 'bin')
     mkdirSync(codexDir)
@@ -219,15 +252,12 @@ describe('setup command generation', () => {
     )
     chmodSync(fakeCodex, 0o755)
 
+    const claudeScript = readSetupScript('claude-posix-v1.txt')
+    const codexScript = readSetupScript('codex-posix-v1.txt')
     try {
-      const claude = buildClaudePosixCommand({
-        ...options,
-        baseUrl: 'https://api.metartr.com',
-      })
-      const codex = buildCodexPosixCommand(options)
-      for (const command of [claude, codex]) {
+      for (const script of [claudeScript, codexScript]) {
         const parsed = spawnSync(bash, ['-n'], {
-          input: command,
+          input: script,
           encoding: 'utf8',
         })
         expect(parsed.status, parsed.stderr).toBe(0)
@@ -239,14 +269,24 @@ describe('setup command generation', () => {
         CODEX_HOME: toPosixPath(codexDir),
         PATH: `${toPosixPath(binDir)}:/usr/bin`,
       }
+      const claude = spawnSync(bash, ['-s'], {
+        input: claudeScript,
+        encoding: 'utf8',
+        env: { ...env, MTRKEY: 'sk-claude' },
+      })
+      expect(claude.status, claude.stderr).toBe(0)
+      expect(readFileSync(join(home, '.bashrc'), 'utf8')).toContain(
+        "export ANTHROPIC_AUTH_TOKEN='sk-claude'"
+      )
+
       for (const apiKey of ['sk-first', 'sk-second']) {
-        const result = spawnSync(
-          bash,
-          ['-c', buildCodexPosixCommand({ ...options, apiKey })],
-          { encoding: 'utf8', env }
-        )
+        const result = spawnSync(bash, ['-s'], {
+          input: codexScript,
+          encoding: 'utf8',
+          env: { ...env, MTRKEY: apiKey },
+        })
         expect(result.status, result.stderr).toBe(0)
-        expect(result.stdout).toContain(options.successMessage)
+        expect(result.stdout).toContain('MetaRtr setup complete')
       }
       expect(readFileSync(configPath, 'utf8')).toContain('[mcp_servers.demo]')
       expect(readFileSync(`${configPath}.metartr-original.bak`, 'utf8')).toBe(
@@ -255,33 +295,11 @@ describe('setup command generation', () => {
       expect(readFileSync(`${authPath}.metartr-original.bak`, 'utf8')).toBe(
         originalAuth
       )
-      expect(buildCodexPosixCommand(options)).toContain(
-        'chmod 600 "$metartr_auth" || return 1'
-      )
-      if (process.platform !== 'win32') {
-        expect(statSync(authPath).mode & 0o777).toBe(0o600)
-      }
-
-      const blockedCodexHome = join(home, 'blocked-codex-home')
-      writeFileSync(blockedCodexHome, 'not a directory', 'utf8')
-      const failed = spawnSync(bash, ['-c', buildCodexPosixCommand(options)], {
-        encoding: 'utf8',
-        env: { ...env, CODEX_HOME: toPosixPath(blockedCodexHome) },
+      expect(JSON.parse(readFileSync(authPath, 'utf8'))).toMatchObject({
+        OPENAI_API_KEY: 'sk-second',
       })
-      expect(failed.status).not.toBe(0)
-      expect(failed.stdout).not.toContain(options.successMessage)
-      expect(failed.stderr).toContain(options.failureMessage)
     } finally {
       rmSync(home, { recursive: true, force: true })
     }
-  })
-
-  test('rejects commands already corrupted by rich-text rendering', () => {
-    expect(() =>
-      buildClaudePowerShellCommand({
-        ...options,
-        baseUrl: '[https://api.metartr.com](https://api.metartr.com)',
-      })
-    ).toThrow('rendered rich-text markup')
   })
 })

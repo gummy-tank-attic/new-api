@@ -153,7 +153,10 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     expect(screen.queryByRole('tab')).not.toBeInTheDocument()
     expect(screen.getByText('Claude Code only')).toBeInTheDocument()
     expect(screen.queryByText(/Codex CLI/)).not.toBeInTheDocument()
-    expect(screen.getByText(/ANTHROPIC_BASE_URL/)).toBeInTheDocument()
+    expect(screen.getByText(/claude-windows-v1\.txt/)).toBeInTheDocument()
+    expect(
+      screen.getByText('Current group: Claude Max（CLI Only）')
+    ).toBeInTheDocument()
     expect(
       screen.getAllByText(
         'This command configures your API base URL and key for Claude Code.'
@@ -161,7 +164,7 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     ).toHaveLength(1)
   })
 
-  test('PowerShell copy writes the readable command as plain text', async () => {
+  test('PowerShell copy writes the one-line bootstrap as plain text', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
@@ -169,17 +172,14 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     })
     renderDialog('Claude Max（CLI Only）')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Copy' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Copy setup command' }))
 
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
     const copied = writeText.mock.calls[0][0] as string
-    expect(copied).toContain(
-      "[Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', $metartrBaseUrl, 'Process')"
+    expect(copied).toBe(
+      "$env:MTRKEY='sk-test';irm https://www.metartr.com/setup/claude-windows-v1.txt|iex"
     )
-    expect(copied).toContain(
-      "[Environment]::SetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', $metartrAuthToken, 'User')"
-    )
-    expect(copied).toContain("$metartrBaseUrl = 'https://api.metartr.com'")
+    expect(copied.split(/\r?\n/)).toHaveLength(1)
     expect(copied).not.toContain('\\_')
     expect(copied).not.toContain('[https://')
     expect(copied).not.toMatch(/&#(?:x[\da-f]+|\d+);|&nbsp;/i)
@@ -201,12 +201,11 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     expect(setData).toHaveBeenCalledOnce()
     expect(setData).toHaveBeenCalledWith(
       'text/plain',
-      expect.stringContaining(
-        "[Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', $metartrBaseUrl, 'Process')"
-      )
+      expect.stringContaining('claude-windows-v1.txt')
     )
     const copied = setData.mock.calls[0][1] as string
-    expect(copied).toContain("$metartrBaseUrl = 'https://api.metartr.com'")
+    expect(copied).toContain("$env:MTRKEY='sk-test'")
+    expect(copied.split(/\r?\n/)).toHaveLength(1)
     expect(copied).not.toContain('\\_')
     expect(copied).not.toContain('[https://')
     expect(copied).not.toMatch(/&#(?:x[\da-f]+|\d+);|&nbsp;/i)
@@ -236,14 +235,11 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
   test('Claude lite (Sale) shows Claude Code only, no desktop-apps tab', () => {
     renderDialog('Claude lite（Sale）')
     expect(screen.queryByRole('tab')).not.toBeInTheDocument()
-    expect(screen.getByText(/ANTHROPIC_BASE_URL/)).toBeInTheDocument()
+    expect(screen.getByText(/claude-windows-v1\.txt/)).toBeInTheDocument()
     expect(screen.queryByText('Desktop apps')).not.toBeInTheDocument()
     expect(
-      screen.getByText(
-        /✅ MetaRtr setup complete\. Fully quit and restart the terminal and Claude Code\./
-      )
+      screen.getByText(/When you see "✅ MetaRtr setup complete".*Claude Code/)
     ).toBeInTheDocument()
-    expect(screen.queryByText(/配置完成/)).not.toBeInTheDocument()
     expect(document.querySelector('pre')?.className.includes('break-all')).toBe(
       false
     )

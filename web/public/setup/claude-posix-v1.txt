@@ -1,0 +1,33 @@
+#!/bin/sh
+
+metartr_claude_setup() {
+  umask 077
+  [ -n "${MTRKEY:-}" ] || { printf '%s\n' 'ERROR: MetaRtr setup failed. API key is missing.' >&2; return 1; }
+  metartr_auth_token=$MTRKEY
+  unset MTRKEY
+ case $metartr_auth_token in
+    *[!A-Za-z0-9._:/+_-]*) printf '%s\n' 'ERROR: MetaRtr setup failed. API key contains an unsupported character.' >&2; return 1 ;;
+ esac
+  metartr_base_export="export ANTHROPIC_BASE_URL='https://api.metartr.com'"
+  metartr_token_export="export ANTHROPIC_AUTH_TOKEN='$metartr_auth_token'"
+
+  for metartr_file in "$HOME/.zshrc" "$HOME/.bashrc"; do
+    touch "$metartr_file" || return 1
+    if [ ! -e "$metartr_file.metartr-original.bak" ]; then
+      cp -p "$metartr_file" "$metartr_file.metartr-original.bak" || return 1
+    fi
+    metartr_tmp=$(mktemp "$metartr_file.metartr.XXXXXX") || return 1
+    awk '!/ANTHROPIC_BASE_URL|ANTHROPIC_AUTH_TOKEN/' "$metartr_file" > "$metartr_tmp" || return 1
+    printf '%s\n' "$metartr_base_export" "$metartr_token_export" >> "$metartr_tmp" || return 1
+    mv "$metartr_tmp" "$metartr_file" || return 1
+    grep -Fqx "$metartr_base_export" "$metartr_file" || return 1
+    grep -Fqx "$metartr_token_export" "$metartr_file" || return 1
+  done
+}
+
+if metartr_claude_setup; then
+  printf '\342\234\205 %s\n' 'MetaRtr setup complete. Fully close and reopen Terminal and Claude Code.'
+else
+  printf '%s\n' 'ERROR: MetaRtr setup failed. Check the error above and try again.' >&2
+  exit 1
+fi
