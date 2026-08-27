@@ -316,19 +316,19 @@ export function ApiKeyConnectDialog({
         <li>
           {osType === 'windows'
             ? t(
-                'Click Windows Start, type "PowerShell", then open Windows PowerShell.'
+                'Click Windows Start, type "PowerShell", then open Windows PowerShell. You do not need to open a project folder or type a path; leave the window at its default location.'
               )
             : t(
-                'On macOS, press Command + Space, search for "Terminal", and open it. On Linux, open Terminal from the applications menu.'
+                'On macOS, press Command + Space, search for "Terminal", and open it. On Linux, open Terminal from the applications menu. You do not need to open a project folder or type a path.'
               )}
         </li>
         <li>
           {osType === 'windows'
             ? t(
-                'In the PowerShell window, right-click once to paste the copied command, then press Enter. Paste only; do not type or change anything.'
+                'In the PowerShell window, right-click where the cursor is blinking on the last line to paste the copied command, then press Enter. Paste only; do not type a path, add text, or change anything.'
               )
             : t(
-                'In Terminal, paste the copied command, then press Enter. On macOS use Command + V; on Linux use Ctrl + Shift + V. Paste only; do not type or change anything.'
+                'In Terminal, paste the copied command where the cursor is blinking on the last line, then press Enter. On macOS use Command + V; on Linux use Ctrl + Shift + V. Paste only; do not type a path, add text, or change anything.'
               )}
         </li>
         <li>

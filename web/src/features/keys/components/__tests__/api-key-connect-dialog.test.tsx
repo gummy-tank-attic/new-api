@@ -21,6 +21,12 @@ import i18next from 'i18next'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
 import { GROUP_DISPLAY_ORDER } from '@/features/pricing/constants'
+import enLocale from '@/i18n/locales/en.json'
+import frLocale from '@/i18n/locales/fr.json'
+import jaLocale from '@/i18n/locales/ja.json'
+import ruLocale from '@/i18n/locales/ru.json'
+import viLocale from '@/i18n/locales/vi.json'
+import zhTwLocale from '@/i18n/locales/zh-TW.json'
 import zhLocale from '@/i18n/locales/zh.json'
 
 import { ApiKeyConnectDialog } from '../dialogs/api-key-connect-dialog'
@@ -296,7 +302,10 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
         screen.getByText(/点击 Windows 左下角的“开始”/)
       ).toBeInTheDocument()
       expect(
-        screen.getByText(/点击一次鼠标右键.*按 Enter（回车）/)
+        screen.getByText(/不需要进入项目文件夹.*不需要输入任何路径或 cd/)
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(/最后一行光标闪烁的位置.*按 Enter（回车）/)
       ).toBeInTheDocument()
       expect(
         screen.getByText(/一直没有看到以“✅”开头的提示/)
@@ -325,6 +334,58 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
       renderDialog('Codex Pro（External）')
       expect(screen.getByText('配置 Codex CLI：t')).toBeInTheDocument()
       expect(screen.getByText(/已有设置会自动备份/)).toBeInTheDocument()
+    } finally {
+      await i18next.changeLanguage('en')
+    }
+  })
+
+  test('folder and paste instructions are translated in every locale', () => {
+    const localeTranslations = [
+      enLocale.translation,
+      frLocale.translation,
+      jaLocale.translation,
+      ruLocale.translation,
+      viLocale.translation,
+      zhTwLocale.translation,
+      zhLocale.translation,
+    ]
+    const keys = [
+      'Click Windows Start, type "PowerShell", then open Windows PowerShell. You do not need to open a project folder or type a path; leave the window at its default location.',
+      'On macOS, press Command + Space, search for "Terminal", and open it. On Linux, open Terminal from the applications menu. You do not need to open a project folder or type a path.',
+      'In the PowerShell window, right-click where the cursor is blinking on the last line to paste the copied command, then press Enter. Paste only; do not type a path, add text, or change anything.',
+      'In Terminal, paste the copied command where the cursor is blinking on the last line, then press Enter. On macOS use Command + V; on Linux use Ctrl + Shift + V. Paste only; do not type a path, add text, or change anything.',
+    ] as const
+
+    for (const translations of localeTranslations) {
+      for (const key of keys) {
+        expect(translations[key]).toBeTypeOf('string')
+        expect(translations[key].trim().length).toBeGreaterThan(20)
+      }
+    }
+    for (const translations of localeTranslations.slice(1)) {
+      for (const key of keys) expect(translations[key]).not.toBe(key)
+    }
+  })
+
+  test('changing the interface language renders the matching folder instructions', async () => {
+    i18next.addResourceBundle(
+      'fr',
+      'translation',
+      frLocale.translation,
+      true,
+      true
+    )
+    await i18next.changeLanguage('fr')
+
+    try {
+      renderDialog('Claude Max（External）')
+      expect(
+        screen.getByText(/Vous n’avez pas besoin d’ouvrir un dossier de projet/)
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(/dernière ligne où le curseur clignote/)
+      ).toBeInTheDocument()
+      expect(screen.queryByText(/You do not need to open/)).toBeNull()
     } finally {
       await i18next.changeLanguage('en')
     }
