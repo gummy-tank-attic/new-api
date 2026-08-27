@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { AppWindow, Check, Copy, ShieldCheck, Terminal } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
@@ -32,6 +32,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { copyToClipboard } from '@/lib/copy-to-clipboard'
 
+import {
+  buildClaudePosixCommand,
+  buildClaudePowerShellCommand,
+  buildCodexPosixCommand,
+  buildCodexPowerShellCommand,
+} from './api-key-connect-commands'
+import { resolveConnectPlan, type ConnectPlan } from './api-key-connect-plan'
+
 const BASE_API_URL = 'https://api.metartr.com'
 const OPENAI_API_URL = 'https://api.metartr.com/v1'
 
@@ -42,11 +50,43 @@ function detectIsWindows(): boolean {
 
 type OsType = 'windows' | 'posix'
 
+type Translate = (key: string, options?: Record<string, unknown>) => string
+
+function describeGroupUsage(plan: ConnectPlan, t: Translate): string {
+  if (plan.notice === 'image-video') {
+    return t(
+      'Image/video generation group. Use it in a supported image/video client or API.'
+    )
+  }
+  if (plan.notice === 'external') {
+    return t(
+      'Use with an AI chat app via OpenAI-compatible setup. WeChat/QQ will not work.'
+    )
+  }
+  if (plan.tabs.length === 1 && plan.tabs[0] === 'claude-code') {
+    return t('Claude Code only')
+  }
+  if (plan.tabs.length === 1 && plan.tabs[0] === 'codex-cli') {
+    return t('Codex CLI only')
+  }
+  if (plan.defaultTab === 'codex-cli') {
+    return t('Works with Codex CLI or a graphical client')
+  }
+  return t('Works with Claude Code or a graphical client')
+}
+
+const TAB_GRID_CLASS: Record<number, string> = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-2',
+  3: 'grid-cols-3',
+}
+
 interface ApiKeyConnectDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   tokenKey: string
   keyName?: string
+  tokenGroup?: string
 }
 
 export function ApiKeyConnectDialog({
@@ -54,13 +94,20 @@ export function ApiKeyConnectDialog({
   onOpenChange,
   tokenKey,
   keyName,
+  tokenGroup,
 }: ApiKeyConnectDialogProps) {
   const { t } = useTranslation()
-  const [activeTab, setActiveTab] = useState<string>('claude-code')
+  const plan = useMemo(() => resolveConnectPlan(tokenGroup), [tokenGroup])
+  const [activeTab, setActiveTab] = useState<string>(plan.defaultTab)
   const [osType, setOsType] = useState<OsType>(() =>
     detectIsWindows() ? 'windows' : 'posix'
   )
   const [copiedSection, setCopiedSection] = useState<string | null>(null)
+
+  // 重新打开或换令牌时回到该分组的默认 Tab
+  useEffect(() => {
+    if (open) setActiveTab(plan.defaultTab)
+  }, [open, plan.defaultTab])
 
   const cleanKey = useMemo(() => {
     if (!tokenKey) return 'sk-...'
@@ -78,88 +125,91 @@ export function ApiKeyConnectDialog({
     }
   }
 
-  // 命令末尾的 ✅ 成功行是客服判断配置成功的依据，保持中文、勿改措辞。
+  const claudeDone = t(
+    '✅ MetaRtr setup complete. Fully quit and restart the terminal and Claude Code.'
+  )
+  const setupVerificationFailed = t(
+    'MetaRtr setup failed. Check the error above and try again.'
+  )
+  const codexDone = t(
+    '✅ MetaRtr setup complete. Fully quit and restart the terminal and Codex CLI.'
+  )
+
   const claudeCodeCommands = useMemo<Record<OsType, string>>(
     () => ({
-      windows: [
-        `[System.Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', '${BASE_API_URL}', 'User')`,
-        `[System.Environment]::SetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', '${cleanKey}', 'User')`,
-        `Write-Host "✅ MetaRtr 配置完成，请完全退出并重启终端和 Claude Code" -ForegroundColor Green`,
-      ].join('\n'),
-      posix: [
-        `for f in ~/.zshrc ~/.bashrc; do`,
-        `  touch "$f"`,
-        `  grep -v 'ANTHROPIC_BASE_URL\\|ANTHROPIC_AUTH_TOKEN' "$f" > "$f.metartr"`,
-        `  mv "$f.metartr" "$f"`,
-        `  printf 'export ANTHROPIC_BASE_URL="%s"\\nexport ANTHROPIC_AUTH_TOKEN="%s"\\n' '${BASE_API_URL}' '${cleanKey}' >> "$f"`,
-        `done`,
-        `export ANTHROPIC_BASE_URL='${BASE_API_URL}' ANTHROPIC_AUTH_TOKEN='${cleanKey}'`,
-        `echo "✅ MetaRtr 配置完成，请完全退出并重启终端和 Claude Code"`,
-      ].join('\n'),
+      windows: buildClaudePowerShellCommand({
+        baseUrl: BASE_API_URL,
+        apiKey: cleanKey,
+        successMessage: claudeDone,
+        failureMessage: setupVerificationFailed,
+      }),
+      posix: buildClaudePosixCommand({
+        baseUrl: BASE_API_URL,
+        apiKey: cleanKey,
+        successMessage: claudeDone,
+        failureMessage: setupVerificationFailed,
+      }),
     }),
-    [cleanKey]
+    [cleanKey, claudeDone, setupVerificationFailed]
   )
 
   // Codex CLI 走 ~/.codex/config.toml + auth.json（与本站渠道的 responses 协议匹配），
   // 原有 config.toml 自动备份为 config.toml.bak。
   const codexCliCommands = useMemo<Record<OsType, string>>(
     () => ({
-      windows: [
-        `$codexDir = "$env:USERPROFILE\\.codex"`,
-        `New-Item -ItemType Directory -Force $codexDir | Out-Null`,
-        `if (Test-Path "$codexDir\\config.toml") { Copy-Item "$codexDir\\config.toml" "$codexDir\\config.toml.bak" -Force }`,
-        `@'`,
-        `model_provider = "metartr"`,
-        ``,
-        `[model_providers.metartr]`,
-        `name = "MetaRtr"`,
-        `base_url = "${OPENAI_API_URL}"`,
-        `wire_api = "responses"`,
-        `requires_openai_auth = true`,
-        `'@ | Set-Content -Path "$codexDir\\config.toml" -Encoding utf8`,
-        `'{"OPENAI_API_KEY":"${cleanKey}"}' | Set-Content -Path "$codexDir\\auth.json" -Encoding utf8`,
-        `Write-Host "✅ MetaRtr 配置完成，请完全退出并重启 Codex CLI" -ForegroundColor Green`,
-      ].join('\n'),
-      posix: [
-        `mkdir -p ~/.codex`,
-        `[ -f ~/.codex/config.toml ] && cp ~/.codex/config.toml ~/.codex/config.toml.bak`,
-        `cat > ~/.codex/config.toml <<'METARTR_EOF'`,
-        `model_provider = "metartr"`,
-        ``,
-        `[model_providers.metartr]`,
-        `name = "MetaRtr"`,
-        `base_url = "${OPENAI_API_URL}"`,
-        `wire_api = "responses"`,
-        `requires_openai_auth = true`,
-        `METARTR_EOF`,
-        `printf '{"OPENAI_API_KEY":"%s"}\\n' '${cleanKey}' > ~/.codex/auth.json`,
-        `echo "✅ MetaRtr 配置完成，请完全退出并重启 Codex CLI"`,
-      ].join('\n'),
+      windows: buildCodexPowerShellCommand({
+        baseUrl: OPENAI_API_URL,
+        apiKey: cleanKey,
+        successMessage: codexDone,
+        failureMessage: setupVerificationFailed,
+      }),
+      posix: buildCodexPosixCommand({
+        baseUrl: OPENAI_API_URL,
+        apiKey: cleanKey,
+        successMessage: codexDone,
+        failureMessage: setupVerificationFailed,
+      }),
     }),
-    [cleanKey]
+    [cleanKey, codexDone, setupVerificationFailed]
   )
 
-  // 自包含接入信息：小白可整段粘给任意 AI，AI 能据此指导配置。保持中文。
   const copyAllAiPrompt = () => {
-    const text = [
-      `MetaRtr 接入信息（官网：https://www.metartr.com）：`,
-      `- API 基础地址: ${BASE_API_URL}`,
-      `- OpenAI 协议地址: ${OPENAI_API_URL}`,
-      `- API Key: ${cleanKey}`,
-      `- 客户端配置: 在任意第三方 AI 工具中新增 OpenAI 或 Claude 供应商，填入上述地址与 API Key 即可。`,
-    ].join('\n')
-    void handleCopy(text, 'all')
+    const lines = [
+      t('MetaRtr connection info (site: https://www.metartr.com):'),
+      t('- API base URL: {{url}}', {
+        url: BASE_API_URL,
+        interpolation: { escapeValue: false },
+      }),
+      t(
+        '- API Key: copy it from the MetaRtr key page and do not send it in chat.'
+      ),
+    ]
+    if (tokenGroup) {
+      lines.push(
+        t('- Group: {{group}} ({{usage}})', {
+          group: tokenGroup,
+          usage: describeGroupUsage(plan, t),
+          interpolation: { escapeValue: false },
+        })
+      )
+    }
+    lines.push(
+      t(
+        '- Client setup: add a custom provider in your AI tool and enter the API base URL above plus your API key.'
+      )
+    )
+    void handleCopy(lines.join('\n'), 'all')
   }
 
   const osSwitch = (
-    <div className='flex gap-1 text-[11px]'>
+    <div className='bg-muted inline-flex shrink-0 rounded-lg p-1'>
       <button
         type='button'
         onClick={() => setOsType('windows')}
-        className={`px-2 py-0.5 rounded cursor-pointer ${
+        className={`cursor-pointer rounded-md px-3 py-1.5 text-base transition-colors ${
           osType === 'windows'
-            ? 'bg-primary text-primary-foreground font-medium'
-            : 'bg-muted text-muted-foreground hover:text-foreground'
+            ? 'bg-primary text-primary-foreground font-medium shadow-sm'
+            : 'text-muted-foreground hover:text-foreground'
         }`}
       >
         PowerShell
@@ -167,10 +217,10 @@ export function ApiKeyConnectDialog({
       <button
         type='button'
         onClick={() => setOsType('posix')}
-        className={`px-2 py-0.5 rounded cursor-pointer ${
+        className={`cursor-pointer rounded-md px-3 py-1.5 text-base transition-colors ${
           osType === 'posix'
-            ? 'bg-primary text-primary-foreground font-medium'
-            : 'bg-muted text-muted-foreground hover:text-foreground'
+            ? 'bg-primary text-primary-foreground font-medium shadow-sm'
+            : 'text-muted-foreground hover:text-foreground'
         }`}
       >
         macOS / Linux
@@ -179,25 +229,41 @@ export function ApiKeyConnectDialog({
   )
 
   const osLabel = (
-    <span className='text-xs font-medium text-muted-foreground'>
+    <span className='text-muted-foreground min-w-0 text-base'>
       {osType === 'windows'
         ? t('Windows PowerShell (Search PowerShell in Start Menu to open):')
         : t('macOS / Linux (Terminal):')}
     </span>
   )
 
+  let dialogDescription = t(
+    'Paste the API address and key into an AI chat app on your computer — not WeChat or QQ.'
+  )
+  if (plan.defaultTab === 'claude-code') {
+    dialogDescription = t(
+      'This command configures your API base URL and key for Claude Code.'
+    )
+  } else if (plan.defaultTab === 'codex-cli') {
+    dialogDescription = t(
+      'This command writes the Codex CLI config files; your existing config is backed up automatically.'
+    )
+  }
+
+  const cliOnlyLabel =
+    plan.defaultTab === 'claude-code'
+      ? t('Claude Code only')
+      : t('Codex CLI only')
+
   const renderCommandBlock = (
     commands: Record<OsType, string>,
     sectionKey: string
   ) => (
-    <div className='relative rounded-lg bg-zinc-950 p-3 font-mono text-xs text-zinc-100 dark:bg-zinc-900 border border-zinc-800'>
-      <pre className='overflow-x-auto whitespace-pre-wrap break-all pr-12 select-all'>
-        {commands[osType]}
-      </pre>
+    <div className='relative max-w-full min-w-0 overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950 font-mono text-sm leading-6 text-zinc-100 dark:bg-zinc-900'>
       <Button
-        size='icon-sm'
+        size='icon'
         variant='ghost'
-        className='absolute right-2 top-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
+        aria-label={t('Copy')}
+        className='absolute top-2 right-2 z-10 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
         onClick={() => handleCopy(commands[osType], sectionKey)}
       >
         {copiedSection === sectionKey ? (
@@ -206,35 +272,38 @@ export function ApiKeyConnectDialog({
           <Copy className='size-4' />
         )}
       </Button>
+      <pre className='min-w-max p-5 pr-14 whitespace-pre select-all'>
+        {commands[osType]}
+      </pre>
     </div>
   )
 
   const renderCopyRow = (label: string, value: string, sectionKey: string) => (
-    <div className='rounded-lg border bg-muted/30 p-3 space-y-1'>
-      <div className='flex items-center justify-between'>
-        <span className='text-xs font-medium text-muted-foreground'>
+    <div className='bg-muted/30 space-y-2 rounded-xl border p-4'>
+      <div className='flex items-center justify-between gap-3'>
+        <span className='text-muted-foreground text-base font-medium'>
           {label}
         </span>
         <Button
           variant='ghost'
-          size='xs'
-          className='h-6 text-xs gap-1'
+          size='sm'
+          className='gap-1.5'
           onClick={() => handleCopy(value, sectionKey)}
         >
           {copiedSection === sectionKey ? (
             <>
-              <Check className='size-3 text-emerald-500' />
+              <Check className='size-3.5 text-emerald-500' />
               <span>{t('Copied')}</span>
             </>
           ) : (
             <>
-              <Copy className='size-3' />
+              <Copy className='size-3.5' />
               <span>{t('Copy')}</span>
             </>
           )}
         </Button>
       </div>
-      <div className='font-mono text-sm font-medium break-all select-all'>
+      <div className='font-mono text-base font-medium break-all select-all'>
         {value}
       </div>
     </div>
@@ -242,98 +311,163 @@ export function ApiKeyConnectDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-xl max-h-[90vh] overflow-y-auto'>
-        <DialogHeader>
-          <div className='flex items-center gap-2'>
-            <ShieldCheck className='size-5 text-emerald-500 shrink-0' />
-            <DialogTitle>
+      <DialogContent className='max-h-[90vh] w-[calc(100%-2rem)] max-w-4xl min-w-0 gap-6 overflow-x-hidden overflow-y-auto p-6 sm:max-w-4xl sm:p-8'>
+        <DialogHeader className='min-w-0'>
+          <div className='flex min-w-0 items-center gap-2.5'>
+            <ShieldCheck className='size-6 shrink-0 text-emerald-500' />
+            <DialogTitle className='truncate text-xl'>
               {keyName
                 ? t('Connect API Key: {{name}}', { name: keyName })
                 : t('Client Connection Guide')}
             </DialogTitle>
           </div>
-          <DialogDescription>
-            {t(
-              'Copy one-line setup command or configure your graphical client directly.'
-            )}
+          <DialogDescription className='text-base'>
+            {dialogDescription}
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className='w-full mt-2'
-        >
-          <TabsList className='grid grid-cols-3 w-full'>
-            <TabsTrigger value='claude-code' className='text-xs sm:text-sm'>
-              <Terminal className='size-3.5 mr-1.5' />
-              Claude Code
-            </TabsTrigger>
-            <TabsTrigger value='codex-cli' className='text-xs sm:text-sm'>
-              <Terminal className='size-3.5 mr-1.5' />
-              Codex CLI
-            </TabsTrigger>
-            <TabsTrigger value='gui' className='text-xs sm:text-sm'>
-              <AppWindow className='size-3.5 mr-1.5' />
-              {t('GUI Clients')}
-            </TabsTrigger>
-          </TabsList>
+        {plan.tabs.length > 0 && (
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className='w-full min-w-0'
+          >
+            {plan.tabs.length > 1 && (
+              <TabsList
+                className={`grid h-11 w-full min-w-0 ${TAB_GRID_CLASS[plan.tabs.length] ?? 'grid-cols-2'} group-data-horizontal/tabs:h-11`}
+              >
+                {plan.tabs.includes('claude-code') && (
+                  <TabsTrigger
+                    value='claude-code'
+                    className='min-w-0 text-base'
+                  >
+                    <Terminal className='mr-1.5 size-4' />
+                    Claude Code
+                  </TabsTrigger>
+                )}
+                {plan.tabs.includes('codex-cli') && (
+                  <TabsTrigger value='codex-cli' className='min-w-0 text-base'>
+                    <Terminal className='mr-1.5 size-4' />
+                    Codex CLI
+                  </TabsTrigger>
+                )}
+                {plan.tabs.includes('app') && (
+                  <TabsTrigger value='app' className='min-w-0 text-base'>
+                    <AppWindow className='mr-1.5 size-4' />
+                    {t('Fill into an app')}
+                  </TabsTrigger>
+                )}
+              </TabsList>
+            )}
 
-          <TabsContent value='claude-code' className='space-y-4 pt-3'>
-            <p className='text-xs text-muted-foreground'>
-              {t(
-                'This command configures your API base URL and key for Claude Code.'
-              )}
-            </p>
-            <div className='flex items-center justify-between'>
-              {osLabel}
-              {osSwitch}
-            </div>
-            {renderCommandBlock(claudeCodeCommands, 'claude-code')}
-          </TabsContent>
+            {plan.tabs.includes('claude-code') && (
+              <TabsContent
+                value='claude-code'
+                className='min-w-0 space-y-4 pt-4'
+              >
+                {plan.notice === 'cli-only' && (
+                  <p className='text-destructive text-base font-medium'>
+                    {cliOnlyLabel}
+                  </p>
+                )}
+                <div className='flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+                  {osLabel}
+                  {osSwitch}
+                </div>
+                {renderCommandBlock(claudeCodeCommands, 'claude-code')}
+              </TabsContent>
+            )}
 
-          <TabsContent value='codex-cli' className='space-y-4 pt-3'>
-            <p className='text-xs text-muted-foreground'>
-              {t(
-                'This command writes the Codex CLI config files; your existing config is backed up automatically.'
-              )}
-            </p>
-            <div className='flex items-center justify-between'>
-              {osLabel}
-              {osSwitch}
-            </div>
-            {renderCommandBlock(codexCliCommands, 'codex-cli')}
-          </TabsContent>
+            {plan.tabs.includes('codex-cli') && (
+              <TabsContent value='codex-cli' className='min-w-0 space-y-4 pt-4'>
+                {plan.notice === 'cli-only' && (
+                  <p className='text-destructive text-base font-medium'>
+                    {cliOnlyLabel}
+                  </p>
+                )}
+                <div className='flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+                  {osLabel}
+                  {osSwitch}
+                </div>
+                {renderCommandBlock(codexCliCommands, 'codex-cli')}
+              </TabsContent>
+            )}
 
-          <TabsContent value='gui' className='space-y-4 pt-3'>
-            <p className='text-xs text-muted-foreground'>
-              {t(
-                'In Cherry Studio, Claude Desktop, NextChat or other clients, add a new model provider and enter the two fields below:'
-              )}
-            </p>
-            <div className='space-y-3'>
-              {renderCopyRow(t('API Base URL'), BASE_API_URL, 'url')}
-              {renderCopyRow(t('API Key'), cleanKey, 'key')}
-            </div>
-          </TabsContent>
-        </Tabs>
+            {plan.tabs.includes('app') && (
+              <TabsContent value='app' className='min-w-0 space-y-4 pt-4'>
+                {plan.notice === 'image-video' && (
+                  <p className='text-base font-medium text-amber-600 dark:text-amber-500'>
+                    {t(
+                      'This group generates images/videos. Enter the two fields below into an app that supports image/video generation.'
+                    )}
+                  </p>
+                )}
+                {plan.notice === 'external' && (
+                  <>
+                    <p className='text-base font-medium'>
+                      {t(
+                        'This key works inside an AI chat app — not WeChat or QQ. Three steps to start chatting:'
+                      )}
+                    </p>
+                    <ol className='text-muted-foreground list-inside list-decimal space-y-1.5 text-base'>
+                      <li>
+                        {t('Install a free AI chat app on your computer.')}
+                      </li>
+                      <li>
+                        {t(
+                          'In the app, open Settings → Model Provider, add a new provider, and paste the two fields below.'
+                        )}
+                      </li>
+                      {tokenGroup && (
+                        <li>
+                          {t(
+                            "Pick a {{group}} model in the app's model list and start chatting.",
+                            { group: tokenGroup }
+                          )}
+                        </li>
+                      )}
+                    </ol>
+                  </>
+                )}
+                <div className='min-w-0 space-y-3'>
+                  {renderCopyRow(t('API Base URL'), BASE_API_URL, 'url')}
+                  {renderCopyRow(t('API Key'), cleanKey, 'key')}
+                </div>
+                {plan.notice === 'external' && (
+                  <p className='text-muted-foreground text-base'>
+                    {t(
+                      'Not sure how? Click "Copy all info for AI" at the bottom left and send it to our support or any AI for step-by-step help. Full guide:'
+                    )}{' '}
+                    <a
+                      href='/docs?s=clients'
+                      target='_blank'
+                      rel='noreferrer'
+                      className='text-primary underline underline-offset-2'
+                    >
+                      {t('Setup guide')}
+                    </a>
+                  </p>
+                )}
+              </TabsContent>
+            )}
+          </Tabs>
+        )}
 
-        <div className='mt-3 flex items-center justify-between border-t pt-3'>
+        <div className='flex min-w-0 flex-wrap items-center justify-between gap-3 border-t pt-5'>
           <Button
             variant='outline'
-            size='sm'
-            className='text-xs gap-1.5'
+            className='gap-1.5'
             onClick={copyAllAiPrompt}
           >
             {copiedSection === 'all' ? (
-              <Check className='size-3.5 text-emerald-500' />
+              <Check className='size-4 text-emerald-500' />
             ) : (
-              <Copy className='size-3.5' />
+              <Copy className='size-4' />
             )}
             {t('Copy all info for AI')}
           </Button>
 
-          <Button variant='default' size='sm' onClick={() => onOpenChange(false)}>
+          <Button variant='default' onClick={() => onOpenChange(false)}>
             {t('Done')}
           </Button>
         </div>

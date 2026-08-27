@@ -58,6 +58,7 @@ import { updateApiKeyStatus } from '../api'
 import { API_KEY_STATUS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants'
 import { apiKeySchema } from '../types'
 import { useApiKeys } from './api-keys-provider'
+import { hasConnectGuide } from './dialogs/api-key-connect-plan'
 
 function getServerAddress(): string {
   try {
@@ -269,20 +270,22 @@ export function DataTableRowActions<TData>({
             <Link size={16} />
           </DropdownMenuShortcut>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={async () => {
-            const realKey = await resolveRealKey(apiKey.id)
-            if (!realKey) return
-            setResolvedKey(realKey)
-            setCurrentRow(apiKey)
-            setOpen('connect')
-          }}
-        >
-          {t('View Connection Guide')}
-          <DropdownMenuShortcut>
-            <Terminal size={16} />
-          </DropdownMenuShortcut>
-        </DropdownMenuItem>
+        {hasConnectGuide(apiKey.group ?? '') && (
+          <DropdownMenuItem
+            onClick={async () => {
+              const realKey = await resolveRealKey(apiKey.id)
+              if (!realKey) return
+              setResolvedKey(realKey)
+              setCurrentRow(apiKey)
+              setOpen('connect')
+            }}
+          >
+            {t('View Connection Guide')}
+            <DropdownMenuShortcut>
+              <Terminal size={16} />
+            </DropdownMenuShortcut>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={async () => {

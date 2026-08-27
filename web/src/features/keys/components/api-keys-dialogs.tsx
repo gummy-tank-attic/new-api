@@ -38,6 +38,7 @@ export function ApiKeysDialogs() {
         onOpenChange={(isOpen) => !isOpen && setOpen(null)}
         tokenKey={resolvedKey}
         keyName={currentRow?.name}
+        tokenGroup={currentRow?.group ?? undefined}
       />
       <CCSwitchDialog
         open={open === 'cc-switch'}

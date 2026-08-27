@@ -47,8 +47,12 @@ const originalGet = apiClient.get
 const originalPost = apiClient.post
 let renderedDrawer: RenderedDrawer | null = null
 
-function installApiFixtures(createdPayloads: Array<Record<string, unknown>>) {
+function installApiFixtures(
+  createdPayloads: Array<Record<string, unknown>>,
+  requestedUrls: string[] = []
+) {
   apiClient.get = async (url) => {
+    requestedUrls.push(url)
     switch (url) {
       case '/api/status':
         return { data: { data: { default_use_auto_group: true } } }
@@ -72,11 +76,21 @@ function installApiFixtures(createdPayloads: Array<Record<string, unknown>>) {
             data: { groups: ['vip', 'default'], max_count: 3 },
           },
         }
+      case '/api/token/?p=1&size=5':
+        return {
+          data: {
+            success: true,
+            data: {
+              items: [{ id: 999, name: 'another-key', group: 'vip' }],
+            },
+          },
+        }
       default:
         throw new Error(`Unexpected GET ${url}`)
     }
   }
   apiClient.post = async (url, data) => {
+    requestedUrls.push(url)
     expect(url).toBe('/api/token/')
     expect(data && typeof data === 'object').toBeTruthy()
     createdPayloads.push(data as Record<string, unknown>)
@@ -231,7 +245,9 @@ describe('API keys mutate drawer group selection (T1)', () => {
       ...document.querySelectorAll<HTMLElement>('[data-slot="command-item"]'),
     ]
     // auto should be filtered out
-    const hasAuto = items.some((item) => item.textContent?.includes('Automatic routing'))
+    const hasAuto = items.some((item) =>
+      item.textContent?.includes('Automatic routing')
+    )
     expect(hasAuto).toBe(false)
 
     // select vip group
@@ -249,5 +265,21 @@ describe('API keys mutate drawer group selection (T1)', () => {
     for (const payload of createdPayloads) {
       expect(payload.group).toBe('vip')
     }
+  })
+
+  test('does not resolve or show an unrelated key when the new key is absent from the refreshed list', async () => {
+    const createdPayloads: Array<Record<string, unknown>> = []
+    const requestedUrls: string[] = []
+    installApiFixtures(createdPayloads, requestedUrls)
+    await renderCreateDrawer()
+
+    selectComboboxOption(getControlByLabel('Group'), 'Priority access')
+    changeInput(getControlByLabel('Name'), 'my-new-key')
+    fireEvent.click(findButton('Save changes', true))
+
+    await waitFor(() =>
+      expect(requestedUrls).toContain('/api/token/?p=1&size=5')
+    )
+    expect(requestedUrls.some((url) => url.endsWith('/key'))).toBe(false)
   })
 })

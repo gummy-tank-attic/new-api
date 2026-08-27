@@ -96,6 +96,7 @@ import {
 } from './api-key-group-combobox'
 import { isCliOnlyGroup } from './api-key-group-option-item'
 import { useApiKeys } from './api-keys-provider'
+import { hasConnectGuide } from './dialogs/api-key-connect-plan'
 
 type ApiKeyMutateDrawerProps = {
   open: boolean
@@ -111,8 +112,13 @@ export function ApiKeysMutateDrawer({
   const { t } = useTranslation()
   const isUpdate = !!currentRow
   const currentRowId = currentRow?.id
-  const { triggerRefresh, setOpen, setCurrentRow, setResolvedKey, resolveRealKey } =
-    useApiKeys()
+  const {
+    triggerRefresh,
+    setOpen,
+    setCurrentRow,
+    setResolvedKey,
+    resolveRealKey,
+  } = useApiKeys()
   const { loading: statusLoading } = useStatus()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(false)
@@ -306,16 +312,18 @@ export function ApiKeysMutateDrawer({
             try {
               const listRes = await getApiKeys({ p: 1, size: 5 })
               const items = listRes?.data?.items ?? []
-              const created =
-                items.find((item) => item.name === firstTokenName) ?? items[0]
+              const created = items.find((item) => item.name === firstTokenName)
               if (created) {
                 const rawKey = await resolveRealKey(created.id)
                 if (rawKey) {
                   setResolvedKey(
                     rawKey.startsWith('sk-') ? rawKey : `sk-${rawKey}`
                   )
-                  setCurrentRow(created)
-                  setOpen('connect')
+                  const group = created.group || data.group
+                  setCurrentRow({ ...created, group })
+                  if (hasConnectGuide(group)) {
+                    setOpen('connect')
+                  }
                 }
               }
             } catch {
@@ -427,7 +435,7 @@ export function ApiKeysMutateDrawer({
                       />
                     </FormControl>
                     {isCliOnlyGroup(selectedGroup || '') && (
-                      <div className='flex items-center gap-1.5 text-xs text-destructive mt-1'>
+                      <div className='text-destructive mt-1 flex items-center gap-1.5 text-xs'>
                         <AlertCircle className='size-3.5 shrink-0' />
                         <span>
                           {t(
