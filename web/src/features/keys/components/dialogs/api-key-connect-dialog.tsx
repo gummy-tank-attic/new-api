@@ -175,11 +175,25 @@ export function ApiKeyConnectDialog({
         })
       )
     }
-    lines.push(
-      t(
-        '- Client setup: add a custom provider in your AI tool and enter the API base URL above plus your API key.'
+    if (plan.defaultTab === 'claude-code' || plan.defaultTab === 'codex-cli') {
+      lines.push(
+        t('- Client: {{client}}', {
+          client:
+            plan.defaultTab === 'claude-code' ? 'Claude Code' : 'Codex CLI',
+        })
       )
-    )
+      lines.push(
+        t(
+          "- Setup: open this key's connection guide in MetaRtr, copy the command for your system, and run it once."
+        )
+      )
+    } else {
+      lines.push(
+        t(
+          '- Client setup: add a custom provider in your AI tool and enter the API base URL above plus your API key.'
+        )
+      )
+    }
     void handleCopy(lines.join('\n'), 'all')
   }
 
@@ -223,13 +237,31 @@ export function ApiKeyConnectDialog({
   )
   if (plan.defaultTab === 'claude-code') {
     dialogDescription = t(
-      'This command configures your API base URL and key for Claude Code.'
+      'Follow the four steps below. This command connects the key for the current group to Claude Code; you do not need to edit any settings yourself.'
     )
   } else if (plan.defaultTab === 'codex-cli') {
     dialogDescription = t(
-      'This command writes the Codex CLI config files; your existing config is backed up automatically.'
+      'Follow the four steps below. This command connects the key for the current group to Codex CLI; your existing settings are backed up automatically.'
     )
   }
+
+  const defaultClient =
+    plan.defaultTab === 'claude-code'
+      ? 'Claude Code'
+      : plan.defaultTab === 'codex-cli'
+        ? 'Codex CLI'
+        : null
+
+  const dialogTitle = defaultClient
+    ? keyName
+      ? t('Set up {{client}}: {{name}}', {
+          client: defaultClient,
+          name: keyName,
+        })
+      : t('Set up {{client}}', { client: defaultClient })
+    : keyName
+      ? t('How to use this key: {{name}}', { name: keyName })
+      : t('How to use this key')
 
   const cliOnlyLabel =
     plan.defaultTab === 'claude-code'
@@ -243,7 +275,7 @@ export function ApiKeyConnectDialog({
     <div className='max-w-full min-w-0 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-100 dark:bg-zinc-900'>
       <div className='flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-zinc-800 px-4 py-2'>
         <span className='text-sm font-medium text-zinc-300'>
-          {t('One-line setup command')}
+          {t('Command to copy')}
         </span>
         <Button
           size='sm'
@@ -256,7 +288,7 @@ export function ApiKeyConnectDialog({
           ) : (
             <Copy className='size-4' />
           )}
-          {copiedSection === sectionKey ? t('Copied') : t('Copy setup command')}
+          {copiedSection === sectionKey ? t('Copied') : t('Copy command')}
         </Button>
       </div>
       <div className='max-w-full overflow-x-auto'>
@@ -276,39 +308,67 @@ export function ApiKeyConnectDialog({
     <div className='min-w-0 space-y-3'>
       {tokenGroup && (
         <p className='text-base font-medium'>
-          {t('Current group: {{group}}', { group: tokenGroup })}
+          {t('Group this command will use: {{group}}', { group: tokenGroup })}
         </p>
       )}
-      <ol className='text-muted-foreground list-inside list-decimal space-y-2 text-base'>
-        <li>{t('Click "Copy setup command" below.')}</li>
+      <ol className='text-muted-foreground ml-5 list-outside list-decimal space-y-2 text-base leading-7'>
+        <li>{t('Click "Copy command" below.')}</li>
         <li>
           {osType === 'windows'
             ? t(
-                'Open the Windows Start menu, type "PowerShell", then open Windows PowerShell.'
+                'Click Windows Start, type "PowerShell", then open Windows PowerShell.'
               )
-            : t('Open the Terminal app from your applications menu.')}
+            : t(
+                'On macOS, press Command + Space, search for "Terminal", and open it. On Linux, open Terminal from the applications menu.'
+              )}
         </li>
         <li>
-          {t(
-            'Paste into the terminal window and press Enter. Paste only the copied command; do not type the "PS C:\\Users\\...>" text.'
-          )}
+          {osType === 'windows'
+            ? t(
+                'In the PowerShell window, right-click once to paste the copied command, then press Enter. Paste only; do not type or change anything.'
+              )
+            : t(
+                'In Terminal, paste the copied command, then press Enter. On macOS use Command + V; on Linux use Ctrl + Shift + V. Paste only; do not type or change anything.'
+              )}
+        </li>
+        <li>
+          {osType === 'windows'
+            ? t(
+                'Wait until a line beginning with ✅ appears. Then fully close PowerShell and {{client}}, and reopen {{client}}.',
+                { client }
+              )
+            : t(
+                'Wait until a line beginning with ✅ appears. Then fully close Terminal and {{client}}, and reopen {{client}}.',
+                { client }
+              )}
         </li>
       </ol>
-      <p className='text-base font-medium text-emerald-700 dark:text-emerald-400'>
+      <p className='text-sm leading-6 text-amber-700 dark:text-amber-400'>
         {t(
-          'When you see "✅ MetaRtr setup complete", fully close and reopen the terminal and {{client}}.',
-          { client }
+          'If red error text appears, or no ✅ line appears, setup did not finish. Keep the window open and send a screenshot to support.'
         )}
       </p>
     </div>
   )
 
-  const renderSwitchGroupHelp = () => (
-    <p className='text-muted-foreground text-sm leading-6'>
-      {t(
-        "To switch groups later: Console → API Keys → find the target group's key → ⋯ → View Connection Guide → copy and run its command."
-      )}
-    </p>
+  const renderSwitchGroupHelp = (client: 'Claude Code' | 'Codex CLI') => (
+    <div className='min-w-0 space-y-2 border-t pt-4'>
+      <p className='text-base font-medium'>{t('How to switch groups later')}</p>
+      <ol className='text-muted-foreground ml-5 list-outside list-decimal space-y-1.5 text-sm leading-6'>
+        <li>{t('Return to the MetaRtr Console and open "API Keys".')}</li>
+        <li>
+          {t(
+            'Find a key for the group you want to use, click "⋯" on its right, then click "View Connection Guide".'
+          )}
+        </li>
+        <li>
+          {t(
+            "Copy that group's command and run it once. The last command you run is the group {{client}} will use.",
+            { client }
+          )}
+        </li>
+      </ol>
+    </div>
   )
 
   const renderCopyRow = (label: string, value: string, sectionKey: string) => (
@@ -349,9 +409,7 @@ export function ApiKeyConnectDialog({
           <div className='flex min-w-0 items-center gap-2.5'>
             <ShieldCheck className='size-6 shrink-0 text-emerald-500' />
             <DialogTitle className='truncate text-xl'>
-              {keyName
-                ? t('Connect API Key: {{name}}', { name: keyName })
-                : t('Client Connection Guide')}
+              {dialogTitle}
             </DialogTitle>
           </div>
           <DialogDescription className='text-base'>
@@ -411,10 +469,10 @@ export function ApiKeyConnectDialog({
                 {renderCommandBlock(claudeCodeCommands, 'claude-code')}
                 <p className='text-muted-foreground text-sm leading-6'>
                   {t(
-                    'This command automatically reads a fixed-version setup script from www.metartr.com; you do not need to download any file.'
+                    'No download is needed. This command completes the setup automatically.'
                   )}
                 </p>
-                {renderSwitchGroupHelp()}
+                {renderSwitchGroupHelp('Claude Code')}
               </TabsContent>
             )}
 
@@ -433,10 +491,10 @@ export function ApiKeyConnectDialog({
                 {renderCommandBlock(codexCliCommands, 'codex-cli')}
                 <p className='text-muted-foreground text-sm leading-6'>
                   {t(
-                    'This command automatically reads a fixed-version setup script from www.metartr.com; you do not need to download any file.'
+                    'No download is needed. This command completes the setup automatically.'
                   )}
                 </p>
-                {renderSwitchGroupHelp()}
+                {renderSwitchGroupHelp('Codex CLI')}
               </TabsContent>
             )}
 
@@ -483,7 +541,7 @@ export function ApiKeyConnectDialog({
                 {plan.notice === 'external' && (
                   <p className='text-muted-foreground text-base'>
                     {t(
-                      'Not sure how? Click "Copy all info for AI" at the bottom left and send it to our support or any AI for step-by-step help. Full guide:'
+                      'Not sure how? Click "Copy help info (key excluded)" at the bottom left and send it to support or any AI for step-by-step help. Full guide:'
                     )}{' '}
                     <a
                       href='/docs?s=clients'
@@ -511,7 +569,7 @@ export function ApiKeyConnectDialog({
             ) : (
               <Copy className='size-4' />
             )}
-            {t('Copy all info for AI')}
+            {t('Copy help info (key excluded)')}
           </Button>
 
           <Button variant='default' onClick={() => onOpenChange(false)}>

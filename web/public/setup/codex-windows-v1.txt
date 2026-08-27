@@ -98,9 +98,9 @@ try {
     throw 'config verification failed.'
   }
 
-  Write-Host (([char]0x2705) + ' MetaRtr setup complete. Fully close and reopen PowerShell and Codex CLI.') -ForegroundColor Green
+  Write-Host (([char]0x2705) + ' MetaRtr setup complete / 配置完成. Fully close and reopen PowerShell and Codex CLI.') -ForegroundColor Green
 } catch {
-  Write-Host ('ERROR: MetaRtr setup failed. ' + $_.Exception.Message) -ForegroundColor Red
+  Write-Host ('ERROR / 配置失败: MetaRtr setup failed. ' + $_.Exception.Message) -ForegroundColor Red
   throw
 } finally {
   if ($metartrTempConfig -and (Test-Path -LiteralPath $metartrTempConfig)) {

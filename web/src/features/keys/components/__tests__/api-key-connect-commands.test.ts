@@ -98,6 +98,7 @@ describe('one-line setup command generation', () => {
       expect(script).toContain('MTRKEY')
       expect(script).not.toContain(options.apiKey)
       expect(script).toContain('MetaRtr setup complete')
+      expect(script).toContain('配置完成')
     }
     expect(scripts[0]).toContain('ANTHROPIC_BASE_URL')
     expect(scripts[1]).toContain('ANTHROPIC_AUTH_TOKEN')

@@ -17,9 +17,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import i18next from 'i18next'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
 import { GROUP_DISPLAY_ORDER } from '@/features/pricing/constants'
+import zhLocale from '@/i18n/locales/zh.json'
 
 import { ApiKeyConnectDialog } from '../dialogs/api-key-connect-dialog'
 import {
@@ -155,11 +157,11 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     expect(screen.queryByText(/Codex CLI/)).not.toBeInTheDocument()
     expect(screen.getByText(/claude-windows-v1\.txt/)).toBeInTheDocument()
     expect(
-      screen.getByText('Current group: Claude Max（CLI Only）')
+      screen.getByText('Group this command will use: Claude Max（CLI Only）')
     ).toBeInTheDocument()
     expect(
       screen.getAllByText(
-        'This command configures your API base URL and key for Claude Code.'
+        'Follow the four steps below. This command connects the key for the current group to Claude Code; you do not need to edit any settings yourself.'
       )
     ).toHaveLength(1)
   })
@@ -172,7 +174,7 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     })
     renderDialog('Claude Max（CLI Only）')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Copy setup command' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Copy command' }))
 
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
     const copied = writeText.mock.calls[0][0] as string
@@ -220,7 +222,7 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     renderDialog('Grok')
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Copy all info for AI' })
+      screen.getByRole('button', { name: 'Copy help info (key excluded)' })
     )
 
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
@@ -232,13 +234,33 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     expect(copied).toContain('https://api.metartr.com')
   })
 
+  test('copy-for-AI text gives CLI instructions for Claude groups', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    renderDialog('Claude Max（External）')
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Copy help info (key excluded)' })
+    )
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
+    const copied = writeText.mock.calls[0][0] as string
+    expect(copied).toContain('- Client: Claude Code')
+    expect(copied).toContain("open this key's connection guide")
+    expect(copied).not.toContain('add a custom provider')
+    expect(copied).not.toContain('sk-test')
+  })
+
   test('Claude lite (Sale) shows Claude Code only, no desktop-apps tab', () => {
     renderDialog('Claude lite（Sale）')
     expect(screen.queryByRole('tab')).not.toBeInTheDocument()
     expect(screen.getByText(/claude-windows-v1\.txt/)).toBeInTheDocument()
     expect(screen.queryByText('Desktop apps')).not.toBeInTheDocument()
     expect(
-      screen.getByText(/When you see "✅ MetaRtr setup complete".*Claude Code/)
+      screen.getByText(/line beginning with ✅.*Claude Code/)
     ).toBeInTheDocument()
     expect(document.querySelector('pre')?.className.includes('break-all')).toBe(
       false
@@ -251,5 +273,60 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     expect(screen.getByText('API Base URL')).toBeInTheDocument()
     expect(screen.queryByText(/ANTHROPIC_BASE_URL/)).not.toBeInTheDocument()
     expect(screen.queryByText(/Pick a .* model/)).not.toBeInTheDocument()
+  })
+
+  test('Chinese beginner guide is complete and never falls back to English', async () => {
+    i18next.addResourceBundle(
+      'zh',
+      'translation',
+      zhLocale.translation,
+      true,
+      true
+    )
+    await i18next.changeLanguage('zh')
+
+    try {
+      const { unmount } = renderDialog('Claude Max（External）')
+
+      expect(screen.getByText('配置 Claude Code：t')).toBeInTheDocument()
+      expect(
+        screen.getByText('这条命令将使用的分组：Claude Max（External）')
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(/点击 Windows 左下角的“开始”/)
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(/点击一次鼠标右键.*按 Enter（回车）/)
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(/一直没有看到以“✅”开头的提示/)
+      ).toBeInTheDocument()
+      expect(screen.getByText('以后如何切换分组')).toBeInTheDocument()
+      expect(
+        screen.getByText(/最后执行的是哪个分组的命令.*就会使用哪个分组/)
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: '复制命令' })
+      ).toBeInTheDocument()
+      expect(screen.queryByText(/Paste into the terminal/)).toBeNull()
+      expect(screen.queryByText(/MetaRtr setup complete/)).toBeNull()
+
+      fireEvent.click(screen.getByRole('button', { name: 'macOS / Linux' }))
+      expect(
+        screen.getByText(/如果使用 macOS.*如果使用 Linux/)
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          /macOS 请按 Command \+ V.*Linux 请按 Ctrl \+ Shift \+ V/
+        )
+      ).toBeInTheDocument()
+
+      unmount()
+      renderDialog('Codex Pro（External）')
+      expect(screen.getByText('配置 Codex CLI：t')).toBeInTheDocument()
+      expect(screen.getByText(/已有设置会自动备份/)).toBeInTheDocument()
+    } finally {
+      await i18next.changeLanguage('en')
+    }
   })
 })

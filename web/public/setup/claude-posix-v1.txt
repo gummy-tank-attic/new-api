@@ -26,8 +26,8 @@ metartr_claude_setup() {
 }
 
 if metartr_claude_setup; then
-  printf '\342\234\205 %s\n' 'MetaRtr setup complete. Fully close and reopen Terminal and Claude Code.'
+  printf '\342\234\205 %s\n' 'MetaRtr setup complete / 配置完成. Fully close and reopen Terminal and Claude Code.'
 else
-  printf '%s\n' 'ERROR: MetaRtr setup failed. Check the error above and try again.' >&2
+  printf '%s\n' 'ERROR / 配置失败: MetaRtr setup failed. Check the error above and try again.' >&2
   exit 1
 fi

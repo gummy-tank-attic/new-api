@@ -21,9 +21,9 @@ try {
     throw 'Environment variable verification failed.'
   }
 
-  Write-Host (([char]0x2705) + ' MetaRtr setup complete. Fully close and reopen PowerShell and Claude Code.') -ForegroundColor Green
+  Write-Host (([char]0x2705) + ' MetaRtr setup complete / 配置完成. Fully close and reopen PowerShell and Claude Code.') -ForegroundColor Green
 } catch {
-  Write-Host ('ERROR: MetaRtr setup failed. ' + $_.Exception.Message) -ForegroundColor Red
+  Write-Host ('ERROR / 配置失败: MetaRtr setup failed. ' + $_.Exception.Message) -ForegroundColor Red
   throw
 } finally {
   Remove-Item Env:\MTRKEY -ErrorAction SilentlyContinue
