@@ -3629,7 +3629,7 @@
     "Passwords don't match.": "兩次輸入的密碼不一致。",
     "Paste Connection Info": "貼上連線資訊",
     "Paste that ID into your client or SDK—do not invent names.": "將該 ID 貼到用戶端或 SDK——不要自行編造名稱。",
-    "Paste the API address and key into an AI chat app on your computer — not WeChat or QQ.": "把 API 網址和 Key 填進電腦上的 AI 對話軟體，不要填到微信/QQ。",
+    "Paste the API address and key into an AI chat app on your computer — not WeChat or QQ.": "Collez l’URL et la clé dans une appli de chat IA sur l’ordinateur — pas WeChat ni QQ.",
     "Paste this Base URL in every client. Do not use www.": "所有用戶端都貼上這一條 Base URL。不要用 www。",
     "Paste your MetaRtr API key into OpenAI API Key.": "將 MetaRtr API 金鑰貼到 OpenAI API Key。",
     "Path": "路徑",
@@ -5029,8 +5029,8 @@
     "This identifier is sent to the payment backend when creating an order. Use alipay for Alipay, wxpay for WeChat Pay, stripe for Stripe. Custom values must be supported by your payment provider.": "建立訂單時會把這個標識提交給支付後端。支付寶填 alipay，微信填 wxpay，Stripe 填 stripe。自訂值必須是支付服務支援的標識。",
     "This instance is using an automatic hostname. Set NODE_NAME to a stable unique value for multi-instance management.": "該實例正在使用自動主機名稱。請設定穩定且唯一的 NODE_NAME，以便進行多實例管理。",
     "This key works inside an AI chat app — not WeChat or QQ. Three steps to start chatting:": "這把 key 要搭配「AI 對話軟體」使用（微信、QQ 這類不行）。照下面三步就能開始對話：",
-    "For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:": "這個 MetaRtr {{group}} 分組建議使用支援 OpenAI 相容 API 的 AI 對話軟體。不要把 Key 填入微信或 QQ。請依照下面三步操作：",
-    "On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "在電腦上安裝一個免費的 AI 對話軟體。",
+    "For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:": "Pour ce groupe MetaRtr {{group}}, nous recommandons une application de chat IA compatible avec l'API OpenAI. Ne saisissez pas la clé dans WeChat ou QQ. Suivez ces trois étapes :",
+    "On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "Installez une application de chat IA gratuite sur votre ordinateur.",
     "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the API Base URL and API Key shown below.": "這個分組請選擇「相容 OpenAI」的供應商，然後填寫下方的 API 位址和 API Key。",
     "This list is the supported product surface, not an internal route dump. A call works only when the model appears on Model Square for your plan and key. Prefer Model Square over guessing extra paths.": "本清單為對外支援的產品面，不是內部路由全集。僅當模型在模型廣場對你的方案與金鑰可見時才能呼叫。請以模型廣場為準，勿猜測額外路徑。",
     "This may cause cache failures.": "這可能導致緩存故障。",
@@ -5765,6 +5765,9 @@
     "Zoom": "縮放",
     "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.": "這個分組請選擇「相容 OpenAI」的供應商，然後填寫下方的 API 位址和 API Key。",
     "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.": "Gemini 分組同時支援「相容 OpenAI」和 Gemini 原生介面。大多數軟體請選擇「相容 OpenAI」；只有軟體明確要求 Google Gemini 格式時，才選擇 Gemini 原生。",
-    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "這個 MetaRtr 分組建議透過支援 OpenAI 相容 API 的 AI 對話軟體接入，微信或 QQ 不能直接使用。"
+    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Pour ce groupe MetaRtr, la configuration recommandée est une application de chat IA compatible avec l'API OpenAI. WeChat et QQ ne conviennent pas.",
+    "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "這個 MetaRtr {{group}} 分組請在支援新增自訂 API 服務商的 AI 客戶端中使用。請依照下面三步設定：",
+    "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "在電腦上開啟支援「自訂供應商」、「OpenAI 相容 API」或「自訂 API 位址」的 AI 客戶端。",
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "這個 MetaRtr 分組請透過支援新增自訂 API 服務商和 OpenAI 相容介面的 AI 客戶端接入。"
   }
 }

@@ -5765,6 +5765,9 @@
     "Zoom": "ズーム",
     "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.": "このグループでは、アプリで OpenAI 互換プロバイダーを選び、下の API ベース URL と API キーを入力してください。",
     "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.": "Gemini グループは OpenAI 互換形式と Gemini ネイティブ形式の両方に対応しています。ほとんどのアプリでは OpenAI 互換を選び、アプリが Google Gemini を明示的に求める場合だけ Gemini ネイティブを使用してください。",
-    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "この MetaRtr グループでは、OpenAI 互換 API に対応した AI チャットアプリでの接続を推奨します。WeChat や QQ では使えません。"
+    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "この MetaRtr グループでは、OpenAI 互換 API に対応した AI チャットアプリでの接続を推奨します。WeChat や QQ では使えません。",
+    "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "この MetaRtr {{group}} グループでは、OpenAI 互換 API に対応した AI チャットアプリを推奨します。キーを WeChat や QQ に入力しないでください。次の 3 ステップに従ってください：",
+    "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "パソコンに無料の AI チャットアプリをインストールします。",
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "この MetaRtr グループでは、OpenAI 互換 API に対応した AI チャットアプリでの接続を推奨します。WeChat や QQ では使えません。"
   }
 }

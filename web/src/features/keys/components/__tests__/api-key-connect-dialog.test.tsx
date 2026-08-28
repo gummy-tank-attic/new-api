@@ -155,12 +155,12 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     expect(screen.queryAllByRole('tab')).toHaveLength(0)
     expect(
       screen.getByText(
-        /For this MetaRtr Grok group, we recommend an AI chat app that supports the OpenAI-compatible API/
+        /Use this MetaRtr Grok group in an AI client that supports custom API providers/
       )
     ).toBeInTheDocument()
     expect(
       screen.getByText(
-        'On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.'
+        'On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.'
       )
     ).toBeInTheDocument()
     expect(screen.queryByText(/Cherry Studio/)).not.toBeInTheDocument()

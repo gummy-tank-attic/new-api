@@ -3629,7 +3629,7 @@
     "Passwords don't match.": "Passwords don't match.",
     "Paste Connection Info": "Paste Connection Info",
     "Paste that ID into your client or SDK—do not invent names.": "Paste that ID into your client or SDK—do not invent names.",
-    "Paste the API address and key into an AI chat app on your computer — not WeChat or QQ.": "Paste the API address and key into an AI chat app on your computer — not WeChat or QQ.",
+    "Paste the API address and key into an AI chat app on your computer — not WeChat or QQ.": "Collez l’URL et la clé dans une appli de chat IA sur l’ordinateur — pas WeChat ni QQ.",
     "Paste this Base URL in every client. Do not use www.": "Paste this Base URL in every client. Do not use www.",
     "Paste your MetaRtr API key into OpenAI API Key.": "Paste your MetaRtr API key into OpenAI API Key.",
     "Path": "Path",
@@ -5029,8 +5029,8 @@
     "This identifier is sent to the payment backend when creating an order. Use alipay for Alipay, wxpay for WeChat Pay, stripe for Stripe. Custom values must be supported by your payment provider.": "This identifier is sent to the payment backend when creating an order. Use alipay for Alipay, wxpay for WeChat Pay, stripe for Stripe. Custom values must be supported by your payment provider.",
     "This instance is using an automatic hostname. Set NODE_NAME to a stable unique value for multi-instance management.": "This instance is using an automatic hostname. Set NODE_NAME to a stable unique value for multi-instance management.",
     "This key works inside an AI chat app — not WeChat or QQ. Three steps to start chatting:": "This key works inside an AI chat app — not WeChat or QQ. Three steps to start chatting:",
-    "For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:": "For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:",
-    "On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.",
+    "For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:": "Pour ce groupe MetaRtr {{group}}, nous recommandons une application de chat IA compatible avec l'API OpenAI. Ne saisissez pas la clé dans WeChat ou QQ. Suivez ces trois étapes :",
+    "On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "Installez une application de chat IA gratuite sur votre ordinateur.",
     "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the API Base URL and API Key shown below.": "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the API Base URL and API Key shown below.",
     "This list is the supported product surface, not an internal route dump. A call works only when the model appears on Model Square for your plan and key. Prefer Model Square over guessing extra paths.": "This list is the supported product surface, not an internal route dump. A call works only when the model appears on Model Square for your plan and key. Prefer Model Square over guessing extra paths.",
     "This may cause cache failures.": "This may cause cache failures.",
@@ -5765,6 +5765,9 @@
     "Zoom": "Zoom",
     "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.": "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.",
     "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.": "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.",
-    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work."
+    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Pour ce groupe MetaRtr, la configuration recommandée est une application de chat IA compatible avec l'API OpenAI. WeChat et QQ ne conviennent pas.",
+    "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:",
+    "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.",
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API."
   }
 }

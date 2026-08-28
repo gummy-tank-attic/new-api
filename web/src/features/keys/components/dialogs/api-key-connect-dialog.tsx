@@ -63,7 +63,7 @@ function describeGroupUsage(plan: ConnectPlan, t: Translate): string {
   }
   if (plan.notice === 'external') {
     return t(
-      'For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.'
+      'Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.'
     )
   }
   if (plan.tabs.length === 1 && plan.tabs[0] === 'claude-code') {
@@ -241,7 +241,7 @@ export function ApiKeyConnectDialog({
   )
 
   let dialogDescription = t(
-    'Paste the API address and key into an AI chat app on your computer — not WeChat or QQ.'
+    'Enter the API address and key in an AI client that supports custom API providers.'
   )
   if (plan.defaultTab === 'claude-code') {
     dialogDescription = t(
@@ -519,14 +519,14 @@ export function ApiKeyConnectDialog({
                   <>
                     <p className='text-base font-medium'>
                       {t(
-                        'For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:',
+                        'Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:',
                         { group: tokenGroup || 'AI' }
                       )}
                     </p>
                     <ol className='text-muted-foreground list-inside list-decimal space-y-1.5 text-base'>
                       <li>
                         {t(
-                          'On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.'
+                          'On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.'
                         )}
                       </li>
                       <li>

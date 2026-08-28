@@ -5765,6 +5765,9 @@
     "Zoom": "Zoom",
     "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.": "Với nhóm này, hãy chọn nhà cung cấp tương thích OpenAI trong ứng dụng, rồi nhập Base URL và API Key bên dưới.",
     "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.": "Các nhóm Gemini hỗ trợ cả định dạng tương thích OpenAI và Gemini native. Với hầu hết ứng dụng, hãy chọn tương thích OpenAI; chỉ dùng Gemini native khi ứng dụng yêu cầu rõ định dạng Google Gemini.",
-    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Với nhóm MetaRtr này, cách thiết lập được khuyến nghị là dùng ứng dụng chat AI hỗ trợ API tương thích OpenAI. WeChat và QQ không dùng được."
+    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Với nhóm MetaRtr này, cách thiết lập được khuyến nghị là dùng ứng dụng chat AI hỗ trợ API tương thích OpenAI. WeChat và QQ không dùng được.",
+    "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "Với nhóm MetaRtr {{group}}, chúng tôi khuyên dùng ứng dụng chat AI hỗ trợ API tương thích OpenAI. Không nhập Key vào WeChat hoặc QQ. Hãy làm theo ba bước sau:",
+    "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "Cài một ứng dụng chat AI miễn phí trên máy tính.",
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Với nhóm MetaRtr này, cách thiết lập được khuyến nghị là dùng ứng dụng chat AI hỗ trợ API tương thích OpenAI. WeChat và QQ không dùng được."
   }
 }

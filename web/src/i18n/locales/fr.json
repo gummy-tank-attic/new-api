@@ -5765,6 +5765,9 @@
     "Zoom": "Zoom",
     "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.": "Pour ce groupe, choisissez un fournisseur compatible OpenAI dans l'application, puis saisissez ci-dessous l'URL de base et la clé API.",
     "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.": "Les groupes Gemini prennent en charge les formats compatibles OpenAI et Gemini natif. Dans la plupart des applications, choisissez compatible OpenAI ; utilisez Gemini natif uniquement si l'application demande explicitement Google Gemini.",
-    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Pour ce groupe MetaRtr, la configuration recommandée est une application de chat IA compatible avec l'API OpenAI. WeChat et QQ ne conviennent pas."
+    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Pour ce groupe MetaRtr, la configuration recommandée est une application de chat IA compatible avec l'API OpenAI. WeChat et QQ ne conviennent pas.",
+    "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "Pour ce groupe MetaRtr {{group}}, nous recommandons une application de chat IA compatible avec l'API OpenAI. Ne saisissez pas la clé dans WeChat ou QQ. Suivez ces trois étapes :",
+    "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "Installez une application de chat IA gratuite sur votre ordinateur.",
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Pour ce groupe MetaRtr, la configuration recommandée est une application de chat IA compatible avec l'API OpenAI. WeChat et QQ ne conviennent pas."
   }
 }

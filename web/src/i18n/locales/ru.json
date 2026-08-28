@@ -5765,6 +5765,9 @@
     "Zoom": "Zoom",
     "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.": "Для этой группы выберите в приложении провайдера, совместимого с OpenAI, затем введите расположенные ниже базовый URL и API-ключ.",
     "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.": "Группы Gemini поддерживают форматы OpenAI Compatible и нативный Gemini API. В большинстве приложений выбирайте OpenAI Compatible; используйте нативный Gemini только если приложение явно запрашивает формат Google Gemini.",
-    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Для этой группы MetaRtr рекомендуется приложение для общения с ИИ, поддерживающее OpenAI-совместимый API. WeChat и QQ не подходят."
+    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Для этой группы MetaRtr рекомендуется приложение для общения с ИИ, поддерживающее OpenAI-совместимый API. WeChat и QQ не подходят.",
+    "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "Для группы MetaRtr {{group}} рекомендуется приложение для общения с ИИ, поддерживающее OpenAI-совместимый API. Не вводите ключ в WeChat или QQ. Выполните три шага:",
+    "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "Установите на компьютер бесплатное приложение для общения с ИИ.",
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Для этой группы MetaRtr рекомендуется приложение для общения с ИИ, поддерживающее OpenAI-совместимый API. WeChat и QQ не подходят."
   }
 }
