@@ -3890,7 +3890,9 @@
     "pricingGroupIntro.codexProExternal": "Пул аккаунтов ChatGPT Pro по полной цене. Работает в клиенте Codex, поддерживает внешние скрипты и генерацию изображений.",
     "pricingGroupIntro.deepseek": "Полномощный DeepSeek v4-pro с окном контекста 1M через официальный API.",
     "pricingGroupIntro.gemini": "Сторонний reverse-канал Google Gemini. Пробная акция по специальной цене — только для тестирования.",
-    "pricingGroupIntro.grok": "Официальный прямой доступ к Grok — быстрый, сильный, меньше ограничений; сопоставим с Opus 4.8. Удобен для кода. Поддержка генерации изображений и видео.",
+    "pricingGroupIntro.grok": "Официальный прямой доступ к Grok — быстрый, сильный, меньше ограничений; сопоставим с Opus 4.8. Удобен для кода.",
+    "pricingGroupIntro.grokImageVideo": "Генерация изображений и видео Grok Imagine. Используйте клиент для изображений/видео или совместимый с OpenAI API.",
+    "pricingGroupIntro.imageVideo": "Группа генерации изображений и видео. Используйте клиент для изображений/видео или совместимый с OpenAI API.",
     "pricingGroupIntro.grokBeta": "Grok 4.5 — быстрый, сильный, меньше ограничений; сопоставим с Opus 4.8. Удобен для кода. [Бета-группа может быть нестабильной — не для продакшена.]",
     "pricingGroupIntro.kimi": "kimi-k3 с длинным окном контекста 1M. Качество кода сопоставимо с fable-5 и gpt-5.6 sol — подлинный продуктовый опыт.",
     "pricingGroupIntro.minimax": "MiniMax M3 с окном контекста 1M и очень высокой пропускной способностью.",
@@ -5027,6 +5029,9 @@
     "This identifier is sent to the payment backend when creating an order. Use alipay for Alipay, wxpay for WeChat Pay, stripe for Stripe. Custom values must be supported by your payment provider.": "Этот идентификатор отправляется в платежный backend при создании заказа. Для Alipay используйте alipay, для WeChat Pay — wxpay, для Stripe — stripe. Пользовательские значения должны поддерживаться вашим платежным провайдером.",
     "This instance is using an automatic hostname. Set NODE_NAME to a stable unique value for multi-instance management.": "Этот экземпляр использует автоматическое имя хоста. Задайте стабильное уникальное значение NODE_NAME для управления несколькими экземплярами.",
     "This key works inside an AI chat app — not WeChat or QQ. Three steps to start chatting:": "Этот ключ работает внутри приложения для общения с ИИ (не WeChat и не QQ). Три шага, чтобы начать:",
+    "For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:": "Для группы MetaRtr {{group}} рекомендуется приложение для общения с ИИ, поддерживающее OpenAI-совместимый API. Не вводите ключ в WeChat или QQ. Выполните три шага:",
+    "On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "Установите на компьютер бесплатное приложение для общения с ИИ.",
+    "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the API Base URL and API Key shown below.": "Для этой группы выберите в приложении провайдера, совместимого с OpenAI, затем введите расположенные ниже базовый URL и API-ключ.",
     "This list is the supported product surface, not an internal route dump. A call works only when the model appears on Model Square for your plan and key. Prefer Model Square over guessing extra paths.": "Поддерживаемая продуктовая поверхность, не дамп внутренних маршрутов. Вызов работает только если модель видна на Model Square для вашего плана и ключа.",
     "This may cause cache failures.": "Это может привести к сбоям кэша.",
     "This may take a few moments while we validate the request and update your session.": "Это может занять несколько мгновений, пока мы проверяем запрос и обновляем вашу сессию.",
@@ -5757,6 +5762,9 @@
     "Zero-Log Privacy": "Конфиденциальность без логов",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.": "Для этой группы выберите в приложении провайдера, совместимого с OpenAI, затем введите расположенные ниже базовый URL и API-ключ.",
+    "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.": "Группы Gemini поддерживают форматы OpenAI Compatible и нативный Gemini API. В большинстве приложений выбирайте OpenAI Compatible; используйте нативный Gemini только если приложение явно запрашивает формат Google Gemini.",
+    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Для этой группы MetaRtr рекомендуется приложение для общения с ИИ, поддерживающее OpenAI-совместимый API. WeChat и QQ не подходят."
   }
 }

@@ -38,6 +38,8 @@ const GROUP_INTRO_I18N_BY_NORMALIZED: Record<string, string> = {
   'grok(enterprise)': 'pricingGroupIntro.grok',
   'grok enterprise': 'pricingGroupIntro.grok',
   'grok(beta)': 'pricingGroupIntro.grokBeta',
+  'grok(image video)': 'pricingGroupIntro.grokImageVideo',
+  'codex pro(image)': 'pricingGroupIntro.imageVideo',
   zhipu: 'pricingGroupIntro.zhipu',
   kimi: 'pricingGroupIntro.kimi',
   'kimi(sale)': 'pricingGroupIntro.kimi',

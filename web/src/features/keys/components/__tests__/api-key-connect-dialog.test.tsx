@@ -32,12 +32,23 @@ import zhLocale from '@/i18n/locales/zh.json'
 import { ApiKeyConnectDialog } from '../dialogs/api-key-connect-dialog'
 import {
   hasConnectGuide,
+  resolveAppIntegrationGuide,
   resolveConnectPlan,
 } from '../dialogs/api-key-connect-plan'
 
 // 分流矩阵唯一来源：docs/PLAN_CONNECT_DIALOG_GROUP_AWARE.md §2
 
 describe('resolveConnectPlan', () => {
+  test('classifies remaining vendors by their documented client protocol', () => {
+    expect(resolveAppIntegrationGuide('Gemini')).toBe('gemini')
+    expect(resolveAppIntegrationGuide('Google')).toBe('gemini')
+    expect(resolveAppIntegrationGuide('DeepSeek')).toBe('openai-compatible')
+    expect(resolveAppIntegrationGuide('Zhipu')).toBe('openai-compatible')
+    expect(resolveAppIntegrationGuide('Kimi')).toBe('openai-compatible')
+    expect(resolveAppIntegrationGuide('MiniMax')).toBe('openai-compatible')
+    expect(resolveAppIntegrationGuide('Grok')).toBe('openai-compatible')
+    expect(resolveAppIntegrationGuide('Grok (image video)')).toBe('image-video')
+  })
   test('missing group never defaults to Claude Code commands', () => {
     expect(resolveConnectPlan(undefined)).toEqual({
       tabs: ['app'],
@@ -143,10 +154,14 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     renderDialog('Grok')
     expect(screen.queryAllByRole('tab')).toHaveLength(0)
     expect(
-      screen.getByText(/This key works inside an AI chat app/)
+      screen.getByText(
+        /For this MetaRtr Grok group, we recommend an AI chat app that supports the OpenAI-compatible API/
+      )
     ).toBeInTheDocument()
     expect(
-      screen.getByText('Install a free AI chat app on your computer.')
+      screen.getByText(
+        'On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.'
+      )
     ).toBeInTheDocument()
     expect(screen.queryByText(/Cherry Studio/)).not.toBeInTheDocument()
     expect(screen.queryByText(/NextChat/)).not.toBeInTheDocument()
@@ -154,6 +169,20 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     expect(screen.getByText('https://api.metartr.com')).toBeInTheDocument()
     expect(screen.queryByText(/Claude Code/)).not.toBeInTheDocument()
     expect(screen.queryByText('Desktop apps')).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(
+        'For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.'
+      )
+    ).not.toBeInTheDocument()
+  })
+
+  test('Gemini explains native and OpenAI-compatible choices', () => {
+    renderDialog('Gemini')
+    expect(
+      screen.getByText(
+        'Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.'
+      )
+    ).toBeInTheDocument()
   })
 
   test('Claude Max (CLI Only) shows Claude Code command without tab chrome', () => {

@@ -3890,7 +3890,9 @@
     "pricingGroupIntro.codexProExternal": "Pool tài khoản ChatGPT Pro giá đầy đủ. Dùng được trên client Codex, hỗ trợ script ngoài và tạo ảnh.",
     "pricingGroupIntro.deepseek": "DeepSeek v4-pro full với cửa sổ ngữ cảnh 1M, qua API chính thức.",
     "pricingGroupIntro.gemini": "Kênh Gemini (Google) reverse bên thứ ba. Giá ưu đãi — chỉ mang tính thử nghiệm.",
-    "pricingGroupIntro.grok": "Kết nối Grok chính hãng trực tiếp — nhanh, mạnh, ít giới hạn; ngang tầm Opus 4.8. Rất hợp coding. Hỗ trợ tạo ảnh và video.",
+    "pricingGroupIntro.grok": "Kết nối Grok chính hãng trực tiếp — nhanh, mạnh, ít giới hạn; ngang tầm Opus 4.8. Rất hợp coding.",
+    "pricingGroupIntro.grokImageVideo": "Tạo ảnh và video bằng Grok Imagine. Hãy dùng ứng dụng hỗ trợ ảnh/video hoặc API ảnh/video tương thích OpenAI.",
+    "pricingGroupIntro.imageVideo": "Nhóm tạo ảnh và video. Hãy dùng ứng dụng hỗ trợ ảnh/video hoặc API ảnh/video tương thích OpenAI.",
     "pricingGroupIntro.grokBeta": "Grok 4.5 — nhanh, mạnh, ít giới hạn; ngang tầm Opus 4.8. Rất hợp coding. [Nhóm beta có thể không ổn định — không khuyến nghị production.]",
     "pricingGroupIntro.kimi": "kimi-k3 với cửa sổ ngữ cảnh dài 1M. Chất lượng coding tương đương fable-5 và gpt-5.6 sol — trải nghiệm sản phẩm chính hãng.",
     "pricingGroupIntro.minimax": "MiniMax M3 với cửa sổ ngữ cảnh 1M và thông lượng rất cao.",
@@ -5027,6 +5029,9 @@
     "This identifier is sent to the payment backend when creating an order. Use alipay for Alipay, wxpay for WeChat Pay, stripe for Stripe. Custom values must be supported by your payment provider.": "Mã định danh này được gửi tới backend thanh toán khi tạo đơn hàng. Dùng alipay cho Alipay, wxpay cho WeChat Pay, stripe cho Stripe. Giá trị tùy chỉnh phải được nhà cung cấp thanh toán hỗ trợ.",
     "This instance is using an automatic hostname. Set NODE_NAME to a stable unique value for multi-instance management.": "Phiên bản này đang dùng hostname tự động. Hãy đặt NODE_NAME thành một giá trị ổn định và duy nhất để quản lý nhiều phiên bản.",
     "This key works inside an AI chat app — not WeChat or QQ. Three steps to start chatting:": "Key này dùng bên trong một ứng dụng chat AI (không phải WeChat hay QQ). Ba bước để bắt đầu:",
+    "For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:": "Với nhóm MetaRtr {{group}}, chúng tôi khuyên dùng ứng dụng chat AI hỗ trợ API tương thích OpenAI. Không nhập Key vào WeChat hoặc QQ. Hãy làm theo ba bước sau:",
+    "On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "Cài một ứng dụng chat AI miễn phí trên máy tính.",
+    "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the API Base URL and API Key shown below.": "Với nhóm này, hãy chọn nhà cung cấp tương thích OpenAI trong ứng dụng, rồi nhập Base URL và API Key bên dưới.",
     "This list is the supported product surface, not an internal route dump. A call works only when the model appears on Model Square for your plan and key. Prefer Model Square over guessing extra paths.": "Đây là bề mặt sản phẩm được hỗ trợ, không phải dump route nội bộ. Chỉ gọi được khi model hiện trên Model Square cho gói và key của bạn.",
     "This may cause cache failures.": "Điều này có thể gây ra lỗi bộ nhớ đệm.",
     "This may take a few moments while we validate the request and update your session.": "Việc này có thể mất vài phút trong khi chúng tôi xác thực yêu cầu và cập nhật phiên của bạn.",
@@ -5757,6 +5762,9 @@
     "Zero-Log Privacy": "Bảo mật zero-log",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.": "Với nhóm này, hãy chọn nhà cung cấp tương thích OpenAI trong ứng dụng, rồi nhập Base URL và API Key bên dưới.",
+    "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.": "Các nhóm Gemini hỗ trợ cả định dạng tương thích OpenAI và Gemini native. Với hầu hết ứng dụng, hãy chọn tương thích OpenAI; chỉ dùng Gemini native khi ứng dụng yêu cầu rõ định dạng Google Gemini.",
+    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Với nhóm MetaRtr này, cách thiết lập được khuyến nghị là dùng ứng dụng chat AI hỗ trợ API tương thích OpenAI. WeChat và QQ không dùng được."
   }
 }

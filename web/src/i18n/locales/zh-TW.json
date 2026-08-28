@@ -3890,7 +3890,9 @@
     "pricingGroupIntro.codexProExternal": "ChatGPT 正價 Pro 號池，不僅能在 Codex 客戶端使用，支援外接腳本與生圖。",
     "pricingGroupIntro.deepseek": "DeepSeek 滿血 v4-pro，支援 1M 上下文，官方 API。",
     "pricingGroupIntro.gemini": "Google Gemini 第三方逆向渠道，特價測試！",
-    "pricingGroupIntro.grok": "Grok 官方直連，速度快、智商高、限制少，完全媲美 Opus 4.8，推薦用於編碼。支援圖片生成與影片生成。",
+    "pricingGroupIntro.grok": "Grok 官方直連，速度快、智商高、限制少，完全媲美 Opus 4.8，推薦用於編碼。",
+    "pricingGroupIntro.grokImageVideo": "Grok Imagine 圖片與影片生成。請使用支援圖片/影片的軟體，或使用相容 OpenAI 的圖片與影片 API。",
+    "pricingGroupIntro.imageVideo": "圖片與影片生成分組。請使用支援圖片/影片的軟體，或使用相容 OpenAI 的圖片與影片 API。",
     "pricingGroupIntro.grokBeta": "Grok 4.5 速度快、智商高、限制少，完全媲美 Opus 4.8，推薦用於編碼。【測試分組可能不穩定，不建議用於生產環境】",
     "pricingGroupIntro.kimi": "kimi-k3 支援 1M 長上下文；編程表現媲美 fable-5 與 gpt-5.6 sol，正版體驗。",
     "pricingGroupIntro.minimax": "MiniMax M3，支援 1M 上下文，吞吐高、回應快。",
@@ -5027,6 +5029,9 @@
     "This identifier is sent to the payment backend when creating an order. Use alipay for Alipay, wxpay for WeChat Pay, stripe for Stripe. Custom values must be supported by your payment provider.": "建立訂單時會把這個標識提交給支付後端。支付寶填 alipay，微信填 wxpay，Stripe 填 stripe。自訂值必須是支付服務支援的標識。",
     "This instance is using an automatic hostname. Set NODE_NAME to a stable unique value for multi-instance management.": "該實例正在使用自動主機名稱。請設定穩定且唯一的 NODE_NAME，以便進行多實例管理。",
     "This key works inside an AI chat app — not WeChat or QQ. Three steps to start chatting:": "這把 key 要搭配「AI 對話軟體」使用（微信、QQ 這類不行）。照下面三步就能開始對話：",
+    "For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:": "這個 MetaRtr {{group}} 分組建議使用支援 OpenAI 相容 API 的 AI 對話軟體。不要把 Key 填入微信或 QQ。請依照下面三步操作：",
+    "On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "在電腦上安裝一個免費的 AI 對話軟體。",
+    "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the API Base URL and API Key shown below.": "這個分組請選擇「相容 OpenAI」的供應商，然後填寫下方的 API 位址和 API Key。",
     "This list is the supported product surface, not an internal route dump. A call works only when the model appears on Model Square for your plan and key. Prefer Model Square over guessing extra paths.": "本清單為對外支援的產品面，不是內部路由全集。僅當模型在模型廣場對你的方案與金鑰可見時才能呼叫。請以模型廣場為準，勿猜測額外路徑。",
     "This may cause cache failures.": "這可能導致緩存故障。",
     "This may take a few moments while we validate the request and update your session.": "這可能需要一些時間，因為我們正在驗證請求並更新您的對話。",
@@ -5757,6 +5762,9 @@
     "Zero-Log Privacy": "零日誌隱私",
     "Zhipu": "智譜",
     "Zhipu V4": "智譜 V4",
-    "Zoom": "縮放"
+    "Zoom": "縮放",
+    "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.": "這個分組請選擇「相容 OpenAI」的供應商，然後填寫下方的 API 位址和 API Key。",
+    "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.": "Gemini 分組同時支援「相容 OpenAI」和 Gemini 原生介面。大多數軟體請選擇「相容 OpenAI」；只有軟體明確要求 Google Gemini 格式時，才選擇 Gemini 原生。",
+    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "這個 MetaRtr 分組建議透過支援 OpenAI 相容 API 的 AI 對話軟體接入，微信或 QQ 不能直接使用。"
   }
 }

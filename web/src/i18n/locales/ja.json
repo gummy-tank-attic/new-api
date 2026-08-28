@@ -3890,7 +3890,9 @@
     "pricingGroupIntro.codexProExternal": "定価の ChatGPT Pro アカウントプール。Codex クライアントに加え、外部スクリプトや画像生成にも対応します。",
     "pricingGroupIntro.deepseek": "フル性能の DeepSeek v4-pro。1M コンテキスト対応。公式 API 経由。",
     "pricingGroupIntro.gemini": "Google Gemini のサードパーティ逆向チャネル。特価でのテスト提供中。",
-    "pricingGroupIntro.grok": "Grok 公式直結。高速・高性能で制限が少なく、Opus 4.8 に匹敵。コーディング向け。画像生成と動画生成に対応。",
+    "pricingGroupIntro.grok": "Grok 公式直結。高速・高性能で制限が少なく、Opus 4.8 に匹敵。コーディング向け。",
+    "pricingGroupIntro.grokImageVideo": "Grok Imagine の画像・動画生成。画像/動画対応クライアント、または OpenAI 互換の画像・動画 API を使用してください。",
+    "pricingGroupIntro.imageVideo": "画像・動画生成グループ。画像/動画対応クライアント、または OpenAI 互換の画像・動画 API を使用してください。",
     "pricingGroupIntro.grokBeta": "Grok 4.5 は高速・高性能で制限が少なく、Opus 4.8 に匹敵。コーディング向け。【ベータのため不安定な場合があり、本番利用は非推奨】",
     "pricingGroupIntro.kimi": "kimi-k3 は 1M の長文コンテキストに対応。コーディング品質は fable-5 や gpt-5.6 sol に匹敵する、正規の製品体験です。",
     "pricingGroupIntro.minimax": "MiniMax M3。1M コンテキスト対応で、高いスループットと高速レスポンス。",
@@ -5027,6 +5029,9 @@
     "This identifier is sent to the payment backend when creating an order. Use alipay for Alipay, wxpay for WeChat Pay, stripe for Stripe. Custom values must be supported by your payment provider.": "注文作成時に、この識別子が決済バックエンドへ送信されます。Alipay は alipay、WeChat Pay は wxpay、Stripe は stripe を使ってください。カスタム値は決済サービス側で対応している必要があります。",
     "This instance is using an automatic hostname. Set NODE_NAME to a stable unique value for multi-instance management.": "このインスタンスは自動ホスト名を使用しています。マルチインスタンス管理のために、安定した一意の NODE_NAME を設定してください。",
     "This key works inside an AI chat app — not WeChat or QQ. Three steps to start chatting:": "この key は「AI チャットアプリ」の中で使います（WeChat や QQ では使えません）。次の 3 ステップで会話を始められます：",
+    "For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:": "この MetaRtr {{group}} グループでは、OpenAI 互換 API に対応した AI チャットアプリを推奨します。キーを WeChat や QQ に入力しないでください。次の 3 ステップに従ってください：",
+    "On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "パソコンに無料の AI チャットアプリをインストールします。",
+    "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the API Base URL and API Key shown below.": "このグループでは、アプリで OpenAI 互換プロバイダーを選び、下の API ベース URL と API キーを入力してください。",
     "This list is the supported product surface, not an internal route dump. A call works only when the model appears on Model Square for your plan and key. Prefer Model Square over guessing extra paths.": "サポートする製品面の一覧であり内部ルート一覧ではありません。プランとキーでモデル広場に見えるモデルのみ利用可能です。",
     "This may cause cache failures.": "これによりキャッシュ障害が発生する可能性があります。",
     "This may take a few moments while we validate the request and update your session.": "リクエストを検証し、セッションを更新するのに数分かかる場合があります。",
@@ -5757,6 +5762,9 @@
     "Zero-Log Privacy": "ゼロログ・プライバシー",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V 4",
-    "Zoom": "ズーム"
+    "Zoom": "ズーム",
+    "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.": "このグループでは、アプリで OpenAI 互換プロバイダーを選び、下の API ベース URL と API キーを入力してください。",
+    "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.": "Gemini グループは OpenAI 互換形式と Gemini ネイティブ形式の両方に対応しています。ほとんどのアプリでは OpenAI 互換を選び、アプリが Google Gemini を明示的に求める場合だけ Gemini ネイティブを使用してください。",
+    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "この MetaRtr グループでは、OpenAI 互換 API に対応した AI チャットアプリでの接続を推奨します。WeChat や QQ では使えません。"
   }
 }

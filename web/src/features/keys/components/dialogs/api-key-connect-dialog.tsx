@@ -38,7 +38,11 @@ import {
   buildCodexPosixCommand,
   buildCodexPowerShellCommand,
 } from './api-key-connect-commands'
-import { resolveConnectPlan, type ConnectPlan } from './api-key-connect-plan'
+import {
+  resolveAppIntegrationGuide,
+  resolveConnectPlan,
+  type ConnectPlan,
+} from './api-key-connect-plan'
 
 const BASE_API_URL = 'https://api.metartr.com'
 
@@ -59,7 +63,7 @@ function describeGroupUsage(plan: ConnectPlan, t: Translate): string {
   }
   if (plan.notice === 'external') {
     return t(
-      'Use with an AI chat app via OpenAI-compatible setup. WeChat/QQ will not work.'
+      'For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.'
     )
   }
   if (plan.tabs.length === 1 && plan.tabs[0] === 'claude-code') {
@@ -97,6 +101,10 @@ export function ApiKeyConnectDialog({
 }: ApiKeyConnectDialogProps) {
   const { t } = useTranslation()
   const plan = useMemo(() => resolveConnectPlan(tokenGroup), [tokenGroup])
+  const appIntegrationGuide = useMemo(
+    () => resolveAppIntegrationGuide(tokenGroup),
+    [tokenGroup]
+  )
   const [activeTab, setActiveTab] = useState<string>(plan.defaultTab)
   const [osType, setOsType] = useState<OsType>(() =>
     detectIsWindows() ? 'windows' : 'posix'
@@ -511,16 +519,19 @@ export function ApiKeyConnectDialog({
                   <>
                     <p className='text-base font-medium'>
                       {t(
-                        'This key works inside an AI chat app — not WeChat or QQ. Three steps to start chatting:'
+                        'For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:',
+                        { group: tokenGroup || 'AI' }
                       )}
                     </p>
                     <ol className='text-muted-foreground list-inside list-decimal space-y-1.5 text-base'>
                       <li>
-                        {t('Install a free AI chat app on your computer.')}
+                        {t(
+                          'On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.'
+                        )}
                       </li>
                       <li>
                         {t(
-                          'In the app, open Settings → Model Provider, add a new provider, and paste the two fields below.'
+                          'Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the API Base URL and API Key shown below.'
                         )}
                       </li>
                       {tokenGroup && (
@@ -532,6 +543,13 @@ export function ApiKeyConnectDialog({
                         </li>
                       )}
                     </ol>
+                    {appIntegrationGuide === 'gemini' && (
+                      <p className='text-muted-foreground text-base'>
+                        {t(
+                          'Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.'
+                        )}
+                      </p>
+                    )}
                   </>
                 )}
                 <div className='min-w-0 space-y-3'>

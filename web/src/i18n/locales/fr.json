@@ -3890,7 +3890,9 @@
     "pricingGroupIntro.codexProExternal": "Pool de comptes ChatGPT Pro au tarif officiel. Utilisable dans le client Codex, avec scripts externes et génération d’images.",
     "pricingGroupIntro.deepseek": "DeepSeek v4-pro à capacité complète, fenêtre de contexte 1M, via l’API officielle.",
     "pricingGroupIntro.gemini": "Accès Gemini (Google) via un canal tiers reverse. Tarif promotionnel — en phase de test uniquement.",
-    "pricingGroupIntro.grok": "Accès direct officiel Grok — rapide, performant, peu de limites ; comparable à Opus 4.8. Idéal pour le code. Prend en charge la génération d’images et de vidéos.",
+    "pricingGroupIntro.grok": "Accès direct officiel Grok — rapide, performant, peu de limites ; comparable à Opus 4.8. Idéal pour le code.",
+    "pricingGroupIntro.grokImageVideo": "Génération d’images et de vidéos Grok Imagine. Utilisez un client image/vidéo ou l’API image/vidéo compatible OpenAI.",
+    "pricingGroupIntro.imageVideo": "Groupe de génération d’images et de vidéos. Utilisez un client image/vidéo ou l’API compatible OpenAI.",
     "pricingGroupIntro.grokBeta": "Grok 4.5 — rapide, performant, peu de limites ; comparable à Opus 4.8. Idéal pour le code. [Groupe bêta parfois instable — déconseillé en production.]",
     "pricingGroupIntro.kimi": "kimi-k3 avec une fenêtre de contexte longue de 1M. Qualité de code comparable à fable-5 et gpt-5.6 sol — expérience produit authentique.",
     "pricingGroupIntro.minimax": "MiniMax M3 avec une fenêtre de contexte 1M et un très haut débit.",
@@ -5027,6 +5029,9 @@
     "This identifier is sent to the payment backend when creating an order. Use alipay for Alipay, wxpay for WeChat Pay, stripe for Stripe. Custom values must be supported by your payment provider.": "Cet identifiant est envoyé au backend de paiement lors de la création d’une commande. Utilisez alipay pour Alipay, wxpay pour WeChat Pay, stripe pour Stripe. Les valeurs personnalisées doivent être prises en charge par votre fournisseur de paiement.",
     "This instance is using an automatic hostname. Set NODE_NAME to a stable unique value for multi-instance management.": "Cette instance utilise un nom d’hôte automatique. Définissez NODE_NAME sur une valeur stable et unique pour la gestion multi-instance.",
     "This key works inside an AI chat app — not WeChat or QQ. Three steps to start chatting:": "Cette clé s'utilise dans une application de chat IA (pas WeChat ni QQ). Trois étapes pour commencer :",
+    "For this MetaRtr {{group}} group, we recommend an AI chat app that supports the OpenAI-compatible API. Do not enter the key in WeChat or QQ. Follow these three steps:": "Pour ce groupe MetaRtr {{group}}, nous recommandons une application de chat IA compatible avec l'API OpenAI. Ne saisissez pas la clé dans WeChat ou QQ. Suivez ces trois étapes :",
+    "On your computer, install an AI chat app that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "Installez une application de chat IA gratuite sur votre ordinateur.",
+    "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the API Base URL and API Key shown below.": "Pour ce groupe, choisissez un fournisseur compatible OpenAI dans l'application, puis saisissez ci-dessous l'URL de base et la clé API.",
     "This list is the supported product surface, not an internal route dump. A call works only when the model appears on Model Square for your plan and key. Prefer Model Square over guessing extra paths.": "Surface produit supportée, pas un dump de routes internes. Un appel fonctionne seulement si le modèle est sur Model Square pour votre plan et clé.",
     "This may cause cache failures.": "Cela peut provoquer des échecs de cache.",
     "This may take a few moments while we validate the request and update your session.": "Cela peut prendre quelques instants pendant que nous validons la requête et mettons à jour votre session.",
@@ -5757,6 +5762,9 @@
     "Zero-Log Privacy": "Confidentialité zéro journal",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "For this group, choose an OpenAI-compatible provider in the app, then enter the Base URL and API Key below.": "Pour ce groupe, choisissez un fournisseur compatible OpenAI dans l'application, puis saisissez ci-dessous l'URL de base et la clé API.",
+    "Gemini groups support both OpenAI-compatible and native Gemini API formats. For most apps, choose OpenAI-compatible; use Gemini native only when the app specifically asks for Google Gemini.": "Les groupes Gemini prennent en charge les formats compatibles OpenAI et Gemini natif. Dans la plupart des applications, choisissez compatible OpenAI ; utilisez Gemini natif uniquement si l'application demande explicitement Google Gemini.",
+    "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Pour ce groupe MetaRtr, la configuration recommandée est une application de chat IA compatible avec l'API OpenAI. WeChat et QQ ne conviennent pas."
   }
 }

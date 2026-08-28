@@ -26,6 +26,29 @@ export type ConnectPlan = {
   notice: 'image-video' | 'cli-only' | 'external' | null
 }
 
+export type AppIntegrationGuide =
+  | 'openai-compatible'
+  | 'gemini'
+  | 'image-video'
+
+/**
+ * Return the protocol guidance shown for non-CLI groups.
+ * Keep this based on the public group name so the connect dialog does not
+ * depend on pricing data loading or provider metadata.
+ */
+export function resolveAppIntegrationGuide(
+  tokenGroup?: string
+): AppIntegrationGuide {
+  const norm = normalizeGroupName(tokenGroup || '')
+  if (norm.includes('image') || norm.includes('video')) {
+    return 'image-video'
+  }
+  if (norm === 'gemini' || norm === 'google' || norm.includes('gemini')) {
+    return 'gemini'
+  }
+  return 'openai-compatible'
+}
+
 export function resolveConnectPlan(tokenGroup?: string): ConnectPlan {
   const norm = normalizeGroupName(tokenGroup || '')
   if (!norm) {
