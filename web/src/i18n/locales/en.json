@@ -5778,6 +5778,8 @@
     "Use this Base URL for OpenAI-compatible clients. Claude Code uses the API host without /v1. Do not use www.": "Use this Base URL for OpenAI-compatible clients. Claude Code uses the API host without /v1. Do not use www.",
     "OpenAI-compatible clients (OpenAI SDK, Cursor, Codex, and most AI clients)": "OpenAI-compatible clients (OpenAI SDK, Cursor, Codex, and most AI clients)",
     "Most SDKs and IDEs: OpenAI compatible with {{url}}. Keep Anthropic request body (tools, system blocks): Claude native on the API host without /v1. Keep Google contents format or Gemini SDK: Gemini native on the API host.": "Most SDKs and IDEs: OpenAI compatible with {{url}}. Keep Anthropic request body (tools, system blocks): Claude native on the API host without /v1. Keep Google contents format or Gemini SDK: Gemini native on the API host.",
-    "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.": "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}."
+    "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.": "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.",
+    "OpenAI-compatible Base URL": "OpenAI-compatible Base URL",
+    "OpenAI-compatible clients use {{openaiUrl}}; Claude Code and Gemini native use {{apiHost}}. Do not use www.": "OpenAI-compatible clients use {{openaiUrl}}; Claude Code and Gemini native use {{apiHost}}. Do not use www."
   }
 }

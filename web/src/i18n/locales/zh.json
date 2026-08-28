@@ -5778,6 +5778,8 @@
     "Use this Base URL for OpenAI-compatible clients. Claude Code uses the API host without /v1. Do not use www.": "此 Base URL 用于 OpenAI 兼容客户端。Claude Code 使用不带 /v1 的 API 主机。不要使用 www。",
     "OpenAI-compatible clients (OpenAI SDK, Cursor, Codex, and most AI clients)": "OpenAI 兼容客户端（OpenAI SDK、Cursor、Codex 和大多数 AI 客户端）",
     "Most SDKs and IDEs: OpenAI compatible with {{url}}. Keep Anthropic request body (tools, system blocks): Claude native on the API host without /v1. Keep Google contents format or Gemini SDK: Gemini native on the API host.": "大多数 SDK 和 IDE 使用 {{url}} 的 OpenAI 兼容格式。需要保留 Anthropic 内容时，使用不带 /v1 的 API 主机搭配 Claude 原生格式；使用 Google contents 或 Gemini SDK 时，使用 API 主机搭配 Gemini 原生格式。",
-    "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.": "Claude Code 使用 {{url}}；OpenAI 兼容客户端使用 {{openaiUrl}}。"
+    "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.": "Claude Code 使用 {{url}}；OpenAI 兼容客户端使用 {{openaiUrl}}。",
+    "OpenAI-compatible Base URL": "OpenAI 兼容 Base URL",
+    "OpenAI-compatible clients use {{openaiUrl}}; Claude Code and Gemini native use {{apiHost}}. Do not use www.": "OpenAI 兼容客户端使用 {{openaiUrl}}；Claude Code 和 Gemini 原生接口使用 {{apiHost}}。不要使用 www。"
   }
 }

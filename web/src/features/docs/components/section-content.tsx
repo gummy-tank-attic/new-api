@@ -212,9 +212,10 @@ print(response.choices[0].message.content)`}
         <h2 className='text-lg font-bold'>{t('If it fails, check these 5 first')}</h2>
         <StepList
           steps={[
-            t('Base URL is {{url}} for every client.', {
-              url: API_BASE_URL,
-            }),
+            t(
+              'OpenAI-compatible clients use {{openaiUrl}}; Claude Code and Gemini native use {{apiHost}}. Do not use www.',
+              { openaiUrl: API_BASE_URL, apiHost: API_HOST }
+            ),
             t(
               'Model ID: copy the exact string from Model Square — doc examples are placeholders only.'
             ),

@@ -104,7 +104,7 @@ export function Docs() {
               </div>
               <div className='min-w-0'>
                 <div className='text-muted-foreground text-xs font-semibold uppercase tracking-wider'>
-                  {t('Base URL')}
+                  {t('OpenAI-compatible Base URL')}
                 </div>
                 <div className='truncate font-mono text-sm font-semibold text-violet-600 dark:text-violet-400'>
                   {API_BASE_URL}

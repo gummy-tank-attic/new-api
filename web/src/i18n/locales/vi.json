@@ -5778,6 +5778,8 @@
     "Use this Base URL for OpenAI-compatible clients. Claude Code uses the API host without /v1. Do not use www.": "Dùng Base URL này cho client tương thích OpenAI. Claude Code dùng máy chủ API không có /v1. Không dùng www.",
     "OpenAI-compatible clients (OpenAI SDK, Cursor, Codex, and most AI clients)": "Client tương thích OpenAI (OpenAI SDK, Cursor, Codex và hầu hết client AI)",
     "Most SDKs and IDEs: OpenAI compatible with {{url}}. Keep Anthropic request body (tools, system blocks): Claude native on the API host without /v1. Keep Google contents format or Gemini SDK: Gemini native on the API host.": "Hầu hết SDK và IDE dùng OpenAI compatible với {{url}}. Với nội dung Anthropic dùng Claude native trên máy chủ API không có /v1; với Google contents hoặc Gemini SDK dùng Gemini native trên máy chủ API.",
-    "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.": "Dùng {{url}} cho Claude Code. Client tương thích OpenAI dùng {{openaiUrl}}."
+    "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.": "Dùng {{url}} cho Claude Code. Client tương thích OpenAI dùng {{openaiUrl}}.",
+    "OpenAI-compatible Base URL": "Base URL tương thích OpenAI",
+    "OpenAI-compatible clients use {{openaiUrl}}; Claude Code and Gemini native use {{apiHost}}. Do not use www.": "Client tương thích OpenAI dùng {{openaiUrl}}; Claude Code và Gemini native dùng {{apiHost}}. Không dùng www."
   }
 }
