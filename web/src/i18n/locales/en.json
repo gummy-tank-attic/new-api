@@ -5774,6 +5774,10 @@
     "Open an AI client that supports OpenAI-compatible providers or custom endpoints.": "Open an AI client that supports OpenAI-compatible providers or custom endpoints.",
     "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.": "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.",
     "Use this MetaRtr group with an OpenAI-compatible client.": "Use this MetaRtr group with an OpenAI-compatible client.",
-    "- Base URL: {{url}}": "- Base URL: {{url}}"
+    "- Base URL: {{url}}": "- Base URL: {{url}}",
+    "Use this Base URL for OpenAI-compatible clients. Claude Code uses the API host without /v1. Do not use www.": "Use this Base URL for OpenAI-compatible clients. Claude Code uses the API host without /v1. Do not use www.",
+    "OpenAI-compatible clients (OpenAI SDK, Cursor, Codex, and most AI clients)": "OpenAI-compatible clients (OpenAI SDK, Cursor, Codex, and most AI clients)",
+    "Most SDKs and IDEs: OpenAI compatible with {{url}}. Keep Anthropic request body (tools, system blocks): Claude native on the API host without /v1. Keep Google contents format or Gemini SDK: Gemini native on the API host.": "Most SDKs and IDEs: OpenAI compatible with {{url}}. Keep Anthropic request body (tools, system blocks): Claude native on the API host without /v1. Keep Google contents format or Gemini SDK: Gemini native on the API host.",
+    "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.": "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}."
   }
 }

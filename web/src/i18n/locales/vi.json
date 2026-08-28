@@ -5774,6 +5774,10 @@
     "Open an AI client that supports OpenAI-compatible providers or custom endpoints.": "Mở một client AI hỗ trợ nhà cung cấp tương thích OpenAI hoặc endpoint tùy chỉnh.",
     "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.": "Mở Cài đặt > Nhà cung cấp mô hình (hoặc Nhà cung cấp), thêm nhà cung cấp, chọn Tương thích OpenAI hoặc Tùy chỉnh, rồi dán Base URL và API Key bên dưới.",
     "Use this MetaRtr group with an OpenAI-compatible client.": "Dùng nhóm MetaRtr này với client tương thích OpenAI.",
-    "- Base URL: {{url}}": "- Base URL: {{url}}"
+    "- Base URL: {{url}}": "- Base URL: {{url}}",
+    "Use this Base URL for OpenAI-compatible clients. Claude Code uses the API host without /v1. Do not use www.": "Dùng Base URL này cho client tương thích OpenAI. Claude Code dùng máy chủ API không có /v1. Không dùng www.",
+    "OpenAI-compatible clients (OpenAI SDK, Cursor, Codex, and most AI clients)": "Client tương thích OpenAI (OpenAI SDK, Cursor, Codex và hầu hết client AI)",
+    "Most SDKs and IDEs: OpenAI compatible with {{url}}. Keep Anthropic request body (tools, system blocks): Claude native on the API host without /v1. Keep Google contents format or Gemini SDK: Gemini native on the API host.": "Hầu hết SDK và IDE dùng OpenAI compatible với {{url}}. Với nội dung Anthropic dùng Claude native trên máy chủ API không có /v1; với Google contents hoặc Gemini SDK dùng Gemini native trên máy chủ API.",
+    "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.": "Dùng {{url}} cho Claude Code. Client tương thích OpenAI dùng {{openaiUrl}}."
   }
 }

@@ -5774,6 +5774,10 @@
     "Open an AI client that supports OpenAI-compatible providers or custom endpoints.": "Откройте AI-клиент с поддержкой OpenAI-совместимых провайдеров или пользовательских endpoint.",
     "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.": "Откройте Настройки > Провайдер модели (или Провайдеры), добавьте провайдера, выберите OpenAI-совместимый или Пользовательский и вставьте указанные ниже Base URL и API-ключ.",
     "Use this MetaRtr group with an OpenAI-compatible client.": "Используйте эту группу MetaRtr в OpenAI-совместимом клиенте.",
-    "- Base URL: {{url}}": "- Base URL: {{url}}"
+    "- Base URL: {{url}}": "- Base URL: {{url}}",
+    "Use this Base URL for OpenAI-compatible clients. Claude Code uses the API host without /v1. Do not use www.": "Используйте этот Base URL для OpenAI-совместимых клиентов. Claude Code использует хост API без /v1. Не используйте www.",
+    "OpenAI-compatible clients (OpenAI SDK, Cursor, Codex, and most AI clients)": "OpenAI-совместимые клиенты (OpenAI SDK, Cursor, Codex и большинство AI-клиентов)",
+    "Most SDKs and IDEs: OpenAI compatible with {{url}}. Keep Anthropic request body (tools, system blocks): Claude native on the API host without /v1. Keep Google contents format or Gemini SDK: Gemini native on the API host.": "Большинство SDK и IDE используют OpenAI-compatible с {{url}}. Для тела Anthropic используйте Claude native на хосте API без /v1, а для Google contents или Gemini SDK — Gemini native на хосте API.",
+    "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.": "Для Claude Code используйте {{url}}, а OpenAI-совместимые клиенты используют {{openaiUrl}}."
   }
 }

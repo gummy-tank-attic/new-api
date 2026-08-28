@@ -16,11 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-/** The only public Base URL. Paste this in every client. */
-export const API_BASE_URL = 'https://api.metartr.com'
+/** OpenAI-compatible Base URL. Use this in OpenAI SDKs and clients. */
+export const API_BASE_URL = 'https://api.metartr.com/v1'
 
-/** Origin alias — same host as API_BASE_URL; used to compose full request paths. */
-export const API_HOST = API_BASE_URL
+/** API origin for Claude native, Gemini native, account and payment paths. */
+export const API_HOST = 'https://api.metartr.com'
 
 /** OpenAI-compatible image and video generation direct endpoint. */
 export const API_IMAGES_ENDPOINT =

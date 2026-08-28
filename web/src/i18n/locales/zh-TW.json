@@ -5774,6 +5774,10 @@
     "Open an AI client that supports OpenAI-compatible providers or custom endpoints.": "開啟支援相容 OpenAI 供應商或自訂端點的 AI 用戶端。",
     "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.": "開啟「設定 > 模型供應商」（或「供應商」），新增供應商，選擇「相容 OpenAI」或「自訂」，再貼上下方的 Base URL 和 API Key。",
     "Use this MetaRtr group with an OpenAI-compatible client.": "這個 MetaRtr 分組請在相容 OpenAI 的用戶端中使用。",
-    "- Base URL: {{url}}": "- Base URL：{{url}}"
+    "- Base URL: {{url}}": "- Base URL：{{url}}",
+    "Use this Base URL for OpenAI-compatible clients. Claude Code uses the API host without /v1. Do not use www.": "此 Base URL 用於相容 OpenAI 的用戶端。Claude Code 使用不含 /v1 的 API 主機。請勿使用 www。",
+    "OpenAI-compatible clients (OpenAI SDK, Cursor, Codex, and most AI clients)": "相容 OpenAI 的用戶端（OpenAI SDK、Cursor、Codex 及大多數 AI 用戶端）",
+    "Most SDKs and IDEs: OpenAI compatible with {{url}}. Keep Anthropic request body (tools, system blocks): Claude native on the API host without /v1. Keep Google contents format or Gemini SDK: Gemini native on the API host.": "大多數 SDK 和 IDE 使用 {{url}} 的 OpenAI 相容格式。需要保留 Anthropic 內容時，使用不含 /v1 的 API 主機搭配 Claude 原生格式；使用 Google contents 或 Gemini SDK 時，使用 API 主機搭配 Gemini 原生格式。",
+    "Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.": "Claude Code 請使用 {{url}}；相容 OpenAI 的用戶端請使用 {{openaiUrl}}。"
   }
 }

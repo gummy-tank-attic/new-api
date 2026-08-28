@@ -241,7 +241,7 @@ function BaseUrlSection() {
       <SectionTitle
         title={t('Base URL & API Key')}
         description={t(
-          'Paste this Base URL in every client. Do not use www.'
+          'Use this Base URL for OpenAI-compatible clients. Claude Code uses the API host without /v1. Do not use www.'
         )}
       />
 
@@ -260,7 +260,7 @@ function BaseUrlSection() {
               <td className='px-4 py-3 font-mono text-xs'>{API_BASE_URL}</td>
               <td className='text-muted-foreground px-4 py-3 text-xs'>
                 {t(
-                  'All clients (OpenAI, Claude Code, Gemini, Cursor, Codex)'
+                  'OpenAI-compatible clients (OpenAI SDK, Cursor, Codex, and most AI clients)'
                 )}
               </td>
             </tr>
@@ -340,7 +340,7 @@ function ProtocolsSection() {
             <tr>
               <td className='px-4 py-3'>{t('Claude native (Messages)')}</td>
               <td className='px-4 py-3 font-mono text-xs'>
-                {API_BASE_URL}/v1/messages
+                {API_HOST}/v1/messages
               </td>
               <td className='px-4 py-3 font-mono text-xs'>
                 x-api-key + anthropic-version
@@ -359,7 +359,7 @@ function ProtocolsSection() {
 
       <Callout title={t('When to use which')}>
         {t(
-          'Most SDKs and IDEs: OpenAI compatible. Keep Anthropic request body (tools, system blocks): Claude native. Keep Google contents format or Gemini SDK: Gemini native. Set Base URL to {{url}} in every case.',
+          'Most SDKs and IDEs: OpenAI compatible with {{url}}. Keep Anthropic request body (tools, system blocks): Claude native on the API host without /v1. Keep Google contents format or Gemini SDK: Gemini native on the API host.',
           { url: API_BASE_URL }
         )}
       </Callout>
@@ -907,7 +907,7 @@ function ClaudeCodeSection() {
         <h2 className='text-lg font-bold'>{t('macOS / Linux / WSL')}</h2>
         <CodeBlock
           title='bash'
-          code={`export ANTHROPIC_BASE_URL="${API_BASE_URL}"
+          code={`export ANTHROPIC_BASE_URL="${API_HOST}"
 export ANTHROPIC_AUTH_TOKEN="${EXAMPLE_API_KEY}"
 
 # Optional defaults (use exact IDs from Model Square)
@@ -922,7 +922,7 @@ claude`}
         <h2 className='text-lg font-bold'>{t('Windows PowerShell')}</h2>
         <CodeBlock
           title='PowerShell'
-          code={`$env:ANTHROPIC_BASE_URL = "${API_BASE_URL}"
+          code={`$env:ANTHROPIC_BASE_URL = "${API_HOST}"
 $env:ANTHROPIC_AUTH_TOKEN = "${EXAMPLE_API_KEY}"
 claude`}
         />
@@ -940,9 +940,10 @@ claude`}
       </div>
 
       <Callout title={t('Same Base URL')}>
-        {t('Use the same Base URL {{url}} as every other client.', {
-          url: API_BASE_URL,
-        })}
+        {t(
+          'Use {{url}} for Claude Code. OpenAI-compatible clients use {{openaiUrl}}.',
+          { url: API_HOST, openaiUrl: API_BASE_URL }
+        )}
       </Callout>
     </div>
   )
@@ -978,7 +979,7 @@ model = "${EXAMPLE_MODEL_OPENAI}"
 
 [model_providers.metartr]
 name = "MetaRtr"
-base_url = "${API_BASE_URL}/v1"
+base_url = "${API_BASE_URL}"
 wire_api = "responses"
 env_key = "METARTR_API_KEY"`}
         />
@@ -1375,12 +1376,12 @@ function SwitchGroupSection() {
 TOKEN_ID=123                                # key id shown in the API Keys list
 
 # 1) Read the token's current fields
-curl -s ${API_BASE_URL}/api/token/$TOKEN_ID \\
+curl -s ${API_HOST}/api/token/$TOKEN_ID \\
   -H "Authorization: Bearer $ACCESS_TOKEN"
 
 # 2) PUT the FULL object back with only "group" changed.
 #    Missing fields are treated as empty and will wipe that setting.
-curl -s -X PUT ${API_BASE_URL}/api/token/ \\
+curl -s -X PUT ${API_HOST}/api/token/ \\
   -H "Authorization: Bearer $ACCESS_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{"id":123,"name":"my-key","group":"Claude Plus(Premium)","remain_quota":0,"unlimited_quota":true,"expired_time":-1,"model_limits_enabled":false,"model_limits":"","allow_ips":"","auto_groups":[],"cross_group_retry":false}'`}
