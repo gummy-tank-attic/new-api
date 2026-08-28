@@ -5768,6 +5768,12 @@
     "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Với nhóm MetaRtr này, cách thiết lập được khuyến nghị là dùng ứng dụng chat AI hỗ trợ API tương thích OpenAI. WeChat và QQ không dùng được.",
     "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "Với nhóm MetaRtr {{group}}, chúng tôi khuyên dùng ứng dụng chat AI hỗ trợ API tương thích OpenAI. Không nhập Key vào WeChat hoặc QQ. Hãy làm theo ba bước sau:",
     "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "Cài một ứng dụng chat AI miễn phí trên máy tính.",
-    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Với nhóm MetaRtr này, cách thiết lập được khuyến nghị là dùng ứng dụng chat AI hỗ trợ API tương thích OpenAI. WeChat và QQ không dùng được."
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Với nhóm MetaRtr này, cách thiết lập được khuyến nghị là dùng ứng dụng chat AI hỗ trợ API tương thích OpenAI. WeChat và QQ không dùng được.",
+    "Enter the Base URL and API Key in an OpenAI-compatible client.": "Nhập Base URL và API Key vào client tương thích OpenAI.",
+    "Use this MetaRtr {{group}} group with an OpenAI-compatible client. Follow these three steps:": "Dùng nhóm MetaRtr {{group}} này với client tương thích OpenAI. Hãy làm theo ba bước sau:",
+    "Open an AI client that supports OpenAI-compatible providers or custom endpoints.": "Mở một client AI hỗ trợ nhà cung cấp tương thích OpenAI hoặc endpoint tùy chỉnh.",
+    "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.": "Mở Cài đặt > Nhà cung cấp mô hình (hoặc Nhà cung cấp), thêm nhà cung cấp, chọn Tương thích OpenAI hoặc Tùy chỉnh, rồi dán Base URL và API Key bên dưới.",
+    "Use this MetaRtr group with an OpenAI-compatible client.": "Dùng nhóm MetaRtr này với client tương thích OpenAI.",
+    "- Base URL: {{url}}": "- Base URL: {{url}}"
   }
 }

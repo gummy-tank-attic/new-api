@@ -5768,6 +5768,12 @@
     "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "この MetaRtr グループでは、OpenAI 互換 API に対応した AI チャットアプリでの接続を推奨します。WeChat や QQ では使えません。",
     "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "この MetaRtr {{group}} グループでは、OpenAI 互換 API に対応した AI チャットアプリを推奨します。キーを WeChat や QQ に入力しないでください。次の 3 ステップに従ってください：",
     "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "パソコンに無料の AI チャットアプリをインストールします。",
-    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "この MetaRtr グループでは、OpenAI 互換 API に対応した AI チャットアプリでの接続を推奨します。WeChat や QQ では使えません。"
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "この MetaRtr グループでは、OpenAI 互換 API に対応した AI チャットアプリでの接続を推奨します。WeChat や QQ では使えません。",
+    "Enter the Base URL and API Key in an OpenAI-compatible client.": "OpenAI 互換クライアントに Base URL と API キーを入力してください。",
+    "Use this MetaRtr {{group}} group with an OpenAI-compatible client. Follow these three steps:": "MetaRtr の {{group}} グループを OpenAI 互換クライアントで使用します。次の 3 ステップに従ってください：",
+    "Open an AI client that supports OpenAI-compatible providers or custom endpoints.": "OpenAI 互換プロバイダーまたはカスタムエンドポイントに対応した AI クライアントを開きます。",
+    "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.": "設定 > モデルプロバイダー（またはプロバイダー）を開き、プロバイダーを追加して OpenAI 互換またはカスタムを選び、下の Base URL と API キーを貼り付けます。",
+    "Use this MetaRtr group with an OpenAI-compatible client.": "この MetaRtr グループを OpenAI 互換クライアントで使用します。",
+    "- Base URL: {{url}}": "- Base URL：{{url}}"
   }
 }

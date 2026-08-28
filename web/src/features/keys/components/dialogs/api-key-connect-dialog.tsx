@@ -44,7 +44,9 @@ import {
   type ConnectPlan,
 } from './api-key-connect-plan'
 
-const BASE_API_URL = 'https://api.metartr.com'
+// OpenAI-compatible clients use the /v1 API namespace. Claude Code commands
+// have their own endpoint handling and do not use this value.
+const BASE_API_URL = 'https://api.metartr.com/v1'
 
 function detectIsWindows(): boolean {
   if (typeof navigator === 'undefined') return true
@@ -63,7 +65,7 @@ function describeGroupUsage(plan: ConnectPlan, t: Translate): string {
   }
   if (plan.notice === 'external') {
     return t(
-      'Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.'
+      'Use this MetaRtr group with an OpenAI-compatible client.'
     )
   }
   if (plan.tabs.length === 1 && plan.tabs[0] === 'claude-code') {
@@ -166,7 +168,7 @@ export function ApiKeyConnectDialog({
   const copyAllAiPrompt = () => {
     const lines = [
       t('MetaRtr connection info (site: https://www.metartr.com):'),
-      t('- API base URL: {{url}}', {
+      t('- Base URL: {{url}}', {
         url: BASE_API_URL,
         interpolation: { escapeValue: false },
       }),
@@ -241,7 +243,7 @@ export function ApiKeyConnectDialog({
   )
 
   let dialogDescription = t(
-    'Enter the API address and key in an AI client that supports custom API providers.'
+    'Enter the Base URL and API Key in an OpenAI-compatible client.'
   )
   if (plan.defaultTab === 'claude-code') {
     dialogDescription = t(
@@ -519,19 +521,19 @@ export function ApiKeyConnectDialog({
                   <>
                     <p className='text-base font-medium'>
                       {t(
-                        'Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:',
+                        'Use this MetaRtr {{group}} group with an OpenAI-compatible client. Follow these three steps:',
                         { group: tokenGroup || 'AI' }
                       )}
                     </p>
                     <ol className='text-muted-foreground list-inside list-decimal space-y-1.5 text-base'>
                       <li>
                         {t(
-                          'On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.'
+                          'Open an AI client that supports OpenAI-compatible providers or custom endpoints.'
                         )}
                       </li>
                       <li>
                         {t(
-                          'Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the API Base URL and API Key shown below.'
+                          'Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.'
                         )}
                       </li>
                       {tokenGroup && (
@@ -553,7 +555,7 @@ export function ApiKeyConnectDialog({
                   </>
                 )}
                 <div className='min-w-0 space-y-3'>
-                  {renderCopyRow(t('API Base URL'), BASE_API_URL, 'url')}
+                  {renderCopyRow(t('Base URL'), BASE_API_URL, 'url')}
                   {renderCopyRow(t('API Key'), cleanKey, 'key')}
                 </div>
                 {plan.notice === 'external' && (

@@ -5768,6 +5768,12 @@
     "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Pour ce groupe MetaRtr, la configuration recommandée est une application de chat IA compatible avec l'API OpenAI. WeChat et QQ ne conviennent pas.",
     "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:",
     "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.",
-    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API."
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.",
+    "Enter the Base URL and API Key in an OpenAI-compatible client.": "Enter the Base URL and API Key in an OpenAI-compatible client.",
+    "Use this MetaRtr {{group}} group with an OpenAI-compatible client. Follow these three steps:": "Use this MetaRtr {{group}} group with an OpenAI-compatible client. Follow these three steps:",
+    "Open an AI client that supports OpenAI-compatible providers or custom endpoints.": "Open an AI client that supports OpenAI-compatible providers or custom endpoints.",
+    "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.": "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.",
+    "Use this MetaRtr group with an OpenAI-compatible client.": "Use this MetaRtr group with an OpenAI-compatible client.",
+    "- Base URL: {{url}}": "- Base URL: {{url}}"
   }
 }

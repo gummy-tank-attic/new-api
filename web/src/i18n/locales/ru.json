@@ -5768,6 +5768,12 @@
     "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Для этой группы MetaRtr рекомендуется приложение для общения с ИИ, поддерживающее OpenAI-совместимый API. WeChat и QQ не подходят.",
     "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "Для группы MetaRtr {{group}} рекомендуется приложение для общения с ИИ, поддерживающее OpenAI-совместимый API. Не вводите ключ в WeChat или QQ. Выполните три шага:",
     "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "Установите на компьютер бесплатное приложение для общения с ИИ.",
-    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Для этой группы MetaRtr рекомендуется приложение для общения с ИИ, поддерживающее OpenAI-совместимый API. WeChat и QQ не подходят."
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Для этой группы MetaRtr рекомендуется приложение для общения с ИИ, поддерживающее OpenAI-совместимый API. WeChat и QQ не подходят.",
+    "Enter the Base URL and API Key in an OpenAI-compatible client.": "Введите Base URL и API-ключ в OpenAI-совместимом клиенте.",
+    "Use this MetaRtr {{group}} group with an OpenAI-compatible client. Follow these three steps:": "Используйте группу MetaRtr {{group}} в OpenAI-совместимом клиенте. Выполните три шага:",
+    "Open an AI client that supports OpenAI-compatible providers or custom endpoints.": "Откройте AI-клиент с поддержкой OpenAI-совместимых провайдеров или пользовательских endpoint.",
+    "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.": "Откройте Настройки > Провайдер модели (или Провайдеры), добавьте провайдера, выберите OpenAI-совместимый или Пользовательский и вставьте указанные ниже Base URL и API-ключ.",
+    "Use this MetaRtr group with an OpenAI-compatible client.": "Используйте эту группу MetaRtr в OpenAI-совместимом клиенте.",
+    "- Base URL: {{url}}": "- Base URL: {{url}}"
   }
 }

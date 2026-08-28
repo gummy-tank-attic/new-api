@@ -5768,6 +5768,12 @@
     "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Pour ce groupe MetaRtr, la configuration recommandée est une application de chat IA compatible avec l'API OpenAI. WeChat et QQ ne conviennent pas.",
     "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "这个 MetaRtr {{group}} 分组请在支持添加自定义 API 服务商的 AI 客户端中使用。按下面三步配置：",
     "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "在电脑上打开一个支持“自定义供应商”“OpenAI 兼容 API”或“自定义 API 地址”的 AI 客户端。",
-    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "这个 MetaRtr 分组请通过支持添加自定义 API 服务商和 OpenAI 兼容接口的 AI 客户端接入。"
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "这个 MetaRtr 分组请通过支持添加自定义 API 服务商和 OpenAI 兼容接口的 AI 客户端接入。",
+    "Enter the Base URL and API Key in an OpenAI-compatible client.": "请在兼容 OpenAI 的客户端中填写 Base URL 和 API Key。",
+    "Use this MetaRtr {{group}} group with an OpenAI-compatible client. Follow these three steps:": "这个 MetaRtr {{group}} 分组请在兼容 OpenAI 的客户端中使用。按下面三步配置：",
+    "Open an AI client that supports OpenAI-compatible providers or custom endpoints.": "打开支持 OpenAI 兼容供应商或自定义端点的 AI 客户端。",
+    "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.": "打开“设置 > 模型供应商（或供应商）”，新增供应商，选择“兼容 OpenAI”或“自定义”，然后粘贴下面的 Base URL 和 API Key。",
+    "Use this MetaRtr group with an OpenAI-compatible client.": "这个 MetaRtr 分组请在兼容 OpenAI 的客户端中使用。",
+    "- Base URL: {{url}}": "- Base URL：{{url}}"
   }
 }

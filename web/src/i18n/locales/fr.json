@@ -5768,6 +5768,12 @@
     "For this MetaRtr group, the recommended setup is an AI chat app that supports the OpenAI-compatible API. WeChat/QQ will not work.": "Pour ce groupe MetaRtr, la configuration recommandée est une application de chat IA compatible avec l'API OpenAI. WeChat et QQ ne conviennent pas.",
     "Use this MetaRtr {{group}} group in an AI client that supports custom API providers. Follow these three steps:": "Pour ce groupe MetaRtr {{group}}, nous recommandons une application de chat IA compatible avec l'API OpenAI. Ne saisissez pas la clé dans WeChat ou QQ. Suivez ces trois étapes :",
     "On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.": "Installez une application de chat IA gratuite sur votre ordinateur.",
-    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Pour ce groupe MetaRtr, la configuration recommandée est une application de chat IA compatible avec l'API OpenAI. WeChat et QQ ne conviennent pas."
+    "Use this MetaRtr group in an AI client that supports custom API providers and the OpenAI-compatible API.": "Pour ce groupe MetaRtr, la configuration recommandée est une application de chat IA compatible avec l'API OpenAI. WeChat et QQ ne conviennent pas.",
+    "Enter the Base URL and API Key in an OpenAI-compatible client.": "Saisissez la Base URL et la clé API dans un client compatible OpenAI.",
+    "Use this MetaRtr {{group}} group with an OpenAI-compatible client. Follow these three steps:": "Utilisez ce groupe MetaRtr {{group}} avec un client compatible OpenAI. Suivez ces trois étapes :",
+    "Open an AI client that supports OpenAI-compatible providers or custom endpoints.": "Ouvrez un client IA prenant en charge les fournisseurs compatibles OpenAI ou les points de terminaison personnalisés.",
+    "Open Settings > Model Provider (or Providers), add a provider, choose OpenAI-compatible or Custom, then paste the Base URL and API Key shown below.": "Dans Paramètres > Fournisseur de modèle (ou Fournisseurs), ajoutez un fournisseur, choisissez Compatible OpenAI ou Personnalisé, puis collez la Base URL et la clé API ci-dessous.",
+    "Use this MetaRtr group with an OpenAI-compatible client.": "Utilisez ce groupe MetaRtr avec un client compatible OpenAI.",
+    "- Base URL: {{url}}": "- Base URL : {{url}}"
   }
 }

@@ -155,18 +155,18 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     expect(screen.queryAllByRole('tab')).toHaveLength(0)
     expect(
       screen.getByText(
-        /Use this MetaRtr Grok group in an AI client that supports custom API providers/
+        /Use this MetaRtr Grok group with an OpenAI-compatible client/
       )
     ).toBeInTheDocument()
     expect(
       screen.getByText(
-        'On your computer, open an AI client that supports a custom provider, OpenAI-compatible API, or custom API endpoint.'
+        'Open an AI client that supports OpenAI-compatible providers or custom endpoints.'
       )
     ).toBeInTheDocument()
     expect(screen.queryByText(/Cherry Studio/)).not.toBeInTheDocument()
     expect(screen.queryByText(/NextChat/)).not.toBeInTheDocument()
-    expect(screen.getByText('API Base URL')).toBeInTheDocument()
-    expect(screen.getByText('https://api.metartr.com')).toBeInTheDocument()
+    expect(screen.getByText('Base URL')).toBeInTheDocument()
+    expect(screen.getByText('https://api.metartr.com/v1')).toBeInTheDocument()
     expect(screen.queryByText(/Claude Code/)).not.toBeInTheDocument()
     expect(screen.queryByText('Desktop apps')).not.toBeInTheDocument()
     expect(
@@ -263,10 +263,9 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
     const copied = writeText.mock.calls[0][0] as string
     expect(copied).not.toContain('sk-test')
-    expect(copied).not.toContain('https://api.metartr.com/v1')
     expect(copied).not.toContain('Claude provider')
     expect(copied).not.toMatch(/&#(?:x[\da-f]+|\d+);|&nbsp;/i)
-    expect(copied).toContain('https://api.metartr.com')
+    expect(copied).toContain('https://api.metartr.com/v1')
   })
 
   test('copy-for-AI text gives CLI instructions for Claude groups', async () => {
@@ -305,7 +304,7 @@ describe('ApiKeyConnectDialog group-aware tabs', () => {
   test('missing group shows fill-into-app guide, not Claude Code', () => {
     renderDialog(undefined)
     expect(screen.queryAllByRole('tab')).toHaveLength(0)
-    expect(screen.getByText('API Base URL')).toBeInTheDocument()
+    expect(screen.getByText('Base URL')).toBeInTheDocument()
     expect(screen.queryByText(/ANTHROPIC_BASE_URL/)).not.toBeInTheDocument()
     expect(screen.queryByText(/Pick a .* model/)).not.toBeInTheDocument()
   })
