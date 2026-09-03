@@ -184,6 +184,7 @@ export function getVendorTabRank(name: string): number {
  */
 export const MODEL_DISPLAY_ORDER = [
   // —— Anthropic ——
+  'claude-fable-5-1',
   'claude-fable-5',
   'claude-opus-5',
   'claude-opus-4-8',
@@ -213,6 +214,7 @@ export const MODEL_DISPLAY_ORDER = [
   'grok-imagine-image',
   'grok-imagine-video',
   // —— Google / Gemini：版本号大的在上 ——
+  'gemini-3.8-flash',
   'gemini-3.7-flash',
   'gemini-3.6-flash',
   'gemini-3.5-flash',

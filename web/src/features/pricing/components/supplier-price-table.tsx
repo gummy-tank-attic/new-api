@@ -211,8 +211,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           <span className='inline-block size-1.5 rounded-full bg-indigo-500/70 shrink-0' />
           <span>
             {t(
-              'Peak Hours: 01:00–04:00 and 06:00–10:00 UTC (all other hours are off-peak)',
-              '高峰时段：01:00–04:00 与 06:00–10:00 UTC（其余时间为空闲）'
+              'Peak Hours: 09:00–12:00 and 14:00–18:00 SGT (all other hours are off-peak)',
+              '高峰时段：09:00–12:00 与 14:00–18:00（新加坡时间，其余时间为空闲）'
             )}
           </span>
         </div>
@@ -475,7 +475,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                   >
                     <TableCell className='px-3 py-3 text-center'>
                       <span
-                        title={t('Peak Hours: 01:00–04:00 and 06:00–10:00 UTC', '高峰时段：01:00–04:00 与 06:00–10:00 UTC')}
+                        title={t('Peak Hours: 09:00–12:00 and 14:00–18:00 SGT', '高峰时段：09:00–12:00 与 14:00–18:00（新加坡时间）')}
                         className='inline-flex items-center rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-[11.5px] font-medium text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-500/15 cursor-help'
                       >
                         {t('Peak', '峰值')}
