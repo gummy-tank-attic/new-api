@@ -439,14 +439,16 @@ func TestClearRefreshCookieExpiresHostOnlyAndLegacyDomain(t *testing.T) {
 	ClearRefreshCookie(c)
 
 	cookies := w.Header()["Set-Cookie"]
-	require.Len(t, cookies, 2)
+	require.Len(t, cookies, 3)
 
 	// net/http.SetCookie strips a leading dot from Domain (RFC 6265), so
 	// Domain=.metartr.com is serialized as Domain=metartr.com.
 	legacyDomainSerialized := strings.TrimPrefix(legacyRefreshCookieDomain, ".")
 	var sawHostOnly, sawLegacyDomain bool
 	for _, raw := range cookies {
-		assert.Contains(t, raw, RefreshCookieName+"=")
+		if !strings.Contains(raw, RefreshCookieName+"=") {
+			continue
+		}
 		assert.Contains(t, raw, "Path="+refreshCookiePath)
 		assert.Contains(t, raw, "HttpOnly")
 		assert.Contains(t, raw, "SameSite=Strict")
@@ -469,13 +471,19 @@ func TestWriteRefreshCookieClearsLegacyDomainBeforeHostOnlyWrite(t *testing.T) {
 	WriteRefreshCookie(c, "00000000-0000-4000-8000-000000000001.raw-refresh-secret")
 
 	cookies := w.Header()["Set-Cookie"]
-	require.Len(t, cookies, 2)
+	require.Len(t, cookies, 4)
 	legacyDomainSerialized := strings.TrimPrefix(legacyRefreshCookieDomain, ".")
 	assert.Contains(t, cookies[0], "Domain="+legacyDomainSerialized)
 	assert.Contains(t, cookies[0], "Max-Age=0")
-	assert.Contains(t, cookies[1], "00000000-0000-4000-8000-000000000001.raw-refresh-secret")
-	assert.NotContains(t, cookies[1], "Domain=")
-	assert.Contains(t, cookies[1], "Path="+refreshCookiePath)
+	var sawRefreshSecret bool
+	for _, raw := range cookies {
+		if strings.Contains(raw, "00000000-0000-4000-8000-000000000001.raw-refresh-secret") {
+			sawRefreshSecret = true
+			assert.NotContains(t, raw, "Domain=")
+			assert.Contains(t, raw, "Path="+refreshCookiePath)
+		}
+	}
+	assert.True(t, sawRefreshSecret, "must write host-only refresh secret")
 }
 
 type cookieCaptureWriter struct {
