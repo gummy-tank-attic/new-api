@@ -15,7 +15,7 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 ## Project Reference
 
 > **MUST** open the **parent MetaRtr project** (not only this repo folder):
-> `d:\workplace\我的相关项目\中转站\newapi\README.md`
+> `../README.md`
 >
 > That README starts with **「AI / 人 · 必读」** — even if you only read the README, obey those iron rules.
 > Full release rules: `../docs/RELEASE_RULES.md` (path relative to parent `newapi/`).
@@ -29,7 +29,7 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 | Default `npm ci` | **Forbidden** for routine deploys; only `deploy-web.ps1 -Install` when node_modules is broken |
 | Secrets | Only parent `.env` / VPS `/opt/newapi/.env` — never commit secrets or paste into docs/chat |
 | Domains | **www** = VPS nginx static; **api** = API + payment webhooks; apex unused |
-| Public Base URL | Only `https://api.metartr.com` (no `/v1`, no www). Parent PRODUCTION §4.2 |
+| Public Base URLs | OpenAI-compatible clients use `https://api.metartr.com/v1`; Claude/Gemini native use `https://api.metartr.com`; never use www. Parent PRODUCTION §4.2 |
 | Pricing display order | Only `web/src/features/pricing/constants.ts` (`MODEL_DISPLAY_ORDER` etc.); must redeploy frontend after change |
 | Where to edit | Go/web code = **this** tree (`newapi源码/`); ops docs/compose/deploy scripts = **parent** `newapi/` |
 | Upstream upgrade | Parent README 铁律 11–12 + `METARTR_UPGRADE_POLICY.md`. Never replace `web/` wholesale. Merge on `upgrade/<ver>`. Do not `deploy-web.ps1` until `/` still shows MetaRtr home |
@@ -38,7 +38,7 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 | About / contact | `/about` contact cards; links only in `web/src/lib/contact-links.ts`; About uses `showFooter={false}`; do not block paint on empty `/api/about` (parent PRODUCTION §7.9) |
 | Pricing nav label | i18n key still `Model Square` → zh **价格**; route `/pricing` |
 
-Tech stack snapshot: Go 1.22+ / Gin / GORM · React 19 / TypeScript / Rsbuild / Bun · PG/MySQL/SQLite + Redis · i18n via `go-i18n` (backend) and `i18next` (frontend, 7 locales).
+Tech stack snapshot: Go 1.22+ / Gin / GORM · React 19 / TypeScript / Rsbuild · PG/MySQL/SQLite + Redis · i18n via `go-i18n` (backend) and `i18next` (frontend, 7 locales). The tree contains both `web/bun.lock` for upstream development and `web/package-lock.json` for the reviewed MetaRtr production workflow.
 
 
 ## Rules
@@ -123,12 +123,12 @@ Do NOT directly import or call `encoding/json` in business code. `json.RawMessag
 
 ### Frontend Rules
 
-- Use `bun` as the preferred package manager and script runner for the frontend (`web/`):
-  - `bun install` for dependency installation
-  - `bun run dev` for development server
-  - `bun run build` for production build
-  - `bun run i18n:*` for i18n tooling
-- Frontend UI text must support i18n with `i18next`/`react-i18next`. Use flat JSON locale files in `web/src/i18n/locales/{lang}.json`, with English source strings as keys. Boot: `index.html` prefetches `/locales/{lang}.json` in parallel with JS; do not bundle all 7 locales into the main JS, and do not use `i18next-browser-languagedetector`. See repo `docs/FRONTEND_I18N.md`.
+- The parent MetaRtr production workflow uses `web/package-lock.json`, npm, and
+  `scripts/deploy-web.ps1`; it does not run `npm ci` by default. Upstream-focused
+  development may use Bun with `web/bun.lock`. Do not regenerate both lockfiles
+  incidentally, and do not switch the production workflow during an upgrade
+  without reviewing that transition.
+- Frontend UI text must support i18n with `i18next`/`react-i18next`. Use flat JSON locale files in `web/src/i18n/locales/{lang}.json`, with English source strings as keys. Boot: `index.html` prefetches `/locales/{lang}.json` in parallel with JS; do not bundle all 7 locales into the main JS, and do not use `i18next-browser-languagedetector`. See parent `../docs/FRONTEND_I18N.md`.
 - In React components, use `useTranslation()` and call `t('English key')` for user-facing text.
 - **Dialog / Portal ref timing:** Use `useState + useCallback` callback ref (not `useRef`) whenever a `useEffect` must fire after a Portal-mounted DOM node is available. `useRef` updates silently without re-render; inside Radix `<Dialog>` the Portal may mount one render cycle late, so `ref.current` will be `null` on the first effect run. See `README.md §` "Frontend Known Gotchas" for the full pattern and background.
 - Follow `web/AGENTS.md` for detailed frontend conventions, including TypeScript, component structure, styling, accessibility, testing, and build checks.

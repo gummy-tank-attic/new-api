@@ -10,6 +10,10 @@ Before merging or deploying an upstream update, preserve and regression-check:
 
 - page structure, navigation, header, footer, and responsive layout;
 - pricing page grouping, ordering, presentation, group descriptions, and i18n;
+- custom pricing consumers of `getDynamicPricingTiers` must narrow
+  `DynamicPricingTier` before reading token-price fields (for example,
+  `'inputPrice' in tier` or a shared type guard), because task tiers expose a
+  different price shape;
 - production API origin (`https://api.metartr.com`) and the existing
   authentication/session flow;
 - `skipAuthRefresh` 401 on public pages must **not** call `clearAuthentication`
@@ -43,8 +47,8 @@ security fixes forward selectively, then reapply MetaRtr frontend changes.
    if the operator rejects a visual change.
 
 The snapshot branch is the rollback baseline for local source state. Before a
-future upgrade, capture production VPS evidence using the project-level
-`docs/history/ONLINE_ALIGNMENT_CAPTURE.md` procedure.
+future upgrade, capture production VPS evidence using the parent project
+`../docs/history/ONLINE_ALIGNMENT_CAPTURE.md` procedure.
 The production branch is `production`; do not treat `main` as the live
 frontend. After acceptance, merge the tested upgrade commit into `production`
 and verify the live `www` bundle hash belongs to that commit.
