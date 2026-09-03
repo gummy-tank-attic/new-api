@@ -20,13 +20,13 @@ import { api } from '@/lib/api'
 
 import type { AboutResponse } from './types'
 
-/** Public about blob; never block UI on auth refresh if the request fails. */
-export async function getAboutContent() {
+export async function getAboutContent(): Promise<AboutResponse> {
   const res = await api.get<AboutResponse>('/api/about', {
     skipAuthRefresh: true,
     skipBusinessError: true,
     skipErrorHandler: true,
     timeout: 8_000,
+    headers: { 'Cache-Control': null },
   })
   return res.data
 }

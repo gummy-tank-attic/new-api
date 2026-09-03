@@ -35,7 +35,7 @@ const EMPTY_AUTO: string[] = []
 /** Module-level snapshot so hard refresh still has a sync placeholder once read. */
 let memoryPricingCache = readPricingCache()
 
-export function usePricingData() {
+export function usePricingData(enabled = true) {
   const { status } = useStatus()
   const sessionSid = useAuthStore((state) => state.auth.session?.sid)
 
@@ -53,6 +53,7 @@ export function usePricingData() {
       gcTime: 30 * 60 * 1000,
       refetchOnMount: 'always',
       refetchOnWindowFocus: true,
+      enabled,
       // Keep last payload across anon → session so bootstrap cannot blank the table.
       placeholderData: (previousData) =>
         previousData ?? memoryPricingCache ?? readPricingCache(),

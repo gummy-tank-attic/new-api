@@ -28,6 +28,7 @@ export {
   getFreshAuthHeaders,
   isAuthBundle,
   refreshAuthentication,
+  resolveAuthentication,
   AuthRotationError,
 } from '@/lib/auth-session'
 export type { AuthTokenRotation, RefreshOutcome } from '@/lib/auth-session'
@@ -77,7 +78,10 @@ export async function getNotice(): Promise<{
   message?: string
   data?: string
 }> {
-  const res = await api.get('/api/notice', PUBLIC_API_REQUEST_CONFIG)
+  const res = await api.get('/api/notice', {
+    ...PUBLIC_API_REQUEST_CONFIG,
+    headers: { 'Cache-Control': null },
+  })
   return res.data
 }
 

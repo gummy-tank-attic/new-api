@@ -6,6 +6,7 @@
 
 - Access Token 是有效期 15 分钟的 JWT，只保存在浏览器内存中，通过 `Authorization: Bearer <token>` 发送。
 - Refresh Token 是随机不透明值，有效期最长 30 天。浏览器只通过 `HttpOnly`、`SameSite=Strict` Cookie 持有它；服务端仅保存 HMAC 摘要，并在每次刷新时轮换。
+- `new_api_has_session` 是 Refresh Cookie 的会话提示，值恒为 `1`，`Path=/`、非 `HttpOnly`，与 Refresh Cookie 同时写入、同时清除、同一过期时间。它只声明"曾签发过 Refresh Cookie"，不含任何凭据，也不参与任何鉴权判定；伪造它唯一的效果是自费一次注定失败的 refresh。它存在的原因是 Refresh Cookie 被 `HttpOnly` 和 `Path=/api/user/auth` 双重限制，`/` 上的页面无法判断自己是否匿名，否则每次冷启动都要发一次注定 401 的 refresh，而该请求还会占用按 IP 计数的 `CriticalRateLimit` 配额。
 - `user_sessions` 是登录会话控制面，记录设备、IP、登录方式、最后活跃时间、到期时间和撤销状态。数据库中的 Session 状态是最终权威；撤销传播速度取决于下文所述的 Redis 拓扑。
 - 用户的密码、状态、角色或安全因子发生安全相关变化时，`auth_version` 会递增并使旧登录会话失效。订阅带来的分组升降级只刷新授权缓存，不会退出任何登录设备。
 - Redis 缓存保存用户鉴权快照和登录会话快照。版本栅栏和撤销 tombstone 防止旧缓存重新授权；Session 快照使用跟随 `SYNC_FREQUENCY` 的短 TTL，缓存未命中或未启用 Redis 时回退到数据库校验。
@@ -73,6 +74,8 @@
 Access Token 到期前约 60 秒应静默调用 refresh。价格页、首页、About 等公开接口使用 `skipAuthRefresh` 时，401 **不得** `clearAuthentication`：过期 Bearer 打 `TryUserAuth` 会 401，这只表示该请求应按匿名降级，Refresh Cookie 仍有效。违反这条会在约 15 分钟后把用户踢出（MetaRtr 2026-08-13 生产事故）。`/api/user/auth/logout` 除外。
 
 根路由在 SID 变化时必须走 `applySessionQuerySync`（`web/src/lib/session-query-sync.ts`）：冷启动 `undefined → sid` 只 `invalidateQueries`，换身份才 `resetQueries`。**禁止**在此路径 `queryClient.clear()`。Access Token 不落盘，已登录 Ctrl+F5 会先匿名拉公开接口再恢复会话；`clear()` 会 silent cancel 进行中的请求，价格/排行榜等不订阅 auth 的页面会永远停在骨架屏（MetaRtr 2026-08-17）。不要为消掉这次多余请求而去等 bootstrap 完成再发公开请求，公开页不得重新阻塞在 refresh / Web Lock 上。回归：`npm run test:regression` 含 `session-query-sync.test.ts`。登出仍可用 `clearAuthenticatedClientState`（会 `clear()`），但必须随即离开当前页。
+
+公开页面的冷启动会先读 `new_api_has_session`：提示不存在且内存中没有任何身份时跳过 refresh，直接按匿名渲染，且**不**把这次跳过记为已完成的匿名判定——跳过只是延后，不是服务端结论。会依据鉴权结果做跳转的位置（受保护路由与登录页）不看提示，内存为空时一律回源。因此提示缺失但 Refresh Cookie 有效的用户（该 Cookie 上线前建立的会话，或只清理了 `/` 站点数据的浏览器）会在公开页显示为匿名，并在进入上述任一位置时自动恢复登录态，不需要重新输入密码。提示因服务端撤销而过期时，那次 refresh 返回 401 并在同一响应里清除提示，浪费的请求只发生一次。
 
 ## Session 签发限额与保留策略
 
