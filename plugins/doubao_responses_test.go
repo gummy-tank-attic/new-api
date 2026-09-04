@@ -1,6 +1,14 @@
 package plugins_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/pkg/jsplugin"
+	builtinplugins "github.com/QuantumNous/new-api/plugins"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
 
 func TestDoubaoResponsesProtocol(t *testing.T) {
 	testVideoResponsesProtocol(t, videoResponsesTestCase{
@@ -25,7 +33,61 @@ func TestDoubaoResponsesProtocol(t *testing.T) {
 				"resolution": "1080p",
 			},
 		},
-		wantUsageKeys:  []string{"resolution", "tokens", "video_input"},
+		wantUsageKeys:  []string{"resolution", "seconds", "tokens", "video_input"},
 		wantVendorName: "doubao",
 	})
+}
+
+func TestDoubaoCompletionUsageFacts(t *testing.T) {
+	source, err := builtinplugins.Source("doubao")
+	require.NoError(t, err)
+	plugin, err := jsplugin.NewRegistry().RegisterFactory(source, jsplugin.Options{Key: "doubao"})
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name string
+		body map[string]any
+		want map[string]any
+	}{
+		{
+			name: "ark succeeded overlays tokens resolution seconds",
+			body: map[string]any{
+				"status":     "succeeded",
+				"duration":   5,
+				"resolution": "720p",
+				"usage":      map[string]any{"completion_tokens": 102880, "total_tokens": 102880},
+			},
+			want: map[string]any{"tokens": float64(102880), "resolution": "720p", "seconds": float64(5)},
+		},
+		{
+			name: "tokease completed overlays duration",
+			body: map[string]any{
+				"status":     "completed",
+				"duration":   5,
+				"resolution": "720p",
+				"usage":      map[string]any{"completion_tokens": 102880},
+				"content":    map[string]any{"video_url": "https://example.com/upscale.mp4"},
+			},
+			want: map[string]any{"tokens": float64(102880), "resolution": "720p", "seconds": float64(5)},
+		},
+		{
+			name: "in progress does not overlay",
+			body: map[string]any{"status": "in_progress", "duration": 5, "usage": map[string]any{"completion_tokens": 1}},
+			want: map[string]any{},
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			value, callErr := plugin.Engine.Call(t.Context(), "extractUsageOnComplete", nil, map[string]any{}, testCase.body)
+			require.NoError(t, callErr)
+			encoded, marshalErr := common.Marshal(value)
+			require.NoError(t, marshalErr)
+			var facts map[string]any
+			require.NoError(t, common.Unmarshal(encoded, &facts))
+			if facts == nil {
+				facts = map[string]any{}
+			}
+			assert.Equal(t, testCase.want, facts)
+		})
+	}
 }

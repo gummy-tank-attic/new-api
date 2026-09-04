@@ -9,6 +9,11 @@ behavior unless the operator explicitly approves a layout change.
 Before merging or deploying an upstream update, preserve and regression-check:
 
 - page structure, navigation, header, footer, and responsive layout;
+- custom homepage architecture in `web/src/features/home/`:
+  - modular React sections (`hero.tsx`, `stats.tsx`, `features.tsx`, `how-it-works.tsx`, `cta.tsx`, and `hero-terminal-demo.tsx`);
+  - client-side SWR caching in `home-content-cache.ts` (`localStorage` fast-boot + hash invalidation);
+  - upstream New API/One API changes to root `/` or home routes must NEVER overwrite `web/src/features/home/`; merge conflicts must unconditionally keep MetaRtr (`ours`);
+  - database `options.HomePageContent` is maintained empty so that dynamic client rendering is 100% driven by MetaRtr React code;
 - pricing page grouping, ordering, presentation, group descriptions, and i18n;
 - custom pricing consumers of `getDynamicPricingTiers` must narrow
   `DynamicPricingTier` before reading token-price fields (for example,
@@ -39,7 +44,10 @@ security fixes forward selectively, then reapply MetaRtr frontend changes.
 2. Run `npm run build:check`. Its startup policy and bundle budgets are release
    blockers, including the production-entry check for invalid undefined calls.
 3. There is **no Pages preview**. Verify locally (`npm run build` + `npm run
-   dev` against the protected contract on desktop and mobile) first.
+   dev` against the protected contract on desktop and mobile) first. Specifically
+   open `http://localhost:5173/` to visually inspect the custom MetaRtr homepage
+   (Hero, Terminal Demo, Stats, Features, How-It-Works, CTA) before running
+   `deploy-web.ps1`.
 4. Deploy the accepted candidate with parent `scripts/deploy-web.ps1`.
 5. Treat `NO_FCP`, an empty `#root`, console startup errors, or a mismatched
    entry asset as a failed release even when HTTP status is 200.

@@ -104,30 +104,32 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
 
       {/* 2. Studio Control Bar */}
       <div className='flex flex-col gap-3'>
-        <div className='flex flex-wrap items-center justify-between gap-3'>
-          {/* Left: Group Selector & subtitle */}
-          <div className='flex flex-wrap items-center gap-3'>
-            <GroupPriceCards
-              groups={props.groups}
-              selectedGroup={props.selectedGroup}
-              onSelect={props.onGroupChange}
-              groupRatio={props.groupRatio}
-              usableGroup={props.usableGroup}
-            />
+        {/* Top: Group Selector Tabs */}
+        <GroupPriceCards
+          groups={props.groups}
+          selectedGroup={props.selectedGroup}
+          onSelect={props.onGroupChange}
+          groupRatio={props.groupRatio}
+          usableGroup={props.usableGroup}
+        />
+
+        {/* Bottom Sub-bar: Description on Left, Controls on Far Right */}
+        <div className='flex flex-wrap items-center justify-between gap-3 min-h-[36px]'>
+          <div className='flex items-center min-w-0 flex-1'>
             {groupIntroDisplay && (
-              <span
-                className='text-muted-foreground hidden max-w-xl truncate text-xs leading-none lg:inline-flex'
+              <p
+                className='text-muted-foreground text-sm font-normal leading-relaxed tracking-tight'
                 title={groupIntroDisplay}
               >
                 • {groupIntroDisplay}
-              </span>
+              </p>
             )}
           </div>
 
-          {/* Right: Controls Cluster */}
-          <div className='flex items-center gap-2.5 self-start sm:self-auto'>
+          {/* Right: Controls Cluster (图一：放到最右边) */}
+          <div className='flex items-center gap-2.5 ml-auto shrink-0'>
             <div
-              className='bg-muted/80 ring-border/50 inline-flex rounded-full p-1 ring-1'
+              className='bg-muted/80 ring-border/50 inline-flex rounded-full p-1 ring-1 shadow-2xs'
               role='group'
               aria-label={t('Price mode')}
             >
@@ -159,7 +161,7 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
 
             {/* View Mode Toggle: Grid vs Table */}
             <div
-              className='bg-muted/80 ring-border/50 inline-flex rounded-full p-1 ring-1'
+              className='bg-muted/80 ring-border/50 inline-flex rounded-full p-1 ring-1 shadow-2xs'
               role='group'
               aria-label={t('View mode')}
             >
@@ -194,12 +196,6 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
             </div>
           </div>
         </div>
-
-        {groupIntroDisplay && (
-          <p className='text-muted-foreground text-xs leading-relaxed lg:hidden'>
-            {groupIntroDisplay}
-          </p>
-        )}
       </div>
 
       {/* 3. Main Content: Bento Grid or Clean Table */}
@@ -220,17 +216,15 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
           onModelClick={props.onModelClick}
         />
       ) : (
-        <div className='bg-card border-border/70 overflow-hidden rounded-2xl border shadow-xs'>
-          <SupplierPriceTable
-            models={props.models}
-            priceMode={props.priceMode}
-            selectedGroup={props.selectedGroup}
-            groupRatio={props.groupRatio}
-            priceRate={props.priceRate}
-            usdExchangeRate={props.usdExchangeRate}
-            onModelClick={props.onModelClick}
-          />
-        </div>
+        <SupplierPriceTable
+          models={props.models}
+          priceMode={props.priceMode}
+          selectedGroup={props.selectedGroup}
+          groupRatio={props.groupRatio}
+          priceRate={props.priceRate}
+          usdExchangeRate={props.usdExchangeRate}
+          onModelClick={props.onModelClick}
+        />
       )}
 
       {/* 4. Elegant Minimalist Pricing Rule Footer */}

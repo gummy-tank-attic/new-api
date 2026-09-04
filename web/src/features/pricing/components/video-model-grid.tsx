@@ -51,12 +51,11 @@ export interface VideoModelGridProps {
 }
 
 export function VideoModelGrid(props: VideoModelGridProps) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { copyToClipboard } = useCopyToClipboard()
   const [copiedName, setCopiedName] = useState<string | null>(null)
 
   const isGroupMode = props.priceMode === 'group'
-  const isZh = i18n.language?.startsWith('zh')
 
   const handleCopy = (e: React.MouseEvent, modelName: string) => {
     e.stopPropagation()
