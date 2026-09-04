@@ -49,6 +49,12 @@ import {
 import { isBreakdownTierMatched } from '../lib/breakdown-tier-match'
 import type { DynamicPriceLabelKind } from '../lib/dynamic-price'
 import { getTaskMatrixDisplayTiers } from '../lib/task-matrix-display'
+import {
+  formatHumanFriendlyCondition,
+  formatHumanFriendlyTierLabel,
+  isVideoUpscaleModel,
+  parseVideoUpscaleTiers,
+} from '../lib/video-pricing'
 import type { BillingUsageSchema, BillingUsageUnit } from '../types'
 
 type DynamicPricingBreakdownProps = {
@@ -159,8 +165,8 @@ function formatBreakdownConditionSummary(
     return formatConditionSummary(tier.conditions, t)
   }
   return tier.conditions
-    .map((condition) => `${condition.field} = ${condition.value}`)
-    .join(' && ')
+    .map((condition) => formatHumanFriendlyCondition(condition.field, condition.value))
+    .join(' · ')
 }
 
 function formatBreakdownPrice(
@@ -292,6 +298,41 @@ export function DynamicPricingBreakdown({
   if (!expr) return null
 
   if (!hasTiers) {
+    if (isVideoUpscaleModel(expr)) {
+      const upscaleTiers = parseVideoUpscaleTiers(expr)
+      return (
+        <section className={cn('min-w-0', !compact && 'py-4')}>
+          <div className='text-foreground mb-3 text-sm font-semibold'>
+            {t('Video Upscale Specifications & Rates', '视频 Upscale 计费标准与规格')}
+          </div>
+          <div className='grid grid-cols-1 divide-y rounded-lg border sm:grid-cols-3 sm:divide-y-0 sm:divide-x overflow-hidden'>
+            {upscaleTiers.map((tier) => (
+              <div key={tier.tierKey} className='bg-muted/10 p-3.5 flex flex-col justify-between'>
+                <div>
+                  <div className='flex items-center justify-between'>
+                    <Badge variant='secondary' className='bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 font-semibold'>
+                      {tier.displayName}
+                    </Badge>
+                    <span className='font-mono text-xs text-muted-foreground uppercase'>{tier.resolution}</span>
+                  </div>
+                  <div className='mt-2.5 font-mono text-base font-bold text-foreground'>
+                    ${(tier.secondPrice * rate).toFixed(4)}
+                    <span className='text-xs font-normal text-muted-foreground ml-1'>/ 秒 (Upscale)</span>
+                  </div>
+                  <div className='text-xs text-muted-foreground mt-0.5 font-mono'>
+                    + ${(tier.tokenPricePerM * rate).toFixed(2)} / 1M tok
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className='text-muted-foreground/70 mt-2 text-xs leading-relaxed'>
+            {t('Billing formula: Billed by output video tokens plus duration seconds.', '计费说明：视频 Upscale 采用双轨计费，包含视频生成 Token 基础消耗与目标分辨率时长秒费。')}
+          </p>
+        </section>
+      )
+    }
+
     return (
       <section className={cn('min-w-0', !compact && 'py-4')}>
         {!compact && (
@@ -432,7 +473,7 @@ export function DynamicPricingBreakdown({
                       variant='secondary'
                       className='bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300'
                     >
-                      {tier.label || t('Default')}
+                      {formatHumanFriendlyTierLabel(tier.label || t('Default'))}
                     </Badge>
                     {isMatched && (
                       <Badge
@@ -526,7 +567,7 @@ export function DynamicPricingBreakdown({
                           variant='secondary'
                           className='bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300'
                         >
-                          {tier.label || t('Default')}
+                          {formatHumanFriendlyTierLabel(tier.label || t('Default'))}
                         </Badge>
                         {isMatched && (
                           <Badge

@@ -23,6 +23,7 @@ import {
   CalendarClock,
   Code2,
   FileText,
+  Film,
   HeartPulse,
   Info,
   Layers,
@@ -38,6 +39,7 @@ import { StaticDataTable } from '@/components/data-table'
 import { sideDrawerContentClassName } from '@/components/drawer-layout'
 import { GroupBadge } from '@/components/group-badge'
 import { PublicLayout } from '@/components/layout'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -90,6 +92,15 @@ import { DynamicPricingBreakdown } from './dynamic-pricing-breakdown'
 import { ModelBillingModeBadge } from './model-billing-mode-badge'
 import { ModelDetailsApi } from './model-details-api'
 import { ModelDetailsPerformance } from './model-details-performance'
+import {
+  formatHumanFriendlyTierLabel,
+  getModelSupportedResolutions,
+  getResolutionBadgeStyle,
+  getVideoModelTierGroups,
+  isByteDanceOrVideoModel,
+  isVideoUpscaleModel,
+  parseVideoUpscaleTiers,
+} from '../lib/video-pricing'
 
 // ----------------------------------------------------------------------------
 // Local UI helpers
@@ -399,6 +410,17 @@ function ModelBackendQuickStats(props: { model: PricingModel }) {
     })
   }
 
+  const supportedRes = getModelSupportedResolutions(model)
+  if (supportedRes.length > 0) {
+    stats.push({
+      key: 'resolutions',
+      icon: Film,
+      label: t('Resolutions', '支持分辨率'),
+      value: supportedRes.map((r) => r.toUpperCase()).join(' · '),
+      hint: t('Supported output resolutions', '模型支持输出的分辨率规格'),
+    })
+  }
+
   if (knowledgeCutoff) {
     stats.push({
       key: 'knowledge',
@@ -617,6 +639,29 @@ function ModelHeader(props: { model: PricingModel }) {
         )}
         <span className='text-muted-foreground/30'>·</span>
         <ModelBillingModeBadge model={model} />
+        {(() => {
+          const resolutions = getModelSupportedResolutions(model)
+          if (resolutions.length === 0) return null
+          return (
+            <>
+              <span className='text-muted-foreground/30'>·</span>
+              <div className='flex items-center gap-1'>
+                {resolutions.map((res) => {
+                  const style = getResolutionBadgeStyle(res)
+                  return (
+                    <Badge
+                      key={res}
+                      variant='outline'
+                      className={cn('text-[10px] px-1.5 py-0 font-medium', style.className)}
+                    >
+                      {style.label}
+                    </Badge>
+                  )
+                })}
+              </div>
+            </>
+          )
+        })()}
       </div>
       {description && (
         <p className='text-muted-foreground mt-2 text-sm leading-relaxed'>
@@ -624,6 +669,243 @@ function ModelHeader(props: { model: PricingModel }) {
         </p>
       )}
     </header>
+  )
+}
+
+
+
+function VideoUpscaleGroupPricingSection(props: {
+  model: PricingModel
+  groupRatio: Record<string, number>
+  usableGroup: Record<string, string>
+  autoGroups: string[]
+  priceRate: number
+  availableGroups: string[]
+}) {
+  const { i18n } = useTranslation()
+  const isZh = i18n.language?.startsWith('zh') ?? true
+  const tiers = parseVideoUpscaleTiers(props.model.billing_expr)
+
+  return (
+    <section className='space-y-4'>
+      <AutoGroupChain model={props.model} autoGroups={props.autoGroups} />
+
+      {/* Real billing reference callout matching user actual log */}
+      <div className='rounded-xl border border-blue-200/70 bg-blue-50/50 p-3.5 text-xs text-blue-950 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-200 shadow-2xs'>
+        <div className='flex items-center gap-1.5 font-bold text-xs text-blue-900 dark:text-blue-300'>
+          <span>💡</span>
+          <span>{isZh ? 'Upscale 扣费结构与实测说明（两项相加）' : 'Upscale Billing Breakdown'}</span>
+        </div>
+        <div className='mt-2 space-y-1.5 text-[11px] leading-relaxed text-muted-foreground'>
+          <div>
+            <span className='font-semibold text-foreground'>{isZh ? '1. 【Upscale 价格（按秒）】：' : '1. [Upscale Price (Per Sec)]: '}</span>
+            {isZh ? '目标清晰度的 Upscale 重建服务费（如 720p 为 $0.0091/秒，原价 $0.0130/秒）。' : 'Upscale service fee per second (e.g. 720p is $0.0091/s).'}
+          </div>
+          <div>
+            <span className='font-semibold text-foreground'>{isZh ? '2. 【视频价格（按 Token）】：' : '2. [Video Token Fee]: '}</span>
+            {isZh ? 'Upscale 生成视频时消耗的底模 Token，为 $7.18/1M Tokens（实测 6秒约消耗 10万 Tokens，约合 $0.61）。' : 'Underlying video model token usage (~100k tokens for 6s).'}
+          </div>
+          <div className='mt-1 pt-1.5 border-t border-blue-200/50 dark:border-blue-900/40 font-mono text-[10px] text-primary'>
+            {isZh
+              ? '• 实测账目对照（以 6秒 720p 为例）：Upscale 费 6秒 × $0.0091/s ($0.055) + 102,880 Tokens ($0.612) = 实际扣费约 $0.66'
+              : '• Real Billing Example (6s 720p): Upscale 6s * $0.0091 ($0.055) + 102,880 Tokens ($0.612) = Total ~$0.66'}
+          </div>
+        </div>
+      </div>
+
+      <div className='space-y-4'>
+        {props.availableGroups.map((group) => {
+          const ratio = props.groupRatio[group] || 1
+          return (
+            <div key={group} className='overflow-hidden rounded-xl border border-border/70 bg-card/60 shadow-2xs space-y-3 pb-3'>
+              <div className='bg-muted/30 flex items-center justify-between gap-3 border-b border-border/50 px-3.5 py-2.5'>
+                <GroupBadge group={group} size='sm' />
+                <div className='flex items-center gap-2'>
+                  <span className='inline-flex items-center rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-2xs'>
+                    30% OFF
+                  </span>
+                  <span className='text-muted-foreground font-mono text-xs'>{ratio}x</span>
+                </div>
+              </div>
+
+              {/* Table 1: Upscale Price */}
+              <div className='px-3.5'>
+                <div className='flex items-center justify-between mb-1.5'>
+                  <div className='text-xs font-bold text-foreground flex items-center gap-1.5'>
+                    <span className='h-2 w-2 rounded-full bg-purple-500 inline-block' />
+                    {isZh ? 'Upscale 价格 (按秒计费)' : 'Upscale Price (Per Sec)'}
+                  </div>
+                  <span className='text-[10px] text-muted-foreground'>按生成视频时长</span>
+                </div>
+                <div className='rounded-lg border border-border/60 overflow-hidden text-xs'>
+                  <div className='grid grid-cols-12 bg-muted/40 border-b border-border/40 px-3 py-1.5 text-[11px] font-semibold text-muted-foreground'>
+                    <div className='col-span-3'>{isZh ? '分辨率' : 'Resolution'}</div>
+                    <div className='col-span-3 text-right'>{isZh ? '平台单价' : 'Price /s'}</div>
+                    <div className='col-span-3 text-right'>{isZh ? '官方原价' : 'Official'}</div>
+                    <div className='col-span-3 text-right'>{isZh ? '折扣' : 'Discount'}</div>
+                  </div>
+                  <div className='divide-y divide-border/30 bg-card/40'>
+                    {tiers.map((tier) => {
+                      const billedSecond = tier.secondPrice * ratio * props.priceRate
+                      const officialSecond = tier.officialSecondPrice * props.priceRate
+                      return (
+                        <div key={tier.tierKey} className='grid grid-cols-12 items-center px-3 py-2'>
+                          <div className='col-span-3 font-bold text-foreground text-xs'>
+                            {tier.displayName}
+                          </div>
+                          <div className='col-span-3 text-right font-mono font-bold text-foreground text-xs tabular-nums'>
+                            ${billedSecond.toFixed(4)}/s
+                          </div>
+                          <div className='col-span-3 text-right font-mono text-muted-foreground/60 line-through text-[11px] tabular-nums'>
+                            ${officialSecond.toFixed(4)}/s
+                          </div>
+                          <div className='col-span-3 text-right'>
+                            <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
+                              30% OFF
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Table 2: Video Generation Price */}
+              <div className='px-3.5'>
+                <div className='flex items-center justify-between mb-1.5'>
+                  <div className='text-xs font-bold text-foreground flex items-center gap-1.5'>
+                    <span className='h-2 w-2 rounded-full bg-blue-500 inline-block' />
+                    {isZh ? '视频生成价格 (按 Token 计费)' : 'Video Generation Price (Per Token)'}
+                  </div>
+                  <span className='text-[10px] text-muted-foreground'>
+                    {isZh ? '文生视频 / 图生视频 / 视频生视频' : 'Text / Image / Video to Video'}
+                  </span>
+                </div>
+                <div className='rounded-lg border border-border/60 overflow-hidden text-xs'>
+                  <div className='grid grid-cols-12 bg-muted/40 border-b border-border/40 px-3 py-1.5 text-[11px] font-semibold text-muted-foreground'>
+                    <div className='col-span-3'>{isZh ? '分辨率' : 'Resolution'}</div>
+                    <div className='col-span-3 text-right'>{isZh ? '平台单价' : 'Price /1M'}</div>
+                    <div className='col-span-3 text-right'>{isZh ? '官方原价' : 'Official'}</div>
+                    <div className='col-span-3 text-right'>{isZh ? '折扣' : 'Discount'}</div>
+                  </div>
+                  <div className='divide-y divide-border/30 bg-card/40'>
+                    {tiers.map((tier) => {
+                      const billedToken = tier.tokenPricePerM * ratio * props.priceRate
+                      const officialToken = tier.officialTokenPricePerM * props.priceRate
+                      return (
+                        <div key={tier.tierKey} className='grid grid-cols-12 items-center px-3 py-2'>
+                          <div className='col-span-3 font-bold text-foreground text-xs'>
+                            {tier.displayName}
+                          </div>
+                          <div className='col-span-3 text-right font-mono font-bold text-foreground text-xs tabular-nums'>
+                            ${billedToken.toFixed(2)}/M
+                          </div>
+                          <div className='col-span-3 text-right font-mono text-muted-foreground/60 line-through text-[11px] tabular-nums'>
+                            ${officialToken.toFixed(2)}/M
+                          </div>
+                          <div className='col-span-3 text-right'>
+                            <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
+                              30% OFF
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className='border-t border-border/40 pt-2 px-3.5 text-right text-[10px] text-muted-foreground/75 font-mono'>
+                {isZh
+                  ? '计费说明：单次任务扣费 = 视频实际消耗 Token 费 + 视频时长 Upscale 秒费 · 全档位 7 折特惠'
+                  : 'Total = Video Tokens Fee + Video Duration * Upscale Fee · 30% OFF all tiers'}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function VideoModelGroupPricingSection(props: {
+  model: PricingModel
+  groupRatio: Record<string, number>
+  usableGroup: Record<string, string>
+  autoGroups: string[]
+  priceRate: number
+  availableGroups: string[]
+}) {
+  const { i18n } = useTranslation()
+  const isZh = i18n.language?.startsWith('zh') ?? true
+  const groups = getVideoModelTierGroups(props.model)
+
+  return (
+    <section className='space-y-3'>
+      <AutoGroupChain model={props.model} autoGroups={props.autoGroups} />
+      <div className='space-y-3'>
+        {props.availableGroups.map((group) => {
+          const ratio = props.groupRatio[group] || 1
+          return (
+            <div key={group} className='overflow-hidden rounded-xl border border-border/70 bg-card/60 shadow-2xs'>
+              <div className='bg-muted/30 flex items-center justify-between gap-3 border-b border-border/50 px-3.5 py-2.5'>
+                <GroupBadge group={group} size='sm' />
+                <span className='text-muted-foreground font-mono text-xs'>{ratio}x</span>
+              </div>
+              <div className='grid grid-cols-12 bg-muted/50 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground'>
+                <div className='col-span-4'>{isZh ? '分辨率' : 'Resolution'}</div>
+                <div className='col-span-4 text-right'>{isZh ? '无视频输入' : 'Without Video Input'}</div>
+                <div className='col-span-4 text-right'>{isZh ? '有视频输入' : 'With Video Input'}</div>
+              </div>
+              <div className='divide-y divide-border/40'>
+                {groups.map((tierGroup) => {
+                  const billedNoVideo = tierGroup.withoutVideoPrice * ratio * props.priceRate
+                  const billedVideo = tierGroup.withVideoPrice * ratio * props.priceRate
+                  const officialNoVideo = (tierGroup.officialWithoutVideoPrice ?? tierGroup.withoutVideoPrice) * props.priceRate
+                  const officialVideo = (tierGroup.officialWithVideoPrice ?? tierGroup.withVideoPrice) * props.priceRate
+                  const showOfficial = Math.abs(billedNoVideo - officialNoVideo) > 0.001 || Math.abs(billedVideo - officialVideo) > 0.001
+
+                  return (
+                    <div
+                      key={tierGroup.title}
+                      className='grid grid-cols-12 items-center px-3.5 py-2.5 transition-colors hover:bg-muted/30'
+                    >
+                      <div className='col-span-4 font-bold text-foreground text-xs sm:text-sm'>
+                        {tierGroup.resLabel}
+                      </div>
+                      <div className='col-span-4 text-right'>
+                        <div className='font-mono font-bold text-foreground text-xs sm:text-sm tabular-nums'>
+                          ${billedNoVideo.toFixed(3)}
+                        </div>
+                        {showOfficial && (
+                          <div className='text-[10px] text-muted-foreground/55 line-through font-mono'>
+                            ${officialNoVideo.toFixed(3)}
+                          </div>
+                        )}
+                      </div>
+                      <div className='col-span-4 text-right'>
+                        <div className='font-mono font-bold text-foreground text-xs sm:text-sm tabular-nums'>
+                          ${billedVideo.toFixed(3)}
+                        </div>
+                        {showOfficial && (
+                          <div className='text-[10px] text-muted-foreground/55 line-through font-mono'>
+                            ${officialVideo.toFixed(3)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className='border-t border-border/40 bg-muted/15 px-3.5 py-1.5 text-right text-[10px] text-muted-foreground/75'>
+                {isZh ? '计费单位: / 1M Tokens' : 'Unit: / 1M Tokens'}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
   )
 }
 
@@ -688,6 +970,10 @@ function PriceSection(props: {
         props.model.audio_completion_ratio != null,
     },
   ]
+
+  if (isByteDanceOrVideoModel(props.model)) {
+    return null
+  }
 
   if (dynamicSummary) {
     if (dynamicSummary.isSpecialExpression) {
@@ -990,6 +1276,31 @@ function GroupPricingSection(props: {
   const thClass =
     'text-muted-foreground py-2 text-[10px] font-medium tracking-wider uppercase'
 
+  if (isByteDanceOrVideoModel(props.model)) {
+    if (isVideoUpscaleModel(props.model)) {
+      return (
+        <VideoUpscaleGroupPricingSection
+          model={props.model}
+          groupRatio={props.groupRatio}
+          usableGroup={props.usableGroup}
+          autoGroups={props.autoGroups}
+          priceRate={props.priceRate}
+          availableGroups={availableGroups}
+        />
+      )
+    }
+    return (
+      <VideoModelGroupPricingSection
+        model={props.model}
+        groupRatio={props.groupRatio}
+        usableGroup={props.usableGroup}
+        autoGroups={props.autoGroups}
+        priceRate={props.priceRate}
+        availableGroups={availableGroups}
+      />
+    )
+  }
+
   if (isDynamicPricingModel(props.model)) {
     const dynamicTiers =
       getTaskMatrixDisplayTiers(
@@ -1087,7 +1398,7 @@ function GroupPricingSection(props: {
                       header: t('Tier'),
                       className: thClass,
                       cellClassName: 'text-muted-foreground py-2.5',
-                      cell: (tier) => tier.label || t('Default'),
+                      cell: (tier) => formatHumanFriendlyTierLabel(tier.label || t('Default')),
                     },
                     ...priceFields.map((fieldEntry) => {
                       const unitLabelKey =
@@ -1340,7 +1651,7 @@ export function ModelDetailsContent(props: ModelDetailsContentProps) {
               tokenUnit={props.tokenUnit}
               showRechargePrice={showRechargePrice}
             />
-            {isDynamic && (
+            {isDynamic && !isByteDanceOrVideoModel(props.model) && (
               <DynamicPricingBreakdown
                 billingExpr={props.model.billing_expr}
                 usageSchema={props.model.billing_usage_schema}

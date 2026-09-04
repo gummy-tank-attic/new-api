@@ -1,4 +1,5 @@
 {
+  "- Base URL: {{url}}": "- Base URL: {{url}}",
   "/ {{unit}} tokens": "/ {{unit}} tokens",
   "403 / insufficient_user_quota": "403 / insufficient_user_quota",
   "Base URL": "Base URL",

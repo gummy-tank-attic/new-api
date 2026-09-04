@@ -33,17 +33,22 @@ import { cn } from '@/lib/utils'
 
 import {
   DEFAULT_TOKEN_UNIT,
+  isByteDancePricingVendor,
   lookupGroupMapValue,
   MANUAL_GROUP_SAVINGS_OFF,
 } from '../constants'
 import {
   formatDynamicUnitPrice,
+  formatTaskUsageUnitPrice,
   getDynamicPricingTiers,
+  getTaskUsagePriceUnitLabelKey,
   isDynamicPricingModel,
 } from '../lib/dynamic-price'
+import { getTaskMatrixTableLines } from '../lib/task-matrix-display'
 import { resolveGroupSavingsOffPercent } from '../lib/group-discount'
 import {
   getConfiguredGroupRatio,
+  getDisplayGroupRatio,
   isTokenBasedModel,
 } from '../lib/model-helpers'
 import {
@@ -52,6 +57,15 @@ import {
   stripTrailingZeros,
 } from '../lib/price'
 import type { PriceType, PricingModel, TokenUnit } from '../types'
+import {
+  getModelSupportedResolutions,
+  getResolutionBadgeStyle,
+  getVideoModelCapabilityTag,
+  getVideoModelTierGroups,
+  isByteDanceOrVideoModel,
+  isVideoUpscaleModel,
+  parseVideoUpscaleTiers,
+} from '../lib/video-pricing'
 
 export type PriceMode = 'group' | 'official'
 
@@ -190,6 +204,10 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
     () => rows.length > 0 && rows.some(isTimeTieredModel),
     [rows]
   )
+  const isVideoTable = useMemo(
+    () => rows.length > 0 && rows.every(isByteDanceOrVideoModel),
+    [rows]
+  )
 
   if (rows.length === 0) {
     return (
@@ -224,47 +242,158 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
       <Table className='[&_td]:text-[15px] [&_td_*]:text-[length:inherit] [&_th]:text-xs [&_th_*]:text-xs'>
         <TableHeader>
           <TableRow className='bg-muted/40 hover:bg-muted/40 border-border/60 border-b'>
-            <TableHead className='text-muted-foreground h-11 min-w-[11rem] px-4 font-medium tracking-wide'>
-              {t('Model ID')}
-            </TableHead>
-            {isTimeTieredTable ? (
-              <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
-                {t('Billing Period', '计费时段')}
-              </TableHead>
-            ) : null}
-            <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
-              {t('Input price')}
-              <span className='text-muted-foreground/50 ml-1 font-normal'>
-                {t('/ {{unit}} tokens', { unit: unitHint })}
-              </span>
-            </TableHead>
-            <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
-              {t('Output price')}
-              <span className='text-muted-foreground/50 ml-1 font-normal'>
-                {t('/ {{unit}} tokens', { unit: unitHint })}
-              </span>
-            </TableHead>
-            {!isTimeTieredTable ? (
-              <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
-                {t('Cache Write')}
-                <span className='text-muted-foreground/50 ml-1 font-normal'>
-                  {t('/ {{unit}} tokens', { unit: unitHint })}
-                </span>
-              </TableHead>
-            ) : null}
-            <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
-              {t('Cache Read')}
-              <span className='text-muted-foreground/50 ml-1 font-normal'>
-                {t('/ {{unit}} tokens', { unit: unitHint })}
-              </span>
-            </TableHead>
-            <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
-              {t('Savings')}
-            </TableHead>
+            {isVideoTable ? (
+              <>
+                <TableHead className='text-muted-foreground h-11 min-w-[12rem] px-4 font-medium tracking-wide'>
+                  {t('Model & Capability', '模型与特性')}
+                </TableHead>
+                <TableHead className='text-muted-foreground h-11 min-w-[9rem] px-3 text-center font-medium tracking-wide'>
+                  {t('Supported Resolutions', '支持分辨率')}
+                </TableHead>
+                <TableHead className='text-muted-foreground h-11 min-w-[20rem] px-4 text-center font-medium tracking-wide'>
+                  {t('Generation Mode & Pricing', '生成模式与计费价格')}
+                </TableHead>
+                <TableHead className='text-muted-foreground h-11 min-w-[6rem] px-3 text-center font-medium tracking-wide'>
+                  {t('Savings')}
+                </TableHead>
+              </>
+            ) : (
+              <>
+                <TableHead className='text-muted-foreground h-11 min-w-[11rem] px-4 font-medium tracking-wide'>
+                  {t('Model ID')}
+                </TableHead>
+                {isTimeTieredTable ? (
+                  <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
+                    {t('Billing Period', '计费时段')}
+                  </TableHead>
+                ) : null}
+                <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
+                  {t('Input price')}
+                  <span className='text-muted-foreground/50 ml-1 font-normal'>
+                    {t('/ {{unit}} tokens', { unit: unitHint })}
+                  </span>
+                </TableHead>
+                <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
+                  {t('Output price')}
+                  <span className='text-muted-foreground/50 ml-1 font-normal'>
+                    {t('/ {{unit}} tokens', { unit: unitHint })}
+                  </span>
+                </TableHead>
+                {!isTimeTieredTable ? (
+                  <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
+                    {t('Cache Write')}
+                    <span className='text-muted-foreground/50 ml-1 font-normal'>
+                      {t('/ {{unit}} tokens', { unit: unitHint })}
+                    </span>
+                  </TableHead>
+                ) : null}
+                <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
+                  {t('Cache Read')}
+                  <span className='text-muted-foreground/50 ml-1 font-normal'>
+                    {t('/ {{unit}} tokens', { unit: unitHint })}
+                  </span>
+                </TableHead>
+                <TableHead className='text-muted-foreground h-11 px-3 text-center font-medium tracking-wide'>
+                  {t('Savings')}
+                </TableHead>
+              </>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((model, index) => {
+            if (isVideoTable) {
+              const capTag = getVideoModelCapabilityTag(model.model_name)
+              const resolutions = getModelSupportedResolutions(model)
+              return (
+                <TableRow
+                  key={model.model_name}
+                  onClick={() => props.onModelClick?.(model.model_name)}
+                  className={cn(
+                    'border-border/60 transition-colors',
+                    props.onModelClick && 'cursor-pointer hover:bg-muted/30',
+                    index % 2 === 1 ? 'bg-muted/40 dark:bg-muted/20' : 'bg-background'
+                  )}
+                >
+                  <TableCell className='px-4 py-3.5 align-middle'>
+                    <div className='flex flex-col gap-1'>
+                      <div className='flex items-center gap-1.5'>
+                        <span className='font-mono text-[15px] font-semibold tracking-tight text-foreground'>
+                          {model.model_name}
+                        </span>
+                        <span
+                          className='inline-flex'
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        >
+                          <CopyButton
+                            value={model.model_name}
+                            size='icon'
+                            variant='ghost'
+                            className='text-muted-foreground/55 hover:text-muted-foreground size-8 shrink-0'
+                            iconClassName='size-3.5'
+                          />
+                        </span>
+                      </div>
+                      {capTag && (
+                        <div>
+                          <Badge
+                            variant='outline'
+                            className={cn('text-[10px] px-1.5 py-0 border font-normal', capTag.className)}
+                          >
+                            {capTag.label}
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className='px-3 py-3.5 align-middle text-center'>
+                    <div className='flex flex-wrap items-center justify-center gap-1 max-w-[140px] mx-auto'>
+                      {resolutions.map((res) => {
+                        const style = getResolutionBadgeStyle(res)
+                        return (
+                          <Badge
+                            key={res}
+                            variant='outline'
+                            className={cn('text-[10px] px-1.5 py-0 font-medium', style.className)}
+                          >
+                            {style.label}
+                          </Badge>
+                        )
+                      })}
+                    </div>
+                  </TableCell>
+                  <TableCell className='px-4 py-3.5 align-middle'>
+                    {isVideoUpscaleModel(model) ? (
+                      <VideoUpscaleTableContent
+                        model={model}
+                        tokenUnit={tokenUnit}
+                        priceRate={priceRate}
+                        usdExchangeRate={usdExchangeRate}
+                        selectedGroup={selectedGroup}
+                        isGroupMode={isGroupMode}
+                        savings={savings}
+                      />
+                    ) : (
+                      <VideoGenerationTableContent
+                        model={model}
+                        tokenUnit={tokenUnit}
+                        priceRate={priceRate}
+                        usdExchangeRate={usdExchangeRate}
+                        selectedGroup={selectedGroup}
+                        isGroupMode={isGroupMode}
+                        savings={savings}
+                        t={t}
+                      />
+                    )}
+                  </TableCell>
+                  <TableCell className='px-3 py-3.5 align-middle text-center'>
+                    <SavingsPill savings={savings} />
+                  </TableCell>
+                </TableRow>
+              )
+            }
+
             if (isTimeTieredModel(model)) {
               // Off-peak prices (0.5x half price)
               const offPeakInputGroup = getModelUnitPrice(
@@ -541,6 +670,17 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           })}
         </TableBody>
       </Table>
+      {isVideoTable && (
+        <div className='bg-muted/30 border-t border-border/50 px-4 py-2.5 text-xs text-muted-foreground flex items-center gap-2'>
+          <span className='inline-block h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0' />
+          <span>
+            {t(
+              'Video billing note: Text/image-to-video uses standard rates; reference video uses reference rates; upscale uses seconds + tokens compound billing.',
+              '计费说明：文生视频与图生视频执行「无参考视频」费率；首尾帧与多镜头运镜执行「参考视频」费率；Upscale 按时长秒数 + Token 复合计费。'
+            )}
+          </span>
+        </div>
+      )}
     </div>
   )
 }
@@ -566,7 +706,114 @@ function ModelPriceCells(props: {
     t,
   } = props
 
+  if (isVideoUpscaleModel(model)) {
+    return (
+      <>
+        <TableCell colSpan={4} className='px-3 py-3.5'>
+          <VideoUpscaleTableContent
+            model={model}
+            tokenUnit={tokenUnit}
+            priceRate={priceRate}
+            usdExchangeRate={usdExchangeRate}
+            selectedGroup={selectedGroup}
+            isGroupMode={isGroupMode}
+            savings={savings}
+          />
+        </TableCell>
+        <TableCell className='px-3 py-3.5 text-center'>
+          <SavingsPill savings={savings} />
+        </TableCell>
+      </>
+    )
+  }
+
+  if (isByteDanceOrVideoModel(model)) {
+    const groups = getVideoModelTierGroups(model)
+    if (groups.length > 0) {
+      return (
+        <>
+          <TableCell colSpan={4} className='px-3 py-3.5'>
+            <VideoGenerationTableContent
+              model={model}
+              tokenUnit={tokenUnit}
+              priceRate={priceRate}
+              usdExchangeRate={usdExchangeRate}
+              selectedGroup={selectedGroup}
+              isGroupMode={isGroupMode}
+              savings={savings}
+              t={t}
+            />
+          </TableCell>
+          <TableCell className='px-3 py-3.5 text-center'>
+            <SavingsPill savings={savings} />
+          </TableCell>
+        </>
+      )
+    }
+  }
+
   if (isDynamicPricingModel(model)) {
+    const matrixLines = isByteDancePricingVendor(model.vendor_name)
+      ? getTaskMatrixTableLines(
+          model.billing_expr,
+          model.billing_usage_schema
+        )
+      : null
+    if (matrixLines && matrixLines.length > 0) {
+      const groupRatio = getDisplayGroupRatio(model, selectedGroup ?? undefined)
+      return (
+        <>
+          <TableCell colSpan={4} className='px-3 py-3.5'>
+            <div className='mx-auto flex w-full max-w-md flex-col gap-2'>
+              {matrixLines.map((line) => {
+                const groupPrice = formatTaskUsageUnitPrice(line.unitPrice, {
+                  tokenUnit,
+                  priceRate,
+                  usdExchangeRate,
+                  groupRatioMultiplier: groupRatio,
+                })
+                const officialPrice = formatTaskUsageUnitPrice(line.unitPrice, {
+                  tokenUnit,
+                  priceRate,
+                  usdExchangeRate,
+                  groupRatioMultiplier: 1,
+                })
+                const { primary, official } = resolvePrices(
+                  groupPrice,
+                  officialPrice,
+                  isGroupMode,
+                  Boolean(selectedGroup)
+                )
+                return (
+                  <div
+                    key={line.labelKey}
+                    className='flex items-center justify-between gap-4'
+                  >
+                    <span className='text-foreground text-sm font-medium'>
+                      {t(line.labelKey)}
+                    </span>
+                    <div className='flex items-center gap-1.5'>
+                      <DualPriceCell primary={primary} official={official} />
+                      <span className='text-muted-foreground shrink-0 text-xs'>
+                        / {t(getTaskUsagePriceUnitLabelKey(line.unit))}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+              <p className='text-muted-foreground text-left text-xs leading-snug'>
+                {t(
+                  'Text-to-video and image-to-video use the first price; a reference video uses the second.'
+                )}
+              </p>
+            </div>
+          </TableCell>
+          <TableCell className='px-3 py-3.5 text-center'>
+            <SavingsPill savings={savings} />
+          </TableCell>
+        </>
+      )
+    }
     if (model.model_name === 'gpt-image-2') {
       return (
         <>
@@ -811,6 +1058,161 @@ function ModelPriceCells(props: {
         <SavingsPill savings={savings} />
       </TableCell>
     </>
+  )
+}
+
+function VideoUpscaleTableContent(props: {
+  model: PricingModel
+  tokenUnit: TokenUnit
+  priceRate: number
+  usdExchangeRate: number
+  selectedGroup?: string
+  isGroupMode: boolean
+  savings?: number | null
+}) {
+  const tiers = parseVideoUpscaleTiers(props.model.billing_expr)
+  const rawRatio = getDisplayGroupRatio(props.model, props.selectedGroup ?? undefined)
+  const effectiveRatio =
+    props.isGroupMode && props.savings != null && rawRatio === 1
+      ? (100 - props.savings) / 100
+      : rawRatio
+
+  return (
+    <div className='mx-auto flex w-full max-w-lg flex-col gap-2'>
+      <div className='grid grid-cols-1 gap-2 sm:grid-cols-3'>
+        {tiers.map((tier) => {
+          const mult = props.isGroupMode ? effectiveRatio : 1
+          const secondPrice = (tier.secondPrice * mult * props.priceRate).toFixed(4)
+          const officialSecond = (tier.secondPrice * props.priceRate).toFixed(4)
+          const tokenPrice = (tier.tokenPricePerM * mult * props.priceRate).toFixed(2)
+          const est5s = (
+            (tier.secondPrice * 5 + (tier.tokenPricePerM * 1000) / 1_000_000) *
+            mult *
+            props.priceRate
+          ).toFixed(2)
+          const showOfficial = props.isGroupMode && props.savings != null
+
+          return (
+            <div
+              key={tier.tierKey}
+              className='bg-muted/20 flex flex-col items-center justify-between rounded-lg border border-border/50 p-2.5 text-center'
+            >
+              <div className='flex flex-col items-center gap-1'>
+                <Badge variant='outline' className='px-1.5 py-0 text-[10px] font-medium'>
+                  {tier.displayName}
+                </Badge>
+                <div className='flex flex-col items-center'>
+                  <span className='font-mono text-sm font-semibold text-foreground'>
+                    ${secondPrice} / 秒
+                  </span>
+                  {showOfficial && (
+                    <span className='text-muted-foreground/60 text-[11px] font-mono line-through'>
+                      ${officialSecond}
+                    </span>
+                  )}
+                </div>
+                <span className='text-muted-foreground text-[10px] font-mono'>
+                  + ${tokenPrice} / 1M tok
+                </span>
+              </div>
+              <div className='mt-1.5 border-t border-border/40 pt-1 text-[10px] text-muted-foreground'>
+                5s 预估 ≈ ${est5s}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function VideoGenerationTableContent(props: {
+  model: PricingModel
+  tokenUnit: TokenUnit
+  priceRate: number
+  usdExchangeRate: number
+  selectedGroup?: string
+  isGroupMode: boolean
+  savings?: number | null
+  t: (key: string) => string
+}) {
+  const groups = getVideoModelTierGroups(props.model)
+  const rawRatio = getDisplayGroupRatio(props.model, props.selectedGroup ?? undefined)
+  const effectiveRatio =
+    props.isGroupMode && props.savings != null && rawRatio === 1
+      ? (100 - props.savings) / 100
+      : rawRatio
+
+  if (groups.length === 0) return null
+
+  const formatTokens = (val: number, multiplier: number) => {
+    return formatTaskUsageUnitPrice(val, {
+      tokenUnit: props.tokenUnit,
+      priceRate: props.priceRate,
+      usdExchangeRate: props.usdExchangeRate,
+      groupRatioMultiplier: multiplier,
+    })
+  }
+
+  return (
+    <div className='mx-auto flex w-full max-w-lg flex-col gap-2'>
+      <div
+        className={cn(
+          'grid gap-2',
+          groups.length > 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'
+        )}
+      >
+        {groups.map((group) => {
+          const noneGroup = formatTokens(group.withoutVideoPrice, effectiveRatio)
+          const noneOfficial = formatTokens(group.withoutVideoPrice, 1)
+          const { primary: nonePrimary, official: noneOff } = resolvePrices(
+            noneGroup,
+            noneOfficial,
+            props.isGroupMode,
+            Boolean(props.selectedGroup)
+          )
+
+          const videoGroup = formatTokens(group.withVideoPrice, effectiveRatio)
+          const videoOfficial = formatTokens(group.withVideoPrice, 1)
+          const { primary: videoPrimary, official: videoOff } = resolvePrices(
+            videoGroup,
+            videoOfficial,
+            props.isGroupMode,
+            Boolean(props.selectedGroup)
+          )
+
+          return (
+            <div
+              key={group.title}
+              className='bg-muted/20 flex flex-col justify-between rounded-lg border border-border/50 p-2.5 text-left'
+            >
+              <div className='mb-2 flex items-center justify-between border-b border-border/40 pb-1.5'>
+                <span className='text-foreground text-xs font-semibold'>
+                  {group.title}
+                </span>
+                <span className='text-muted-foreground/60 text-[10px] uppercase'>
+                  / 1M Tokens
+                </span>
+              </div>
+              <div className='space-y-1.5 text-xs'>
+                <div className='flex items-center justify-between gap-2'>
+                  <span className='text-muted-foreground font-medium'>
+                    无视频输入:
+                  </span>
+                  <DualPriceCell primary={nonePrimary} official={noneOff} />
+                </div>
+                <div className='flex items-center justify-between gap-2'>
+                  <span className='text-muted-foreground font-medium'>
+                    有视频输入:
+                  </span>
+                  <DualPriceCell primary={videoPrimary} official={videoOff} />
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 

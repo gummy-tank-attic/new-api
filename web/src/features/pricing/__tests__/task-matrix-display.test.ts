@@ -20,7 +20,15 @@ import assert from 'node:assert/strict'
 import { describe, test } from 'vitest'
 
 import { getDynamicPriceEntries } from '../lib/dynamic-price'
-import { getTaskMatrixDisplayTiers } from '../lib/task-matrix-display'
+import {
+  getTaskMatrixDisplayTiers,
+  getTaskMatrixTableLines,
+} from '../lib/task-matrix-display'
+import {
+  generateTaskExprFromConfig,
+  getTaskEnumCombinations,
+  taskMatrixToTiers,
+} from '../lib/task-expr'
 import type { BillingUsageSchema } from '../types'
 
 const resolutionSchema: BillingUsageSchema = {
@@ -165,5 +173,71 @@ describe('task matrix marketplace display rows', () => {
     assert.match(doubledEntries[0]?.formatted ?? '', /0[.,]8/)
     assert.equal(baseEntries.at(-1)?.value, 0.1)
     assert.match(doubledEntries.at(-1)?.formatted ?? '', /0[.,]2/)
+  })
+})
+
+const seedanceSchema: BillingUsageSchema = {
+  tokens: { type: 'number', unit: 'token' },
+  resolution: { enum: ['480p', '720p', '1080p', '4k'] },
+  video_input: { enum: ['none', 'video'] },
+}
+
+describe('task matrix public table lines', () => {
+  test('collapses a uniform Seedance token matrix into text/image vs video lines', () => {
+    const rows = getTaskEnumCombinations(seedanceSchema).map((combination) => ({
+      combination,
+      constant: 0,
+      unitPrices: {
+        tokens: combination.video_input === 'video' ? 4.1056 : 6.7449,
+      },
+    }))
+    const expression = generateTaskExprFromConfig(
+      { tiers: taskMatrixToTiers({ rows }, seedanceSchema) },
+      seedanceSchema
+    )
+
+    assert.deepEqual(getTaskMatrixTableLines(expression, seedanceSchema), [
+      {
+        labelKey: 'Without video input',
+        unitPrice: 6.7449,
+        unit: 'token',
+      },
+      {
+        labelKey: 'With video input',
+        unitPrice: 4.1056,
+        unit: 'token',
+      },
+    ])
+  })
+
+  test('returns null when video_input prices also vary by resolution', () => {
+    const rows = getTaskEnumCombinations(seedanceSchema).map((combination) => ({
+      combination,
+      constant: 0,
+      unitPrices: {
+        tokens:
+          combination.video_input === 'video'
+            ? 4.3
+            : combination.resolution === '1080p'
+              ? 7.7
+              : 7,
+      },
+    }))
+    const expression = generateTaskExprFromConfig(
+      { tiers: taskMatrixToTiers({ rows }, seedanceSchema) },
+      seedanceSchema
+    )
+
+    assert.equal(getTaskMatrixTableLines(expression, seedanceSchema), null)
+  })
+
+  test('returns null without a video_input dimension', () => {
+    assert.equal(
+      getTaskMatrixTableLines(
+        'tier("base", u("seconds") * 0.4)',
+        resolutionSchema
+      ),
+      null
+    )
   })
 })

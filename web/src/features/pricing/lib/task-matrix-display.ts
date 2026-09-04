@@ -16,10 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { BillingUsageSchema } from '../types'
+import type { BillingUsageSchema, BillingUsageUnit } from '../types'
 import type { ParsedTaskTier } from './billing-expr'
 import {
   getTaskEnumFields,
+  getTaskNumberFields,
   taskMatrixRowLabel,
   tryParseTaskMatrixConfig,
 } from './task-expr'
@@ -48,4 +49,79 @@ export function getTaskMatrixDisplayTiers(
     constant: row.constant,
     unitPrices: { ...row.unitPrices },
   }))
+}
+
+const PRICE_SNAP = 1e-9
+
+export const TASK_VIDEO_INPUT_TABLE_LABEL_KEYS: Record<string, string> = {
+  none: 'Without video input',
+  video: 'With video input',
+}
+
+export type TaskMatrixTableLine = {
+  labelKey: string
+  unitPrice: number
+  unit: BillingUsageUnit
+}
+
+function conditionValue(
+  tier: ParsedTaskTier,
+  field: string
+): string | undefined {
+  return tier.conditions.find((condition) => condition.field === field)?.value
+}
+
+function pricesMatch(values: number[]): boolean {
+  if (values.length === 0) return false
+  const first = values[0]
+  return values.every((value) => Math.abs(value - first) <= PRICE_SNAP)
+}
+
+function primaryNumberField(
+  schema: BillingUsageSchema
+): [string, BillingUsageUnit] | null {
+  const fields = getTaskNumberFields(schema)
+  const tokens = fields.find(([field]) => field === 'tokens')
+  const picked = tokens ?? fields[0]
+  if (!picked) return null
+  const unit = picked[1].unit
+  if (!unit) return null
+  return [picked[0], unit]
+}
+
+/**
+ * Collapse a Seedance-style token matrix for the public price table: when
+ * unit price only depends on video_input, emit one line per mode so users
+ * do not have to open the model drawer.
+ */
+export function getTaskMatrixTableLines(
+  expression: string | null | undefined,
+  schema: BillingUsageSchema | null | undefined
+): TaskMatrixTableLine[] | null {
+  if (!schema) return null
+  const primary = primaryNumberField(schema)
+  if (!primary) return null
+  const [priceField, unit] = primary
+
+  const tiers = getTaskMatrixDisplayTiers(expression, schema)
+  if (!tiers?.length) return null
+
+  const videoInput = schema.video_input?.enum
+  if (videoInput?.length) {
+    const lines: TaskMatrixTableLine[] = []
+    for (const value of videoInput) {
+      const prices = tiers
+        .filter((tier) => conditionValue(tier, 'video_input') === value)
+        .map((tier) => Number(tier.unitPrices[priceField]) || 0)
+      if (!pricesMatch(prices)) return null
+      lines.push({
+        labelKey: TASK_VIDEO_INPUT_TABLE_LABEL_KEYS[value] ?? value,
+        unitPrice: prices[0],
+        unit,
+      })
+    }
+    return lines
+  }
+
+  return null
 }

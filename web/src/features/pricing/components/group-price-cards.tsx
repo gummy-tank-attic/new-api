@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils'
 
 import {
   lookupGroupMapValue,
+  MANUAL_GROUP_OFF_LABEL,
   MANUAL_GROUP_SAVINGS_OFF,
   MANUAL_GROUP_ZHE,
 } from '../constants'
@@ -76,8 +77,11 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
           ratio,
           lookupGroupMapValue(MANUAL_GROUP_SAVINGS_OFF, group)
         )
-        // Fixed English copy — never i18n: "85% off"
-        const offLabel = savingsOff != null ? `${savingsOff}%\u00A0off` : null
+        const manualLabel = lookupGroupMapValue(MANUAL_GROUP_OFF_LABEL, group)
+        // Fixed English copy — never i18n: "up to 50% off" or "85% off"
+        const offLabel =
+          manualLabel ??
+          (savingsOff != null ? `${savingsOff}%\u00A0off` : null)
 
         return (
           <button

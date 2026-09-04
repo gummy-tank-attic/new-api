@@ -143,6 +143,29 @@ export const VENDOR_TAB_ORDER = [
   'MiniMax',
 ] as const
 
+/** Public Seedance video-input table (Without / With video input) is ByteDance only. */
+const BYTEDANCE_VENDOR_KEYS = new Set([
+  'bytedance',
+  'byte dance',
+  '字节跳动',
+  '字节',
+  '火山',
+  '火山引擎',
+  'volcengine',
+  'seedance',
+])
+
+export function isByteDancePricingVendor(name: string | undefined): boolean {
+  const trimmed = (name || '').trim().toLowerCase()
+  if (!trimmed) return false
+  const compact = trimmed.replace(/\s+/g, '')
+  return (
+    BYTEDANCE_VENDOR_KEYS.has(trimmed) ||
+    BYTEDANCE_VENDOR_KEYS.has(compact) ||
+    compact.includes('bytedance')
+  )
+}
+
 /** Aliases → canonical key used in VENDOR_TAB_ORDER matching */
 export const VENDOR_NAME_ALIASES: Record<string, string> = {
   anthropic: 'Anthropic',
@@ -245,6 +268,13 @@ export const MODEL_DISPLAY_ORDER = [
   'minimax-m3',
   'minimax-m2.7',
   'minimax-m2.5',
+  // —— ByteDance / Seedance ——
+  'seedance2.5',
+  'Seedance 2.0',
+  'Seedance2.0-4k',
+  'seedance2.0-fast',
+  'seedance2.0-mini',
+  'seedance-2.5-upscale',
 ] as const
 
 /** Rank for pricing table rows (lower first). Unlisted models share the last bucket. */
@@ -380,6 +410,13 @@ export const MANUAL_GROUP_ZHE: Record<string, number> = {
  * 仅在「分组价格」模式显示；「官方价格」模式始终留空。
  */
 export const MANUAL_GROUP_SAVINGS_OFF: Record<string, number> = {
-  // 默认留空：全部自动换算。需要固定文案时再写，例如：
-  // 'Claude lite（Sale）': 85,
+  // 对标上游 tokease 9折 (10% off)
+  Seedance: 10,
+}
+
+/**
+ * 自定义分组展示文案（如 "up to 50% off"）
+ */
+export const MANUAL_GROUP_OFF_LABEL: Record<string, string> = {
+  Seedance: 'up to 50%\u00A0off',
 }
