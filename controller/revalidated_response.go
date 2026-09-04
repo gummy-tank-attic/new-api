@@ -52,3 +52,40 @@ func serveRevalidatedJSON(c *gin.Context, content string) {
 
 	c.Data(http.StatusOK, "application/json; charset=utf-8", body)
 }
+
+type homePageContentResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Data    string `json:"data"`
+	Hash    string `json:"hash"`
+}
+
+func serveRevalidatedHomePageJSON(c *gin.Context, content string) {
+	body, err := common.Marshal(homePageContentResponse{
+		Success: true,
+		Message: "",
+		Data:    content,
+		Hash:    homePageContentHash(content),
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	etag := common.ETagFor(etagVersionPublicContent, content)
+
+	c.Header("ETag", etag)
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Vary", "Accept-Encoding")
+
+	if common.ETagMatches(c.GetHeader("If-None-Match"), etag) {
+		c.Status(http.StatusNotModified)
+		return
+	}
+
+	c.Data(http.StatusOK, "application/json; charset=utf-8", body)
+}
+
