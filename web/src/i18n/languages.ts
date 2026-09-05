@@ -32,22 +32,42 @@ export type InterfaceLanguageCode =
 export function normalizeInterfaceLanguage(value?: string | null): string {
   if (!value) return 'en'
 
-  let normalized = value.trim().replaceAll('_', '-').toLowerCase()
+  const trimmed = value.trim()
+  const exact = INTERFACE_LANGUAGE_OPTIONS.find((lang) => lang.code === trimmed)
+  if (exact) return exact.code
+
+  const lower = trimmed.replaceAll('_', '-').toLowerCase()
   if (
-    value === 'zh-TW' ||
-    value === 'zh-HK' ||
-    value === 'zh-MO' ||
-    value === 'zhTW'
+    lower === 'zh-tw' ||
+    lower === 'zh-hk' ||
+    lower === 'zh-mo' ||
+    lower === 'zhtw' ||
+    lower.startsWith('zh-hant')
   ) {
-    normalized = 'zhTW'
+    return 'zhTW'
   }
-  if (value === 'zh-CN' || value === 'zh-Hans' || value === 'zhCN') {
-    normalized = 'zhCN'
+  if (
+    lower === 'zh-cn' ||
+    lower === 'zh-sg' ||
+    lower === 'zh-hans' ||
+    lower === 'zhcn' ||
+    lower === 'zh'
+  ) {
+    return 'zhCN'
   }
 
-  return INTERFACE_LANGUAGE_OPTIONS.some((lang) => lang.code === normalized)
-    ? normalized
-    : 'en'
+  const matched = INTERFACE_LANGUAGE_OPTIONS.find(
+    (lang) => lang.code.toLowerCase() === lower
+  )
+  if (matched) return matched.code
+
+  const base = lower.split('-')[0]
+  const baseMatched = INTERFACE_LANGUAGE_OPTIONS.find(
+    (lang) => lang.code.toLowerCase() === base
+  )
+  if (baseMatched) return baseMatched.code
+
+  return 'en'
 }
 
 /**
@@ -61,12 +81,17 @@ export function normalizeInterfaceLanguage(value?: string | null): string {
  * matching still applies (e.g. `fr-FR` -> `fr`, `ja` -> `ja`).
  */
 export function convertDetectedLanguage(value: string): string {
-  const lower = value.trim().replaceAll('_', '-').toLowerCase()
+  const trimmed = value.trim()
+  if (trimmed === 'zhTW') return 'zhTW'
+  if (trimmed === 'zhCN') return 'zhCN'
+
+  const lower = trimmed.replaceAll('_', '-').toLowerCase()
   if (!lower.startsWith('zh')) return value
   if (
     lower === 'zh-tw' ||
     lower === 'zh-hk' ||
     lower === 'zh-mo' ||
+    lower === 'zhtw' ||
     lower.startsWith('zh-hant')
   ) {
     return 'zhTW'

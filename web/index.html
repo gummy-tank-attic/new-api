@@ -41,8 +41,10 @@
           vi: 'vi',
         }
         function convert(raw) {
-          var lower = String(raw || '')
-            .trim()
+          var str = String(raw || '').trim()
+          if (str === 'zhTW') return 'zhTW'
+          if (str === 'zhCN') return 'zhCN'
+          var lower = str
             .replace(/_/g, '-')
             .toLowerCase()
           if (lower.indexOf('zh') !== 0) return raw
@@ -50,6 +52,7 @@
             lower === 'zh-tw' ||
             lower === 'zh-hk' ||
             lower === 'zh-mo' ||
+            lower === 'zhtw' ||
             lower.indexOf('zh-hant') === 0
           ) {
             return 'zhTW'
@@ -59,9 +62,9 @@
         function resolve(raw) {
           if (!raw) return 'en'
           var trimmed = String(raw).trim()
+          if (FILES[trimmed]) return trimmed
           var converted = convert(trimmed)
           if (FILES[converted]) return converted
-          if (FILES[trimmed]) return trimmed
           var lower = String(converted)
             .replace(/_/g, '-')
             .toLowerCase()

@@ -88,13 +88,14 @@ export function resolveInterfaceLanguage(
 ): InterfaceLanguageCode {
   if (!raw) return 'en'
   const trimmed = raw.trim()
-  const converted = convertDetectedLanguage(trimmed)
-  if (isSupportedLang(converted)) return converted
   if (isSupportedLang(trimmed)) return trimmed
 
-  const lower = converted.replaceAll('_', '-').toLowerCase()
+  const converted = convertDetectedLanguage(trimmed)
+  if (isSupportedLang(converted)) return converted
+
+  const lower = trimmed.replaceAll('_', '-').toLowerCase()
   if (lower.startsWith('zh')) {
-    return convertDetectedLanguage(converted) === 'zhTW' ? 'zhTW' : 'zhCN'
+    return convertDetectedLanguage(trimmed) === 'zhTW' ? 'zhTW' : 'zhCN'
   }
   const base = lower.split('-')[0]
   if (isSupportedLang(base)) return base

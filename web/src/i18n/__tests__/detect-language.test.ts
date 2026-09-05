@@ -22,7 +22,10 @@ import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 
-import { convertDetectedLanguage } from '../languages.ts'
+import {
+  convertDetectedLanguage,
+  normalizeInterfaceLanguage,
+} from '../languages.ts'
 
 const localesDir = join(dirname(fileURLToPath(import.meta.url)), '../locales')
 
@@ -30,10 +33,19 @@ test('maps browser Chinese tags the same way the HTML boot script does', () => {
   assert.equal(convertDetectedLanguage('zh-CN'), 'zhCN')
   assert.equal(convertDetectedLanguage('zh'), 'zhCN')
   assert.equal(convertDetectedLanguage('zh-TW'), 'zhTW')
+  assert.equal(convertDetectedLanguage('zh-tw'), 'zhTW')
+  assert.equal(convertDetectedLanguage('zhTW'), 'zhTW')
   assert.equal(convertDetectedLanguage('zh-HK'), 'zhTW')
   assert.equal(convertDetectedLanguage('zh-Hant'), 'zhTW')
   assert.equal(convertDetectedLanguage('fr-FR'), 'fr-FR')
   assert.equal(convertDetectedLanguage('en-US'), 'en-US')
+
+  assert.equal(normalizeInterfaceLanguage('zhTW'), 'zhTW')
+  assert.equal(normalizeInterfaceLanguage('zh-tw'), 'zhTW')
+  assert.equal(normalizeInterfaceLanguage('zh_TW'), 'zhTW')
+  assert.equal(normalizeInterfaceLanguage('zh-TW'), 'zhTW')
+  assert.equal(normalizeInterfaceLanguage('zhCN'), 'zhCN')
+  assert.equal(normalizeInterfaceLanguage('zh-CN'), 'zhCN')
 })
 
 test('stable public locale files exist for every shipped language', () => {
