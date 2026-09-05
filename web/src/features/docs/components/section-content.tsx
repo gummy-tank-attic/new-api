@@ -209,7 +209,9 @@ print(response.choices[0].message.content)`}
       </Callout>
 
       <div className='space-y-3'>
-        <h2 className='text-lg font-bold'>{t('If it fails, check these 5 first')}</h2>
+        <h2 className='text-lg font-bold'>
+          {t('If it fails, check these 5 first')}
+        </h2>
         <StepList
           steps={[
             t(
@@ -762,9 +764,7 @@ console.log("Image URL:", response.data[0].url);`}
       </div>
 
       <div className='space-y-4'>
-        <h2 className='text-xl font-bold'>
-          {t('Video generation')}
-        </h2>
+        <h2 className='text-xl font-bold'>{t('Video generation')}</h2>
         <p className='text-muted-foreground text-sm leading-relaxed'>
           {t(
             'Some video models accept POST on the same /v1/images/generations path with duration and resolution. Use the live video model ID from Model Square.'
@@ -804,16 +804,18 @@ console.log("Image URL:", response.data[0].url);`}
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>model</td>
                 <td className='text-muted-foreground px-4 py-3 text-xs'>
-                  string (required)
+                  {t('string (required)')}
                 </td>
                 <td className='px-4 py-3 text-xs'>
-                  {t('Exact model ID from Model Square (placeholder in examples)')}
+                  {t(
+                    'Exact model ID from Model Square (placeholder in examples)'
+                  )}
                 </td>
               </tr>
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>prompt</td>
                 <td className='text-muted-foreground px-4 py-3 text-xs'>
-                  string (required)
+                  {t('string (required)')}
                 </td>
                 <td className='px-4 py-3 text-xs'>
                   {t('Text description of the desired image or video')}
@@ -822,7 +824,7 @@ console.log("Image URL:", response.data[0].url);`}
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>size</td>
                 <td className='text-muted-foreground px-4 py-3 text-xs'>
-                  string (optional)
+                  {t('string (optional)')}
                 </td>
                 <td className='px-4 py-3 text-xs'>
                   {t(
@@ -833,7 +835,7 @@ console.log("Image URL:", response.data[0].url);`}
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>duration</td>
                 <td className='text-muted-foreground px-4 py-3 text-xs'>
-                  integer (video)
+                  {t('integer (video)')}
                 </td>
                 <td className='px-4 py-3 text-xs'>
                   {t('Video duration in seconds (model-dependent)')}
@@ -842,7 +844,7 @@ console.log("Image URL:", response.data[0].url);`}
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>resolution</td>
                 <td className='text-muted-foreground px-4 py-3 text-xs'>
-                  string (video)
+                  {t('string (video)')}
                 </td>
                 <td className='px-4 py-3 text-xs'>
                   {t('Video resolution (model-dependent; example: 480p)')}
@@ -851,7 +853,7 @@ console.log("Image URL:", response.data[0].url);`}
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>aspect_ratio</td>
                 <td className='text-muted-foreground px-4 py-3 text-xs'>
-                  string (video)
+                  {t('string (video)')}
                 </td>
                 <td className='px-4 py-3 text-xs'>
                   {t('Aspect ratio (model-dependent; example: 16:9)')}
@@ -860,7 +862,7 @@ console.log("Image URL:", response.data[0].url);`}
               <tr>
                 <td className='px-4 py-3 font-mono text-xs'>n</td>
                 <td className='text-muted-foreground px-4 py-3 text-xs'>
-                  integer (optional)
+                  {t('integer (optional)')}
                 </td>
                 <td className='px-4 py-3 text-xs'>
                   {t('Number of images to generate (default 1)')}
@@ -887,9 +889,7 @@ function ClaudeCodeSection() {
     <div className='space-y-8'>
       <SectionTitle
         title={t('Claude Code')}
-        description={t(
-          'Point Anthropic CLI environment variables at MetaRtr.'
-        )}
+        description={t('Point Anthropic CLI environment variables at MetaRtr.')}
       />
 
       <StepList
@@ -1289,7 +1289,7 @@ function TroubleshootingSection() {
             </a>
           </p>
           <p>
-            Telegram Support：
+            {t('Telegram Support')}:{' '}
             <a
               className='text-primary font-medium hover:underline'
               href='https://t.me/MetaRtrSupport_bot'
@@ -1300,7 +1300,7 @@ function TroubleshootingSection() {
             </a>
           </p>
           <p>
-            Telegram Channel：
+            {t('Telegram Channel')}:{' '}
             <a
               className='text-primary font-medium hover:underline'
               href='https://t.me/MetaRtr'
