@@ -14,7 +14,7 @@ Before merging or deploying an upstream update, preserve and regression-check:
   - client-side SWR caching in `home-content-cache.ts` (`localStorage` fast-boot + hash invalidation);
   - upstream New API/One API changes to root `/` or home routes must NEVER overwrite `web/src/features/home/`; merge conflicts must unconditionally keep MetaRtr (`ours`);
   - database `options.HomePageContent` is maintained empty so that dynamic client rendering is 100% driven by MetaRtr React code;
-- pricing page grouping, ordering, presentation, group descriptions, and i18n;
+- pricing page grouping, ordering (including `VENDOR_MODEL_DISPLAY_ORDER` in `constants.ts` and intelligent version self-adaptation `getModelEffectiveScore` in `model-helpers.ts`), presentation, group descriptions, and i18n;
 - custom pricing consumers of `getDynamicPricingTiers` must narrow
   `DynamicPricingTier` before reading token-price fields (for example,
   `'inputPrice' in tier` or a shared type guard), because task tiers expose a

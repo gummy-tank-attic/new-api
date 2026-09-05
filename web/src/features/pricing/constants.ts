@@ -200,82 +200,106 @@ export function getVendorTabRank(name: string): number {
 }
 
 /**
- * 模型行固定顺序（产品规定 · 长期有效）。
- * 与后台 model_name / GET /api/pricing 完全一致（大小写不敏感匹配）。
- * 完整对照表：docs/PRICING_PAGE_DESIGN.md §2.4
- * 未列入：排在已列入之后，再按 model_name 降序（numeric，版本号大的在上）。
- * 跨供应商仍先按 VENDOR_TAB_ORDER。
- * 改序/增模型：只改本数组 + 同步设计文档；禁止在组件写死。
+ * 解析并获取标准供应商名（不区分大小写与常见别名）。
  */
-export const MODEL_DISPLAY_ORDER = [
+export function getCanonicalVendorName(vendorName?: string): string {
+  const trimmed = (vendorName || '').trim()
+  if (!trimmed) return ''
+  if (isByteDancePricingVendor(trimmed)) return 'ByteDance'
+  const lower = trimmed.toLowerCase()
+  const compact = lower.replaceAll(/\s+/g, '')
+  return (
+    VENDOR_NAME_ALIASES[lower] ||
+    VENDOR_NAME_ALIASES[compact] ||
+    (compact === '智谱' || compact === '智谱ai' ? 'ZHIPU' : trimmed)
+  )
+}
+
+/**
+ * 供应商核心模型基准顺序表（产品规定 · 长期有效）。
+ * 未列入的新模型将根据自然版本号智能自适应插槽（高版本如 gpt-6.5、gpt-7 自动排在最顶部）。
+ * 完整对照表：docs/PRICING_PAGE_DESIGN.md §2.4
+ */
+export const VENDOR_MODEL_DISPLAY_ORDER: Record<string, readonly string[]> = {
   // —— Anthropic ——
-  'claude-fable-5-1',
-  'claude-fable-5',
-  'claude-opus-5',
-  'claude-opus-4-8',
-  'claude-opus-4-7',
-  'claude-opus-4-6',
-  'claude-opus-4-5-20251101',
-  'claude-sonnet-5',
-  'claude-sonnet-4-6',
-  'claude-haiku-4-5',
+  Anthropic: [
+    'claude-fable-5-1',
+    'claude-fable-5',
+    'claude-opus-5',
+    'claude-opus-4-8',
+    'claude-opus-4-7',
+    'claude-opus-4-6',
+    'claude-opus-4-5-20251101',
+    'claude-sonnet-5',
+    'claude-sonnet-4-6',
+    'claude-haiku-4-5',
+  ],
   // —— OpenAI ——
-  'gpt-5.6-sol',
-  'gpt-5.6-terra',
-  'gpt-5.6-luna',
-  'gpt-5.5',
-  'gpt-5.4',
-  'gpt-5.3-codex-spark',
-  'gpt-image-2',
+  OpenAI: [
+    'gpt-6-astra',
+    'gpt-5.6-sol',
+    'gpt-5.6-terra',
+    'gpt-5.6-luna',
+    'gpt-5.5',
+    'gpt-5.4',
+    'gpt-5.3-codex-spark',
+    'gpt-image-2',
+  ],
   // —— xAI / Grok：主推 → 4.x 系列 → build → imagine ——
-  'grok-4.6',
-  'grok-4.5',
-  'grok-4.3',
-  'grok-4.20-multi-agent-0309',
-  'grok-4.20-0309-reasoning',
-  'grok-4.20-0309-non-reasoning',
-  'grok-build-0.1',
-  'grok-imagine-image-quality',
-  'grok-imagine-image',
-  'grok-imagine-video',
+  xAI: [
+    'grok-4.6',
+    'grok-4.5',
+    'grok-4.3',
+    'grok-4.20-multi-agent-0309',
+    'grok-4.20-0309-reasoning',
+    'grok-4.20-0309-non-reasoning',
+    'grok-build-0.1',
+    'grok-imagine-image-quality',
+    'grok-imagine-image',
+    'grok-imagine-video',
+  ],
   // —— Google / Gemini：版本号大的在上 ——
-  'gemini-3.8-flash',
-  'gemini-3.7-flash',
-  'gemini-3.6-flash',
-  'gemini-3.5-flash',
-  'gemini-3.1-pro-preview',
-  'gemini-3.1-pro',
-  'gemini-3.1-flash-lite-preview',
-  'gemini-3.1-flash-lite',
-  'gemini-3-pro-preview',
-  'gemini-3-flash-preview',
-  'gemini-3-flash',
-  'gemini-2.5-pro',
-  'gemini-2.5-flash-lite',
-  'gemini-2.5-flash',
+  Google: [
+    'gemini-3.8-flash',
+    'gemini-3.7-flash',
+    'gemini-3.6-flash',
+    'gemini-3.5-flash',
+    'gemini-3.1-pro-preview',
+    'gemini-3.1-pro',
+    'gemini-3.1-flash-lite-preview',
+    'gemini-3.1-flash-lite',
+    'gemini-3-pro-preview',
+    'gemini-3-flash-preview',
+    'gemini-3-flash',
+    'gemini-2.5-pro',
+    'gemini-2.5-flash-lite',
+    'gemini-2.5-flash',
+  ],
   // —— DeepSeek ——
-  'deepseek-v4-pro',
-  'deepseek-v4-flash',
+  DeepSeek: ['deepseek-v4-pro', 'deepseek-v4-flash'],
   // —— 智谱 ——
-  'glm-5.3',
-  'glm-5.2',
-  'glm-5.1',
+  ZHIPU: ['glm-5.3', 'glm-5.2', 'glm-5.1'],
   // —— Moonshot / Kimi ——
-  'kimi-k3',
-  'kimi-k2.7-code',
-  'kimi-k2.6',
+  Moonshot: ['kimi-k3', 'kimi-k2.7-code', 'kimi-k2.6'],
   // —— MiniMax ——
-  'minimax-m3',
-  'minimax-m2.7',
-  'minimax-m2.5',
+  MiniMax: ['minimax-m3', 'minimax-m2.7', 'minimax-m2.5'],
   // —— ByteDance / Seedance ——
-  'seedance2.5',
-  'Seedance 2.0',
-  'Seedance2.0-4k',
-  'seedance2.0-fast',
-  'seedance2.0-mini',
-  'seedance-2.5-upscale',
-] as const
+  ByteDance: [
+    'seedance2.5',
+    'Seedance 2.0',
+    'Seedance2.0-4k',
+    'seedance2.0-fast',
+    'seedance2.0-mini',
+    'seedance-2.5-upscale',
+  ],
+}
+
+/**
+ * 扁平化全量模型基准顺序（完全向后兼容）。
+ */
+export const MODEL_DISPLAY_ORDER: readonly string[] = Object.values(
+  VENDOR_MODEL_DISPLAY_ORDER
+).flat()
 
 /** Rank for pricing table rows (lower first). Unlisted models share the last bucket. */
 export function getModelDisplayRank(modelName: string): number {

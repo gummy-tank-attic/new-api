@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { ArrowUpRight } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -146,18 +145,18 @@ function PriceColumn(props: {
   return (
     <div className={cn('flex flex-col items-center justify-center text-center py-1', props.className)}>
       <div className='flex items-baseline justify-center gap-1'>
-        <span className='font-bold text-foreground text-[15px] sm:text-[16px] tabular-nums tracking-tight'>
+        <span className='font-semibold text-foreground text-[15px] sm:text-[16px] tabular-nums tracking-tight'>
           {stripTrailingZeros(props.primary)}
         </span>
         {props.unit && (
-          <span className='text-[10.5px] text-muted-foreground/60 font-normal'>
+          <span className='text-[11px] text-muted-foreground/75 font-normal'>
             {props.unit}
           </span>
         )}
       </div>
       {props.official && !isEmptyPrice(props.official) && (
-        <span className='text-[11px] text-muted-foreground/50 line-through tabular-nums font-normal mt-0.5'>
-          原价 {stripTrailingZeros(props.official)}
+        <span className='text-[12px] text-muted-foreground/75 line-through decoration-muted-foreground/40 tabular-nums font-medium mt-0.5'>
+          {stripTrailingZeros(props.official)}
         </span>
       )}
     </div>
@@ -167,7 +166,7 @@ function PriceColumn(props: {
 function SavingsBadge({ savings }: { savings: number | null }) {
   if (savings == null) return null
   return (
-    <span className='inline-flex items-center justify-center rounded-full bg-[#f43f5e] px-2.5 py-0.5 text-[11px] font-bold text-white shadow-xs tracking-tight whitespace-nowrap tabular-nums leading-normal'>
+    <span className='inline-flex items-center justify-center rounded-full bg-gradient-to-r from-rose-500 to-red-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-2xs tracking-tight whitespace-nowrap tabular-nums leading-normal ring-1 ring-rose-500/20'>
       {savings}% OFF
     </span>
   )
@@ -197,7 +196,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
   return (
     <div className={cn('w-full space-y-3', props.className)}>
       {/* 1. Refined Column Legend Header */}
-      <div className='hidden md:grid grid-cols-12 items-center px-6 py-2.5 text-xs font-semibold text-muted-foreground/75 uppercase tracking-wider border-b border-border/40'>
+      <div className='hidden md:grid grid-cols-12 items-center gap-4 px-5 py-2.5 text-xs font-medium text-muted-foreground border-b border-border/40'>
         <div className='col-span-4'>{t('Model', '模型名称')}</div>
         {isVideoTable ? (
           <div className='col-span-6 text-center'>
@@ -207,13 +206,13 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           <>
             <div className='col-span-2 text-center'>
               {t('Input price')}
-              <span className='text-[10px] font-normal lowercase font-mono ml-1'>
+              <span className='text-[10.5px] font-normal lowercase font-mono ml-1 text-muted-foreground/70'>
                 / {unitHint}
               </span>
             </div>
             <div className='col-span-2 text-center'>
               {t('Output price')}
-              <span className='text-[10px] font-normal lowercase font-mono ml-1'>
+              <span className='text-[10.5px] font-normal lowercase font-mono ml-1 text-muted-foreground/70'>
                 / {unitHint}
               </span>
             </div>
@@ -222,8 +221,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
             </div>
           </>
         )}
-        <div className='col-span-2 text-right'>
-          {t('Savings & Action', '优惠与详情')}
+        <div className='col-span-2 text-center'>
+          {t('Discount', '优惠幅度')}
         </div>
       </div>
 
@@ -245,7 +244,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               >
                 {/* Left: Model Identity (Only model name + copy, no icon) */}
                 <div className='col-span-12 md:col-span-4 flex items-center gap-2 min-w-0'>
-                  <span className='font-mono font-bold text-foreground text-[14.5px] sm:text-[15.5px] truncate tracking-tight group-hover:text-primary transition-colors'>
+                  <span className='font-sans font-semibold text-foreground text-[15px] sm:text-[15.5px] truncate tracking-tight antialiased group-hover:text-primary transition-colors'>
                     {model.model_name}
                   </span>
                   <span onClick={(e) => e.stopPropagation()}>
@@ -324,12 +323,9 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                   )}
                 </div>
 
-                {/* Right: Savings & Action */}
-                <div className='col-span-12 md:col-span-2 flex items-center justify-between md:justify-end gap-3'>
+                {/* Right: Savings */}
+                <div className='col-span-12 md:col-span-2 flex items-center justify-center'>
                   <SavingsBadge savings={savings} />
-                  <div className='flex h-7 w-7 items-center justify-center rounded-full border border-border/60 text-muted-foreground/60 group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/40 transition-all shrink-0'>
-                    <ArrowUpRight className='h-3.5 w-3.5' />
-                  </div>
                 </div>
               </div>
             )
@@ -365,7 +361,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               >
                 {/* Left: Model Identity: Only model name + copy */}
                 <div className='col-span-12 md:col-span-4 flex items-center gap-2 min-w-0'>
-                  <span className='font-mono font-bold text-foreground text-[14.5px] sm:text-[15.5px] truncate tracking-tight group-hover:text-primary transition-colors'>
+                  <span className='font-sans font-semibold text-foreground text-[15px] sm:text-[15.5px] truncate tracking-tight antialiased group-hover:text-primary transition-colors'>
                     {model.model_name}
                   </span>
                   <span onClick={(e) => e.stopPropagation()}>
@@ -398,12 +394,9 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                   />
                 </div>
 
-                {/* Right: Savings & Action */}
-                <div className='col-span-12 md:col-span-2 flex items-center justify-between md:justify-end gap-3'>
+                {/* Right: Savings */}
+                <div className='col-span-12 md:col-span-2 flex items-center justify-center'>
                   <SavingsBadge savings={savings} />
-                  <div className='flex h-7 w-7 items-center justify-center rounded-full border border-border/60 text-muted-foreground/60 group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/40 transition-all shrink-0'>
-                    <ArrowUpRight className='h-3.5 w-3.5' />
-                  </div>
                 </div>
               </div>
             )
@@ -442,7 +435,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
             >
               {/* Left: Model Identity: Only model name + copy */}
               <div className='col-span-12 md:col-span-4 flex items-center gap-2 min-w-0'>
-                <span className='font-mono font-bold text-foreground text-[14.5px] sm:text-[15.5px] truncate tracking-tight group-hover:text-primary transition-colors'>
+                <span className='font-sans font-semibold text-foreground text-[15px] sm:text-[15.5px] truncate tracking-tight antialiased group-hover:text-primary transition-colors'>
                   {model.model_name}
                 </span>
                 <span onClick={(e) => e.stopPropagation()}>
@@ -473,12 +466,9 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 />
               </div>
 
-              {/* Right: Savings & Action (Image 2 Style) */}
-              <div className='col-span-12 md:col-span-2 flex items-center justify-between md:justify-end gap-3'>
+              {/* Right: Savings */}
+              <div className='col-span-12 md:col-span-2 flex items-center justify-center'>
                 <SavingsBadge savings={savings} />
-                <div className='flex h-7 w-7 items-center justify-center rounded-full border border-border/60 text-muted-foreground/60 group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/40 transition-all shrink-0'>
-                  <ArrowUpRight className='h-3.5 w-3.5' />
-                </div>
               </div>
             </div>
           )

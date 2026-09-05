@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { LayoutGrid, Table2 } from 'lucide-react'
+import { LayoutGrid, Sparkles, Table2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -113,53 +113,63 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
           usableGroup={props.usableGroup}
         />
 
-        {/* Bottom Sub-bar: Description on Left, Controls on Far Right */}
-        <div className='flex flex-wrap items-center justify-between gap-3 min-h-[36px]'>
-          <div className='flex items-center min-w-0 flex-1'>
-            {groupIntroDisplay && (
-              <p
-                className='text-muted-foreground text-sm font-normal leading-relaxed tracking-tight'
-                title={groupIntroDisplay}
-              >
-                • {groupIntroDisplay}
-              </p>
-            )}
-          </div>
-
-          {/* Right: Controls Cluster (图一：放到最右边) */}
-          <div className='flex items-center gap-2.5 ml-auto shrink-0'>
-            <div
-              className='bg-muted/80 ring-border/50 inline-flex rounded-full p-1 ring-1 shadow-2xs'
-              role='group'
-              aria-label={t('Price mode')}
-            >
-              <button
-                type='button'
-                onClick={() => props.onPriceModeChange('official')}
-                className={cn(
-                  'rounded-full px-3 py-1 text-xs font-medium transition-all',
-                  props.priceMode === 'official'
-                    ? 'bg-primary text-primary-foreground shadow-xs'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {t('Official price')}
-              </button>
-              <button
-                type='button'
-                onClick={() => props.onPriceModeChange('group')}
-                className={cn(
-                  'rounded-full px-3 py-1 text-xs font-medium transition-all',
-                  props.priceMode === 'group'
-                    ? 'bg-primary text-primary-foreground shadow-xs'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {t('Group price')}
-              </button>
+        {/* Scheme A Luxury Callout Banner (方案 A 高光导读卡) */}
+        {groupIntroDisplay ? (
+          <div className='relative flex flex-wrap items-center justify-between gap-3.5 rounded-2xl border border-amber-500/25 bg-gradient-to-r from-amber-500/[0.08] via-amber-500/[0.04] to-transparent dark:from-amber-500/[0.12] dark:via-amber-500/[0.05] dark:to-transparent p-2.5 sm:px-4 sm:py-2.5 shadow-2xs backdrop-blur-xs'>
+            <div className='flex items-center gap-2.5 min-w-0 flex-1'>
+              <span className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 shadow-2xs ring-1 ring-amber-500/20'>
+                <Sparkles className='h-3.5 w-3.5' />
+              </span>
+              <div className='flex items-center min-w-0'>
+                <p
+                  className='text-foreground text-[14px] font-bold leading-relaxed tracking-tight'
+                  title={groupIntroDisplay}
+                >
+                  {groupIntroDisplay}
+                </p>
+              </div>
             </div>
 
-            {/* View Mode Toggle: Grid vs Table */}
+            {/* Right: View Mode Toggle (Grid vs Table) */}
+            <div className='flex items-center gap-2.5 ml-auto shrink-0'>
+              <div
+                className='bg-background/80 dark:bg-muted/80 ring-border/50 inline-flex rounded-full p-1 ring-1 shadow-2xs backdrop-blur-xs'
+                role='group'
+                aria-label={t('View mode')}
+              >
+                <button
+                  type='button'
+                  onClick={() => setViewMode('grid')}
+                  aria-label={t('Grid view')}
+                  title={t('Grid view')}
+                  className={cn(
+                    'rounded-full p-1.5 transition-all',
+                    viewMode === 'grid'
+                      ? 'bg-primary text-primary-foreground shadow-xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  <LayoutGrid className='h-3.5 w-3.5' />
+                </button>
+                <button
+                  type='button'
+                  onClick={() => setViewMode('table')}
+                  aria-label={t('Table view')}
+                  title={t('Table view')}
+                  className={cn(
+                    'rounded-full p-1.5 transition-all',
+                    viewMode === 'table'
+                      ? 'bg-primary text-primary-foreground shadow-xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  <Table2 className='h-3.5 w-3.5' />
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className='flex items-center justify-end min-h-[36px]'>
             <div
               className='bg-muted/80 ring-border/50 inline-flex rounded-full p-1 ring-1 shadow-2xs'
               role='group'
@@ -195,7 +205,7 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
               </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 3. Main Content: Bento Grid or Clean Table */}
