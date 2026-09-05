@@ -133,6 +133,8 @@ if (!fs.existsSync(htmlPath)) {
     'ja.json',
     'ru.json',
     'vi.json',
+    'es.json',
+    'pt.json',
   ]
   for (const file of localeFiles) {
     const localePath = path.join(root, 'dist', 'locales', file)

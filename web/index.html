@@ -39,6 +39,8 @@
           ja: 'ja',
           ru: 'ru',
           vi: 'vi',
+          es: 'es',
+          pt: 'pt',
         }
         function convert(raw) {
           var str = String(raw || '').trim()
@@ -70,6 +72,12 @@
             .toLowerCase()
           if (lower.indexOf('zh') === 0) {
             return convert(converted) === 'zhTW' ? 'zhTW' : 'zhCN'
+          }
+          if (lower === 'es' || lower.indexOf('es-') === 0) {
+            return 'es'
+          }
+          if (lower === 'pt' || lower.indexOf('pt-') === 0) {
+            return 'pt'
           }
           var base = lower.split('-')[0]
           return FILES[base] ? base : 'en'

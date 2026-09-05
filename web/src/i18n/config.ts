@@ -44,6 +44,8 @@ export const LOCALE_PUBLIC_FILES: Record<InterfaceLanguageCode, string> = {
   ja: 'ja',
   ru: 'ru',
   vi: 'vi',
+  es: 'es',
+  pt: 'pt',
 }
 
 type LocaleFile = {
@@ -64,6 +66,8 @@ const localeLoaders: Record<
   ja: () => import('./locales/ja.json'),
   vi: () => import('./locales/vi.json'),
   zhTW: () => import('./locales/zh-TW.json'),
+  es: () => import('./locales/es.json'),
+  pt: () => import('./locales/pt.json'),
 }
 
 type BootPrefetch = {
@@ -96,6 +100,12 @@ export function resolveInterfaceLanguage(
   const lower = trimmed.replaceAll('_', '-').toLowerCase()
   if (lower.startsWith('zh')) {
     return convertDetectedLanguage(trimmed) === 'zhTW' ? 'zhTW' : 'zhCN'
+  }
+  if (lower === 'es' || lower.startsWith('es-')) {
+    return 'es'
+  }
+  if (lower === 'pt' || lower.startsWith('pt-')) {
+    return 'pt'
   }
   const base = lower.split('-')[0]
   if (isSupportedLang(base)) return base

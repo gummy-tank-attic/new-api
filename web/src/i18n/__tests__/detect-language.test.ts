@@ -46,6 +46,12 @@ test('maps browser Chinese tags the same way the HTML boot script does', () => {
   assert.equal(normalizeInterfaceLanguage('zh-TW'), 'zhTW')
   assert.equal(normalizeInterfaceLanguage('zhCN'), 'zhCN')
   assert.equal(normalizeInterfaceLanguage('zh-CN'), 'zhCN')
+  assert.equal(normalizeInterfaceLanguage('es'), 'es')
+  assert.equal(normalizeInterfaceLanguage('es-ES'), 'es')
+  assert.equal(normalizeInterfaceLanguage('es-MX'), 'es')
+  assert.equal(normalizeInterfaceLanguage('pt'), 'pt')
+  assert.equal(normalizeInterfaceLanguage('pt-BR'), 'pt')
+  assert.equal(normalizeInterfaceLanguage('pt-PT'), 'pt')
 })
 
 test('stable public locale files exist for every shipped language', () => {
@@ -57,6 +63,8 @@ test('stable public locale files exist for every shipped language', () => {
     'ja.json',
     'ru.json',
     'vi.json',
+    'es.json',
+    'pt.json',
   ]) {
     assert.equal(existsSync(join(localesDir, file)), true, file)
   }

@@ -120,6 +120,8 @@ export default defineConfig(({ envMode }) => {
         'ja.json',
         'ru.json',
         'vi.json',
+        'es.json',
+        'pt.json',
       ].map((file) => ({
         from: path.resolve(__dirname, 'src/i18n/locales', file),
         to: path.join('locales', file),

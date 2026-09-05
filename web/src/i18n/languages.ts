@@ -24,6 +24,8 @@ export const INTERFACE_LANGUAGE_OPTIONS = [
   { code: 'ja', label: '日本語' },
   { code: 'vi', label: 'Tiếng Việt' },
   { code: 'zhTW', label: '繁體中文' },
+  { code: 'es', label: 'Español' },
+  { code: 'pt', label: 'Português' },
 ] as const
 
 export type InterfaceLanguageCode =
@@ -54,6 +56,12 @@ export function normalizeInterfaceLanguage(value?: string | null): string {
     lower === 'zh'
   ) {
     return 'zhCN'
+  }
+  if (lower === 'es' || lower.startsWith('es-')) {
+    return 'es'
+  }
+  if (lower === 'pt' || lower.startsWith('pt-')) {
+    return 'pt'
   }
 
   const matched = INTERFACE_LANGUAGE_OPTIONS.find(
