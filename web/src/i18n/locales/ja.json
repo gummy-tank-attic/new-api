@@ -2099,7 +2099,7 @@
     "Fallback must be last": "フォールバックは最後",
     "Fallback route": "フォールバックルート",
     "Fallback tier": "フォールバック段階",
-    "FAQ": "FAQ",
+    "FAQ": "よくある質問",
     "FAQ added. Click \"Save Settings\" to apply.": "FAQ が追加されました。「設定を保存」をクリックして適用してください。",
     "FAQ deleted. Click \"Save Settings\" to apply.": "FAQ が削除されました。「設定を保存」をクリックして適用してください。",
     "FAQ saved successfully": "FAQ が正常に保存されました",
@@ -6024,6 +6024,14 @@
     "Versions": "バージョン",
     "View the complete details for this task": "このタスクの完全な詳細を表示します",
     "When disabled, all uploaded custom plugins are ignored and every platform falls back to its built-in factory plugin.": "無効にすると、アップロード済みのカスタムプラグインはすべて無視され、各プラットフォームは内蔵のファクトリープラグインにフォールバックします。",
-    "When disabled, the entire task plugin system stops serving, including factory and custom plugins.": "無効にすると、ファクトリープラグインとカスタムプラグインを含むタスクプラグインシステム全体が停止します。"
+    "When disabled, the entire task plugin system stops serving, including factory and custom plugins.": "無効にすると、ファクトリープラグインとカスタムプラグインを含むタスクプラグインシステム全体が停止します。",
+    "Video Upscale Specifications & Rates": "動画アップスケール仕様と料金",
+    "Billing formula: Billed by output video tokens plus duration seconds.": "請求計算式：出力動画トークン数と再生時間（秒）の合算で課金されます。",
+    "Resolutions": "解像度",
+    "Supported output resolutions": "対応出力解像度",
+    "Generation Mode & Pricing": "生成モードと料金",
+    "Grid view": "グリッド表示",
+    "Starting Price": "開始価格",
+    "{{count}} model(s)": "{{count}} 件のモデル"
   }
 }

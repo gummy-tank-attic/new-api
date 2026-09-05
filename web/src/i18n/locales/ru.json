@@ -6,7 +6,7 @@
     "_copy": "_копировать",
     "- API base URL: {{url}}": "- Базовый URL API: {{url}}",
     "- API Key: copy it from the MetaRtr key page and do not send it in chat.": "- API-ключ: скопируйте его на странице ключей MetaRtr и не отправляйте в чат.",
-    "- Base URL: {{url}}": "- Base URL: {{url}}",
+    "- Base URL: {{url}}": "- Базовый URL: {{url}}",
     "- Client setup: add a custom provider in your AI tool and enter the API base URL above plus your API key.": "- Настройка клиента: добавьте своего провайдера в ИИ-инструменте и укажите базовый URL выше вместе с API-ключом.",
     "- Client: {{client}}": "- Подключаемая программа: {{client}}",
     "- Group: {{group}} ({{usage}})": "- Группа: {{group}} ({{usage}})",
@@ -47,7 +47,7 @@
     "{{count}} channel(s) failed to disable": "Не удалось отключить {{count}} каналов",
     "{{count}} channel(s) failed to enable": "Не удалось включить {{count}} каналов",
     "{{count}} days ago": "{{count}} дней назад",
-    "{{count}} days remaining": "Осталось {{count}} дней",
+    "{{count}} days remaining": "Осталось {{count}} дн.",
     "{{count}} disabled channel(s) deleted": "Удалено {{count}} отключённых каналов",
     "{{count}} FAQ entries will be removed from the list.": "{{count}} записей FAQ будут удалены из списка.",
     "{{count}} hours ago": "{{count}} часов назад",
@@ -1709,7 +1709,7 @@
     "Edited channels with tag {{tag}}": "Изменены каналы с тегом {{tag}}",
     "Editor mode": "Режим редактора",
     "Education": "Образование",
-    "Email": "Email",
+    "Email": "Эл. почта",
     "Email (required for verification)": "Email (требуется для верификации)",
     "Email Address": "Адрес электронной почты",
     "Email Alias Restriction": "Ограничение по псевдониму Email",
@@ -6024,6 +6024,14 @@
     "Versions": "Версии",
     "View the complete details for this task": "Просмотреть полные сведения об этой задаче",
     "When disabled, all uploaded custom plugins are ignored and every platform falls back to its built-in factory plugin.": "При отключении все загруженные пользовательские плагины игнорируются, а каждая платформа использует встроенный заводской плагин.",
-    "When disabled, the entire task plugin system stops serving, including factory and custom plugins.": "При отключении вся система плагинов задач перестаёт обслуживать запросы, включая заводские и пользовательские плагины."
+    "When disabled, the entire task plugin system stops serving, including factory and custom plugins.": "При отключении вся система плагинов задач перестаёт обслуживать запросы, включая заводские и пользовательские плагины.",
+    "Video Upscale Specifications & Rates": "Характеристики и тарифы масштабирования видео",
+    "Billing formula: Billed by output video tokens plus duration seconds.": "Формула расчета: тарифицируется по токенам выходного видео плюс длительность в секундах.",
+    "Resolutions": "Разрешения",
+    "Supported output resolutions": "Поддерживаемые разрешения вывода",
+    "Generation Mode & Pricing": "Режим генерации и тарификация",
+    "Grid view": "Сетка",
+    "Starting Price": "Начальная цена",
+    "{{count}} model(s)": "{{count}} моделей"
   }
 }

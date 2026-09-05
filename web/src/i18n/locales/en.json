@@ -6025,6 +6025,14 @@
     "Versions": "Versions",
     "View the complete details for this task": "View the complete details for this task",
     "When disabled, all uploaded custom plugins are ignored and every platform falls back to its built-in factory plugin.": "When disabled, all uploaded custom plugins are ignored and every platform falls back to its built-in factory plugin.",
-    "When disabled, the entire task plugin system stops serving, including factory and custom plugins.": "When disabled, the entire task plugin system stops serving, including factory and custom plugins."
+    "When disabled, the entire task plugin system stops serving, including factory and custom plugins.": "When disabled, the entire task plugin system stops serving, including factory and custom plugins.",
+    "Video Upscale Specifications & Rates": "Video Upscale Specifications & Rates",
+    "Billing formula: Billed by output video tokens plus duration seconds.": "Billing formula: Billed by output video tokens plus duration seconds.",
+    "Resolutions": "Resolutions",
+    "Supported output resolutions": "Supported output resolutions",
+    "Generation Mode & Pricing": "Generation Mode & Pricing",
+    "Grid view": "Grid view",
+    "Starting Price": "Starting Price",
+    "{{count}} model(s)": "{{count}} model(s)"
   }
 }

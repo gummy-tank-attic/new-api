@@ -6025,6 +6025,14 @@
     "Versions": "版本",
     "View the complete details for this task": "查看此任务的完整详情",
     "When disabled, all uploaded custom plugins are ignored and every platform falls back to its built-in factory plugin.": "关闭后，所有上传的自定义插件都会被忽略，每个平台均回落到内置的出厂插件。",
-    "When disabled, the entire task plugin system stops serving, including factory and custom plugins.": "关闭后，整个任务插件系统停止服务，包括出厂插件和自定义插件。"
+    "When disabled, the entire task plugin system stops serving, including factory and custom plugins.": "关闭后，整个任务插件系统停止服务，包括出厂插件和自定义插件。",
+    "Video Upscale Specifications & Rates": "视频超分辨率规格与费率",
+    "Billing formula: Billed by output video tokens plus duration seconds.": "计费公式：按输出视频 Token 加上时长秒数计费。",
+    "Resolutions": "分辨率",
+    "Supported output resolutions": "支持的输出分辨率",
+    "Generation Mode & Pricing": "生成模式与计费",
+    "Grid view": "网格视图",
+    "Starting Price": "起步价格",
+    "{{count}} model(s)": "{{count}} 个模型"
   }
 }
