@@ -47,8 +47,26 @@ function formatManualZhe(value: number): string {
   return `${label}折`
 }
 
+/** Clean up multi-line group names from backend (e.g. "Claude lite(Sale)\nClaude lite(促销)") */
+function formatGroupDisplayName(group: string, isZh: boolean): string {
+  const lines = (group || '')
+    .split(/[\r\n]+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (lines.length <= 1) return group
+  if (isZh) {
+    const zhLine = lines.find((l) => /[\u4e00-\u9fa5]/.test(l))
+    if (zhLine) return zhLine
+  } else {
+    const enLine = lines.find((l) => !/[\u4e00-\u9fa5]/.test(l))
+    if (enLine) return enLine
+  }
+  return lines[0]
+}
+
 export function GroupPriceCards(props: GroupPriceCardsProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const isZh = (i18n.language || '').toLowerCase().startsWith('zh')
 
   if (props.groups.length === 0) {
     return (
@@ -66,6 +84,7 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
     >
       {props.groups.map((group) => {
         const active = props.selectedGroup === group
+        const displayName = formatGroupDisplayName(group, isZh)
         const ratio = getConfiguredGroupRatio(props.groupRatio, group)
         const zheRaw = lookupGroupMapValue(MANUAL_GROUP_ZHE, group)
         const zhe =
@@ -80,8 +99,7 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
         const manualLabel = lookupGroupMapValue(MANUAL_GROUP_OFF_LABEL, group)
         // Fixed English copy — never i18n: "up to 50% off" or "85% off"
         const offLabel =
-          manualLabel ??
-          (savingsOff != null ? `${savingsOff}%\u00A0off` : null)
+          manualLabel ?? (savingsOff != null ? `${savingsOff}%\u00A0off` : null)
 
         return (
           <button
@@ -94,12 +112,12 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
               // 方案 A 极简流线药丸：名称 + 覆盆子红渐变微徽章
               'inline-flex max-w-full shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-left transition-all',
               active
-                ? 'border-primary/50 bg-primary/10 text-foreground font-semibold shadow-xs ring-1 ring-primary/20'
+                ? 'border-primary/50 bg-primary/10 text-foreground font-medium shadow-xs ring-1 ring-primary/20'
                 : 'bg-background border-border/70 hover:border-border hover:bg-muted/50 text-foreground/80 hover:text-foreground'
             )}
           >
-            <span className='text-[15px] tracking-tight whitespace-nowrap'>
-              {group}
+            <span className='text-[14.5px] whitespace-nowrap sm:text-[15px]'>
+              {displayName}
             </span>
             {zhe ? (
               <span
@@ -114,7 +132,7 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
               </span>
             ) : null}
             {offLabel ? (
-              <span className='shrink-0 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-rose-500 to-red-500 px-2.5 py-0.5 text-[11px] font-bold text-white shadow-xs tracking-tight whitespace-nowrap tabular-nums leading-normal ring-1 ring-rose-500/25'>
+              <span className='inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-rose-500 to-red-500 px-2.5 py-0.5 text-[11px] leading-normal font-bold whitespace-nowrap text-white tabular-nums shadow-xs ring-1 ring-rose-500/25'>
                 {offLabel}
               </span>
             ) : null}

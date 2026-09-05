@@ -42,12 +42,12 @@ import {
   formatRequestPrice,
   stripTrailingZeros,
 } from '../lib/price'
-import type { PriceType, PricingModel, TokenUnit } from '../types'
 import {
   getVideoModelTierGroups,
   isByteDanceOrVideoModel,
   isVideoUpscaleModel,
 } from '../lib/video-pricing'
+import type { PriceType, PricingModel, TokenUnit } from '../types'
 
 export type PriceMode = 'group' | 'official'
 
@@ -90,7 +90,8 @@ function getModelUnitPrice(
         if (type === 'input') val = Number(tier.inputPrice) || 0
         else if (type === 'output') val = Number(tier.outputPrice) || 0
         else if (type === 'cache') val = Number(tier.cacheReadPrice) || 0
-        else if (type === 'create_cache') val = Number(tier.cacheCreatePrice) || 0
+        else if (type === 'create_cache')
+          val = Number(tier.cacheCreatePrice) || 0
 
         if (val > 0) {
           return formatDynamicUnitPrice(val, {
@@ -136,26 +137,36 @@ function PriceColumn(props: {
 }) {
   if (isEmptyPrice(props.primary)) {
     return (
-      <div className={cn('flex flex-col items-center justify-center text-center py-1', props.className)}>
+      <div
+        className={cn(
+          'flex flex-col items-center justify-center text-center py-1',
+          props.className
+        )}
+      >
         <span className='text-muted-foreground/30 text-sm font-light'>—</span>
       </div>
     )
   }
 
   return (
-    <div className={cn('flex flex-col items-center justify-center text-center py-1', props.className)}>
+    <div
+      className={cn(
+        'flex flex-col items-center justify-center text-center py-1',
+        props.className
+      )}
+    >
       <div className='flex items-baseline justify-center gap-1'>
-        <span className='font-semibold text-foreground text-[15px] sm:text-[16px] tabular-nums tracking-tight'>
+        <span className='text-foreground text-[15px] font-semibold tabular-nums sm:text-[16px]'>
           {stripTrailingZeros(props.primary)}
         </span>
         {props.unit && (
-          <span className='text-[11px] text-muted-foreground/75 font-normal'>
+          <span className='text-muted-foreground/75 text-[11px] font-normal'>
             {props.unit}
           </span>
         )}
       </div>
       {props.official && !isEmptyPrice(props.official) && (
-        <span className='text-[12px] text-muted-foreground/75 line-through decoration-muted-foreground/40 tabular-nums font-medium mt-0.5'>
+        <span className='text-muted-foreground/75 decoration-muted-foreground/40 mt-0.5 text-[12px] font-medium tabular-nums line-through'>
           {stripTrailingZeros(props.official)}
         </span>
       )}
@@ -166,7 +177,7 @@ function PriceColumn(props: {
 function SavingsBadge({ savings }: { savings: number | null }) {
   if (savings == null) return null
   return (
-    <span className='inline-flex items-center justify-center rounded-full bg-gradient-to-r from-rose-500 to-red-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-2xs tracking-tight whitespace-nowrap tabular-nums leading-normal ring-1 ring-rose-500/20'>
+    <span className='inline-flex items-center justify-center rounded-full bg-gradient-to-r from-rose-500 to-red-500 px-2.5 py-0.5 text-xs leading-normal font-bold whitespace-nowrap text-white tabular-nums shadow-2xs ring-1 ring-rose-500/20'>
       {savings}% OFF
     </span>
   )
@@ -196,7 +207,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
   return (
     <div className={cn('w-full space-y-3', props.className)}>
       {/* 1. Refined Column Legend Header */}
-      <div className='hidden md:grid grid-cols-12 items-center gap-4 px-5 py-2.5 text-xs font-medium text-muted-foreground border-b border-border/40'>
+      <div className='text-muted-foreground border-border/40 hidden grid-cols-12 items-center gap-4 border-b px-5 py-2.5 text-xs font-medium md:grid'>
         <div className='col-span-4'>{t('Model', '模型名称')}</div>
         {isVideoTable ? (
           <div className='col-span-6 text-center'>
@@ -206,13 +217,13 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           <>
             <div className='col-span-2 text-center'>
               {t('Input price')}
-              <span className='text-[10.5px] font-normal lowercase font-mono ml-1 text-muted-foreground/70'>
+              <span className='text-muted-foreground/70 ml-1 font-mono text-[10.5px] font-normal lowercase'>
                 / {unitHint}
               </span>
             </div>
             <div className='col-span-2 text-center'>
               {t('Output price')}
-              <span className='text-[10.5px] font-normal lowercase font-mono ml-1 text-muted-foreground/70'>
+              <span className='text-muted-foreground/70 ml-1 font-mono text-[10.5px] font-normal lowercase'>
                 / {unitHint}
               </span>
             </div>
@@ -240,11 +251,11 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               <div
                 key={model.model_name}
                 onClick={() => props.onModelClick?.(model.model_name)}
-                className='group relative grid grid-cols-1 md:grid-cols-12 items-center gap-4 rounded-xl border border-border/70 bg-card/80 px-5 py-3.5 shadow-2xs backdrop-blur-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card hover:shadow-xs cursor-pointer'
+                className='group border-border/70 bg-card/80 hover:border-primary/40 hover:bg-card relative grid cursor-pointer grid-cols-1 items-center gap-4 rounded-xl border px-5 py-3.5 shadow-2xs backdrop-blur-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs md:grid-cols-12'
               >
                 {/* Left: Model Identity (Only model name + copy, no icon) */}
-                <div className='col-span-12 md:col-span-4 flex items-center gap-2 min-w-0'>
-                  <span className='font-sans font-semibold text-foreground text-[15px] sm:text-[15.5px] truncate tracking-tight antialiased group-hover:text-primary transition-colors'>
+                <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-4'>
+                  <span className='text-foreground group-hover:text-primary truncate font-sans text-[15px] font-medium antialiased transition-colors sm:text-[15.5px] sm:font-semibold'>
                     {model.model_name}
                   </span>
                   <span onClick={(e) => e.stopPropagation()}>
@@ -252,7 +263,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                       value={model.model_name}
                       size='icon'
                       variant='ghost'
-                      className='size-5 text-muted-foreground/40 hover:text-foreground'
+                      className='text-muted-foreground/40 hover:text-foreground size-5'
                       iconClassName='size-3'
                     />
                   </span>
@@ -261,7 +272,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 {/* Center: Video Mode Pricing */}
                 <div className='col-span-12 md:col-span-6'>
                   {isUpscale ? (
-                    <div className='grid grid-cols-1 sm:grid-cols-3 gap-2'>
+                    <div className='grid grid-cols-1 gap-2 sm:grid-cols-3'>
                       <PriceColumn
                         primary={`$${(0.0091 * (isGroupMode ? (savings != null ? (100 - savings) / 100 : 1) : 1) * priceRate).toFixed(4)}`}
                         official={`$${(0.013 * priceRate).toFixed(4)}`}
@@ -272,44 +283,70 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                         official={`$${(10.2639 * priceRate).toFixed(2)}`}
                         unit='/ 1M'
                       />
-                      <div className='flex flex-col items-center justify-center text-center py-1'>
+                      <div className='flex flex-col items-center justify-center py-1 text-center'>
                         <span className='text-[11px] font-medium text-purple-600 dark:text-purple-400'>
                           720p · 1080p · 2K
                         </span>
-                        <span className='text-[10px] text-muted-foreground/60 mt-0.5'>
+                        <span className='text-muted-foreground/60 mt-0.5 text-[10px]'>
                           细节重绘超分
                         </span>
                       </div>
                     </div>
                   ) : tierGroups.length > 0 ? (
-                    <div className='grid grid-cols-1 sm:grid-cols-3 gap-2.5'>
+                    <div className='grid grid-cols-1 gap-2.5 sm:grid-cols-3'>
                       {tierGroups.slice(0, 3).map((tg) => {
-                        const noneBilled = (isGroupMode ? tg.withoutVideoPrice : tg.officialWithoutVideoPrice ?? tg.withoutVideoPrice) * priceRate
-                        const noneOff = (tg.officialWithoutVideoPrice ?? tg.withoutVideoPrice) * priceRate
-                        const videoBilled = (isGroupMode ? tg.withVideoPrice : tg.officialWithVideoPrice ?? tg.withVideoPrice) * priceRate
-                        const videoOff = (tg.officialWithVideoPrice ?? tg.withVideoPrice) * priceRate
+                        const noneBilled =
+                          (isGroupMode
+                            ? tg.withoutVideoPrice
+                            : (tg.officialWithoutVideoPrice ??
+                              tg.withoutVideoPrice)) * priceRate
+                        const noneOff =
+                          (tg.officialWithoutVideoPrice ??
+                            tg.withoutVideoPrice) * priceRate
+                        const videoBilled =
+                          (isGroupMode
+                            ? tg.withVideoPrice
+                            : (tg.officialWithVideoPrice ??
+                              tg.withVideoPrice)) * priceRate
+                        const videoOff =
+                          (tg.officialWithVideoPrice ?? tg.withVideoPrice) *
+                          priceRate
 
                         return (
                           <div
                             key={tg.title}
-                            className='flex flex-col rounded-lg bg-muted/20 border border-border/40 px-2.5 py-1.5 text-xs'
+                            className='bg-muted/20 border-border/40 flex flex-col rounded-lg border px-2.5 py-1.5 text-xs'
                           >
-                            <div className='flex items-center justify-between border-b border-border/20 pb-0.5 mb-1 font-semibold text-foreground text-[11px]'>
+                            <div className='border-border/20 text-foreground mb-1 flex items-center justify-between border-b pb-0.5 text-[11px] font-semibold'>
                               <span>{tg.resLabel}</span>
-                              <span className='text-[9.5px] text-muted-foreground/60'>/ 1M tok</span>
-                            </div>
-                            <div className='flex items-center justify-between text-[11px]'>
-                              <span className='text-muted-foreground/75'>无视频:</span>
-                              <span className='font-semibold tabular-nums text-foreground'>
-                                ${noneBilled.toFixed(3)}
-                                {isGroupMode && <span className='text-[9.5px] text-muted-foreground/50 line-through ml-1 font-normal'>${noneOff.toFixed(3)}</span>}
+                              <span className='text-muted-foreground/60 text-[9.5px]'>
+                                / 1M tok
                               </span>
                             </div>
-                            <div className='flex items-center justify-between text-[11px] mt-0.5'>
-                              <span className='text-muted-foreground/75'>有视频:</span>
-                              <span className='font-semibold tabular-nums text-foreground'>
+                            <div className='flex items-center justify-between text-[11px]'>
+                              <span className='text-muted-foreground/75'>
+                                无视频:
+                              </span>
+                              <span className='text-foreground font-semibold tabular-nums'>
+                                ${noneBilled.toFixed(3)}
+                                {isGroupMode && (
+                                  <span className='text-muted-foreground/50 ml-1 text-[9.5px] font-normal line-through'>
+                                    ${noneOff.toFixed(3)}
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                            <div className='mt-0.5 flex items-center justify-between text-[11px]'>
+                              <span className='text-muted-foreground/75'>
+                                有视频:
+                              </span>
+                              <span className='text-foreground font-semibold tabular-nums'>
                                 ${videoBilled.toFixed(3)}
-                                {isGroupMode && <span className='text-[9.5px] text-muted-foreground/50 line-through ml-1 font-normal'>${videoOff.toFixed(3)}</span>}
+                                {isGroupMode && (
+                                  <span className='text-muted-foreground/50 ml-1 text-[9.5px] font-normal line-through'>
+                                    ${videoOff.toFixed(3)}
+                                  </span>
+                                )}
                               </span>
                             </div>
                           </div>
@@ -317,14 +354,14 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                       })}
                     </div>
                   ) : (
-                    <div className='text-center text-sm text-muted-foreground py-2'>
+                    <div className='text-muted-foreground py-2 text-center text-sm'>
                       {t('Special billing expression')}
                     </div>
                   )}
                 </div>
 
                 {/* Right: Savings */}
-                <div className='col-span-12 md:col-span-2 flex items-center justify-center'>
+                <div className='col-span-12 flex items-center justify-center md:col-span-2'>
                   <SavingsBadge savings={savings} />
                 </div>
               </div>
@@ -333,22 +370,70 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
 
           // Time-Tiered Branch (DeepSeek)
           if (isTimeTiered) {
-            const baseRatio = getConfiguredGroupRatio(props.groupRatio, selectedGroup || '')
+            const baseRatio = getConfiguredGroupRatio(
+              props.groupRatio,
+              selectedGroup || ''
+            )
             const offPeakInput = resolvePrices(
-              getModelUnitPrice(model, 'input', baseRatio * 0.5, tokenUnit, priceRate, usdExchangeRate, selectedGroup),
-              getModelUnitPrice(model, 'input', 0.5, tokenUnit, priceRate, usdExchangeRate),
+              getModelUnitPrice(
+                model,
+                'input',
+                baseRatio * 0.5,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate,
+                selectedGroup
+              ),
+              getModelUnitPrice(
+                model,
+                'input',
+                0.5,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate
+              ),
               isGroupMode,
               Boolean(selectedGroup)
             )
             const offPeakOutput = resolvePrices(
-              getModelUnitPrice(model, 'output', baseRatio * 0.5, tokenUnit, priceRate, usdExchangeRate, selectedGroup),
-              getModelUnitPrice(model, 'output', 0.5, tokenUnit, priceRate, usdExchangeRate),
+              getModelUnitPrice(
+                model,
+                'output',
+                baseRatio * 0.5,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate,
+                selectedGroup
+              ),
+              getModelUnitPrice(
+                model,
+                'output',
+                0.5,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate
+              ),
               isGroupMode,
               Boolean(selectedGroup)
             )
             const peakInput = resolvePrices(
-              getModelUnitPrice(model, 'input', baseRatio, tokenUnit, priceRate, usdExchangeRate, selectedGroup),
-              getModelUnitPrice(model, 'input', 1, tokenUnit, priceRate, usdExchangeRate),
+              getModelUnitPrice(
+                model,
+                'input',
+                baseRatio,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate,
+                selectedGroup
+              ),
+              getModelUnitPrice(
+                model,
+                'input',
+                1,
+                tokenUnit,
+                priceRate,
+                usdExchangeRate
+              ),
               isGroupMode,
               Boolean(selectedGroup)
             )
@@ -357,11 +442,11 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               <div
                 key={model.model_name}
                 onClick={() => props.onModelClick?.(model.model_name)}
-                className='group relative grid grid-cols-1 md:grid-cols-12 items-center gap-4 rounded-xl border border-border/70 bg-card/80 px-5 py-3.5 shadow-2xs backdrop-blur-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card hover:shadow-xs cursor-pointer'
+                className='group border-border/70 bg-card/80 hover:border-primary/40 hover:bg-card relative grid cursor-pointer grid-cols-1 items-center gap-4 rounded-xl border px-5 py-3.5 shadow-2xs backdrop-blur-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs md:grid-cols-12'
               >
                 {/* Left: Model Identity: Only model name + copy */}
-                <div className='col-span-12 md:col-span-4 flex items-center gap-2 min-w-0'>
-                  <span className='font-sans font-semibold text-foreground text-[15px] sm:text-[15.5px] truncate tracking-tight antialiased group-hover:text-primary transition-colors'>
+                <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-4'>
+                  <span className='text-foreground group-hover:text-primary truncate font-sans text-[15px] font-medium antialiased transition-colors sm:text-[15.5px] sm:font-semibold'>
                     {model.model_name}
                   </span>
                   <span onClick={(e) => e.stopPropagation()}>
@@ -369,14 +454,14 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                       value={model.model_name}
                       size='icon'
                       variant='ghost'
-                      className='size-5 text-muted-foreground/40 hover:text-foreground'
+                      className='text-muted-foreground/40 hover:text-foreground size-5'
                       iconClassName='size-3'
                     />
                   </span>
                 </div>
 
                 {/* Center: Time-tiered Pricing */}
-                <div className='col-span-12 md:col-span-6 grid grid-cols-1 sm:grid-cols-3 gap-2'>
+                <div className='col-span-12 grid grid-cols-1 gap-2 sm:grid-cols-3 md:col-span-6'>
                   <PriceColumn
                     primary={offPeakInput.primary}
                     official={offPeakInput.official}
@@ -395,7 +480,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 </div>
 
                 {/* Right: Savings */}
-                <div className='col-span-12 md:col-span-2 flex items-center justify-center'>
+                <div className='col-span-12 flex items-center justify-center md:col-span-2'>
                   <SavingsBadge savings={savings} />
                 </div>
               </div>
@@ -409,33 +494,117 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           let cachePrice = { primary: '—', official: null as string | null }
 
           if (!isToken) {
-            const groupReq = formatRequestPrice(model, false, priceRate, usdExchangeRate, selectedGroup)
-            const offReq = formatRequestPrice(model, false, priceRate, usdExchangeRate, undefined, 1)
-            const res = resolvePrices(groupReq, offReq, isGroupMode, Boolean(selectedGroup))
+            const groupReq = formatRequestPrice(
+              model,
+              false,
+              priceRate,
+              usdExchangeRate,
+              selectedGroup
+            )
+            const offReq = formatRequestPrice(
+              model,
+              false,
+              priceRate,
+              usdExchangeRate,
+              undefined,
+              1
+            )
+            const res = resolvePrices(
+              groupReq,
+              offReq,
+              isGroupMode,
+              Boolean(selectedGroup)
+            )
             inputPrice = res
           } else {
-            const inGroup = formatPrice(model, 'input', tokenUnit, false, priceRate, usdExchangeRate, selectedGroup)
-            const inOff = formatPrice(model, 'input', tokenUnit, false, priceRate, usdExchangeRate, undefined, 1)
-            inputPrice = resolvePrices(inGroup, inOff, isGroupMode, Boolean(selectedGroup))
+            const inGroup = formatPrice(
+              model,
+              'input',
+              tokenUnit,
+              false,
+              priceRate,
+              usdExchangeRate,
+              selectedGroup
+            )
+            const inOff = formatPrice(
+              model,
+              'input',
+              tokenUnit,
+              false,
+              priceRate,
+              usdExchangeRate,
+              undefined,
+              1
+            )
+            inputPrice = resolvePrices(
+              inGroup,
+              inOff,
+              isGroupMode,
+              Boolean(selectedGroup)
+            )
 
-            const outGroup = formatPrice(model, 'output', tokenUnit, false, priceRate, usdExchangeRate, selectedGroup)
-            const outOff = formatPrice(model, 'output', tokenUnit, false, priceRate, usdExchangeRate, undefined, 1)
-            outputPrice = resolvePrices(outGroup, outOff, isGroupMode, Boolean(selectedGroup))
+            const outGroup = formatPrice(
+              model,
+              'output',
+              tokenUnit,
+              false,
+              priceRate,
+              usdExchangeRate,
+              selectedGroup
+            )
+            const outOff = formatPrice(
+              model,
+              'output',
+              tokenUnit,
+              false,
+              priceRate,
+              usdExchangeRate,
+              undefined,
+              1
+            )
+            outputPrice = resolvePrices(
+              outGroup,
+              outOff,
+              isGroupMode,
+              Boolean(selectedGroup)
+            )
 
-            const cacheGroup = formatPrice(model, 'cache', tokenUnit, false, priceRate, usdExchangeRate, selectedGroup)
-            const cacheOff = formatPrice(model, 'cache', tokenUnit, false, priceRate, usdExchangeRate, undefined, 1)
-            cachePrice = resolvePrices(cacheGroup, cacheOff, isGroupMode, Boolean(selectedGroup))
+            const cacheGroup = formatPrice(
+              model,
+              'cache',
+              tokenUnit,
+              false,
+              priceRate,
+              usdExchangeRate,
+              selectedGroup
+            )
+            const cacheOff = formatPrice(
+              model,
+              'cache',
+              tokenUnit,
+              false,
+              priceRate,
+              usdExchangeRate,
+              undefined,
+              1
+            )
+            cachePrice = resolvePrices(
+              cacheGroup,
+              cacheOff,
+              isGroupMode,
+              Boolean(selectedGroup)
+            )
           }
 
           return (
             <div
               key={model.model_name}
               onClick={() => props.onModelClick?.(model.model_name)}
-              className='group relative grid grid-cols-1 md:grid-cols-12 items-center gap-4 rounded-xl border border-border/70 bg-card/80 px-5 py-3.5 shadow-2xs backdrop-blur-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card hover:shadow-xs cursor-pointer'
+              className='group border-border/70 bg-card/80 hover:border-primary/40 hover:bg-card relative grid cursor-pointer grid-cols-1 items-center gap-4 rounded-xl border px-5 py-3.5 shadow-2xs backdrop-blur-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs md:grid-cols-12'
             >
               {/* Left: Model Identity: Only model name + copy */}
-              <div className='col-span-12 md:col-span-4 flex items-center gap-2 min-w-0'>
-                <span className='font-sans font-semibold text-foreground text-[15px] sm:text-[15.5px] truncate tracking-tight antialiased group-hover:text-primary transition-colors'>
+              <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-4'>
+                <span className='text-foreground group-hover:text-primary truncate font-sans text-[15px] font-medium antialiased transition-colors sm:text-[15.5px] sm:font-semibold'>
                   {model.model_name}
                 </span>
                 <span onClick={(e) => e.stopPropagation()}>
@@ -443,14 +612,14 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     value={model.model_name}
                     size='icon'
                     variant='ghost'
-                    className='size-5 text-muted-foreground/40 hover:text-foreground'
+                    className='text-muted-foreground/40 hover:text-foreground size-5'
                     iconClassName='size-3'
                   />
                 </span>
               </div>
 
               {/* Middle: Standard Price Columns without nested boxes (无须 1m) */}
-              <div className='col-span-12 md:col-span-6 grid grid-cols-1 sm:grid-cols-3 gap-2'>
+              <div className='col-span-12 grid grid-cols-1 gap-2 sm:grid-cols-3 md:col-span-6'>
                 <PriceColumn
                   primary={inputPrice.primary}
                   official={inputPrice.official}
@@ -467,7 +636,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               </div>
 
               {/* Right: Savings */}
-              <div className='col-span-12 md:col-span-2 flex items-center justify-center'>
+              <div className='col-span-12 flex items-center justify-center md:col-span-2'>
                 <SavingsBadge savings={savings} />
               </div>
             </div>

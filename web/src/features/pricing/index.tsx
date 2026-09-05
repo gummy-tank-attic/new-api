@@ -193,12 +193,12 @@ export function Pricing() {
               <h1 className='text-foreground text-3xl font-semibold tracking-tight sm:text-4xl sm:leading-tight'>
                 {t('Model Square')}
               </h1>
-              <p className='text-muted-foreground mt-2.5 text-base leading-relaxed'>
+              <p className='text-muted-foreground mt-2.5 text-sm leading-relaxed sm:text-base'>
                 {isLoading
                   ? t('Loading model prices…')
-                  : t('This site currently has {{count}} models enabled', {
-                      count: allModels.length,
-                    })}
+                  : t(
+                      'Each model is quoted at the upstream official list price. Actual billing uses only your group ratio—with no hidden multipliers or extra fees.'
+                    )}
               </p>
             </div>
             {isRefreshing ? (

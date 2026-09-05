@@ -115,14 +115,14 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
 
         {/* Scheme A Luxury Callout Banner (方案 A 高光导读卡) */}
         {groupIntroDisplay ? (
-          <div className='relative flex flex-wrap items-center justify-between gap-3.5 rounded-2xl border border-amber-500/25 bg-gradient-to-r from-amber-500/[0.08] via-amber-500/[0.04] to-transparent dark:from-amber-500/[0.12] dark:via-amber-500/[0.05] dark:to-transparent p-2.5 sm:px-4 sm:py-2.5 shadow-2xs backdrop-blur-xs'>
-            <div className='flex items-center gap-2.5 min-w-0 flex-1'>
-              <span className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 shadow-2xs ring-1 ring-amber-500/20'>
+          <div className='relative flex flex-wrap items-center justify-between gap-3.5 rounded-2xl border border-amber-500/25 bg-gradient-to-r from-amber-500/[0.08] via-amber-500/[0.04] to-transparent p-2.5 shadow-2xs backdrop-blur-xs sm:px-4 sm:py-2.5 dark:from-amber-500/[0.12] dark:via-amber-500/[0.05] dark:to-transparent'>
+            <div className='flex min-w-0 flex-1 items-center gap-2.5'>
+              <span className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-700 shadow-2xs ring-1 ring-amber-500/20 dark:text-amber-300'>
                 <Sparkles className='h-3.5 w-3.5' />
               </span>
-              <div className='flex items-center min-w-0'>
+              <div className='flex min-w-0 items-center'>
                 <p
-                  className='text-foreground text-[14px] font-bold leading-relaxed tracking-tight'
+                  className='text-foreground/90 text-[13.5px] leading-relaxed font-medium sm:text-[14px]'
                   title={groupIntroDisplay}
                 >
                   {groupIntroDisplay}
@@ -131,9 +131,9 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
             </div>
 
             {/* Right: View Mode Toggle (Grid vs Table) */}
-            <div className='flex items-center gap-2.5 ml-auto shrink-0'>
+            <div className='ml-auto flex shrink-0 items-center gap-2.5'>
               <div
-                className='bg-background/80 dark:bg-muted/80 ring-border/50 inline-flex rounded-full p-1 ring-1 shadow-2xs backdrop-blur-xs'
+                className='bg-background/80 dark:bg-muted/80 ring-border/50 inline-flex rounded-full p-1 shadow-2xs ring-1 backdrop-blur-xs'
                 role='group'
                 aria-label={t('View mode')}
               >
@@ -169,9 +169,9 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
             </div>
           </div>
         ) : (
-          <div className='flex items-center justify-end min-h-[36px]'>
+          <div className='flex min-h-[36px] items-center justify-end'>
             <div
-              className='bg-muted/80 ring-border/50 inline-flex rounded-full p-1 ring-1 shadow-2xs'
+              className='bg-muted/80 ring-border/50 inline-flex rounded-full p-1 shadow-2xs ring-1'
               role='group'
               aria-label={t('View mode')}
             >
@@ -236,15 +236,6 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
           onModelClick={props.onModelClick}
         />
       )}
-
-      {/* 4. Elegant Minimalist Pricing Rule Footer */}
-      <div className='pt-1 text-center'>
-        <p className='text-muted-foreground/75 text-xs leading-relaxed'>
-          {t(
-            'Each model is quoted at the upstream official list price. Actual billing uses only your group ratio—with no hidden multipliers or extra fees.'
-          )}
-        </p>
-      </div>
     </div>
   )
 }

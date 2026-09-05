@@ -15,6 +15,13 @@ Before merging or deploying an upstream update, preserve and regression-check:
   - upstream New API/One API changes to root `/` or home routes must NEVER overwrite `web/src/features/home/`; merge conflicts must unconditionally keep MetaRtr (`ours`);
   - database `options.HomePageContent` is maintained empty so that dynamic client rendering is 100% driven by MetaRtr React code;
 - pricing page grouping, ordering (including `VENDOR_MODEL_DISPLAY_ORDER` in `constants.ts` and intelligent version self-adaptation `getModelEffectiveScore` in `model-helpers.ts`), presentation, group descriptions, and i18n;
+- pricing page title and subtitle contract: the subtitle under the main `h1` must strictly display the official upstream price & transparent ratio commitment (`t('Each model is quoted at the upstream official list price. Actual billing uses only your group ratio—with no hidden multipliers or extra fees.')`) instead of the upstream model count text (`This site currently has...`); the bottom duplicate text is removed to maintain a compact, clean layout;
+- group pill single-line defensive sanitation: `formatGroupDisplayName` in `group-price-cards.tsx` must be preserved to prevent multi-line or bilingual newline inputs from expanding pill heights unevenly;
+- Inter Variable typography system and antialiasing contract:
+  - `@fontsource-variable/inter` package in `web/package.json` and `@import '@fontsource-variable/inter';` in `web/src/styles/index.css` must NEVER be removed;
+  - `--font-sans` and `--font-inter` in `web/src/styles/theme.css` must remain Inter-first with complete CJK fallbacks (`'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', sans-serif;`) to prevent Windows faux-bold rendering bugs;
+  - `html` and `body` in `web/src/styles/index.css` must retain `-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility;` to eliminate DirectWrite subpixel color fringing;
+  - small-size typography in `supplier-price-table.tsx` (model names, prices, badges) must NOT have `tracking-tight` re-applied, and callout banner in `supplier-pricing-layout.tsx` must maintain `font-medium` (500) rather than heavy `font-bold` (700);
 - custom pricing consumers of `getDynamicPricingTiers` must narrow
   `DynamicPricingTier` before reading token-price fields (for example,
   `'inputPrice' in tier` or a shared type guard), because task tiers expose a
