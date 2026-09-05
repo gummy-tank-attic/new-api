@@ -22,6 +22,12 @@ Before merging or deploying an upstream update, preserve and regression-check:
   - `--font-sans` and `--font-inter` in `web/src/styles/theme.css` must remain Inter-first with complete CJK fallbacks (`'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', sans-serif;`) to prevent Windows faux-bold rendering bugs;
   - `html` and `body` in `web/src/styles/index.css` must retain `-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility;` to eliminate DirectWrite subpixel color fringing;
   - small-size typography in `supplier-price-table.tsx` (model names, prices, badges) must NOT have `tracking-tight` re-applied, and callout banner in `supplier-pricing-layout.tsx` must maintain `font-medium` (500) rather than heavy `font-bold` (700);
+- 9-language i18n architecture and anti-contamination iron laws:
+  - `web/src/i18n/locales/` contains all 9 audited locales (`zh`, `zh-TW`, `en`, `es`, `pt`, `ja`, `fr`, `ru`, `vi`); upstream merges must NEVER overwrite `web/src/i18n/` wholesale;
+  - **MANDATORY AI-TRANSLATION (NO BATCH SCRIPTS)**: All audits and new translations must strictly be performed via neural LLM comprehension and reasoning. Automated batch translation scripts are strictly prohibited as they previously contaminated Chinese/English files with French strings;
+  - **Zero contamination**: English and Chinese dictionaries must remain 100% free of French/other language leaks; Traditional Chinese (`zh-TW`) must remain 100% free of Simplified Chinese and strictly adhere to Taiwan local IT terminology (`快取`, `分組價格`, `官方價格`, `節省幅度`, `計價規則`, `介面`, `存取`, `停用`, `啟用`, `自訂`, `即時`, `備用版本`);
+  - Minor/regional languages (`ja`, `fr`, `ru`, `vi`, `es`, `pt`) must maintain complete pricing, vendor, and protocol keys without falling back to raw English;
+  - Backend multi-locale error guidance: `i18n/locales/{zh-CN,zh-TW,en}.yaml` must retain MetaRtr custom user guidance (e.g., `quota.insufficient` pointing users to `www.metartr.com → 控制台/Console` to recharge);
 - custom pricing consumers of `getDynamicPricingTiers` must narrow
   `DynamicPricingTier` before reading token-price fields (for example,
   `'inputPrice' in tier` or a shared type guard), because task tiers expose a
