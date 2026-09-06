@@ -9,6 +9,10 @@ import type { PricingModel } from '../types'
 
 const expression =
   '(has(param("size") ?? "", "2048") || has(param("resolution") ?? "", "2K")) ? tier("2K", 200000 * (param("n") ?? 1.0)) : tier("1K", 133333.3333333333 * (param("n") ?? 1.0))'
+const clampedExpression = expression.replaceAll(
+  '(param("n") ?? 1.0)',
+  'max(param("n") ?? 1.0, 1.0)'
+)
 const model: PricingModel = {
   id: 1,
   model_name: 'gpt-image-2',
@@ -89,10 +93,18 @@ describe('per-image pricing', () => {
     expect(tiers[1]?.price).toBe(0.2)
   })
 
+  test('extracts prices when image count is clamped to at least one', () => {
+    const tiers = parseImageTiersFromExpr(clampedExpression)
+    expect(tiers.map((tier) => tier.label)).toEqual(['1K', '2K'])
+    expect(tiers[0]?.price).toBeCloseTo(0.1333333333333333)
+    expect(tiers[1]?.price).toBe(0.2)
+  })
+
   test.each([
     `(${expression}) * 2`,
     expression.replace('200000 *', 'p * 200000 *'),
     expression.replace('1.0', '2.0'),
+    clampedExpression.replace(', 1.0)', ', 2.0)'),
     `v2:${expression}`,
     `${expression}|||when(header("x") has "y") * 2`,
   ])('does not invent prices for unsupported expression %s', (expr) => {

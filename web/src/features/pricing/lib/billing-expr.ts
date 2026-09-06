@@ -346,7 +346,7 @@ export function parseImageTiersFromExpr(expression: string): ParsedImageTier[] {
       rest = remaining.slice(colon + 1).trim()
     }
     const match =
-      /^tier\(\s*("(?:[^"\\]|\\.)*")\s*,\s*(\d+(?:\.\d+)?)\s*\*\s*\(\s*param\(\s*"n"\s*\)\s*\?\?\s*1(?:\.0+)?\s*\)\s*\)$/.exec(
+      /^tier\(\s*("(?:[^"\\]|\\.)*")\s*,\s*(\d+(?:\.\d+)?)\s*\*\s*(?:\(\s*param\(\s*"n"\s*\)\s*\?\?\s*1(?:\.0+)?\s*\)|max\(\s*param\(\s*"n"\s*\)\s*\?\?\s*1(?:\.0+)?\s*,\s*1(?:\.0+)?\s*\))\s*\)$/.exec(
         branch
       )
     if (!match) return []
