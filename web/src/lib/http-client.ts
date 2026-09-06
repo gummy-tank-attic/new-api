@@ -231,15 +231,15 @@ api.interceptors.response.use(
   }
 )
 
-<<<<<<< HEAD
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
   if (config.skipAuth) {
     if (config.headers) {
       delete (config.headers as Record<string, unknown>).Authorization
       delete (config.headers as Record<string, unknown>).authorization
-=======
-api.interceptors.request.use(async (config) => {
-  if (config.singleUseAuthorization || config.headers.has('X-Security-Proof')) {
+    }
+    return config
+  }
+  if (config.singleUseAuthorization || config.headers?.has?.('X-Security-Proof')) {
     // Refresh before spending a proof/flow, never by replaying its request.
     config.skipAuthRefresh = true
     try {
@@ -249,7 +249,6 @@ api.interceptors.request.use(async (config) => {
       }
     } catch (error) {
       throw axios.AxiosError.from(error, undefined, config)
->>>>>>> v1.0.0-rc.34
     }
     return config
   }
