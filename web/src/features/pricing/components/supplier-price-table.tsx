@@ -35,6 +35,7 @@ import {
 import { resolveGroupSavingsOffPercent } from '../lib/group-discount'
 import {
   getConfiguredGroupRatio,
+  isPerImageExpressionModel,
   isTokenBasedModel,
 } from '../lib/model-helpers'
 import {
@@ -48,6 +49,7 @@ import {
   isVideoUpscaleModel,
 } from '../lib/video-pricing'
 import type { PriceType, PricingModel, TokenUnit } from '../types'
+import { ImageTierPrices } from './image-tier-prices'
 
 export type PriceMode = 'group' | 'official'
 
@@ -90,8 +92,9 @@ function getModelUnitPrice(
         if (type === 'input') val = Number(tier.inputPrice) || 0
         else if (type === 'output') val = Number(tier.outputPrice) || 0
         else if (type === 'cache') val = Number(tier.cacheReadPrice) || 0
-        else if (type === 'create_cache')
+        else if (type === 'create_cache') {
           val = Number(tier.cacheCreatePrice) || 0
+        }
 
         if (val > 0) {
           return formatDynamicUnitPrice(val, {
@@ -201,16 +204,29 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
     )
   }, [isGroupMode, props.selectedGroup, props.groupRatio])
 
-  const isVideoTable =
-    props.models.length > 0 && props.models.every(isByteDanceOrVideoModel)
+  const isImageTable =
+    props.models.length > 0 && props.models.every(isPerImageExpressionModel)
+  const isGenerationTable =
+    props.models.length > 0 &&
+    props.models.every(
+      (model) =>
+        isByteDanceOrVideoModel(model) || isPerImageExpressionModel(model)
+    )
 
   return (
     <div className={cn('w-full space-y-3', props.className)}>
       {/* 1. Refined Column Legend Header */}
-      <div className='text-muted-foreground border-border/40 hidden grid-cols-12 items-center gap-4 border-b px-5 py-2.5 text-xs font-medium md:grid'>
+      <div
+        className={cn(
+          'text-muted-foreground border-border/40 hidden grid-cols-12 items-center gap-4 border-b px-5 py-2.5 text-xs font-medium',
+          !isImageTable && 'md:grid'
+        )}
+      >
         <div className='col-span-4'>{t('Model', '模型名称')}</div>
-        {isVideoTable ? (
-          <div className='col-span-6 text-center'>
+        {isGenerationTable ? (
+          <div
+            className={isImageTable ? 'col-span-8' : 'col-span-6 text-center'}
+          >
             {t('Generation Mode & Pricing', '生成模式与计费价格')}
           </div>
         ) : (
@@ -232,9 +248,11 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
             </div>
           </>
         )}
-        <div className='col-span-2 text-center'>
-          {t('Discount', '优惠幅度')}
-        </div>
+        {!isImageTable && (
+          <div className='col-span-2 text-center'>
+            {t('Discount', '优惠幅度')}
+          </div>
+        )}
       </div>
 
       {/* 2. Floating Card-Rows List */}
@@ -242,10 +260,57 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
         {props.models.map((model) => {
           const isTimeTiered = isTimeTieredModel(model)
 
+          if (isPerImageExpressionModel(model)) {
+            return (
+              <div
+                key={model.model_name}
+                className='group border-border/70 bg-card/80 hover:border-primary/40 hover:bg-card relative grid grid-cols-1 items-center gap-4 rounded-xl border px-5 py-3.5 shadow-2xs backdrop-blur-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs md:grid-cols-12'
+              >
+                <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-4'>
+                  <button
+                    type='button'
+                    className='text-foreground group-hover:text-primary min-w-0 truncate rounded-sm text-left font-sans text-[15px] font-medium antialiased transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current sm:text-[15.5px] sm:font-semibold'
+                    onClick={() => props.onModelClick?.(model.model_name)}
+                  >
+                    {model.model_name}
+                  </button>
+                  <CopyButton
+                    value={model.model_name}
+                    size='icon'
+                    variant='ghost'
+                    className='text-muted-foreground/40 hover:text-foreground size-5 shrink-0'
+                    iconClassName='size-3'
+                  />
+                </div>
+                <div className='col-span-12 min-w-0 md:col-span-6'>
+                  {!isGroupMode && (
+                    <div className='text-muted-foreground mb-1 text-xs'>
+                      {t('Base Price')}
+                    </div>
+                  )}
+                  <ImageTierPrices
+                    model={model}
+                    layout='table'
+                    groupRatio={
+                      isGroupMode
+                        ? getConfiguredGroupRatio(
+                            props.groupRatio,
+                            selectedGroup ?? ''
+                          )
+                        : 1
+                    }
+                  />
+                </div>
+              </div>
+            )
+          }
+
           // Video Model Branch
           if (isByteDanceOrVideoModel(model)) {
             const isUpscale = isVideoUpscaleModel(model)
             const tierGroups = isUpscale ? [] : getVideoModelTierGroups(model)
+            const upscaleRatio =
+              isGroupMode && savings != null ? (100 - savings) / 100 : 1
 
             return (
               <div
@@ -271,15 +336,15 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
 
                 {/* Center: Video Mode Pricing */}
                 <div className='col-span-12 md:col-span-6'>
-                  {isUpscale ? (
+                  {isUpscale && (
                     <div className='grid grid-cols-1 gap-2 sm:grid-cols-3'>
                       <PriceColumn
-                        primary={`$${(0.0091 * (isGroupMode ? (savings != null ? (100 - savings) / 100 : 1) : 1) * priceRate).toFixed(4)}`}
+                        primary={`$${(0.0091 * upscaleRatio * priceRate).toFixed(4)}`}
                         official={`$${(0.013 * priceRate).toFixed(4)}`}
                         unit='/ 秒起'
                       />
                       <PriceColumn
-                        primary={`$${(7.1848 * (isGroupMode ? (savings != null ? (100 - savings) / 100 : 1) : 1) * priceRate).toFixed(2)}`}
+                        primary={`$${(7.1848 * upscaleRatio * priceRate).toFixed(2)}`}
                         official={`$${(10.2639 * priceRate).toFixed(2)}`}
                         unit='/ 1M'
                       />
@@ -292,7 +357,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                         </span>
                       </div>
                     </div>
-                  ) : tierGroups.length > 0 ? (
+                  )}
+                  {!isUpscale && tierGroups.length > 0 && (
                     <div className='grid grid-cols-1 gap-2.5 sm:grid-cols-3'>
                       {tierGroups.slice(0, 3).map((tg) => {
                         const noneBilled =
@@ -353,7 +419,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                         )
                       })}
                     </div>
-                  ) : (
+                  )}
+                  {!isUpscale && tierGroups.length === 0 && (
                     <div className='text-muted-foreground py-2 text-center text-sm'>
                       {t('Special billing expression')}
                     </div>

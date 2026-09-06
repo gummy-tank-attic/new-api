@@ -74,7 +74,12 @@ import {
   type DynamicPriceEntry,
 } from '../lib/dynamic-price'
 import { parseTags } from '../lib/filters'
-import { getAvailableGroups, isTokenBasedModel } from '../lib/model-helpers'
+import {
+  getAvailableGroups,
+  getConfiguredGroupRatio,
+  isPerImageExpressionModel,
+  isTokenBasedModel,
+} from '../lib/model-helpers'
 import { formatFixedPrice, formatGroupPrice } from '../lib/price'
 import {
   evaluateTaskUsageExamples,
@@ -82,16 +87,6 @@ import {
   getTaskNumberFields,
 } from '../lib/task-expr'
 import { getTaskMatrixDisplayTiers } from '../lib/task-matrix-display'
-import type {
-  ModelCapability,
-  PriceType,
-  PricingModel,
-  TokenUnit,
-} from '../types'
-import { DynamicPricingBreakdown } from './dynamic-pricing-breakdown'
-import { ModelBillingModeBadge } from './model-billing-mode-badge'
-import { ModelDetailsApi } from './model-details-api'
-import { ModelDetailsPerformance } from './model-details-performance'
 import {
   formatHumanFriendlyTierLabel,
   getModelSupportedResolutions,
@@ -101,6 +96,17 @@ import {
   isVideoUpscaleModel,
   parseVideoUpscaleTiers,
 } from '../lib/video-pricing'
+import type {
+  ModelCapability,
+  PriceType,
+  PricingModel,
+  TokenUnit,
+} from '../types'
+import { DynamicPricingBreakdown } from './dynamic-pricing-breakdown'
+import { ImageTierPrices } from './image-tier-prices'
+import { ModelBillingModeBadge } from './model-billing-mode-badge'
+import { ModelDetailsApi } from './model-details-api'
+import { ModelDetailsPerformance } from './model-details-performance'
 
 // ----------------------------------------------------------------------------
 // Local UI helpers
@@ -975,6 +981,10 @@ function PriceSection(props: {
     return null
   }
 
+  if (isPerImageExpressionModel(props.model)) {
+    return null
+  }
+
   if (dynamicSummary) {
     if (dynamicSummary.isSpecialExpression) {
       return (
@@ -1298,6 +1308,32 @@ function GroupPricingSection(props: {
         priceRate={props.priceRate}
         availableGroups={availableGroups}
       />
+    )
+  }
+
+  if (isPerImageExpressionModel(props.model)) {
+    return (
+      <section>
+        <SectionTitle>{t('Pricing by Group')}</SectionTitle>
+        <AutoGroupChain model={props.model} autoGroups={props.autoGroups} />
+        <div className='divide-border divide-y'>
+          {availableGroups.map((group) => (
+            <div
+              key={group}
+              className='grid min-w-0 grid-cols-1 items-center gap-4 py-5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]'
+            >
+              <span className='min-w-0 text-sm break-words'>{group}</span>
+              <ImageTierPrices
+                model={props.model}
+                groupRatio={getConfiguredGroupRatio(props.groupRatio, group)}
+                showRechargePrice={showRechargePrice}
+                priceRate={props.priceRate}
+                usdExchangeRate={props.usdExchangeRate}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
     )
   }
 
@@ -1651,12 +1687,14 @@ export function ModelDetailsContent(props: ModelDetailsContentProps) {
               tokenUnit={props.tokenUnit}
               showRechargePrice={showRechargePrice}
             />
-            {isDynamic && !isByteDanceOrVideoModel(props.model) && (
-              <DynamicPricingBreakdown
-                billingExpr={props.model.billing_expr}
-                usageSchema={props.model.billing_usage_schema}
-              />
-            )}
+            {isDynamic &&
+              !isByteDanceOrVideoModel(props.model) &&
+              !isPerImageExpressionModel(props.model) && (
+                <DynamicPricingBreakdown
+                  billingExpr={props.model.billing_expr}
+                  usageSchema={props.model.billing_usage_schema}
+                />
+              )}
             <GroupPricingSection
               model={props.model}
               groupRatio={props.groupRatio}

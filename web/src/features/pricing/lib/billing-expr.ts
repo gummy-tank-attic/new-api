@@ -326,6 +326,47 @@ export function parseTiersFromExpr(exprStr: string): ParsedTier[] {
   }
 }
 
+export type ParsedImageTier = { label: string; price: number }
+
+// Only quote complete, canonical per-image branches. Never evaluate admin code
+// or drop additional charges/multipliers while extracting a display price.
+export function parseImageTiersFromExpr(expression: string): ParsedImageTier[] {
+  const { version, body } = stripExprVersion(expression.trim())
+  if (version !== 1 || body.includes('|||')) return []
+  const tiers: ParsedImageTier[] = []
+  let remaining = unwrapOuterParens(body)
+  while (remaining) {
+    const question = findTaskTopLevelCharacter(remaining, '?')
+    let branch = remaining
+    let rest = ''
+    if (question >= 0) {
+      const colon = findTaskTernaryColon(remaining, question)
+      if (colon < 0) return []
+      branch = remaining.slice(question + 1, colon).trim()
+      rest = remaining.slice(colon + 1).trim()
+    }
+    const match =
+      /^tier\(\s*("(?:[^"\\]|\\.)*")\s*,\s*(\d+(?:\.\d+)?)\s*\*\s*\(\s*param\(\s*"n"\s*\)\s*\?\?\s*1(?:\.0+)?\s*\)\s*\)$/.exec(
+        branch
+      )
+    if (!match) return []
+    const price = Number(match[2]) / 1_000_000
+    if (!Number.isFinite(price) || price <= 0) return []
+    let label: string
+    try {
+      label = JSON.parse(match[1]) as string
+    } catch {
+      return []
+    }
+    if (!label || tiers.some((tier) => tier.label === label)) return []
+    tiers.push({ label, price })
+    remaining = rest
+  }
+  return tiers.sort((a, b) =>
+    a.label.localeCompare(b.label, 'en', { numeric: true })
+  )
+}
+
 function findTaskTopLevelCharacter(
   expression: string,
   target: string,

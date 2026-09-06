@@ -30,6 +30,12 @@ import type { PricingModel } from '../types'
 // Model Helper Utilities
 // ----------------------------------------------------------------------------
 
+export function isPerImageExpressionModel(model: PricingModel): boolean {
+  return (
+    model.model_name === 'gpt-image-2' && model.billing_mode === 'tiered_expr'
+  )
+}
+
 /**
  * Get available groups for a model
  */

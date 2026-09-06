@@ -32,11 +32,15 @@ import {
   getDynamicPricingSummary,
   isUnconfiguredTaskUsageModel,
 } from '../lib/dynamic-price'
-import { getTaskNumberFields } from '../lib/task-expr'
 import { parseTags } from '../lib/filters'
-import { isTokenBasedModel } from '../lib/model-helpers'
+import {
+  isTokenBasedModel,
+  isPerImageExpressionModel,
+} from '../lib/model-helpers'
 import { formatPrice, formatRequestPrice } from '../lib/price'
+import { getTaskNumberFields } from '../lib/task-expr'
 import type { PricingModel, TokenUnit } from '../types'
+import { ImageTierPrices } from './image-tier-prices'
 import { ModelBillingModeBadge } from './model-billing-mode-badge'
 import { ModelPerfBadge, type ModelPerfBadgeData } from './model-perf-badge'
 
@@ -84,10 +88,7 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   const dynamicSummary = isDynamicPricing
     ? getDynamicPricingSummary(props.model, dynamicPriceOptions)
     : null
-  const cardExamplePrice = getCardExamplePrice(
-    props.model,
-    dynamicPriceOptions
-  )
+  const cardExamplePrice = getCardExamplePrice(props.model, dynamicPriceOptions)
   const showTaskFieldLabels =
     getTaskNumberFields(props.model.billing_usage_schema).length > 1
 
@@ -104,7 +105,17 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   }
 
   let priceSummary: ReactNode
-  if (dynamicSummary) {
+  if (isPerImageExpressionModel(props.model)) {
+    priceSummary = (
+      <ImageTierPrices
+        model={props.model}
+        groupRatio={dynamicPriceOptions.groupRatioMultiplier}
+        showRechargePrice={showRechargePrice}
+        priceRate={priceRate}
+        usdExchangeRate={usdExchangeRate}
+      />
+    )
+  } else if (dynamicSummary) {
     if (dynamicSummary.isSpecialExpression) {
       priceSummary = (
         <span className='min-w-0'>
@@ -147,7 +158,7 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
             )
           })}
           {cardExamplePrice && (
-            <span className='text-muted-foreground/70 min-w-0 max-w-full truncate text-xs'>
+            <span className='text-muted-foreground/70 max-w-full min-w-0 truncate text-xs'>
               {cardExamplePrice.label} ≈ {cardExamplePrice.formatted}
             </span>
           )}
@@ -311,11 +322,13 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
               {item}
             </span>
           ))}
-          {!dynamicSummary?.isTaskUsage && !isUnconfiguredTaskUsage && (
-            <span className='text-muted-foreground/50 text-xs'>
-              {tokenUnitLabel}
-            </span>
-          )}
+          {!isPerImageExpressionModel(props.model) &&
+            !dynamicSummary?.isTaskUsage &&
+            !isUnconfiguredTaskUsage && (
+              <span className='text-muted-foreground/50 text-xs'>
+                {tokenUnitLabel}
+              </span>
+            )}
           {hiddenCount > 0 && (
             <span className='text-muted-foreground/40 text-xs'>
               +{hiddenCount}
