@@ -23,6 +23,7 @@ For commercial licensing, please contact support@quantumnous.com
  * Load the package once via dynamic import so the initial route shell
  * (home / layout) does not pay for every vendor glyph up front.
  */
+import { toc } from '@lobehub/icons'
 import type React from 'react'
 import { useEffect, useState } from 'react'
 
@@ -206,4 +207,12 @@ export function getLobeIcon(
   size: number = 20
 ): React.ReactNode {
   return <LobeIcon iconName={iconName} size={size} />
+}
+
+// The selector uses the same installed icon registry as the renderer.
+export function getLobeIconNames(): string[] {
+  const names = (toc as Array<{ id: string; param?: { hasColor?: boolean } }>).flatMap((icon) =>
+    icon.param?.hasColor ? [icon.id, `${icon.id}.Color`] : [icon.id]
+  )
+  return [...new Set([...names, ...Object.keys(CUSTOM_ICONS)])].sort()
 }

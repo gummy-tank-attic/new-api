@@ -23,6 +23,7 @@ import { toast } from 'sonner'
 import {
   applyAuthRotation,
   clearAuthentication,
+  getFreshAuthHeaders,
   refreshAuthentication,
 } from '@/lib/auth-session'
 import { getServerErrorMessageKey } from '@/lib/server-error-message'
@@ -38,6 +39,7 @@ declare module 'axios' {
     skipAuth?: boolean
     authRetry?: boolean
     acceptAuthRotation?: boolean
+    singleUseAuthorization?: boolean
   }
 }
 
@@ -229,11 +231,25 @@ api.interceptors.response.use(
   }
 )
 
+<<<<<<< HEAD
 api.interceptors.request.use((config) => {
   if (config.skipAuth) {
     if (config.headers) {
       delete (config.headers as Record<string, unknown>).Authorization
       delete (config.headers as Record<string, unknown>).authorization
+=======
+api.interceptors.request.use(async (config) => {
+  if (config.singleUseAuthorization || config.headers.has('X-Security-Proof')) {
+    // Refresh before spending a proof/flow, never by replaying its request.
+    config.skipAuthRefresh = true
+    try {
+      const headers = await getFreshAuthHeaders()
+      for (const [name, value] of Object.entries(headers)) {
+        config.headers.set(name, value)
+      }
+    } catch (error) {
+      throw axios.AxiosError.from(error, undefined, config)
+>>>>>>> v1.0.0-rc.34
     }
     return config
   }

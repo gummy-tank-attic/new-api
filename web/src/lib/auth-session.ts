@@ -76,6 +76,10 @@ const authClient = axios.create({
   // Same cap as http-client. Authenticated routes await bootstrap; no timeout
   // leaves Ctrl+F5 hanging on a stuck refresh / Web Lock.
   timeout: 20_000,
+  headers: {
+    // no-store forbids storage; no-cache also revalidates any older cached response.
+    'Cache-Control': 'no-cache, no-store',
+  },
 })
 
 const refreshRaceDelays = [80, 200, 500] as const

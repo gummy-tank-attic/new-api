@@ -51,6 +51,14 @@ Tech stack snapshot: Go 1.22+ / Gin / GORM · React 19 / TypeScript / Rsbuild ·
 - A separate function is appropriate when it represents reusable behavior, a required interface/framework callback, an exported API, a test fixture, or complex business logic that deserves direct tests.
 - If a single-use helper is kept, its name must describe a durable domain concept rather than a mechanical step extracted only to shorten the caller.
 
+### Authentication Security (OWASP Mandatory)
+
+- Any implementation, modification, or review involving authentication-related flows MUST comply with the applicable requirements of the latest stable [OWASP Application Security Verification Standard (ASVS)](https://owasp.org/www-project-application-security-verification-standard/) and the relevant [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/). This applies to both backend and frontend changes, including registration, login/logout, password changes and recovery, email verification, MFA, WebAuthn/Passkeys, OAuth/OIDC, account linking/unlinking, sessions, JWTs, API credentials, and re-authentication for sensitive actions.
+- Before changing these flows, read the applicable OWASP guidance, starting with the [Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) and [Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html). Consult the password storage, forgot password, MFA, OAuth, and CSRF guidance when those mechanisms are involved. Identify the applicable controls before implementation; existing code is not a justification for retaining or introducing an insecure pattern.
+- Enforce security controls on the server. Apply the relevant requirements for credential storage and transport, resistance to account enumeration and brute force, CSRF and replay protection, token/challenge expiry and single use where required, protocol-specific verification, session rotation and invalidation, and re-authentication for sensitive account changes. Frontend checks MUST NOT substitute for server-side enforcement, and recovery or alternative login paths MUST NOT bypass the required authentication assurance.
+- Authentication audit events MUST exclude passwords, verification codes, recovery codes, private keys, and usable session or authentication tokens. Record enough non-secret context to investigate authentication failures and sensitive account changes.
+- Verify affected security controls with focused regression tests, including applicable failure, expiry, replay, and bypass cases, following the existing backend/frontend test conventions. Record the OWASP references (including the ASVS version and requirement IDs when used), validation performed, and any unresolved gaps in the change summary or PR description. Do not claim compliance or completion while an applicable security requirement remains unmet or unverified.
+
 ### Backend Rules
 
 **relaykit module independence:** The `relaykit/` Go module MUST remain independently buildable.
@@ -124,6 +132,8 @@ Do NOT directly import or call `encoding/json` in business code. `json.RawMessag
 - Avoid hand-written assertion helpers unless they encode a reusable project-specific invariant.
 - When cleaning tests, preserve meaningful regression coverage. If a deleted test covered a real contract indirectly, replace it with a smaller test that asserts that contract directly.
 
+**Documentation files:** Do NOT add new files under `docs/` or any of its subdirectories unless the user explicitly requests it.
+
 ### Frontend Rules
 
 - The parent MetaRtr production workflow uses `web/package-lock.json`, npm, and
@@ -131,7 +141,9 @@ Do NOT directly import or call `encoding/json` in business code. `json.RawMessag
   development may use Bun with `web/bun.lock`. Do not regenerate both lockfiles
   incidentally, and do not switch the production workflow during an upgrade
   without reviewing that transition.
-- Frontend UI text must support i18n with `i18next`/`react-i18next`. Use flat JSON locale files in `web/src/i18n/locales/{lang}.json`, with English source strings as keys. Boot: `index.html` prefetches `/locales/{lang}.json` in parallel with JS; do not bundle all 7 locales into the main JS, and do not use `i18next-browser-languagedetector`. See parent `../docs/FRONTEND_I18N.md`.
+- **Reuse existing UI components first (mandatory):** Before implementing or changing frontend UI, read `web/AGENTS.md` and the project `shadcn-ui` skill, search `web/src/components/` and the relevant feature for existing components, and read matching implementations and call sites. Do not start from custom markup or registry installation without checking the repository first.
+- Prefer the project's shared business components over lower-level UI primitives when they cover the use case. Evaluate existing props, composition, and a compatible extension before introducing a replacement.
+- Frontend UI text must support i18n with `i18next`/`react-i18next`. Use flat JSON locale files in `web/src/i18n/locales/{lang}.json`, with English source strings as keys. Boot: `index.html` prefetches `/locales/{lang}.json` in parallel with JS; do not bundle all locales into the main JS, and do not use `i18next-browser-languagedetector`. See parent `../docs/FRONTEND_I18N.md`.
 - In React components, use `useTranslation()` and call `t('English key')` for user-facing text.
 - **Dialog / Portal ref timing:** Use `useState + useCallback` callback ref (not `useRef`) whenever a `useEffect` must fire after a Portal-mounted DOM node is available. `useRef` updates silently without re-render; inside Radix `<Dialog>` the Portal may mount one render cycle late, so `ref.current` will be `null` on the first effect run. See `README.md §` "Frontend Known Gotchas" for the full pattern and background.
 - Follow `web/AGENTS.md` for detailed frontend conventions, including TypeScript, component structure, styling, accessibility, testing, and build checks.
