@@ -54,7 +54,7 @@ export function LoadingSkeleton(props: LoadingSkeletonProps) {
 
 function CardContentSkeleton() {
   return (
-    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
+    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'>
       {Array.from({ length: 9 }).map((_, i) => (
         <div key={i} className='rounded-xl border p-5'>
           <div className='flex items-start justify-between gap-3'>
