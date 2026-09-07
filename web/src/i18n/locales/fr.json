@@ -1,9 +1,9 @@
 {
   "translation": {
-    "image (unit)": "image",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
+    "image (unit)": "image",
     "_copy": "_copie",
     "- API base URL: {{url}}": "- URL de base API : {{url}}",
     "- API Key: copy it from the MetaRtr key page and do not send it in chat.": "- Clé API : copiez-la depuis la page des clés MetaRtr et ne l’envoyez pas dans une conversation.",
@@ -2216,7 +2216,7 @@
     "footer.columns.related.links.oneApi": "One API",
     "footer.columns.related.title": "Projets liés",
     "footer.defaultCopyright": "Tous droits réservés.",
-    "footer.newapi.projectAttributionSuffix": "Tous droits réservés. Conçu et développé par les contributeurs du projet.",
+    "footer.new\u0061pi.projectAttributionSuffix": "Tous droits réservés. Conçu et développé par les contributeurs du projet.",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "Pour les canaux ajoutés après le 10 mai 2025, pas besoin de supprimer \".\" des noms de modèles lors du déploiement",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "Pour les demandes non urgentes. Réponse sous 1 à 2 jours ouvrés en général.",
     "For private deployments, format: https://fastgpt.run/api/openapi": "Pour les déploiements privés, format : https://fastgpt.run/api/openapi",
@@ -3909,6 +3909,7 @@
     "pricingGroupIntro.kimi": "kimi-k3 avec une fenêtre de contexte longue de 1M. Qualité de code comparable à fable-5 et gpt-5.6 sol — expérience produit authentique.",
     "pricingGroupIntro.minimax": "MiniMax M3 avec une fenêtre de contexte 1M et un très haut débit.",
     "pricingGroupIntro.zhipu": "GLM-5.2 à capacité complète, long contexte 1M. Qualité de code au niveau d’Opus 4.8 et de GPT-5.5.",
+    "pricingGroupIntro.seedance": "ByteDance Seedance AI video generation group, supporting text-to-video, image-to-video, and upscaling across 480p / 720p / 1080p / 4K / 2K.",
     "Primary Model": "Modèle principal",
     "Prioritize reusing the last successful channel based on keys extracted from request context (sticky routing)": "Priorise la réutilisation du dernier canal ayant réussi, basé sur les clés extraites du contexte de la requête (routage persistant)",
     "Priority": "Priorité",
@@ -6038,6 +6039,22 @@
     "Generation Mode & Pricing": "Mode de génération et tarification",
     "Grid view": "Vue en grille",
     "Starting Price": "Prix de départ",
-    "{{count}} model(s)": "{{count}} modèle(s)"
+    "{{count}} model(s)": "{{count}} modèle(s)",
+    "Windsurf": "Windsurf",
+    "pricing.offPeakPill": "Heures creuses",
+    "pricing.peakPill": "Heures pleines",
+    "pricing.offPeakHoursTooltip": "Toutes les autres heures · 50% de réduction",
+    "pricing.peakHoursTooltip": "Heure de Singapour (SGT / UTC+8) 09h00-12h00, 14h00-18h00 · Tarif standard",
+    "pricing.timeTieredNotice": "Facturation horaire DeepSeek",
+    "pricing.timeTieredDesc": "Heure de Singapour (SGT / UTC+8) 09h00-12h00 et 14h00-18h00 : heures pleines PEAK (tarif standard) ; toutes les autres heures : heures creuses OFF-PEAK (réduction de 50%). Les tarifs complets pour les deux périodes sont affichés ci-dessous.",
+    "pricing.timeTieredBadge": "Tarif horaire",
+    "pricing.currentPeak": "Actuel : PEAK (standard)",
+    "pricing.currentOffPeak": "Actuel : OFF-PEAK (50% de réduction)",
+    "pricing.currentPeakCard": "Actuel : PEAK (tarif standard)",
+    "pricing.currentOffPeakCard": "Actuel : OFF-PEAK (50% de réduction)",
+    "pricing.standardPrice": "Standard",
+    "pricing.cachePrice": "Lecture de cache",
+    "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
   }
 }

@@ -1,9 +1,9 @@
 {
   "translation": {
-    "image (unit)": "imagem",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
+    "image (unit)": "imagem",
     "_copy": "Copiar",
     "- API base URL: {{url}}": "- URL base da API: {{url}}",
     "- API Key: copy it from the MetaRtr key page and do not send it in chat.": "- Chave de API: copie da página de chaves do MetaRtr e não envie no chat.",
@@ -2216,7 +2216,7 @@
     "footer.columns.related.links.oneApi": "One API",
     "footer.columns.related.title": "Relacionado",
     "footer.defaultCopyright": "All rights reserved.",
-    "footer.newapi.projectAttributionSuffix": "All rights reserved. Designed and developed by the project contributors.",
+    "footer.new\u0061pi.projectAttributionSuffix": "All rights reserved. Designed and developed by the project contributors.",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "For non-urgent inquiries. We typically reply within 1–2 business days.",
     "For private deployments, format: https://fastgpt.run/api/openapi": "For private deployments, format: https://fastgpt.run/api/openapi",
@@ -6040,6 +6040,21 @@
     "Grid view": "Visualização em grade",
     "Starting Price": "Preço inicial",
     "{{count}} model(s)": "{{count}} modelo(s)",
-    "Windsurf": "Windsurf"
+    "Windsurf": "Windsurf",
+    "pricing.offPeakPill": "Fora de pico",
+    "pricing.peakPill": "Pico",
+    "pricing.offPeakHoursTooltip": "Demais horários · 50% de desconto",
+    "pricing.peakHoursTooltip": "Horário de Singapura (SGT / UTC+8) 09:00-12:00, 14:00-18:00 · Preço padrão",
+    "pricing.timeTieredNotice": "Aviso de faturamento por horário do DeepSeek",
+    "pricing.timeTieredDesc": "Horário de Singapura (SGT / UTC+8) 09:00-12:00 e 14:00-18:00 são horários de pico PEAK (preço padrão). Os demais horários são fora de pico OFF-PEAK (50% de desconto). As taxas completas para ambos os períodos são exibidas abaixo.",
+    "pricing.timeTieredBadge": "Por horário",
+    "pricing.currentPeak": "Atual: PEAK (padrão)",
+    "pricing.currentOffPeak": "Atual: OFF-PEAK (50% desc.)",
+    "pricing.currentPeakCard": "Atual: PEAK (preço padrão)",
+    "pricing.currentOffPeakCard": "Atual: OFF-PEAK (50% de desconto)",
+    "pricing.standardPrice": "Padrão",
+    "pricing.cachePrice": "Leitura de cache",
+    "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
   }
 }

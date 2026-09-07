@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { type TFunction } from 'i18next'
+import type { TFunction } from 'i18next'
 
 import type { TokenUnit } from './types'
 
@@ -276,7 +276,14 @@ export const VENDOR_MODEL_DISPLAY_ORDER: Record<string, readonly string[]> = {
     'gemini-2.5-flash',
   ],
   // —— DeepSeek ——
-  DeepSeek: ['deepseek-v4-pro', 'deepseek-v4-flash'],
+  DeepSeek: [
+    'deepseek-v4-pro-0813',
+    'deepseek-v4-flash-0731',
+    'deepseek-v4-flash-vision-exp',
+    'deepseek-v4-pro',
+    'deepseek-v4-flash',
+    'DeepSeek-V3.2',
+  ],
   // —— 智谱 ——
   ZHIPU: ['glm-5.3', 'glm-5.2', 'glm-5.1'],
   // —— Moonshot / Kimi ——
@@ -300,6 +307,15 @@ export const VENDOR_MODEL_DISPLAY_ORDER: Record<string, readonly string[]> = {
 export const MODEL_DISPLAY_ORDER: readonly string[] = Object.values(
   VENDOR_MODEL_DISPLAY_ORDER
 ).flat()
+
+/**
+ * 分时计费模型列表（北京时间 09-12 / 14-18 忙时，其余闲时 50% 折扣）。
+ */
+export const TIME_TIERED_MODEL_NAMES = [
+  'deepseek-v4-pro-0813',
+  'deepseek-v4-flash-0731',
+  'deepseek-v4-flash-vision-exp',
+] as const
 
 /** Rank for pricing table rows (lower first). Unlisted models share the last bucket. */
 export function getModelDisplayRank(modelName: string): number {

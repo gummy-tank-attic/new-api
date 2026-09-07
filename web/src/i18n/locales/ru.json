@@ -1,9 +1,9 @@
 {
   "translation": {
-    "image (unit)": "изображение",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
+    "image (unit)": "изображение",
     "_copy": "_копировать",
     "- API base URL: {{url}}": "- Базовый URL API: {{url}}",
     "- API Key: copy it from the MetaRtr key page and do not send it in chat.": "- API-ключ: скопируйте его на странице ключей MetaRtr и не отправляйте в чат.",
@@ -2216,7 +2216,7 @@
     "footer.columns.related.links.oneApi": "Один API",
     "footer.columns.related.title": "Связанные проекты",
     "footer.defaultCopyright": "Все права защищены.",
-    "footer.newapi.projectAttributionSuffix": "Все права защищены. Разработано участниками проекта.",
+    "footer.new\u0061pi.projectAttributionSuffix": "Все права защищены. Разработано участниками проекта.",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "Для каналов, добавленных после 10 мая 2025 г., не нужно удалять \".\" из имён моделей при развёртывании",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "Для несрочных вопросов. Обычно отвечаем в течение 1–2 рабочих дней.",
     "For private deployments, format: https://fastgpt.run/api/openapi": "Для частных развертываний, формат: https://fastgpt.run/api/openapi",
@@ -3909,6 +3909,7 @@
     "pricingGroupIntro.kimi": "kimi-k3 с длинным окном контекста 1M. Качество кода сопоставимо с fable-5 и gpt-5.6 sol — подлинный продуктовый опыт.",
     "pricingGroupIntro.minimax": "MiniMax M3 с окном контекста 1M и очень высокой пропускной способностью.",
     "pricingGroupIntro.zhipu": "Полномощный GLM-5.2 с длинным контекстом 1M. Качество кода на уровне Opus 4.8 и GPT-5.5.",
+    "pricingGroupIntro.seedance": "ByteDance Seedance AI video generation group, supporting text-to-video, image-to-video, and upscaling across 480p / 720p / 1080p / 4K / 2K.",
     "Primary Model": "Основная модель",
     "Prioritize reusing the last successful channel based on keys extracted from request context (sticky routing)": "Приоритет повторного использования последнего успешного канала на основе ключей из контекста запроса (липкая маршрутизация)",
     "Priority": "Приоритет",
@@ -6038,6 +6039,22 @@
     "Generation Mode & Pricing": "Режим генерации и тарификация",
     "Grid view": "Сетка",
     "Starting Price": "Начальная цена",
-    "{{count}} model(s)": "{{count}} моделей"
+    "{{count}} model(s)": "{{count}} моделей",
+    "Windsurf": "Windsurf",
+    "pricing.offPeakPill": "Вне пика",
+    "pricing.peakPill": "Пик",
+    "pricing.offPeakHoursTooltip": "В остальное время суток · скидка 50%",
+    "pricing.peakHoursTooltip": "Сингапурское время (SGT / UTC+8) 09:00-12:00, 14:00-18:00 · Стандартная цена",
+    "pricing.timeTieredNotice": "Тарификация DeepSeek по времени суток",
+    "pricing.timeTieredDesc": "Сингапурское время (SGT / UTC+8) 09:00-12:00 и 14:00-18:00 — часы пик PEAK (стандартная цена). В остальное время суток — OFF-PEAK (скидка 50%). Ниже представлены полные тарифы для обоих периодов.",
+    "pricing.timeTieredBadge": "По часам",
+    "pricing.currentPeak": "Сейчас: PEAK (стандарт)",
+    "pricing.currentOffPeak": "Сейчас: OFF-PEAK (50% скидка)",
+    "pricing.currentPeakCard": "Сейчас: PEAK (стандартная цена)",
+    "pricing.currentOffPeakCard": "Сейчас: OFF-PEAK (скидка 50%)",
+    "pricing.standardPrice": "Стандарт",
+    "pricing.cachePrice": "Чтение из кэша",
+    "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
   }
 }

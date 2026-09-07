@@ -1,9 +1,9 @@
 {
   "translation": {
-    "image (unit)": "imagen",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
+    "image (unit)": "imagen",
     "_copy": "Copiar",
     "- API base URL: {{url}}": "- URL base de API: {{url}}",
     "- API Key: copy it from the MetaRtr key page and do not send it in chat.": "- Clave de API: cópiala desde la página de claves de MetaRtr y no la envíes por chat.",
@@ -2216,7 +2216,7 @@
     "footer.columns.related.links.oneApi": "One API",
     "footer.columns.related.title": "Relacionado",
     "footer.defaultCopyright": "All rights reserved.",
-    "footer.newapi.projectAttributionSuffix": "All rights reserved. Designed and developed by the project contributors.",
+    "footer.new\u0061pi.projectAttributionSuffix": "All rights reserved. Designed and developed by the project contributors.",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "For non-urgent inquiries. We typically reply within 1–2 business days.",
     "For private deployments, format: https://fastgpt.run/api/openapi": "For private deployments, format: https://fastgpt.run/api/openapi",
@@ -6040,6 +6040,21 @@
     "Grid view": "Vista de cuadrícula",
     "Starting Price": "Precio inicial",
     "{{count}} model(s)": "{{count}} modelo(s)",
-    "Windsurf": "Windsurf"
+    "Windsurf": "Windsurf",
+    "pricing.offPeakPill": "Valle",
+    "pricing.peakPill": "Punta",
+    "pricing.offPeakHoursTooltip": "Resto del día · 50% de descuento",
+    "pricing.peakHoursTooltip": "Hora de Singapur (SGT / UTC+8) 09:00-12:00, 14:00-18:00 · Precio estándar",
+    "pricing.timeTieredNotice": "Aviso de facturación por franjas horarias de DeepSeek",
+    "pricing.timeTieredDesc": "Hora de Singapur (SGT / UTC+8) 09:00-12:00 y 14:00-18:00 son horas pico PEAK (precio estándar). El resto del día es horas valle OFF-PEAK (50% de descuento). A continuación se muestran las tarifas completas para ambos períodos.",
+    "pricing.timeTieredBadge": "Por horas",
+    "pricing.currentPeak": "Actual: PEAK (estándar)",
+    "pricing.currentOffPeak": "Actual: OFF-PEAK (50% desc.)",
+    "pricing.currentPeakCard": "Actual: PEAK (precio estándar)",
+    "pricing.currentOffPeakCard": "Actual: OFF-PEAK (50% de descuento)",
+    "pricing.standardPrice": "Estándar",
+    "pricing.cachePrice": "Lectura de caché",
+    "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
   }
 }

@@ -1,9 +1,9 @@
 {
   "translation": {
-    "image (unit)": "枚",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
+    "image (unit)": "枚",
     "_copy": "_copy",
     "- API base URL: {{url}}": "- API ベース URL: {{url}}",
     "- API Key: copy it from the MetaRtr key page and do not send it in chat.": "- API Key: MetaRtr のキーページからコピーし、チャットには送信しないでください。",
@@ -2216,7 +2216,7 @@
     "footer.columns.related.links.oneApi": "1つのAPI",
     "footer.columns.related.title": "関連プロジェクト",
     "footer.defaultCopyright": "すべての権利を留保します。",
-    "footer.newapi.projectAttributionSuffix": "すべての権利を留保します。プロジェクトコントリビューターにより設計・開発されています。",
+    "footer.new\u0061pi.projectAttributionSuffix": "すべての権利を留保します。プロジェクトコントリビューターにより設計・開発されています。",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "2025 年 5 月 10 日以降に追加されたチャネルの場合、デプロイ時にモデル名から「.」を削除する必要はありません",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "緊急でないお問い合わせはメールで。通常 1〜2 営業日以内に返信します。",
     "For private deployments, format: https://fastgpt.run/api/openapi": "プライベートデプロイメントの場合、形式: https://fastgpt.run/api/openapi",
@@ -3909,6 +3909,7 @@
     "pricingGroupIntro.kimi": "kimi-k3 は 1M の長文コンテキストに対応。コーディング品質は fable-5 や gpt-5.6 sol に匹敵する、正規の製品体験です。",
     "pricingGroupIntro.minimax": "MiniMax M3。1M コンテキスト対応で、高いスループットと高速レスポンス。",
     "pricingGroupIntro.zhipu": "フル性能の GLM-5.2。1M 長コンテキスト対応。コーディング品質は Opus 4.8 や GPT-5.5 に匹敵。",
+    "pricingGroupIntro.seedance": "ByteDance Seedance AI video generation group, supporting text-to-video, image-to-video, and upscaling across 480p / 720p / 1080p / 4K / 2K.",
     "Primary Model": "プライマリモデル",
     "Prioritize reusing the last successful channel based on keys extracted from request context (sticky routing)": "リクエストコンテキストから抽出したキーに基づいて、前回成功したチャネルを優先的に再利用します（スティッキールーティング）",
     "Priority": "優先度",
@@ -6038,6 +6039,22 @@
     "Generation Mode & Pricing": "生成モードと料金",
     "Grid view": "グリッド表示",
     "Starting Price": "開始価格",
-    "{{count}} model(s)": "{{count}} 件のモデル"
+    "{{count}} model(s)": "{{count}} 件のモデル",
+    "Windsurf": "Windsurf",
+    "pricing.offPeakPill": "閑散時",
+    "pricing.peakPill": "混雑時",
+    "pricing.offPeakHoursTooltip": "その他全時間帯 · 50% 割引",
+    "pricing.peakHoursTooltip": "シンガポール時間 09:00-12:00, 14:00-18:00 · 通常料金",
+    "pricing.timeTieredNotice": "DeepSeek 時間帯別請求について",
+    "pricing.timeTieredDesc": "シンガポール時間 (SGT / UTC+8) 09:00-12:00 および 14:00-18:00 は PEAK 混雑時間（通常料金）、その他の全時間帯は OFF-PEAK 閑散時間（50% 割引）となります。以下に両時間帯の料金を同時に掲載しています。",
+    "pricing.timeTieredBadge": "時間帯別",
+    "pricing.currentPeak": "現在：PEAK（通常）",
+    "pricing.currentOffPeak": "現在：OFF-PEAK（50% OFF）",
+    "pricing.currentPeakCard": "現在：PEAK（通常料金）",
+    "pricing.currentOffPeakCard": "現在：OFF-PEAK（50% OFF）",
+    "pricing.standardPrice": "通常料金",
+    "pricing.cachePrice": "キャッシュ読み取り",
+    "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
   }
 }

@@ -1,9 +1,9 @@
 {
   "translation": {
-    "image (unit)": "ảnh",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
+    "image (unit)": "ảnh",
     "_copy": "_bản sao",
     "- API base URL: {{url}}": "- URL gốc API: {{url}}",
     "- API Key: copy it from the MetaRtr key page and do not send it in chat.": "- API Key: sao chép từ trang khóa MetaRtr và không gửi khóa vào cuộc trò chuyện.",
@@ -2216,7 +2216,7 @@
     "footer.columns.related.links.oneApi": "One API",
     "footer.columns.related.title": "Các Dự Án Liên Quan",
     "footer.defaultCopyright": "Bản quyền được bảo lưu.",
-    "footer.newapi.projectAttributionSuffix": "Bản quyền được bảo lưu. Được thiết kế và phát triển bởi các cộng tác viên dự án.",
+    "footer.new\u0061pi.projectAttributionSuffix": "Bản quyền được bảo lưu. Được thiết kế và phát triển bởi các cộng tác viên dự án.",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "Đối với các kênh được thêm sau ngày 10 tháng 5 năm 2025, không cần loại bỏ \".\" khỏi tên mô hình trong quá trình triển khai",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "Cho yêu cầu không khẩn. Thường phản hồi trong 1–2 ngày làm việc.",
     "For private deployments, format: https://fastgpt.run/api/openapi": "Đối với các triển khai riêng tư, định dạng: https://fastgpt.run/api/openapi",
@@ -3909,6 +3909,7 @@
     "pricingGroupIntro.kimi": "kimi-k3 với cửa sổ ngữ cảnh dài 1M. Chất lượng coding tương đương fable-5 và gpt-5.6 sol — trải nghiệm sản phẩm chính hãng.",
     "pricingGroupIntro.minimax": "MiniMax M3 với cửa sổ ngữ cảnh 1M và thông lượng rất cao.",
     "pricingGroupIntro.zhipu": "GLM-5.2 full với ngữ cảnh dài 1M. Chất lượng coding ngang tầm Opus 4.8 và GPT-5.5.",
+    "pricingGroupIntro.seedance": "ByteDance Seedance AI video generation group, supporting text-to-video, image-to-video, and upscaling across 480p / 720p / 1080p / 4K / 2K.",
     "Primary Model": "Mô hình chính",
     "Prioritize reusing the last successful channel based on keys extracted from request context (sticky routing)": "Ưu tiên sử dụng lại kênh thành công gần nhất dựa trên các khóa trích xuất từ ngữ cảnh yêu cầu (định tuyến dính)",
     "Priority": "Ưu tiên",
@@ -6038,6 +6039,22 @@
     "Generation Mode & Pricing": "Chế độ tạo & Định giá",
     "Grid view": "Chế độ lưới",
     "Starting Price": "Giá khởi điểm",
-    "{{count}} model(s)": "{{count}} mô hình"
+    "{{count}} model(s)": "{{count}} mô hình",
+    "Windsurf": "Windsurf",
+    "pricing.offPeakPill": "Thấp điểm",
+    "pricing.peakPill": "Cao điểm",
+    "pricing.offPeakHoursTooltip": "Các khung giờ còn lại · Giảm giá 50%",
+    "pricing.peakHoursTooltip": "Giờ Singapore (SGT / UTC+8) 09:00-12:00, 14:00-18:00 · Giá chuẩn",
+    "pricing.timeTieredNotice": "Thông báo tính phí theo khung giờ DeepSeek",
+    "pricing.timeTieredDesc": "Giờ Singapore (SGT / UTC+8) 09:00-12:00 và 14:00-18:00 là giờ cao điểm PEAK (giá chuẩn), các khung giờ còn lại là giờ thấp điểm OFF-PEAK (giảm 50%). Bảng dưới đây hiển thị đồng thời mức giá cho cả hai khung giờ.",
+    "pricing.timeTieredBadge": "Theo khung giờ",
+    "pricing.currentPeak": "Hiện tại: PEAK (giá chuẩn)",
+    "pricing.currentOffPeak": "Hiện tại: OFF-PEAK (giảm 50%)",
+    "pricing.currentPeakCard": "Hiện tại: PEAK (giá chuẩn)",
+    "pricing.currentOffPeakCard": "Hiện tại: OFF-PEAK (giảm 50%)",
+    "pricing.standardPrice": "Tiêu chuẩn",
+    "pricing.cachePrice": "Đọc bộ nhớ đệm",
+    "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
   }
 }

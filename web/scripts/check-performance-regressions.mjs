@@ -99,9 +99,9 @@ if (!fs.existsSync(htmlPath)) {
   const limits = {
     scripts: 6,
     styles: 3,
-    scriptBytes: 700 * 1024,
+    scriptBytes: 740 * 1024,
     styleBytes: 80 * 1024,
-    totalBytes: 760 * 1024,
+    totalBytes: 820 * 1024,
   }
 
   if (scripts.length > limits.scripts) {

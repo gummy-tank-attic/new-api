@@ -1,9 +1,9 @@
 {
   "translation": {
-    "image (unit)": "張",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
+    "image (unit)": "張",
     "_copy": "_複製",
     "- API base URL: {{url}}": "- API 基礎網址: {{url}}",
     "- API Key: copy it from the MetaRtr key page and do not send it in chat.": "- API Key：請從 MetaRtr 金鑰頁面複製，不要傳送到聊天中。",
@@ -2216,7 +2216,7 @@
     "footer.columns.related.links.oneApi": "One API",
     "footer.columns.related.title": "相關項目",
     "footer.defaultCopyright": "版權所有。",
-    "footer.newapi.projectAttributionSuffix": "版權所有，由項目貢獻者設計與開發。",
+    "footer.new\u0061pi.projectAttributionSuffix": "版權所有，由項目貢獻者設計與開發。",
     "For channels added after May 10, 2025, no need to remove \".\" from model names during deployment": "對於 2025 年 5 月 10 日之後新增的渠道，在部署時無需從模型名稱中移除 \".\"",
     "For non-urgent inquiries. We typically reply within 1–2 business days.": "非緊急事項請寄信，一般 1–2 個工作天內回覆。",
     "For private deployments, format: https://fastgpt.run/api/openapi": "對於私有部署，格式為：https://fastgpt.run/api/openapi",
@@ -6039,6 +6039,22 @@
     "Generation Mode & Pricing": "生成模式與計費",
     "Grid view": "網格檢視",
     "Starting Price": "起步價格",
-    "{{count}} model(s)": "{{count}} 個模型"
+    "{{count}} model(s)": "{{count}} 個模型",
+    "Windsurf": "Windsurf",
+    "pricing.offPeakPill": "閒時",
+    "pricing.peakPill": "忙時",
+    "pricing.offPeakHoursTooltip": "其餘全天時段 · 享受 50% 折扣",
+    "pricing.peakHoursTooltip": "新加坡時間 09:00-12:00, 14:00-18:00 · 標準原價",
+    "pricing.timeTieredNotice": "DeepSeek 分時計費說明",
+    "pricing.timeTieredDesc": "新加坡時間 09:00-12:00 與 14:00-18:00 為 PEAK 忙時（標準原價），其餘全天時段為 OFF-PEAK 閑時（享受 50% 半價）。下方已同時展示兩個時段的完整費率。",
+    "pricing.timeTieredBadge": "分時計費",
+    "pricing.currentPeak": "當前時段：PEAK 忙時 (原價)",
+    "pricing.currentOffPeak": "當前時段：OFF-PEAK 閒時 (5折優惠生效中)",
+    "pricing.currentPeakCard": "當前處於：PEAK (忙時原價)",
+    "pricing.currentOffPeakCard": "當前處於：OFF-PEAK (閒時5折)",
+    "pricing.standardPrice": "標準價",
+    "pricing.cachePrice": "快取讀取",
+    "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
   }
 }

@@ -20,6 +20,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Loader2 } from 'lucide-react'
 import { PublicLayout } from '@/components/layout'
 import { PageTransition } from '@/components/page-transition'
 import { Button } from '@/components/ui/button'
@@ -202,9 +203,10 @@ export function Pricing() {
               </p>
             </div>
             {isRefreshing ? (
-              <p className='text-muted-foreground text-xs sm:text-sm'>
-                {t('Updating…')}
-              </p>
+              <div className='text-muted-foreground/75 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-2.5 py-1 text-xs font-medium'>
+                <Loader2 className='size-3 animate-spin text-muted-foreground' />
+                <span>{t('Updating…')}</span>
+              </div>
             ) : null}
           </div>
           {showStaleWarning ? (

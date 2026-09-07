@@ -109,14 +109,17 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
             aria-selected={active}
             onClick={() => props.onSelect(group)}
             className={cn(
-              // 方案 A 极简流线药丸：名称 + 覆盆子红渐变微徽章
-              'inline-flex max-w-full shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-left transition-all',
+              // 方案 A 极简流线药丸：轻量级主色边框 + 规整玫瑰红小标
+              'inline-flex max-w-full shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 text-left transition-all duration-150',
               active
-                ? 'border-primary/50 bg-primary/10 text-foreground font-medium shadow-xs ring-1 ring-primary/20'
-                : 'bg-background border-border/70 hover:border-border hover:bg-muted/50 text-foreground/80 hover:text-foreground'
+                ? 'border-primary/40 bg-primary/[0.06] text-foreground font-medium shadow-xs ring-1 ring-primary/15'
+                : 'bg-background border-border/70 hover:border-border hover:bg-muted/40 text-muted-foreground hover:text-foreground'
             )}
           >
-            <span className='text-[14.5px] whitespace-nowrap sm:text-[15px]'>
+            <span
+              translate='no'
+              className='notranslate text-[14px] whitespace-nowrap sm:text-[14.5px]'
+            >
               {displayName}
             </span>
             {zhe ? (
@@ -132,7 +135,10 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
               </span>
             ) : null}
             {offLabel ? (
-              <span className='inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-rose-500 to-red-500 px-2.5 py-0.5 text-[11px] leading-normal font-bold whitespace-nowrap text-white tabular-nums shadow-xs ring-1 ring-rose-500/25'>
+              <span
+                translate='no'
+                className='notranslate inline-flex shrink-0 items-center justify-center rounded-full bg-rose-500 px-2 py-0.5 text-[11px] font-bold whitespace-nowrap text-white tabular-nums shadow-xs'
+              >
                 {offLabel}
               </span>
             ) : null}

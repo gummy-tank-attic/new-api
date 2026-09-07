@@ -22,6 +22,14 @@ Before merging or deploying an upstream update, preserve and regression-check:
   - `--font-sans` and `--font-inter` in `web/src/styles/theme.css` must remain Inter-first with complete CJK fallbacks (`'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', sans-serif;`) to prevent Windows faux-bold rendering bugs;
   - `html` and `body` in `web/src/styles/index.css` must retain `-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility;` to eliminate DirectWrite subpixel color fringing;
   - small-size typography in `supplier-price-table.tsx` (model names, prices, badges) must NOT have `tracking-tight` re-applied, and callout banner in `supplier-pricing-layout.tsx` must maintain `font-medium` (500) rather than heavy `font-bold` (700);
+- DeepSeek time-tiered pricing unified card and pure light-mode layout contract:
+  - `supplier-price-table.tsx` must retain the single unified card container with integrated hairline row dividers (`divide-y divide-border/40`) for time-tiered models (`deepseek-v4-pro-0813`, `deepseek-v4-flash-0731`, `deepseek-v4-flash-vision-exp`); nested rectangular border boxes (`rounded-lg border bg-...`) inside model cards are strictly prohibited;
+  - both Off-Peak (闲时) and Peak (忙时) rows must be displayed simultaneously side-by-side; adding global switchers or radio toggles that hide either tier is forbidden;
+  - discount column contract: Off-Peak row must strictly render the savings badge (`50% OFF` baseline or group combination savings), and Peak row must render either group discount or a clean `—` dash, ensuring no blank layout holes;
+  - table header units must strictly adhere to uppercase `/ 1M` (e.g. `t('pricing.inputPricePerMillion', '输入价格 / 1M')`);
+  - model row copy action button on desktop must remain hidden by default (`sm:opacity-0 group-hover:opacity-100 transition-opacity duration-150`) to preserve clean typographic rhythm;
+  - cards must use subtle micro-lighting (`hover:border-foreground/15 hover:bg-muted/30 hover:shadow-xs`) rather than mechanical jumping (`hover:-translate-y-0.5`);
+  - vendor tabs must display directly without redundant view toggle switches above them; ByteDance vendor view defaults to its custom Bento video grid card layout;
 - 9-language i18n architecture and anti-contamination iron laws:
   - `web/src/i18n/locales/` contains all 9 audited locales (`zh`, `zh-TW`, `en`, `es`, `pt`, `ja`, `fr`, `ru`, `vi`); upstream merges must NEVER overwrite `web/src/i18n/` wholesale;
   - **MANDATORY AI-TRANSLATION (NO BATCH SCRIPTS)**: All audits and new translations must strictly be performed via neural LLM comprehension and reasoning. Automated batch translation scripts are strictly prohibited as they previously contaminated Chinese/English files with French strings;

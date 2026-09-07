@@ -361,17 +361,17 @@ export function VideoModelGrid(props: VideoModelGridProps) {
 
               {/* Upscale Explanation Banner at bottom of card */}
               {isUpscale && (
-                <div className='relative mt-3.5 overflow-hidden rounded-xl border border-purple-300/80 bg-gradient-to-br from-purple-500/15 via-indigo-500/10 to-purple-500/20 p-2.5 shadow-2xs dark:border-purple-700/60 dark:from-purple-950/50 dark:to-indigo-950/40'>
-                  <div className='flex items-center gap-1.5 mb-1.5'>
-                    <span className='inline-flex items-center gap-1 rounded-md bg-purple-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-xs dark:bg-purple-500'>
+                <div className='relative mt-3.5 overflow-hidden rounded-xl border border-purple-300/70 bg-gradient-to-br from-purple-500/12 via-indigo-500/8 to-purple-500/16 p-3 shadow-2xs dark:border-purple-700/60 dark:from-purple-950/50 dark:to-indigo-950/40'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <span className='inline-flex items-center gap-1 rounded-md bg-purple-600 px-2 py-0.5 text-xs font-semibold text-white shadow-xs dark:bg-purple-500'>
                       <Sparkles className='h-3 w-3' />
                       {t('Upscale Principle')}
                     </span>
-                    <span className='text-[11px] font-bold text-purple-900 dark:text-purple-200'>
+                    <span className='text-[13px] font-semibold text-purple-950 dark:text-purple-200 tracking-tight'>
                       {t('Deep Learning & Detail Reconstruction')}
                     </span>
                   </div>
-                  <p className='text-[11px] leading-relaxed text-foreground/90'>
+                  <p className='text-[12.5px] leading-[1.6] text-foreground/85'>
                     {t('Takes lower-resolution video and enhances it to higher definition using deep learning and detail reconstruction. For example, generating at 480p and then upscaling to 720p achieves nearly 90% detail fidelity.')}
                   </p>
                 </div>
