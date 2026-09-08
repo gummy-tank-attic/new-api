@@ -165,7 +165,9 @@ function formatBreakdownConditionSummary(
     return formatConditionSummary(tier.conditions, t)
   }
   return tier.conditions
-    .map((condition) => formatHumanFriendlyCondition(condition.field, condition.value))
+    .map((condition) =>
+      formatHumanFriendlyCondition(condition.field, condition.value, t)
+    )
     .join(' · ')
 }
 
@@ -473,7 +475,7 @@ export function DynamicPricingBreakdown({
                       variant='secondary'
                       className='bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300'
                     >
-                      {formatHumanFriendlyTierLabel(tier.label || t('Default'))}
+                      {formatHumanFriendlyTierLabel(tier.label || t('Default'), t)}
                     </Badge>
                     {isMatched && (
                       <Badge
@@ -567,7 +569,7 @@ export function DynamicPricingBreakdown({
                           variant='secondary'
                           className='bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300'
                         >
-                          {formatHumanFriendlyTierLabel(tier.label || t('Default'))}
+                          {formatHumanFriendlyTierLabel(tier.label || t('Default'), t)}
                         </Badge>
                         {isMatched && (
                           <Badge

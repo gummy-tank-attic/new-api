@@ -169,7 +169,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                       capTag.className
                     )}
                   >
-                    {t(capTag.label)}
+                    {t(capTag.key, capTag.label)}
                   </span>
                 </div>
               )}
@@ -199,7 +199,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
 
               {/* Row 4: Tagline */}
               <p className='text-muted-foreground text-xs leading-relaxed font-normal'>
-                {t(tagline)}
+                {t(tagline.key, tagline.defaultText)}
               </p>
             </div>
 
@@ -222,7 +222,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                     )}
                   </div>
                   <span className='text-muted-foreground ml-1 text-xs font-normal'>
-                    {hero.unitText}
+                    {t(hero.unitKey, hero.unitText)}
                   </span>
                   {isUpscale && (
                     <div className='text-[10px] text-muted-foreground/80 mt-0.5 font-medium'>

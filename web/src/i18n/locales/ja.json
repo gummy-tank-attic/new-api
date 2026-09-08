@@ -6055,6 +6055,25 @@
     "pricing.standardPrice": "通常料金",
     "pricing.cachePrice": "キャッシュ読み取り",
     "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
-    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)",
+    "videoPricing.badge.flagship": "万能フラッグシップ主力",
+    "videoPricing.badge.classic": "定番主力",
+    "videoPricing.badge.4k": "4K フラッグシップ",
+    "videoPricing.badge.fast": "高速レンダリング",
+    "videoPricing.badge.mini": "高コスパ軽量版",
+    "videoPricing.badge.upscale": "Upscale 画質再構築",
+    "videoPricing.tagline.flagship": "次世代マルチモーダル主力 · 1080p 生成・カメラワーク・先頭/末尾フレーム制御対応",
+    "videoPricing.tagline.classic": "定番動画主力 · テキスト/画像からの動画生成、先頭/末尾フレーム制御を安定サポート",
+    "videoPricing.tagline.4k": "4K 大画面と精密なディテールの映像制作に特化",
+    "videoPricing.tagline.fast": "秒速の超高速生成 · 高並行処理でアイデアを素早く映像化",
+    "videoPricing.tagline.mini": "高コスパ＆軽量 · 超低コストで日常の動画コンテンツ制作に最適",
+    "videoPricing.tagline.upscale": "インテリジェント修復＆Upscale再構築 · デュアル課金：動画Token＋秒課金",
+    "videoPricing.tagline.default": "プロフェッショナル AI 動画生成モデル",
+    "videoPricing.unitPer1MTokensFrom": "/ 1M Tokens から",
+    "videoPricing.unitPer1MTokens": "/ 1M Tokens",
+    "videoPricing.unitPerSecUpscale": "/ 秒 (Upscale)",
+    "pricing.resolutionPrefix": "解像度",
+    "pricing.modePrefix": "モード"
   }
 }
+

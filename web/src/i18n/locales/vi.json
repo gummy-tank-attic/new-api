@@ -6055,6 +6055,25 @@
     "pricing.standardPrice": "Tiêu chuẩn",
     "pricing.cachePrice": "Đọc bộ nhớ đệm",
     "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
-    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)",
+    "videoPricing.badge.flagship": "Flagship toàn năng",
+    "videoPricing.badge.classic": "Mô hình cốt lõi kinh điển",
+    "videoPricing.badge.4k": "Flagship 4K Ultra HD",
+    "videoPricing.badge.fast": "Xuất video siêu tốc",
+    "videoPricing.badge.mini": "Tiết kiệm & gọn nhẹ",
+    "videoPricing.badge.upscale": "Tái tạo chất lượng Upscale",
+    "videoPricing.tagline.flagship": "Mô hình đa phương thức thế hệ mới · Hỗ trợ xuất 1080p, chuyển động máy quay và kiểm soát khung hình đầu/cuối",
+    "videoPricing.tagline.classic": "Mô hình video kinh điển · Hỗ trợ ổn định tạo video từ văn bản/hình ảnh và kiểm soát khung hình đầu/cuối",
+    "videoPricing.tagline.4k": "Thiết kế riêng cho màn hình 4K và chi tiết hình ảnh điện ảnh sắc nét",
+    "videoPricing.tagline.fast": "Xuất video siêu tốc tính bằng giây · Nhanh chóng nắm bắt cảm hứng sáng tạo với khả năng kết xuất đồng thời cao",
+    "videoPricing.tagline.mini": "Gọn nhẹ tiết kiệm hiệu quả · Chi phí cực thấp đáp ứng sản xuất nội dung video hàng ngày",
+    "videoPricing.tagline.upscale": "Phục hồi thông minh & Tái tạo Upscale · Tính phí kép: Token video + cước theo giây",
+    "videoPricing.tagline.default": "Mô hình tạo video AI chuyên nghiệp",
+    "videoPricing.unitPer1MTokensFrom": "/ 1M Token (từ)",
+    "videoPricing.unitPer1MTokens": "/ 1M Token",
+    "videoPricing.unitPerSecUpscale": "/ giây (Upscale)",
+    "pricing.resolutionPrefix": "Độ phân giải",
+    "pricing.modePrefix": "Chế độ"
   }
 }
+

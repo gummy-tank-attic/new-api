@@ -6055,6 +6055,25 @@
     "pricing.standardPrice": "Estándar",
     "pricing.cachePrice": "Lectura de caché",
     "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
-    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)",
+    "videoPricing.badge.flagship": "Insignia versátil",
+    "videoPricing.badge.classic": "Caballo de batalla clásico",
+    "videoPricing.badge.4k": "Insignia 4K Ultra HD",
+    "videoPricing.badge.fast": "Generación ultrarrápida",
+    "videoPricing.badge.mini": "Económico y ligero",
+    "videoPricing.badge.upscale": "Reconstrucción de imagen Upscale",
+    "videoPricing.tagline.flagship": "Insignia multimodal de nueva generación · Soporta generación 1080p, movimientos de cámara y control de fotograma inicial/final",
+    "videoPricing.tagline.classic": "Caballo de batalla clásico · Soporte confiable de texto/imagen a video y control de fotogramas",
+    "videoPricing.tagline.4k": "Diseñado a medida para pantallas 4K y detalles cinematográficos ultra precisos",
+    "videoPricing.tagline.fast": "Generación ultrarrápida en segundos · Captura creativa ágil con renderizado de alta concurrencia",
+    "videoPricing.tagline.mini": "Económico y liviano · Costo ultrabajo para la creación diaria de contenido en video",
+    "videoPricing.tagline.upscale": "Restauración inteligente y Upscale · Facturación doble: Tokens de video + tarifa por segundo",
+    "videoPricing.tagline.default": "Modelo profesional de generación de video con IA",
+    "videoPricing.unitPer1MTokensFrom": "/ 1M Tokens (desde)",
+    "videoPricing.unitPer1MTokens": "/ 1M Tokens",
+    "videoPricing.unitPerSecUpscale": "/ s (Upscale)",
+    "pricing.resolutionPrefix": "Resolución",
+    "pricing.modePrefix": "Modo"
   }
 }
+

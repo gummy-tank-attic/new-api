@@ -1434,7 +1434,8 @@ function GroupPricingSection(props: {
                       header: t('Tier'),
                       className: thClass,
                       cellClassName: 'text-muted-foreground py-2.5',
-                      cell: (tier) => formatHumanFriendlyTierLabel(tier.label || t('Default')),
+                      cell: (tier) =>
+                        formatHumanFriendlyTierLabel(tier.label || t('Default'), t),
                     },
                     ...priceFields.map((fieldEntry) => {
                       const unitLabelKey =

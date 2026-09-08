@@ -6055,6 +6055,25 @@
     "pricing.standardPrice": "Standard",
     "pricing.cachePrice": "Lecture de cache",
     "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
-    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)",
+    "videoPricing.badge.flagship": "Modèle phare polyvalent",
+    "videoPricing.badge.classic": "Modèle classique",
+    "videoPricing.badge.4k": "Modèle phare 4K Ultra HD",
+    "videoPricing.badge.fast": "Génération ultra-rapide",
+    "videoPricing.badge.mini": "Économique & léger",
+    "videoPricing.badge.upscale": "Reconstruction d'image Upscale",
+    "videoPricing.tagline.flagship": "Modèle multimodal nouvelle génération · Prise en charge 1080p, mouvements de caméra et contrôle première/dernière image",
+    "videoPricing.tagline.classic": "Modèle vidéo classique · Prise en charge stable texte/image-vers-vidéo et contrôle première/dernière image",
+    "videoPricing.tagline.4k": "Conçu sur mesure pour les écrans 4K et les détails cinématographiques ultra-fins",
+    "videoPricing.tagline.fast": "Génération ultra-rapide à la seconde · Capture créative rapide avec rendu à haute concurrence",
+    "videoPricing.tagline.mini": "Économique et léger · Coût ultra-faible pour la création quotidienne de contenu vidéo",
+    "videoPricing.tagline.upscale": "Restauration intelligente et Upscale · Double tarification : Tokens vidéo + coût par seconde",
+    "videoPricing.tagline.default": "Modèle professionnel de génération vidéo par IA",
+    "videoPricing.unitPer1MTokensFrom": "/ 1M Tokens (à partir de)",
+    "videoPricing.unitPer1MTokens": "/ 1M Tokens",
+    "videoPricing.unitPerSecUpscale": "/ s (Upscale)",
+    "pricing.resolutionPrefix": "Résolution",
+    "pricing.modePrefix": "Mode"
   }
 }
+

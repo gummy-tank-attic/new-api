@@ -6055,6 +6055,25 @@
     "pricing.standardPrice": "Стандарт",
     "pricing.cachePrice": "Чтение из кэша",
     "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
-    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)",
+    "videoPricing.badge.flagship": "Флагманский универсал",
+    "videoPricing.badge.classic": "Классическая рабочая лошадка",
+    "videoPricing.badge.4k": "4K Ultra HD флагман",
+    "videoPricing.badge.fast": "Сверхбыстрая генерация",
+    "videoPricing.badge.mini": "Экономичный Lite",
+    "videoPricing.badge.upscale": "Восстановление качества Upscale",
+    "videoPricing.tagline.flagship": "Мультимодальный флагман нового поколения · Поддержка генерации 1080p, движений камеры и управления первым/последним кадрами",
+    "videoPricing.tagline.classic": "Классическая видеомодель · Стабильная генерация видео из текста/изображений и контроль начального/конечного кадров",
+    "videoPricing.tagline.4k": "Специально для 4K экранов и сверхчетких кинематографических деталей",
+    "videoPricing.tagline.fast": "Секундная сверхбыстрая генерация · Моментальное воплощение идей с высокой параллельностью",
+    "videoPricing.tagline.mini": "Экономичный и легкий · Сверхнизкая стоимость для регулярного производства видео",
+    "videoPricing.tagline.upscale": "Интеллектуальное восстановление и Upscale · Двойная тарификация: видеотокены + посекундная плата",
+    "videoPricing.tagline.default": "Профессиональная модель генерации видео с ИИ",
+    "videoPricing.unitPer1MTokensFrom": "/ 1M токенов (от)",
+    "videoPricing.unitPer1MTokens": "/ 1M токенов",
+    "videoPricing.unitPerSecUpscale": "/ с (Upscale)",
+    "pricing.resolutionPrefix": "Разрешение",
+    "pricing.modePrefix": "Режим"
   }
 }
+

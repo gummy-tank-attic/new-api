@@ -6055,6 +6055,25 @@
     "pricing.standardPrice": "Padrão",
     "pricing.cachePrice": "Leitura de cache",
     "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
-    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)",
+    "videoPricing.badge.flagship": "Carro-chefe multifuncional",
+    "videoPricing.badge.classic": "Modelo clássico confiável",
+    "videoPricing.badge.4k": "Carro-chefe 4K Ultra HD",
+    "videoPricing.badge.fast": "Geração ultrarrápida",
+    "videoPricing.badge.mini": "Econômico e leve",
+    "videoPricing.badge.upscale": "Reconstrução de imagem Upscale",
+    "videoPricing.tagline.flagship": "Carro-chefe multimodal de última geração · Suporta geração em 1080p, movimentos de câmera e controle de primeiro/último quadro",
+    "videoPricing.tagline.classic": "Modelo clássico de vídeo · Suporte estável para texto/imagem em vídeo e controle de primeiro/último quadro",
+    "videoPricing.tagline.4k": "Desenvolvido sob medida para telas 4K e detalhes cinematográficos ultrafinos",
+    "videoPricing.tagline.fast": "Geração ultrarrápida em segundos · Captura criativa ágil com renderização de alta concorrência",
+    "videoPricing.tagline.mini": "Econômico e leve · Custo ultrabaixo para produção diária de conteúdo em vídeo",
+    "videoPricing.tagline.upscale": "Restauração inteligente e Upscale · Faturamento duplo: Tokens de vídeo + taxa por segundo",
+    "videoPricing.tagline.default": "Modelo profissional de geração de vídeo por IA",
+    "videoPricing.unitPer1MTokensFrom": "/ 1M Tokens (a partir de)",
+    "videoPricing.unitPer1MTokens": "/ 1M Tokens",
+    "videoPricing.unitPerSecUpscale": "/ s (Upscale)",
+    "pricing.resolutionPrefix": "Resolução",
+    "pricing.modePrefix": "Modo"
   }
 }
+

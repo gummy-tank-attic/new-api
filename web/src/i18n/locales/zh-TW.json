@@ -6055,6 +6055,25 @@
     "pricing.standardPrice": "標準價",
     "pricing.cachePrice": "快取讀取",
     "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
-    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
+    "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)",
+    "videoPricing.badge.flagship": "全能旗艦主力",
+    "videoPricing.badge.classic": "經典主力",
+    "videoPricing.badge.4k": "4K 旗艦",
+    "videoPricing.badge.fast": "極速出片",
+    "videoPricing.badge.mini": "輕量性價比",
+    "videoPricing.badge.upscale": "Upscale 畫質重建",
+    "videoPricing.tagline.flagship": "新一代多模態主力 · 支援 1080p 生成、運鏡與首尾幀控制",
+    "videoPricing.tagline.classic": "經典影片主力 · 穩定支援文生/圖生影片與首尾幀控制",
+    "videoPricing.tagline.4k": "專為 4K 大螢幕與精細畫面客製化出片",
+    "videoPricing.tagline.fast": "極速秒級出片 · 高併發靈感快速捕捉與渲染",
+    "videoPricing.tagline.mini": "輕量經濟高性價比 · 極低成本滿足日常影片內容生產",
+    "videoPricing.tagline.upscale": "畫面智慧修復與 Upscale 重建 · 雙軌計費：影片 Token + 時長秒費",
+    "videoPricing.tagline.default": "專業 AI 影片生成模型",
+    "videoPricing.unitPer1MTokensFrom": "/ 1M Tokens 起",
+    "videoPricing.unitPer1MTokens": "/ 1M Tokens",
+    "videoPricing.unitPerSecUpscale": "/ 秒 (Upscale)",
+    "pricing.resolutionPrefix": "解析度",
+    "pricing.modePrefix": "模式"
   }
 }
+

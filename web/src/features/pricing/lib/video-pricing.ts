@@ -134,42 +134,58 @@ export function getResolutionBadgeStyle(res: string): { label: string; className
   }
 }
 
-export function getVideoModelCapabilityTag(modelName: string): { label: string; className: string } | null {
+export function getVideoModelCapabilityTag(modelName: string): {
+  key: string
+  label: string
+  className: string
+} | null {
   const name = modelName.toLowerCase()
   if (name.includes('upscale') || name.includes('chaofen')) {
     return {
+      key: 'videoPricing.badge.upscale',
       label: 'Upscale Image Reconstruction',
-      className: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800',
+      className:
+        'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800',
     }
   }
   if (name.includes('4k')) {
     return {
+      key: 'videoPricing.badge.4k',
       label: '4K 旗舰',
-      className: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800',
+      className:
+        'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-800',
     }
   }
   if (name.includes('fast')) {
     return {
+      key: 'videoPricing.badge.fast',
       label: '极速出片',
-      className: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800',
+      className:
+        'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800',
     }
   }
   if (name.includes('mini')) {
     return {
+      key: 'videoPricing.badge.mini',
       label: '轻量性价比',
-      className: 'bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-900/40 dark:text-cyan-300 dark:border-cyan-800',
+      className:
+        'bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-900/40 dark:text-cyan-300 dark:border-cyan-800',
     }
   }
   if (name === 'seedance2.5' || name === 'seedance 2.5') {
     return {
+      key: 'videoPricing.badge.flagship',
       label: '全能旗舰主力',
-      className: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800',
+      className:
+        'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800',
     }
   }
   if (name === 'seedance 2.0' || name === 'seedance2.0') {
     return {
+      key: 'videoPricing.badge.classic',
       label: '经典主力',
-      className: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800',
+      className:
+        'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800',
     }
   }
   return null
@@ -487,25 +503,40 @@ export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
   return groups
 }
 
-export function formatHumanFriendlyCondition(field: string, value: string): string {
+export function formatHumanFriendlyCondition(
+  field: string,
+  value: string,
+  t?: (key: string, defaultValue?: string) => string
+): string {
+  const translate = t || ((k: string, d?: string) => d || k)
   if (field === 'resolution') {
     const val = value.toLowerCase()
-    if (val === '480p') return '分辨率: 480p'
-    if (val === '720p') return '分辨率: 720p'
-    if (val === '1080p') return '分辨率: 1080p'
-    if (val === '2k') return '分辨率: 2K'
-    if (val === '4k') return '分辨率: 4K'
-    return `分辨率: ${value.toUpperCase()}`
+    const prefix = translate('pricing.resolutionPrefix', '分辨率')
+    if (val === '480p') return `${prefix}: 480p`
+    if (val === '720p') return `${prefix}: 720p`
+    if (val === '1080p') return `${prefix}: 1080p`
+    if (val === '2k') return `${prefix}: 2K`
+    if (val === '4k') return `${prefix}: 4K`
+    return `${prefix}: ${value.toUpperCase()}`
   }
   if (field === 'video_input') {
-    if (value === 'none') return '模式: 无视频输入'
-    if (value === 'video') return '模式: 有视频输入'
-    return `模式: ${value}`
+    const prefix = translate('pricing.modePrefix', '模式')
+    if (value === 'none') {
+      return `${prefix}: ${translate('Without Video Input', '无视频输入')}`
+    }
+    if (value === 'video') {
+      return `${prefix}: ${translate('With Video Input', '有视频输入')}`
+    }
+    return `${prefix}: ${value}`
   }
   return `${field}: ${value}`
 }
 
-export function formatHumanFriendlyTierLabel(label: string): string {
+export function formatHumanFriendlyTierLabel(
+  label: string,
+  t?: (key: string, defaultValue?: string) => string
+): string {
+  const translate = t || ((k: string, d?: string) => d || k)
   const parts = label.split('·').map((s) => s.trim())
   if (parts.length === 2) {
     const [res, mode] = parts
@@ -513,36 +544,61 @@ export function formatHumanFriendlyTierLabel(label: string): string {
     const lowerMode = mode.toLowerCase()
     const modeText =
       lowerMode === 'video'
-        ? '有视频输入'
+        ? translate('With Video Input', '有视频输入')
         : lowerMode === 'none'
-        ? '无视频输入'
+        ? translate('Without Video Input', '无视频输入')
         : mode
     return `${resText} · ${modeText}`
   }
   return label
 }
 
-export function getVideoModelTagline(modelName: string): string {
+export function getVideoModelTagline(modelName: string): {
+  key: string
+  defaultText: string
+} {
   const name = modelName.toLowerCase()
   if (name.includes('upscale') || name.includes('chaofen')) {
-    return 'Intelligent restoration & Upscale · Dual-track billing: Video Tokens + per-second fee'
+    return {
+      key: 'videoPricing.tagline.upscale',
+      defaultText:
+        'Intelligent restoration & Upscale · Dual-track billing: Video Tokens + per-second fee',
+    }
   }
   if (name.includes('4k')) {
-    return '专为 4K 大屏与精细画面定制出片'
+    return {
+      key: 'videoPricing.tagline.4k',
+      defaultText: '专为 4K 大屏与精细画面定制出片',
+    }
   }
   if (name.includes('fast')) {
-    return '极速秒级出片 · 高并发灵感快速捕捉与渲染'
+    return {
+      key: 'videoPricing.tagline.fast',
+      defaultText: '极速秒级出片 · 高并发灵感快速捕捉与渲染',
+    }
   }
   if (name.includes('mini')) {
-    return '轻量经济高性价比 · 极低成本满足日常视频内容生产'
+    return {
+      key: 'videoPricing.tagline.mini',
+      defaultText: '轻量经济高性价比 · 极低成本满足日常视频内容生产',
+    }
   }
   if (name.includes('seedance2.5') || name.includes('seedance 2.5')) {
-    return '新一代多模态主力 · 支持 1080p 生成、运镜与首尾帧控制'
+    return {
+      key: 'videoPricing.tagline.flagship',
+      defaultText: '新一代多模态主力 · 支持 1080p 生成、运镜与首尾帧控制',
+    }
   }
   if (name.includes('seedance 2.0') || name.includes('seedance2.0')) {
-    return '经典视频主力 · 稳定支持文生/图生视频与首尾帧控制'
+    return {
+      key: 'videoPricing.tagline.classic',
+      defaultText: '经典视频主力 · 稳定支持文生/图生视频与首尾帧控制',
+    }
   }
-  return '专业 AI 视频生成模型'
+  return {
+    key: 'videoPricing.tagline.default',
+    defaultText: '专业 AI 视频生成模型',
+  }
 }
 
 export function getVideoModelHeroPrice(
@@ -553,6 +609,7 @@ export function getVideoModelHeroPrice(
   priceText: string
   officialPriceText: string | null
   unitText: string
+  unitKey: string
   isStartingPrice: boolean
   discountOff: number | null
 } {
@@ -566,6 +623,7 @@ export function getVideoModelHeroPrice(
       priceText: isGroupMode ? `$${billedSecond.toFixed(4)}` : `$${officialSecond.toFixed(4)}`,
       officialPriceText: isGroupMode ? `$${officialSecond.toFixed(4)}` : null,
       unitText: '/ s (Upscale)',
+      unitKey: 'videoPricing.unitPerSecUpscale',
       isStartingPrice: true,
       discountOff,
     }
@@ -578,6 +636,7 @@ export function getVideoModelHeroPrice(
       priceText: isGroupMode ? `$${billed.toFixed(3)}` : `$${official.toFixed(3)}`,
       officialPriceText: isGroupMode ? `$${official.toFixed(3)}` : null,
       unitText: '/ 1M Tokens 起',
+      unitKey: 'videoPricing.unitPer1MTokensFrom',
       isStartingPrice: true,
       discountOff,
     }
@@ -590,6 +649,7 @@ export function getVideoModelHeroPrice(
       priceText: isGroupMode ? `$${billed.toFixed(3)}` : `$${official.toFixed(3)}`,
       officialPriceText: isGroupMode ? `$${official.toFixed(3)}` : null,
       unitText: '/ 1M Tokens 起',
+      unitKey: 'videoPricing.unitPer1MTokensFrom',
       isStartingPrice: true,
       discountOff,
     }
@@ -602,6 +662,7 @@ export function getVideoModelHeroPrice(
       priceText: isGroupMode ? `$${billed.toFixed(3)}` : `$${official.toFixed(3)}`,
       officialPriceText: isGroupMode ? `$${official.toFixed(3)}` : null,
       unitText: '/ 1M Tokens 起',
+      unitKey: 'videoPricing.unitPer1MTokensFrom',
       isStartingPrice: true,
       discountOff,
     }
@@ -614,6 +675,7 @@ export function getVideoModelHeroPrice(
       priceText: isGroupMode ? `$${billed.toFixed(3)}` : `$${official.toFixed(3)}`,
       officialPriceText: isGroupMode ? `$${official.toFixed(3)}` : null,
       unitText: '/ 1M Tokens',
+      unitKey: 'videoPricing.unitPer1MTokens',
       isStartingPrice: false,
       discountOff,
     }
@@ -626,6 +688,7 @@ export function getVideoModelHeroPrice(
       priceText: isGroupMode ? `$${billed.toFixed(3)}` : `$${official.toFixed(3)}`,
       officialPriceText: isGroupMode ? `$${official.toFixed(3)}` : null,
       unitText: '/ 1M Tokens 起',
+      unitKey: 'videoPricing.unitPer1MTokensFrom',
       isStartingPrice: true,
       discountOff,
     }
@@ -635,6 +698,7 @@ export function getVideoModelHeroPrice(
     priceText: '$1.026',
     officialPriceText: null,
     unitText: '/ 1M Tokens 起',
+    unitKey: 'videoPricing.unitPer1MTokensFrom',
     isStartingPrice: true,
     discountOff: null,
   }

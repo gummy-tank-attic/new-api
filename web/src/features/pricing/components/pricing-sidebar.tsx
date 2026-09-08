@@ -33,6 +33,7 @@ import { cn } from '@/lib/utils'
 import {
   ENDPOINT_TYPES,
   FILTER_ALL,
+  getCanonicalVendorName,
   QUOTA_TYPES,
   getEndpointTypeLabels,
   getQuotaTypeLabels,
@@ -169,7 +170,7 @@ export function PricingSidebar(props: PricingSidebarProps) {
     ...props.vendors
       .map((vendor) => ({
         value: vendor.name,
-        label: vendor.name,
+        label: t(getCanonicalVendorName(vendor.name) || vendor.name, vendor.name),
         count: countBy(
           props.models,
           (model) => model.vendor_name === vendor.name

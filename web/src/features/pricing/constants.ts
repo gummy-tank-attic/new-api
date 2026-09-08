@@ -138,7 +138,7 @@ export const VENDOR_TAB_ORDER = [
   'xAI',
   'Google',
   'DeepSeek',
-  'ZHIPU',
+  'Zhipu',
   'Moonshot',
   'MiniMax',
 ] as const
@@ -158,7 +158,7 @@ const BYTEDANCE_VENDOR_KEYS = new Set([
 export function isByteDancePricingVendor(name: string | undefined): boolean {
   const trimmed = (name || '').trim().toLowerCase()
   if (!trimmed) return false
-  const compact = trimmed.replace(/\s+/g, '')
+  const compact = trimmed.replaceAll(/\s+/g, '')
   return (
     BYTEDANCE_VENDOR_KEYS.has(trimmed) ||
     BYTEDANCE_VENDOR_KEYS.has(compact) ||
@@ -174,10 +174,10 @@ export const VENDOR_NAME_ALIASES: Record<string, string> = {
   google: 'Google',
   gemini: 'Google',
   deepseek: 'DeepSeek',
-  zhipu: 'ZHIPU',
-  'zhipu ai': 'ZHIPU',
-  智谱: 'ZHIPU',
-  智谱ai: 'ZHIPU',
+  zhipu: 'Zhipu',
+  'zhipu ai': 'Zhipu',
+  智谱: 'Zhipu',
+  智谱ai: 'Zhipu',
   moonshot: 'Moonshot',
   kimi: 'Moonshot',
   minimax: 'MiniMax',
@@ -188,11 +188,11 @@ export function getVendorTabRank(name: string): number {
   const trimmed = (name || '').trim()
   if (!trimmed) return VENDOR_TAB_ORDER.length
   const lower = trimmed.toLowerCase()
-  const compact = lower.replace(/\s+/g, '')
+  const compact = lower.replaceAll(/\s+/g, '')
   const key =
     VENDOR_NAME_ALIASES[lower] ||
     VENDOR_NAME_ALIASES[compact] ||
-    (compact === '智谱' || compact === '智谱ai' ? 'ZHIPU' : trimmed)
+    (compact === '智谱' || compact === '智谱ai' ? 'Zhipu' : trimmed)
   const idx = VENDOR_TAB_ORDER.findIndex(
     (v) => v.toLowerCase() === key.toLowerCase()
   )
@@ -211,7 +211,7 @@ export function getCanonicalVendorName(vendorName?: string): string {
   return (
     VENDOR_NAME_ALIASES[lower] ||
     VENDOR_NAME_ALIASES[compact] ||
-    (compact === '智谱' || compact === '智谱ai' ? 'ZHIPU' : trimmed)
+    (compact === '智谱' || compact === '智谱ai' ? 'Zhipu' : trimmed)
   )
 }
 
@@ -285,6 +285,7 @@ export const VENDOR_MODEL_DISPLAY_ORDER: Record<string, readonly string[]> = {
     'DeepSeek-V3.2',
   ],
   // —— 智谱 ——
+  Zhipu: ['glm-5.3', 'glm-5.2', 'glm-5.1'],
   ZHIPU: ['glm-5.3', 'glm-5.2', 'glm-5.1'],
   // —— Moonshot / Kimi ——
   Moonshot: ['kimi-k3', 'kimi-k2.7-code', 'kimi-k2.6'],
