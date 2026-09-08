@@ -458,5 +458,5 @@ export const MANUAL_GROUP_SAVINGS_OFF: Record<string, number> = {
  * 自定义分组展示文案（如 "up to 50% off"）
  */
 export const MANUAL_GROUP_OFF_LABEL: Record<string, string> = {
-  Seedance: 'up to 50%\u00A0off',
+  Seedance: 'UP TO 50%\u00A0OFF',
 }

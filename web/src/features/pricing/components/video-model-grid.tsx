@@ -153,7 +153,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                     </button>
                   </div>
                   {discountOff != null && isGroupMode && (
-                    <span className='inline-flex items-center rounded-full bg-rose-600 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold tracking-wide text-white shadow-2xs shadow-rose-600/30 dark:bg-rose-500 tabular-nums shrink-0'>
+                    <span className='inline-flex items-center rounded-full bg-rose-500 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold tracking-wide text-white shadow-xs tabular-nums shrink-0'>
                       {discountOff}% OFF
                     </span>
                   )}

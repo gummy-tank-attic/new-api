@@ -97,9 +97,9 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
           lookupGroupMapValue(MANUAL_GROUP_SAVINGS_OFF, group)
         )
         const manualLabel = lookupGroupMapValue(MANUAL_GROUP_OFF_LABEL, group)
-        // Fixed English copy — never i18n: "up to 50% off" or "85% off"
+        // Fixed English copy — never i18n: "UP TO 50% OFF" or "85% OFF"
         const offLabel =
-          manualLabel ?? (savingsOff != null ? `${savingsOff}%\u00A0off` : null)
+          manualLabel ?? (savingsOff != null ? `${savingsOff}%\u00A0OFF` : null)
 
         return (
           <button
@@ -118,7 +118,7 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
           >
             <span
               translate='no'
-              className='notranslate text-[14px] whitespace-nowrap sm:text-[14.5px]'
+              className='notranslate text-[14px] font-semibold text-foreground whitespace-nowrap sm:text-[14.5px]'
             >
               {displayName}
             </span>
@@ -137,7 +137,7 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
             {offLabel ? (
               <span
                 translate='no'
-                className='notranslate inline-flex shrink-0 items-center justify-center rounded-full bg-rose-500 px-2 py-0.5 text-[11px] font-bold whitespace-nowrap text-white tabular-nums shadow-xs'
+                className='notranslate inline-flex shrink-0 items-center justify-center rounded-full bg-rose-500 px-1.5 py-0 h-[17px] text-[9.5px] font-bold tracking-tight whitespace-nowrap text-white tabular-nums shadow-xs leading-none'
               >
                 {offLabel}
               </span>

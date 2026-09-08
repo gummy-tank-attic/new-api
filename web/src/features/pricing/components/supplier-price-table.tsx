@@ -581,12 +581,18 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               <div
                 key={model.model_name}
                 onClick={() => props.onModelClick?.(model.model_name)}
-                className='group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-150 hover:border-foreground/15 hover:shadow-xs'
+                className='group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-border/80 bg-card/95 shadow-sm transition-all duration-200 hover:border-blue-400/40 hover:shadow-md hover:shadow-blue-500/5 dark:border-border/70 dark:hover:border-blue-500/30'
               >
+                {/* Ambient subtle glow */}
+                <div
+                  className='pointer-events-none absolute -top-14 -right-14 h-32 w-32 rounded-full bg-blue-500/10 blur-3xl transition-all duration-500 group-hover:bg-blue-500/15'
+                  aria-hidden='true'
+                />
+
                 {/* 1. Header: Model Identity */}
-                <div className='flex items-center justify-between border-b border-border/40 bg-muted/20 px-5 py-2.5'>
+                <div className='flex items-center justify-between border-b border-border/50 bg-muted/25 px-5 py-2.5'>
                   <div className='flex items-center gap-2'>
-                    <span className='font-sans text-[15px] font-semibold text-foreground group-hover:text-primary transition-colors sm:text-[15.5px]'>
+                    <span className='font-sans text-[15px] font-semibold text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors sm:text-[15.5px]'>
                       {model.model_name}
                     </span>
                     <span onClick={(e) => e.stopPropagation()}>
@@ -598,8 +604,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                         iconClassName='size-3'
                       />
                     </span>
-                    <span className='inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10.5px] font-medium text-emerald-700 dark:text-emerald-400'>
-                      <Clock className='size-2.5' />
+                    <span className='inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-100/70 px-2.5 py-0.5 text-[10.5px] font-medium text-blue-800 shadow-2xs dark:border-blue-800/80 dark:bg-blue-900/40 dark:text-blue-300'>
+                      <Clock className='size-2.5 text-blue-600 dark:text-blue-400' />
                       {t('pricing.timeTieredBadge', '分时计费')}
                     </span>
                   </div>
@@ -608,12 +614,12 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 {/* 2. Seamless Integrated Tier Rows (Zero Nested Boxes) */}
                 <div className='divide-y divide-border/40'>
                   {/* Tier 1: OFF-PEAK Row */}
-                  <div className='grid grid-cols-1 items-center gap-2.5 bg-emerald-500/[0.03] px-5 py-2.5 transition-colors hover:bg-emerald-500/[0.06] md:grid-cols-12'>
+                  <div className='grid grid-cols-1 items-center gap-2.5 bg-blue-500/[0.03] px-5 py-2.5 transition-colors hover:bg-blue-500/[0.06] dark:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] md:grid-cols-12'>
                     {/* Col 4: Time Range & Pill */}
                     <div className='col-span-12 flex items-center gap-2.5 md:col-span-4'>
                       <span
                         title={t('pricing.offPeakHoursTooltip', '其余全天时段 · 享受 50% 折扣')}
-                        className='inline-flex shrink-0 items-center justify-center rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[11.5px] font-semibold text-emerald-700 dark:text-emerald-400 shadow-2xs'
+                        className='inline-flex shrink-0 items-center justify-center rounded-md border border-blue-300 bg-blue-50 px-2.5 py-0.5 text-[11.5px] font-semibold text-blue-700 shadow-2xs dark:border-blue-800/70 dark:bg-blue-950/50 dark:text-blue-300'
                       >
                         {t('pricing.offPeakPill', '闲时')}
                       </span>
@@ -660,16 +666,16 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                   </div>
 
                   {/* Tier 2: PEAK Row */}
-                  <div className='grid grid-cols-1 items-center gap-2.5 bg-background px-5 py-2.5 transition-colors hover:bg-muted/20 md:grid-cols-12'>
+                  <div className='grid grid-cols-1 items-center gap-2.5 bg-background/80 px-5 py-2.5 transition-colors hover:bg-muted/20 md:grid-cols-12'>
                     {/* Col 4: Time Range & Pill */}
                     <div className='col-span-12 flex items-center gap-2.5 md:col-span-4'>
                       <span
                         title={t('pricing.peakHoursTooltip', '新加坡时间 09:00-12:00, 14:00-18:00 · 标准原价')}
-                        className='inline-flex shrink-0 items-center justify-center rounded-md border border-border/80 bg-muted px-2 py-0.5 text-[11.5px] font-medium text-muted-foreground shadow-2xs'
+                        className='inline-flex shrink-0 items-center justify-center rounded-md border border-slate-300 bg-slate-100 px-2.5 py-0.5 text-[11.5px] font-medium text-slate-700 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
                       >
                         {t('pricing.peakPill', '忙时')}
                       </span>
-                      <span className='text-muted-foreground/60 font-sans text-[11.5px] whitespace-nowrap tracking-tight sm:text-[12px]'>
+                      <span className='text-muted-foreground/70 font-sans text-[11.5px] whitespace-nowrap tracking-tight sm:text-[12px]'>
                         {t('pricing.peakTimeRange', '09:00-12:00, 14:00-18:00 (SGT)')}
                       </span>
                     </div>
