@@ -21,7 +21,7 @@ import { useTranslation } from 'react-i18next'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
-import { FILTER_ALL, getCanonicalVendorName } from '../constants'
+import { FILTER_ALL, getDisplayVendorName } from '../constants'
 
 export type SupplierTabOption = {
   value: string
@@ -83,7 +83,7 @@ export function SupplierTabs(props: SupplierTabsProps) {
           >
             {icon}
             <span className='truncate'>
-              {t(getCanonicalVendorName(option.label) || option.label, option.label)}
+              {getDisplayVendorName(option.label)}
             </span>
           </button>
         )

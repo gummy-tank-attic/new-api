@@ -28,7 +28,7 @@ import { Button } from '@/components/ui/button'
 import { LoadingSkeleton, ModelDetailsDrawer } from './components'
 import type { PriceMode } from './components/supplier-price-table'
 import { SupplierPricingLayout } from './components/supplier-pricing-layout'
-import { FILTER_ALL, VIEW_MODES } from './constants'
+import { FILTER_ALL, VIEW_MODES, getCanonicalVendorName, getDisplayVendorName } from './constants'
 import { usePricingData } from './hooks/use-pricing-data'
 import {
   buildVendorTabOptions,
@@ -74,15 +74,19 @@ export function Pricing() {
     [allModels, vendors]
   )
 
-  // Prefer URL vendor when it is a real tab; otherwise first supplier (no All Vendors).
   const vendor = useMemo(() => {
     const fromUrl = search.vendor
-    if (
-      fromUrl &&
-      fromUrl !== FILTER_ALL &&
-      vendorOptions.some((o) => o.value === fromUrl)
-    ) {
-      return fromUrl
+    if (fromUrl && fromUrl !== FILTER_ALL) {
+      if (vendorOptions.some((o) => o.value === fromUrl)) {
+        return fromUrl
+      }
+      const canonical = getCanonicalVendorName(fromUrl)
+      if (canonical) {
+        const matched = vendorOptions.find(
+          (o) => getCanonicalVendorName(o.value) === canonical
+        )
+        if (matched) return matched.value
+      }
     }
     return vendorOptions[0]?.value ?? FILTER_ALL
   }, [search.vendor, vendorOptions])
@@ -140,7 +144,7 @@ export function Pricing() {
           if (nextVendor === FILTER_ALL) {
             delete next.vendor
           } else {
-            next.vendor = nextVendor
+            next.vendor = getDisplayVendorName(nextVendor) || nextVendor
           }
           delete next.group
           return next

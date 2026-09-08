@@ -178,9 +178,24 @@ export const VENDOR_NAME_ALIASES: Record<string, string> = {
   'zhipu ai': 'Zhipu',
   智谱: 'Zhipu',
   智谱ai: 'Zhipu',
+  'z.ai': 'Zhipu',
+  'z-ai': 'Zhipu',
+  'z ai': 'Zhipu',
   moonshot: 'Moonshot',
   kimi: 'Moonshot',
   minimax: 'MiniMax',
+}
+
+/**
+ * 供应商展示名映射表（对齐国际顶级平台如 OpenRouter 标准：专有名词不随语言翻译，智谱统一出海标准品牌 Z.ai）。
+ */
+export const VENDOR_DISPLAY_NAME_OVERRIDES: Record<string, string> = {
+  Zhipu: 'Z.ai',
+  'z.ai': 'Z.ai',
+  'z-ai': 'Z.ai',
+  'z ai': 'Z.ai',
+  zhipu: 'Z.ai',
+  智谱: 'Z.ai',
 }
 
 /** Rank for vendor tabs / table sort (lower first). Unknown vendors share the last bucket. */
@@ -213,6 +228,14 @@ export function getCanonicalVendorName(vendorName?: string): string {
     VENDOR_NAME_ALIASES[compact] ||
     (compact === '智谱' || compact === '智谱ai' ? 'Zhipu' : trimmed)
   )
+}
+
+/**
+ * 获取用于前端展现的标准化品牌名称（专有名词，不可随系统语言动态翻译）。
+ */
+export function getDisplayVendorName(vendorName?: string): string {
+  const canonical = getCanonicalVendorName(vendorName)
+  return VENDOR_DISPLAY_NAME_OVERRIDES[canonical] || canonical || vendorName || ''
 }
 
 /**
