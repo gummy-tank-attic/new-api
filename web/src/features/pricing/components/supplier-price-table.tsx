@@ -190,7 +190,7 @@ function SavingsBadge({ savings }: { savings: number | null }) {
   return (
     <span
       translate='no'
-      className='notranslate inline-flex items-center justify-center rounded-full bg-rose-500 px-2.5 py-0.5 text-xs font-bold whitespace-nowrap text-white tabular-nums shadow-xs'
+      className='notranslate inline-flex items-center justify-center rounded-full bg-rose-500 px-2.5 pt-[3px] pb-[2px] text-xs font-bold tracking-wide whitespace-nowrap text-white tabular-nums shadow-xs leading-none'
     >
       {savings}% OFF
     </span>

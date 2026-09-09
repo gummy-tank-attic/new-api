@@ -727,7 +727,7 @@ function VideoUpscaleGroupPricingSection(props: {
               <div className='bg-muted/30 flex items-center justify-between gap-3 border-b border-border/50 px-3.5 py-2.5'>
                 <GroupBadge group={group} size='sm' />
                 <div className='flex items-center gap-2'>
-                  <span className='inline-flex items-center rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-2xs'>
+                  <span className='inline-flex items-center justify-center rounded-full bg-rose-600 px-2 h-[18px] pt-[2px] pb-[1px] text-[10px] font-bold tracking-wide text-white shadow-2xs leading-none'>
                     30% OFF
                   </span>
                   <span className='text-muted-foreground font-mono text-xs'>{ratio}x</span>

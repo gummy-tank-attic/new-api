@@ -137,7 +137,7 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
             {offLabel ? (
               <span
                 translate='no'
-                className='notranslate inline-flex shrink-0 items-center justify-center rounded-full bg-rose-500 px-1.5 py-0 h-[17px] text-[9.5px] font-bold tracking-tight whitespace-nowrap text-white tabular-nums shadow-xs leading-none'
+                className='notranslate inline-flex shrink-0 items-center justify-center rounded-full bg-rose-500 px-2 h-[18px] pt-[2px] pb-[1px] text-[10px] font-bold tracking-wide whitespace-nowrap text-white tabular-nums shadow-xs leading-none'
               >
                 {offLabel}
               </span>

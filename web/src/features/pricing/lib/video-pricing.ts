@@ -506,9 +506,12 @@ export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
 export function formatHumanFriendlyCondition(
   field: string,
   value: string,
-  t?: (key: string, defaultValue?: string) => string
+  t?: unknown
 ): string {
-  const translate = t || ((k: string, d?: string) => d || k)
+  const translate = (typeof t === 'function' ? t : ((k: string, d?: string) => d || k)) as (
+    key: string,
+    defaultValue?: string
+  ) => string
   if (field === 'resolution') {
     const val = value.toLowerCase()
     const prefix = translate('pricing.resolutionPrefix', '分辨率')
@@ -534,9 +537,12 @@ export function formatHumanFriendlyCondition(
 
 export function formatHumanFriendlyTierLabel(
   label: string,
-  t?: (key: string, defaultValue?: string) => string
+  t?: unknown
 ): string {
-  const translate = t || ((k: string, d?: string) => d || k)
+  const translate = (typeof t === 'function' ? t : ((k: string, d?: string) => d || k)) as (
+    key: string,
+    defaultValue?: string
+  ) => string
   const parts = label.split('·').map((s) => s.trim())
   if (parts.length === 2) {
     const [res, mode] = parts
