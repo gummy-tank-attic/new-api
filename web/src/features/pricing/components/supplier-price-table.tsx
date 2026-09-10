@@ -246,10 +246,10 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           !isImageTable && 'md:grid'
         )}
       >
-        <div className='col-span-4'>{t('Model', '模型名称')}</div>
+        <div className='col-span-3'>{t('Model', '模型名称')}</div>
         {isGenerationTable ? (
           <div
-            className={isImageTable ? 'col-span-8' : 'col-span-6 text-center'}
+            className={isImageTable ? 'col-span-9' : 'col-span-8 text-center'}
           >
             {t('Generation Mode & Pricing', '生成模式与计费价格')}
           </div>
@@ -268,13 +268,22 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               </span>
             </div>
             <div className='col-span-2 text-center'>
-              {t('Cache & Details', '缓存与扩展')}
+              {t('Cache Read', '缓存读取')}
+              <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                / {unitHint}
+              </span>
+            </div>
+            <div className='col-span-2 text-center'>
+              {t('Cache Write', '缓存写入')}
+              <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                / {unitHint}
+              </span>
             </div>
           </>
         )}
         {!isImageTable && (
-          <div className='col-span-2 text-center'>
-            {t('Discount', '优惠幅度')}
+          <div className='col-span-1 text-center'>
+            {t('Discount', '优惠')}
           </div>
         )}
       </div>
@@ -294,7 +303,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 key={model.model_name}
                 className='group relative grid grid-cols-1 items-center gap-4 rounded-xl border border-border bg-card px-5 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-150 hover:border-foreground/15 hover:bg-muted/30 hover:shadow-xs md:grid-cols-12'
               >
-                <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-4'>
+                <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-3'>
                   <button
                     type='button'
                     className='text-foreground group-hover:text-primary min-w-0 truncate rounded-sm text-left font-sans text-[15px] font-medium antialiased transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current sm:text-[15.5px] sm:font-semibold'
@@ -310,7 +319,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     iconClassName='size-3'
                   />
                 </div>
-                <div className='col-span-12 min-w-0 md:col-span-6'>
+                <div className='col-span-12 min-w-0 md:col-span-9'>
                   {!isGroupMode && (
                     <div className='text-muted-foreground mb-1 text-xs'>
                       {t('Base Price')}
@@ -347,7 +356,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 className='group relative grid cursor-pointer grid-cols-1 items-center gap-4 rounded-xl border border-border bg-card px-5 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50/40 hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:border-border/80 dark:hover:border-border dark:hover:bg-accent/20 md:grid-cols-12'
               >
                 {/* Left: Model Identity (Only model name + copy, no icon) */}
-                <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-4'>
+                <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-3'>
                   <span className='text-foreground group-hover:text-primary truncate font-sans text-[15px] font-medium antialiased transition-colors sm:text-[15.5px] sm:font-semibold'>
                     {model.model_name}
                   </span>
@@ -363,7 +372,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 </div>
 
                 {/* Center: Video Mode Pricing */}
-                <div className='col-span-12 md:col-span-6'>
+                <div className='col-span-12 md:col-span-8'>
                   {isUpscale && (
                     <div className='grid grid-cols-1 gap-2 sm:grid-cols-3'>
                       <PriceColumn
@@ -456,7 +465,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 </div>
 
                 {/* Right: Savings */}
-                <div className='col-span-12 flex items-center justify-center md:col-span-2'>
+                <div className='col-span-12 flex items-center justify-center md:col-span-1'>
                   <SavingsBadge savings={effectiveSavings} />
                 </div>
               </div>
@@ -668,8 +677,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 <div className='divide-y divide-border/40'>
                   {/* Tier 1: OFF-PEAK Row */}
                   <div className='grid grid-cols-1 items-center gap-2.5 bg-blue-500/[0.03] px-5 py-2.5 transition-colors hover:bg-blue-500/[0.06] dark:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.08] md:grid-cols-12'>
-                    {/* Col 4: Time Range & Pill */}
-                    <div className='col-span-12 flex items-center gap-2.5 md:col-span-4'>
+                    {/* Col 3: Time Range & Pill */}
+                    <div className='col-span-12 flex items-center gap-2.5 md:col-span-3'>
                       <span
                         title={offPeakTooltipText}
                         className='inline-flex shrink-0 items-center justify-center rounded-md border border-blue-300 bg-blue-50 px-2.5 py-0.5 text-[11.5px] font-semibold text-blue-700 shadow-2xs dark:border-blue-800/70 dark:bg-blue-950/50 dark:text-blue-300'
@@ -681,8 +690,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                       </span>
                     </div>
 
-                    {/* Col 6: Prices strictly aligned with table header */}
-                    <div className='col-span-12 grid grid-cols-3 gap-2 md:col-span-6'>
+                    {/* Col 8: Prices strictly aligned with table header */}
+                    <div className='col-span-12 grid grid-cols-2 gap-2 sm:grid-cols-4 md:col-span-8'>
                       <div className='flex flex-col items-center justify-center text-center'>
                         <span className='text-muted-foreground/60 text-[9.5px] font-normal md:hidden'>
                           {t('Input price')}
@@ -703,25 +712,31 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                       </div>
                       <div className='flex flex-col items-center justify-center text-center'>
                         <span className='text-muted-foreground/60 text-[9.5px] font-normal md:hidden'>
-                          {t('pricing.cachePrice', '缓存读取')}
+                          {t('Cache Read', '缓存读取')}
                         </span>
                         <PriceColumn
                           primary={offPeakCache.primary}
                           official={offPeakCache.official}
                         />
                       </div>
+                      <div className='flex flex-col items-center justify-center text-center'>
+                        <span className='text-muted-foreground/60 text-[9.5px] font-normal md:hidden'>
+                          {t('Cache Write', '缓存写入')}
+                        </span>
+                        <PriceColumn primary='—' />
+                      </div>
                     </div>
 
-                    {/* Col 2: Discount */}
-                    <div className='col-span-12 flex items-center justify-center md:col-span-2'>
+                    {/* Col 1: Discount */}
+                    <div className='col-span-12 flex items-center justify-center md:col-span-1'>
                       <SavingsBadge savings={offPeakSavings} />
                     </div>
                   </div>
 
                   {/* Tier 2: PEAK Row */}
                   <div className='grid grid-cols-1 items-center gap-2.5 bg-background/80 px-5 py-2.5 transition-colors hover:bg-muted/20 md:grid-cols-12'>
-                    {/* Col 4: Time Range & Pill */}
-                    <div className='col-span-12 flex items-center gap-2.5 md:col-span-4'>
+                    {/* Col 3: Time Range & Pill */}
+                    <div className='col-span-12 flex items-center gap-2.5 md:col-span-3'>
                       <span
                         title={peakTooltipText}
                         className='inline-flex shrink-0 items-center justify-center rounded-md border border-slate-300 bg-slate-100 px-2.5 py-0.5 text-[11.5px] font-medium text-slate-700 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
@@ -733,8 +748,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                       </span>
                     </div>
 
-                    {/* Col 6: Prices strictly aligned with table header */}
-                    <div className='col-span-12 grid grid-cols-3 gap-2 md:col-span-6'>
+                    {/* Col 8: Prices strictly aligned with table header */}
+                    <div className='col-span-12 grid grid-cols-2 gap-2 sm:grid-cols-4 md:col-span-8'>
                       <div className='flex flex-col items-center justify-center text-center'>
                         <span className='text-muted-foreground/60 text-[9.5px] font-normal md:hidden'>
                           {t('Input price')}
@@ -755,17 +770,23 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                       </div>
                       <div className='flex flex-col items-center justify-center text-center'>
                         <span className='text-muted-foreground/60 text-[9.5px] font-normal md:hidden'>
-                          {t('pricing.cachePrice', '缓存读取')}
+                          {t('Cache Read', '缓存读取')}
                         </span>
                         <PriceColumn
                           primary={peakCache.primary}
                           official={peakCache.official}
                         />
                       </div>
+                      <div className='flex flex-col items-center justify-center text-center'>
+                        <span className='text-muted-foreground/60 text-[9.5px] font-normal md:hidden'>
+                          {t('Cache Write', '缓存写入')}
+                        </span>
+                        <PriceColumn primary='—' />
+                      </div>
                     </div>
 
-                    {/* Col 2: Discount */}
-                    <div className='col-span-12 flex items-center justify-center md:col-span-2'>
+                    {/* Col 1: Discount */}
+                    <div className='col-span-12 flex items-center justify-center md:col-span-1'>
                       {effectiveSavings != null ? (
                         <SavingsBadge savings={effectiveSavings} />
                       ) : (
@@ -782,7 +803,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           const isToken = isTokenBasedModel(model)
           let inputPrice = { primary: '—', official: null as string | null }
           let outputPrice = { primary: '—', official: null as string | null }
-          let cachePrice = { primary: '—', official: null as string | null }
+          let cacheReadPrice = { primary: '—', official: null as string | null }
+          let cacheWritePrice = { primary: '—', official: null as string | null }
 
           if (!isToken) {
             const groupReq = formatRequestPrice(
@@ -879,9 +901,35 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               undefined,
               1
             )
-            cachePrice = resolvePrices(
+            cacheReadPrice = resolvePrices(
               cacheGroup,
               cacheOff,
+              isGroupMode,
+              Boolean(selectedGroup)
+            )
+
+            const cacheWriteGroup = formatPrice(
+              model,
+              'create_cache',
+              tokenUnit,
+              false,
+              priceRate,
+              usdExchangeRate,
+              selectedGroup
+            )
+            const cacheWriteOff = formatPrice(
+              model,
+              'create_cache',
+              tokenUnit,
+              false,
+              priceRate,
+              usdExchangeRate,
+              undefined,
+              1
+            )
+            cacheWritePrice = resolvePrices(
+              cacheWriteGroup,
+              cacheWriteOff,
               isGroupMode,
               Boolean(selectedGroup)
             )
@@ -894,7 +942,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               className='group relative grid cursor-pointer grid-cols-1 items-center gap-4 rounded-xl border border-border bg-card px-5 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-150 hover:border-foreground/15 hover:bg-muted/30 hover:shadow-xs md:grid-cols-12'
             >
               {/* Left: Model Identity: Only model name + copy */}
-              <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-4'>
+              <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-3'>
                 <span
                   translate='no'
                   className='notranslate text-foreground group-hover:text-primary truncate font-sans text-[15px] font-semibold antialiased transition-colors sm:text-[15.5px]'
@@ -912,8 +960,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 </span>
               </div>
 
-              {/* Middle: Standard Price Columns without nested boxes (无须 1m) */}
-              <div className='col-span-12 grid grid-cols-1 gap-2 sm:grid-cols-3 md:col-span-6'>
+              {/* Middle: Standard 4 Price Columns without nested boxes */}
+              <div className='col-span-12 grid grid-cols-2 gap-2 sm:grid-cols-4 md:col-span-8'>
                 <PriceColumn
                   primary={inputPrice.primary}
                   official={inputPrice.official}
@@ -924,13 +972,17 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                   official={outputPrice.official}
                 />
                 <PriceColumn
-                  primary={cachePrice.primary}
-                  official={cachePrice.official}
+                  primary={cacheReadPrice.primary}
+                  official={cacheReadPrice.official}
+                />
+                <PriceColumn
+                  primary={cacheWritePrice.primary}
+                  official={cacheWritePrice.official}
                 />
               </div>
 
               {/* Right: Savings */}
-              <div className='col-span-12 flex items-center justify-center md:col-span-2'>
+              <div className='col-span-12 flex items-center justify-center md:col-span-1'>
                 {effectiveSavings != null ? (
                   <SavingsBadge savings={effectiveSavings} />
                 ) : (

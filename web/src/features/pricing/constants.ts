@@ -506,6 +506,10 @@ export const MANUAL_MODEL_SAVINGS_OFF: Record<string, number> = {
   'kimi-k2.6': 25,
   'kimi-k2.5': 25,
   'kimi-k2.7-code': 15,
+  // —— MiniMax ——
+  'minimax-m3': 25,
+  'minimax-m2.7': 15,
+  'minimax-m2.5': 15,
 }
 
 export function lookupModelSavingsOff(modelName: string): number | undefined {
@@ -519,7 +523,7 @@ export function lookupModelSavingsOff(modelName: string): number | undefined {
 
 /**
  * 判定是否属于支持根据模型最大折扣动态展示 UP TO X% OFF 的分组
- * （如 DeepSeek、Z.ai / 智谱、Kimi / Moonshot）
+ * （如 DeepSeek、Z.ai / 智谱、Kimi / Moonshot、MiniMax）
  */
 export function isDynamicUpToGroup(group?: string | null): boolean {
   if (!group) return false
@@ -530,7 +534,8 @@ export function isDynamicUpToGroup(group?: string | null): boolean {
     name.includes('zhipu') ||
     name.includes('智谱') ||
     name.includes('kimi') ||
-    name.includes('moonshot')
+    name.includes('moonshot') ||
+    name.includes('minimax')
   )
 }
 
