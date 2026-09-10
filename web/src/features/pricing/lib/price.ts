@@ -76,10 +76,16 @@ function calculateTokenPrice(
       return hasRatio(model.cache_ratio)
         ? base * Number(model.cache_ratio)
         : Number.NaN
-    case 'create_cache':
-      return hasRatio(model.create_cache_ratio)
-        ? base * Number(model.create_cache_ratio)
-        : Number.NaN
+    case 'create_cache': {
+      if (hasRatio(model.create_cache_ratio)) {
+        return base * Number(model.create_cache_ratio)
+      }
+      const name = (model.model_name || '').toLowerCase()
+      if (name.includes('minimax-m2.7') || name.includes('minimax-m2.5')) {
+        return base * 1.25
+      }
+      return Number.NaN
+    }
     case 'image':
       return hasRatio(model.image_ratio)
         ? base * Number(model.image_ratio)
