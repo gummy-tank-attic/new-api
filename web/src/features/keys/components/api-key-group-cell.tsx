@@ -28,6 +28,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import { BadgeCell, TruncatedCell } from '@/components/data-table'
 import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
@@ -60,6 +61,7 @@ import {
 import { getPricing } from '@/features/pricing/api'
 import { normalizeGroupName } from '@/features/pricing/constants'
 import { resolveGroupDescription } from '@/features/pricing/lib/group-intro-i18n'
+import { useMediaQuery } from '@/hooks'
 import { getUserGroups } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
@@ -71,7 +73,7 @@ import {
   formatRatioDisplay,
   isCliOnlyGroup,
 } from './api-key-group-option-item'
-import { useApiKeys } from './api-keys-provider'
+import { useOptionalApiKeys } from './api-keys-provider'
 import { type GroupRatio, GroupRatioBadge } from './auto-group-visuals'
 
 export type ModelCompatibilityResult = {
@@ -151,31 +153,33 @@ export function buildGroupSwitchPayload(
 
 type ApiKeyGroupCellProps = {
   apiKey?: ApiKey
-  crossGroupRetry: boolean
+  crossGroupRetry?: boolean
   group: string
   ratio?: GroupRatio
-  shouldReduceMotion: boolean
+  shouldReduceMotion?: boolean
 }
 
-export function ApiKeyGroupCell({
-  apiKey,
-  group,
-  ratio,
-  shouldReduceMotion,
-}: ApiKeyGroupCellProps) {
+export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
+  const { apiKey, crossGroupRetry, shouldReduceMotion } = props
   const { t } = useTranslation()
-  const { triggerRefresh } = useApiKeys()
+  const isMobile = useMediaQuery('(max-width: 640px)')
+  const group = props.group?.trim() || ''
+
+  const keysContext = useOptionalApiKeys()
+  const triggerRefresh = keysContext?.triggerRefresh
+
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
   const [targetGroup, setTargetGroup] = useState<string | null>(null)
   const [searchValue, setSearchValue] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Fetch groups
+  // Fetch groups only if apiKey is present (in-cell switch enabled)
   const { data: groupsData } = useQuery({
     queryKey: ['user-groups'],
     queryFn: getUserGroups,
     staleTime: 0,
+    enabled: Boolean(apiKey),
   })
 
   // Fetch pricing data for model compatibility check
@@ -183,9 +187,11 @@ export function ApiKeyGroupCell({
     queryKey: ['pricing-data-for-group-switch'],
     queryFn: getPricing,
     staleTime: 60_000,
+    enabled: Boolean(apiKey),
   })
 
   const groupOptions = useMemo(() => {
+    if (!apiKey) return []
     return Object.entries(groupsData?.data || {})
       .filter(([key]) => key !== 'auto')
       .map(([key, info]) => ({
@@ -194,7 +200,7 @@ export function ApiKeyGroupCell({
         desc: resolveGroupDescription(t, key, info.desc || key),
         ratio: info.ratio,
       }))
-  }, [groupsData, t])
+  }, [apiKey, groupsData, t])
 
   const filteredOptions = useMemo(() => {
     const search = searchValue.trim().toLowerCase()
@@ -211,7 +217,7 @@ export function ApiKeyGroupCell({
     })
   }, [groupOptions, searchValue])
 
-  const numericRatio = typeof ratio === 'number' ? ratio : undefined
+  const numericRatio = typeof props.ratio === 'number' ? props.ratio : undefined
   const currentRatio =
     numericRatio ??
     (group ? groupsData?.data?.[group]?.ratio : undefined)
@@ -251,7 +257,7 @@ export function ApiKeyGroupCell({
           })
         )
         setConfirmDialogOpen(false)
-        triggerRefresh()
+        triggerRefresh?.()
       } else {
         toast.error(res.message || t(ERROR_MESSAGES.UPDATE_FAILED))
       }
@@ -262,6 +268,65 @@ export function ApiKeyGroupCell({
     }
   }
 
+  // Static preview / harness display without apiKey
+  if (!apiKey) {
+    if (group !== 'auto') {
+      return (
+        <TruncatedCell
+          className={isMobile ? 'w-full' : 'max-w-50'}
+          tabIndex={0}
+          tooltipContent={group || t('Follow user group')}
+          tooltipClassName='break-all'
+        >
+          <GroupBadge
+            group={group}
+            ratio={numericRatio}
+            ratioLabel={group ? undefined : t('Inherited')}
+            className='px-0'
+            containerClassName={cn('gap-3', isMobile && 'w-full justify-between')}
+          />
+        </TruncatedCell>
+      )
+    }
+
+    return (
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <BadgeCell
+              data-api-key-group-cell='auto'
+              tabIndex={0}
+              className={cn(
+                'ml-0 gap-3 overflow-visible text-xs',
+                isMobile ? 'w-full justify-between' : 'max-w-50'
+              )}
+            />
+          }
+        >
+          <StatusBadge
+            label={t('Cross-group')}
+            variant='info'
+            copyable={false}
+            className='px-0'
+          />
+          <GroupRatioBadge
+            ratio={props.ratio}
+            isAuto
+            shouldReduceMotion={shouldReduceMotion}
+          />
+        </TooltipTrigger>
+        <TooltipContent>
+          <span className='text-xs'>
+            {t(
+              'Automatically selects the best available group with circuit breaker mechanism'
+            )}
+          </span>
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  // Interactive table cell with apiKey
   return (
     <>
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -286,7 +351,7 @@ export function ApiKeyGroupCell({
                   copyable={false}
                 />
                 <GroupRatioBadge
-                  ratio={ratio}
+                  ratio={props.ratio}
                   isAuto
                   shouldReduceMotion={shouldReduceMotion}
                 />

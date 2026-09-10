@@ -106,6 +106,7 @@ describe('API key group combobox (T1)', () => {
     fireEvent.input(screen.getByPlaceholderText('Search...'), {
       target: { value: 'vip' },
     })
+
     const visibleOptions = [
       ...document.querySelectorAll<HTMLElement>('[data-slot="command-item"]'),
     ]

@@ -188,3 +188,7 @@ export const useApiKeys = () => {
 
   return apiKeysContext
 }
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const useOptionalApiKeys = () => React.useContext(ApiKeysContext)
+
