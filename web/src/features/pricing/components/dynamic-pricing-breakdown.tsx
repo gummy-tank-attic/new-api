@@ -51,10 +51,7 @@ import {
   type DynamicPriceLabelKind,
   type DynamicPriceOptions,
 } from '../lib/dynamic-price'
-import {
-  getTaskMatrixDisplayTiers,
-  getTaskPricingDisplayTiers,
-} from '../lib/task-matrix-display'
+import { getTaskPricingDisplayTiers } from '../lib/task-matrix-display'
 import {
   taskPriceLabel,
   taskPricingConditions,
@@ -181,6 +178,12 @@ function formatBreakdownConditionSummary(
   if (!isTaskBreakdownTier(tier)) {
     return formatConditionSummary(tier.conditions, t)
   }
+  const fromSchema = schema
+    ? taskPricingConditions(tier.conditions, schema, language, t)
+    : ''
+  if (fromSchema) {
+    return fromSchema
+  }
   const hasVideoField = tier.conditions.some(
     (c) => c.field === 'resolution' || c.field === 'video_input'
   )
@@ -191,10 +194,7 @@ function formatBreakdownConditionSummary(
       )
       .join(' · ')
   }
-  return (
-    taskPricingConditions(tier.conditions, schema, language, t) ||
-    t(tierCount > 1 ? 'Other cases' : 'All requests')
-  )
+  return t(tierCount > 1 ? 'Other cases' : 'All requests')
 }
 
 function formatBreakdownPrice(

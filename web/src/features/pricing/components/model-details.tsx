@@ -87,10 +87,7 @@ import {
   getTaskEnumFields,
   getTaskNumberFields,
 } from '../lib/task-expr'
-import {
-  getTaskMatrixDisplayTiers,
-  getTaskPricingDisplayTiers,
-} from '../lib/task-matrix-display'
+import { getTaskPricingDisplayTiers } from '../lib/task-matrix-display'
 import {
   hasSimpleTaskPricing,
   taskPriceLabel,

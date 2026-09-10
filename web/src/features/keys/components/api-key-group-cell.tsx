@@ -151,7 +151,7 @@ export function buildGroupSwitchPayload(
   }
 }
 
-type ApiKeyGroupCellProps = {
+export type ApiKeyGroupCellProps = {
   apiKey?: ApiKey
   crossGroupRetry?: boolean
   group: string
@@ -159,10 +159,74 @@ type ApiKeyGroupCellProps = {
   shouldReduceMotion?: boolean
 }
 
-export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
-  const { apiKey, crossGroupRetry, shouldReduceMotion } = props
+function ApiKeyGroupCellStatic(props: ApiKeyGroupCellProps) {
   const { t } = useTranslation()
   const isMobile = useMediaQuery('(max-width: 640px)')
+  const group = props.group?.trim() || ''
+
+  if (group !== 'auto') {
+    const numericRatio =
+      group && typeof props.ratio === 'number' ? props.ratio : undefined
+    return (
+      <TruncatedCell
+        className={isMobile ? 'w-full' : 'max-w-50'}
+        tabIndex={0}
+        tooltipContent={group || t('Follow user group')}
+        tooltipClassName='break-all'
+      >
+        <GroupBadge
+          group={group}
+          ratio={numericRatio}
+          ratioLabel={group ? undefined : t('Inherited')}
+          className='px-0'
+          containerClassName={cn('gap-3', isMobile && 'w-full justify-between')}
+        />
+      </TruncatedCell>
+    )
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <BadgeCell
+            data-api-key-group-cell='auto'
+            tabIndex={0}
+            className={cn(
+              'ml-0 gap-3 overflow-visible text-xs',
+              isMobile ? 'w-full justify-between' : 'max-w-50'
+            )}
+          />
+        }
+      >
+        <StatusBadge
+          label={t('Cross-group')}
+          variant='info'
+          copyable={false}
+          className='px-0'
+        />
+        <GroupRatioBadge
+          ratio={props.ratio}
+          isAuto
+          shouldReduceMotion={props.shouldReduceMotion}
+        />
+      </TooltipTrigger>
+      <TooltipContent>
+        <span className='text-xs'>
+          {t(
+            'Automatically selects the best available group with circuit breaker mechanism'
+          )}
+        </span>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
+function ApiKeyGroupCellInteractive(
+  props: ApiKeyGroupCellProps & { apiKey: ApiKey }
+) {
+  const { apiKey, shouldReduceMotion } = props
+  const { t } = useTranslation()
   const group = props.group?.trim() || ''
 
   const keysContext = useOptionalApiKeys()
@@ -174,24 +238,19 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
   const [searchValue, setSearchValue] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Fetch groups only if apiKey is present (in-cell switch enabled)
   const { data: groupsData } = useQuery({
     queryKey: ['user-groups'],
     queryFn: getUserGroups,
     staleTime: 0,
-    enabled: Boolean(apiKey),
   })
 
-  // Fetch pricing data for model compatibility check
   const { data: pricingData } = useQuery({
     queryKey: ['pricing-data-for-group-switch'],
     queryFn: getPricing,
     staleTime: 60_000,
-    enabled: Boolean(apiKey),
   })
 
   const groupOptions = useMemo(() => {
-    if (!apiKey) return []
     return Object.entries(groupsData?.data || {})
       .filter(([key]) => key !== 'auto')
       .map(([key, info]) => ({
@@ -200,7 +259,7 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
         desc: resolveGroupDescription(t, key, info.desc || key),
         ratio: info.ratio,
       }))
-  }, [apiKey, groupsData, t])
+  }, [groupsData, t])
 
   const filteredOptions = useMemo(() => {
     const search = searchValue.trim().toLowerCase()
@@ -245,7 +304,7 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
   }
 
   const handleConfirmSwitch = async () => {
-    if (!apiKey || !targetGroup) return
+    if (!targetGroup) return
     setIsSubmitting(true)
 
     try {
@@ -268,65 +327,6 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
     }
   }
 
-  // Static preview / harness display without apiKey
-  if (!apiKey) {
-    if (group !== 'auto') {
-      return (
-        <TruncatedCell
-          className={isMobile ? 'w-full' : 'max-w-50'}
-          tabIndex={0}
-          tooltipContent={group || t('Follow user group')}
-          tooltipClassName='break-all'
-        >
-          <GroupBadge
-            group={group}
-            ratio={numericRatio}
-            ratioLabel={group ? undefined : t('Inherited')}
-            className='px-0'
-            containerClassName={cn('gap-3', isMobile && 'w-full justify-between')}
-          />
-        </TruncatedCell>
-      )
-    }
-
-    return (
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <BadgeCell
-              data-api-key-group-cell='auto'
-              tabIndex={0}
-              className={cn(
-                'ml-0 gap-3 overflow-visible text-xs',
-                isMobile ? 'w-full justify-between' : 'max-w-50'
-              )}
-            />
-          }
-        >
-          <StatusBadge
-            label={t('Cross-group')}
-            variant='info'
-            copyable={false}
-            className='px-0'
-          />
-          <GroupRatioBadge
-            ratio={props.ratio}
-            isAuto
-            shouldReduceMotion={shouldReduceMotion}
-          />
-        </TooltipTrigger>
-        <TooltipContent>
-          <span className='text-xs'>
-            {t(
-              'Automatically selects the best available group with circuit breaker mechanism'
-            )}
-          </span>
-        </TooltipContent>
-      </Tooltip>
-    )
-  }
-
-  // Interactive table cell with apiKey
   return (
     <>
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -412,7 +412,6 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
         </PopoverContent>
       </Popover>
 
-      {/* 确认切换分组对话框 */}
       <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
         <DialogContent className='sm:max-w-md'>
           <DialogHeader>
@@ -427,7 +426,6 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
           </DialogHeader>
 
           <div className='space-y-3 py-2'>
-            {/* 价格倍率对比 */}
             <div className='rounded-lg border bg-muted/40 p-3 space-y-2 text-sm'>
               <div className='text-xs text-muted-foreground font-medium'>
                 {t('Price Ratio Comparison')}
@@ -453,7 +451,6 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
               </div>
             </div>
 
-            {/* 模型兼容性警告 */}
             {compatibility.type === 'incompatible' && (
               <div className='flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive'>
                 <AlertTriangle className='size-4 shrink-0 mt-0.5' />
@@ -476,7 +473,6 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
               </div>
             )}
 
-            {/* CLI Only / Codex Only 目标组警告 */}
             {targetGroup && isCliOnlyGroup(targetGroup) && (
               <div className='flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive'>
                 <AlertCircle className='size-4 shrink-0 mt-0.5' />
@@ -488,7 +484,6 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
               </div>
             )}
 
-            {/* 生效说明 */}
             <p className='text-xs text-muted-foreground leading-relaxed'>
               {t(
                 'Takes effect immediately upon confirmation. The next request will be billed according to the new group; key and client configurations do not need to be modified.'
@@ -519,4 +514,11 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
       </Dialog>
     </>
   )
+}
+
+export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
+  if (props.apiKey) {
+    return <ApiKeyGroupCellInteractive {...props} apiKey={props.apiKey} />
+  }
+  return <ApiKeyGroupCellStatic {...props} />
 }
