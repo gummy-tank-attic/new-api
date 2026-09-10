@@ -25,7 +25,9 @@ import { cn } from '@/lib/utils'
 
 import {
   DEFAULT_TOKEN_UNIT,
+  isDynamicUpToGroup,
   lookupGroupMapValue,
+  lookupModelSavingsOff,
   MANUAL_GROUP_SAVINGS_OFF,
   TIME_TIERED_MODEL_NAMES,
 } from '../constants'
@@ -71,9 +73,24 @@ function isEmptyPrice(value: string): boolean {
   return value === '-' || value === '—' || value === ''
 }
 
-function isTimeTieredModel(model: PricingModel): boolean {
+export function isTimeTieredModel(model: PricingModel): boolean {
+  // 核心守卫：必须后端启用了表达式计费（tiered_expr），才进入分时展示；若后端为普通按量/Token模式，严格跟随展示为标准按量
+  if (!isDynamicPricingModel(model)) return false
+  const expr = model.billing_expr || ''
+  const hasTimeRule = /(?:hour|minute|weekday)\s*\(/i.test(expr)
   const name = (model.model_name || '').trim().toLowerCase()
-  return TIME_TIERED_MODEL_NAMES.some((t) => t.toLowerCase() === name)
+  const isWhitelisted = TIME_TIERED_MODEL_NAMES.some((t) => t.toLowerCase() === name)
+  return hasTimeRule || isWhitelisted
+}
+
+export function getOffPeakMultiplier(model: PricingModel): number {
+  const expr = model.billing_expr || ''
+  const m = expr.match(/\?\s*1(?:\.0+)?\s*:\s*([\d.]+)/)
+  if (m) {
+    const val = Number(m[1])
+    if (Number.isFinite(val) && val > 0 && val < 1) return val
+  }
+  return 0.5
 }
 
 function getModelUnitPrice(
@@ -208,6 +225,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
 
   const savings = useMemo(() => {
     if (!isGroupMode || !props.selectedGroup) return null
+    if (isDynamicUpToGroup(props.selectedGroup)) return null
     const ratio = getConfiguredGroupRatio(props.groupRatio, props.selectedGroup)
     return resolveGroupSavingsOffPercent(
       ratio,
@@ -265,6 +283,10 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
       <div className='flex flex-col gap-2.5 sm:gap-3'>
         {props.models.map((model) => {
           const isTimeTiered = isTimeTieredModel(model)
+          const modelSavings = lookupModelSavingsOff(model.model_name)
+          const effectiveSavings = isGroupMode
+            ? (modelSavings ?? savings)
+            : null
 
           if (isPerImageExpressionModel(model)) {
             return (
@@ -435,7 +457,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
 
                 {/* Right: Savings */}
                 <div className='col-span-12 flex items-center justify-center md:col-span-2'>
-                  <SavingsBadge savings={savings} />
+                  <SavingsBadge savings={effectiveSavings} />
                 </div>
               </div>
             )
@@ -443,6 +465,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
 
           // Time-Tiered Branch (DeepSeek)
           if (isTimeTiered) {
+            const offPeakMultiplier = getOffPeakMultiplier(model)
             const baseRatio = getConfiguredGroupRatio(
               props.groupRatio,
               selectedGroup || ''
@@ -451,7 +474,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               getModelUnitPrice(
                 model,
                 'input',
-                baseRatio * 0.5,
+                baseRatio * offPeakMultiplier,
                 tokenUnit,
                 priceRate,
                 usdExchangeRate,
@@ -460,7 +483,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               getModelUnitPrice(
                 model,
                 'input',
-                0.5,
+                offPeakMultiplier,
                 tokenUnit,
                 priceRate,
                 usdExchangeRate
@@ -493,7 +516,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               getModelUnitPrice(
                 model,
                 'output',
-                baseRatio * 0.5,
+                baseRatio * offPeakMultiplier,
                 tokenUnit,
                 priceRate,
                 usdExchangeRate,
@@ -502,7 +525,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               getModelUnitPrice(
                 model,
                 'output',
-                0.5,
+                offPeakMultiplier,
                 tokenUnit,
                 priceRate,
                 usdExchangeRate
@@ -535,7 +558,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               getModelUnitPrice(
                 model,
                 'cache',
-                baseRatio * 0.5,
+                baseRatio * offPeakMultiplier,
                 tokenUnit,
                 priceRate,
                 usdExchangeRate,
@@ -544,7 +567,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               getModelUnitPrice(
                 model,
                 'cache',
-                0.5,
+                offPeakMultiplier,
                 tokenUnit,
                 priceRate,
                 usdExchangeRate
@@ -574,8 +597,35 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               Boolean(selectedGroup)
             )
 
+            const defaultDiscountPercent = Math.round((1 - offPeakMultiplier) * 100)
             const offPeakSavings =
-              savings != null ? Math.round(100 - (100 - savings) * 0.5) : 50
+              effectiveSavings != null
+                ? Math.round(100 - (100 - effectiveSavings) * offPeakMultiplier)
+                : defaultDiscountPercent
+
+            const isV41Schedule =
+              Boolean(model.billing_expr?.includes('weekday')) ||
+              (model.model_name || '').toLowerCase().includes('deepseek-v4.1-flash')
+
+            const offPeakTimeLabel = isV41Schedule
+              ? t('pricing.v41OffPeakTimeRange', '周六日全天 · 工作日 12:00-14:00, 18:00-09:00 (新加坡时间)')
+              : t('pricing.offPeakTimeRange', '00:00-09:00, 12:00-14:00, 18:00-24:00 (新加坡时间)')
+
+            const peakTimeLabel = isV41Schedule
+              ? t('pricing.v41PeakTimeRange', '工作日 09:00-12:00, 14:00-18:00 (新加坡时间)')
+              : t('pricing.peakTimeRange', '09:00-12:00, 14:00-18:00 (新加坡时间)')
+
+            const offPeakTooltipText = isV41Schedule
+              ? t('pricing.v41OffPeakHoursTooltip', '周六日全天、工作日中午 12:00-14:00 与夜晨 18:00-09:00 (新加坡时间) · 享受 50% 闲时折扣')
+              : t('pricing.offPeakHoursTooltip', '新加坡时间其余全天时段 · 享受 50% 闲时折扣')
+
+            const peakTooltipText = isV41Schedule
+              ? t('pricing.v41PeakHoursTooltip', '仅工作日（周一至周五）09:00-12:00 与 14:00-18:00 (新加坡时间) · 标准原价')
+              : t('pricing.peakHoursTooltip', '新加坡时间 09:00-12:00, 14:00-18:00 · 标准原价')
+
+            const badgeTooltipText = isV41Schedule
+              ? t('pricing.v41TimeTieredBadgeTooltip', '工作日 09:00-12:00 与 14:00-18:00 为忙时；周六日全天、工作日 12:00-14:00 及 18:00-09:00 为闲时 (5折)')
+              : t('pricing.timeTieredBadgeTooltip', '新加坡时间 09:00-12:00 与 14:00-18:00 为忙时；其余全天时段为闲时 (5折)')
 
             return (
               <div
@@ -604,7 +654,10 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                         iconClassName='size-3'
                       />
                     </span>
-                    <span className='inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-100/70 px-2.5 py-0.5 text-[10.5px] font-medium text-blue-800 shadow-2xs dark:border-blue-800/80 dark:bg-blue-900/40 dark:text-blue-300'>
+                    <span
+                      title={badgeTooltipText}
+                      className='inline-flex cursor-help items-center gap-1.5 rounded-full border border-blue-200 bg-blue-100/70 px-2.5 py-0.5 text-[10.5px] font-medium text-blue-800 shadow-2xs transition-colors hover:bg-blue-200/80 dark:border-blue-800/80 dark:bg-blue-900/40 dark:text-blue-300'
+                    >
                       <Clock className='size-2.5 text-blue-600 dark:text-blue-400' />
                       {t('pricing.timeTieredBadge', '分时计费')}
                     </span>
@@ -618,13 +671,13 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     {/* Col 4: Time Range & Pill */}
                     <div className='col-span-12 flex items-center gap-2.5 md:col-span-4'>
                       <span
-                        title={t('pricing.offPeakHoursTooltip', '其余全天时段 · 享受 50% 折扣')}
+                        title={offPeakTooltipText}
                         className='inline-flex shrink-0 items-center justify-center rounded-md border border-blue-300 bg-blue-50 px-2.5 py-0.5 text-[11.5px] font-semibold text-blue-700 shadow-2xs dark:border-blue-800/70 dark:bg-blue-950/50 dark:text-blue-300'
                       >
                         {t('pricing.offPeakPill', '闲时')}
                       </span>
-                      <span className='text-muted-foreground/80 font-sans text-[11.5px] whitespace-nowrap tracking-tight sm:text-[12px]'>
-                        {t('pricing.offPeakTimeRange', '00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)')}
+                      <span className='text-muted-foreground/80 font-sans text-[11px] whitespace-nowrap tracking-tight sm:text-[11.5px] xl:text-[12px]'>
+                        {offPeakTimeLabel}
                       </span>
                     </div>
 
@@ -670,13 +723,13 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     {/* Col 4: Time Range & Pill */}
                     <div className='col-span-12 flex items-center gap-2.5 md:col-span-4'>
                       <span
-                        title={t('pricing.peakHoursTooltip', '新加坡时间 09:00-12:00, 14:00-18:00 · 标准原价')}
+                        title={peakTooltipText}
                         className='inline-flex shrink-0 items-center justify-center rounded-md border border-slate-300 bg-slate-100 px-2.5 py-0.5 text-[11.5px] font-medium text-slate-700 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
                       >
                         {t('pricing.peakPill', '忙时')}
                       </span>
-                      <span className='text-muted-foreground/70 font-sans text-[11.5px] whitespace-nowrap tracking-tight sm:text-[12px]'>
-                        {t('pricing.peakTimeRange', '09:00-12:00, 14:00-18:00 (SGT)')}
+                      <span className='text-muted-foreground/70 font-sans text-[11px] whitespace-nowrap tracking-tight sm:text-[11.5px] xl:text-[12px]'>
+                        {peakTimeLabel}
                       </span>
                     </div>
 
@@ -713,8 +766,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
 
                     {/* Col 2: Discount */}
                     <div className='col-span-12 flex items-center justify-center md:col-span-2'>
-                      {savings != null ? (
-                        <SavingsBadge savings={savings} />
+                      {effectiveSavings != null ? (
+                        <SavingsBadge savings={effectiveSavings} />
                       ) : (
                         <span className='text-muted-foreground/25 text-sm font-light'>—</span>
                       )}
@@ -878,8 +931,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
 
               {/* Right: Savings */}
               <div className='col-span-12 flex items-center justify-center md:col-span-2'>
-                {savings != null ? (
-                  <SavingsBadge savings={savings} />
+                {effectiveSavings != null ? (
+                  <SavingsBadge savings={effectiveSavings} />
                 ) : (
                   <span className='text-muted-foreground/25 text-sm font-light'>—</span>
                 )}

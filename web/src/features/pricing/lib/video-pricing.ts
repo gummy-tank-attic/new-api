@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { isByteDancePricingVendor } from '../constants'
+import { isByteDancePricingVendor, lookupModelSavingsOff } from '../constants'
 import type { PricingModel } from '../types'
 import { getTaskMatrixDisplayTiers } from './task-matrix-display'
 
@@ -48,8 +48,22 @@ export function isByteDanceOrVideoModel(model: PricingModel): boolean {
   const name = model.model_name.toLowerCase()
   if (name.startsWith('seedance') || name.includes('seedance')) return true
   if (name === 'grok-imagine-video') return true
+  if (name.includes('minimax-h3') || name.includes('hailuo') || (name.includes('minimax') && name.includes('h3'))) return true
   const schema = model.billing_usage_schema
+  if (schema?.seconds && (schema?.resolution || schema?.input_images || schema?.input_video_seconds)) {
+    return true
+  }
   return Boolean(schema?.resolution || schema?.video_input)
+}
+
+export function isDurationBasedVideoModel(model: PricingModel | string): boolean {
+  const name = (typeof model === 'string' ? model : model.model_name).toLowerCase()
+  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) return true
+  if (typeof model !== 'string') {
+    const schema = model.billing_usage_schema
+    if (schema?.seconds && !schema?.tokens) return true
+  }
+  return false
 }
 
 export function isVideoUpscaleModel(model: PricingModel | string): boolean {
@@ -71,13 +85,16 @@ export function isVideoUpscaleModel(model: PricingModel | string): boolean {
  */
 export function getModelSupportedResolutions(model: PricingModel): string[] {
   const name = model.model_name.toLowerCase().trim()
+  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) {
+    return ['768p', '2k']
+  }
   if (name.includes('upscale') || name.includes('chaofen')) {
     return ['720p', '1080p', '2k']
   }
   if (name.includes('4k')) {
     return ['4k']
   }
-  if (name.includes('fast') || name.includes('mini')) {
+  if (name.includes('fast') || (name.includes('mini') && !name.includes('minimax'))) {
     return ['480p', '720p']
   }
   if (name.includes('seedance2.5') || name.includes('seedance 2.5')) {
@@ -110,6 +127,12 @@ export function getResolutionBadgeStyle(res: string): { label: string; className
       className: 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-300',
     }
   }
+  if (clean === '768p') {
+    return {
+      label: '768p',
+      className: 'border-cyan-300 bg-cyan-50 text-cyan-700 dark:border-cyan-800/60 dark:bg-cyan-950/40 dark:text-cyan-300 font-semibold',
+    }
+  }
   if (clean === '1080p') {
     return {
       label: '1080p',
@@ -140,6 +163,14 @@ export function getVideoModelCapabilityTag(modelName: string): {
   className: string
 } | null {
   const name = modelName.toLowerCase()
+  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) {
+    return {
+      key: 'videoPricing.badge.h3',
+      label: '旗舰多模态视频',
+      className:
+        'bg-violet-100 text-violet-800 border-violet-200 dark:bg-violet-900/40 dark:text-violet-300 dark:border-violet-800',
+    }
+  }
   if (name.includes('upscale') || name.includes('chaofen')) {
     return {
       key: 'videoPricing.badge.upscale',
@@ -193,13 +224,14 @@ export function getVideoModelCapabilityTag(modelName: string): {
 
 export function getModelSpecificDiscountPercent(modelName: string): number {
   const name = modelName.toLowerCase()
+  if (name.includes('minimax')) return 0
   if (name.includes('mini')) return 50
   if (name.includes('upscale') || name.includes('chaofen')) return 30
   if (name.includes('fast')) return 20
   if (name.includes('2.0') && !name.includes('2.5') && !name.includes('4k')) return 16
   if (name.includes('2.5')) return 10
   if (name.includes('4k')) return 10
-  return 10
+  return 0
 }
 
 export function parseVideoUpscaleTiers(expression: string | null | undefined): VideoUpscaleTier[] {
@@ -564,6 +596,12 @@ export function getVideoModelTagline(modelName: string): {
   defaultText: string
 } {
   const name = modelName.toLowerCase()
+  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) {
+    return {
+      key: 'videoPricing.tagline.h3',
+      defaultText: 'MiniMax 官方多模态视频生成主力 · 支持 768P / 2K 高清、首尾帧控制与多模态参考',
+    }
+  }
   if (name.includes('upscale') || name.includes('chaofen')) {
     return {
       key: 'videoPricing.tagline.upscale',
@@ -620,7 +658,21 @@ export function getVideoModelHeroPrice(
   discountOff: number | null
 } {
   const name = model.model_name.toLowerCase()
-  const discountOff = isGroupMode ? getModelSpecificDiscountPercent(name) : null
+  const discountOff = isGroupMode
+    ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(name) || null))
+    : null
+
+  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo') || isDurationBasedVideoModel(model)) {
+    const billed = 0.400 * rate
+    return {
+      priceText: `$${billed.toFixed(3)}`,
+      officialPriceText: null,
+      unitText: '/ 5秒 起',
+      unitKey: 'videoPricing.unitPer5sFrom',
+      isStartingPrice: true,
+      discountOff,
+    }
+  }
 
   if (name.includes('upscale') || name.includes('chaofen')) {
     const billedSecond = 0.0091 * rate
@@ -710,7 +762,51 @@ export function getVideoModelHeroPrice(
   }
 }
 
+export interface DurationVideoTier {
+  resolution: string
+  resLabel: string
+  est5sPrice: number
+  secondPrice: number
+  officialEst5sPrice?: number
+  officialSecondPrice?: number
+}
+
+export function getDurationVideoTiers(model: PricingModel): DurationVideoTier[] {
+  const name = model.model_name.toLowerCase()
+  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) {
+    return [
+      {
+        resolution: '768p',
+        resLabel: '768P',
+        est5sPrice: 0.400,
+        secondPrice: 0.080,
+      },
+      {
+        resolution: '2k',
+        resLabel: '2K',
+        est5sPrice: 0.650,
+        secondPrice: 0.130,
+      },
+    ]
+  }
+  return [
+    {
+      resolution: '768p',
+      resLabel: '768P',
+      est5sPrice: 0.400,
+      secondPrice: 0.080,
+    },
+    {
+      resolution: '2k',
+      resLabel: '2K',
+      est5sPrice: 0.650,
+      secondPrice: 0.130,
+    },
+  ]
+}
+
 export function getVideoModelEstimateNote(_modelName: string): string {
   return ''
 }
+
 

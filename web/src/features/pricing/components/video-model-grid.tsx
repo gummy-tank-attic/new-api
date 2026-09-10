@@ -24,7 +24,9 @@ import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
+import { lookupModelSavingsOff } from '../constants'
 import {
+  getDurationVideoTiers,
   getModelSpecificDiscountPercent,
   getModelSupportedResolutions,
   getResolutionBadgeStyle,
@@ -32,6 +34,7 @@ import {
   getVideoModelHeroPrice,
   getVideoModelTagline,
   getVideoModelTierGroups,
+  isDurationBasedVideoModel,
   isVideoUpscaleModel,
   parseVideoUpscaleTiers,
 } from '../lib/video-pricing'
@@ -75,20 +78,25 @@ export function VideoModelGrid(props: VideoModelGridProps) {
     >
       {props.models.map((model) => {
         const isUpscale = isVideoUpscaleModel(model)
+        const isDurationBased = isDurationBasedVideoModel(model)
         const resolutions = getModelSupportedResolutions(model)
         const capTag = getVideoModelCapabilityTag(model.model_name)
         const tagline = getVideoModelTagline(model.model_name)
         const discountOff = isGroupMode
-          ? getModelSpecificDiscountPercent(model.model_name)
+          ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || null))
           : null
         const hero = getVideoModelHeroPrice(model, isGroupMode, props.priceRate)
-        const tierGroups = isUpscale ? [] : getVideoModelTierGroups(model)
+        const tierGroups = isUpscale || isDurationBased ? [] : getVideoModelTierGroups(model)
         const upscaleTiers = isUpscale
           ? parseVideoUpscaleTiers(model.billing_expr)
           : []
+        const durationTiers = isDurationBased
+          ? getDurationVideoTiers(model)
+          : []
         const isFlagship =
           model.model_name.toLowerCase().includes('2.5') ||
-          model.model_name.toLowerCase().includes('4k')
+          model.model_name.toLowerCase().includes('4k') ||
+          model.model_name.toLowerCase().includes('h3')
 
         const vendorIcon =
           model.vendor_icon || model.icon
@@ -290,6 +298,61 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                   </div>
                   <div className='border-t border-border/40 bg-muted/15 px-3 py-1.5 text-right text-[10px] text-muted-foreground/80 font-mono'>
                     {t('Billing formula: Charge = Video Tokens + Duration × Upscale Rate')}
+                  </div>
+                </div>
+              ) : isDurationBased ? (
+                /* Duration-based Video Spec Table (e.g. MiniMax-H3) */
+                <div className='rounded-xl border border-border/70 bg-muted/20 overflow-hidden text-xs shadow-2xs'>
+                  <div className='grid grid-cols-12 bg-muted/50 border-b border-border/50 px-3 py-2 text-[11px] font-semibold text-muted-foreground'>
+                    <div className='col-span-4'>{t('Resolution', '分辨率')}</div>
+                    <div className='col-span-4 text-right'>{t('videoPricing.est5s', '5s 预估价格')}</div>
+                    <div className='col-span-4 text-right'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
+                  </div>
+                  <div className='divide-y divide-border/40 bg-card/60'>
+                    {durationTiers.map((tier) => {
+                      const billedEst5s = tier.est5sPrice * props.priceRate
+                      const billedSecond = tier.secondPrice * props.priceRate
+                      const officialEst5s =
+                        (tier.officialEst5sPrice ?? tier.est5sPrice) * props.priceRate
+                      const officialSecond =
+                        (tier.officialSecondPrice ?? tier.secondPrice) * props.priceRate
+
+                      return (
+                        <div
+                          key={tier.resolution}
+                          className='grid grid-cols-12 items-center px-3 py-2.5 transition-colors hover:bg-muted/30'
+                        >
+                          <div className='col-span-4 pr-1'>
+                            <div className='font-bold text-foreground text-xs leading-tight'>
+                              {tier.resLabel}
+                            </div>
+                          </div>
+                          <div className='col-span-4 text-right'>
+                            <div className='font-bold text-foreground text-xs sm:text-[13px] tabular-nums leading-tight'>
+                              ${billedEst5s.toFixed(3)}
+                            </div>
+                            {showOfficial && (
+                              <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
+                                ${officialEst5s.toFixed(3)}
+                              </div>
+                            )}
+                          </div>
+                          <div className='col-span-4 text-right'>
+                            <div className='font-bold text-foreground text-xs sm:text-[13px] tabular-nums leading-tight'>
+                              ${billedSecond.toFixed(3)}/s
+                            </div>
+                            {showOfficial && (
+                              <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
+                                ${officialSecond.toFixed(3)}/s
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className='border-t border-border/40 bg-muted/15 px-3 py-1.5 text-right text-[10px] text-muted-foreground/75 font-mono'>
+                    {t('videoPricing.durationUnitFooter', '计费单位：/ 秒 · 支持 4~15 秒自定义时长')}
                   </div>
                 </div>
               ) : (

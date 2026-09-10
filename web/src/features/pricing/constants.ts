@@ -301,9 +301,11 @@ export const VENDOR_MODEL_DISPLAY_ORDER: Record<string, readonly string[]> = {
   // —— DeepSeek ——
   DeepSeek: [
     'deepseek-v4-pro-0813',
-    'deepseek-v4-flash-0731',
+    'deepseek-v4.1-flash',
     'deepseek-v4-flash-vision-exp',
+    'deepseek-v4-flash-0731',
     'deepseek-v4-pro',
+    'deepseek-v4-pro-flash',
     'deepseek-v4-flash',
     'DeepSeek-V3.2',
   ],
@@ -313,7 +315,7 @@ export const VENDOR_MODEL_DISPLAY_ORDER: Record<string, readonly string[]> = {
   // —— Moonshot / Kimi ——
   Moonshot: ['kimi-k3', 'kimi-k2.7-code', 'kimi-k2.6'],
   // —— MiniMax ——
-  MiniMax: ['minimax-m3', 'minimax-m2.7', 'minimax-m2.5'],
+  MiniMax: ['minimax-m3', 'minimax-m2.7', 'minimax-m2.5', 'MiniMax-H3'],
   // —— ByteDance / Seedance ——
   ByteDance: [
     'seedance2.5',
@@ -337,8 +339,9 @@ export const MODEL_DISPLAY_ORDER: readonly string[] = Object.values(
  */
 export const TIME_TIERED_MODEL_NAMES = [
   'deepseek-v4-pro-0813',
-  'deepseek-v4-flash-0731',
+  'deepseek-v4.1-flash',
   'deepseek-v4-flash-vision-exp',
+  'deepseek-v4-flash-0731',
 ] as const
 
 /** Rank for pricing table rows (lower first). Unlisted models share the last bucket. */
@@ -484,3 +487,51 @@ export const MANUAL_GROUP_SAVINGS_OFF: Record<string, number> = {
 export const MANUAL_GROUP_OFF_LABEL: Record<string, string> = {
   Seedance: 'UP TO 50%\u00A0OFF',
 }
+
+/**
+ * 单个模型的自定义折扣覆盖（百分比，例如 35 对应 35% OFF）
+ */
+export const MANUAL_MODEL_SAVINGS_OFF: Record<string, number> = {
+  'deepseek-v4-pro-0813': 35,
+  'deepseek-v4-pro': 45,
+  'deepseek-v4-flash': 35,
+  'deepseek-v4-flash-0731': 35,
+  'glm-5.3': 25,
+  'glm-5.3-flash': 25,
+  'glm-5.2': 35,
+  'glm-5.1': 20,
+  'glm-5': 25,
+  'glm-5-turbo': 25,
+  'kimi-k3': 25,
+  'kimi-k2.6': 25,
+  'kimi-k2.5': 25,
+  'kimi-k2.7-code': 15,
+}
+
+export function lookupModelSavingsOff(modelName: string): number | undefined {
+  const needle = (modelName || '').trim().toLowerCase()
+  if (!needle) return undefined
+  for (const [key, value] of Object.entries(MANUAL_MODEL_SAVINGS_OFF)) {
+    if (key.trim().toLowerCase() === needle) return value
+  }
+  return undefined
+}
+
+/**
+ * 判定是否属于支持根据模型最大折扣动态展示 UP TO X% OFF 的分组
+ * （如 DeepSeek、Z.ai / 智谱、Kimi / Moonshot）
+ */
+export function isDynamicUpToGroup(group?: string | null): boolean {
+  if (!group) return false
+  const name = group.trim().toLowerCase()
+  return (
+    name.includes('deepseek') ||
+    name.includes('z.ai') ||
+    name.includes('zhipu') ||
+    name.includes('智谱') ||
+    name.includes('kimi') ||
+    name.includes('moonshot')
+  )
+}
+
+

@@ -20,14 +20,18 @@ import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
 
+import type { PricingModel } from '../types'
 import {
+  isDynamicUpToGroup,
   lookupGroupMapValue,
+  lookupModelSavingsOff,
   MANUAL_GROUP_OFF_LABEL,
   MANUAL_GROUP_SAVINGS_OFF,
   MANUAL_GROUP_ZHE,
 } from '../constants'
 import { resolveGroupSavingsOffPercent } from '../lib/group-discount'
 import { getConfiguredGroupRatio } from '../lib/model-helpers'
+import { getOffPeakMultiplier, isTimeTieredModel } from './supplier-price-table'
 
 export interface GroupPriceCardsProps {
   groups: string[]
@@ -35,7 +39,81 @@ export interface GroupPriceCardsProps {
   onSelect: (group: string) => void
   groupRatio: Record<string, number>
   usableGroup: Record<string, string>
+  models?: PricingModel[]
   className?: string
+}
+
+function getGroupMaxDiscount(
+  group: string,
+  models?: PricingModel[],
+  groupRatio?: Record<string, number>
+): number {
+  if (!models || models.length === 0) return 0
+  const groupDiscount =
+    resolveGroupSavingsOffPercent(
+      getConfiguredGroupRatio(groupRatio || {}, group)
+    ) ?? 0
+
+  let maxDiscount = 0
+  let hasModelOverride = false
+
+  const name = group.trim().toLowerCase()
+  const isDeepSeek = name.includes('deepseek')
+  const isZai =
+    name.includes('z.ai') || name.includes('zhipu') || name.includes('智谱')
+  const isKimi = name.includes('kimi') || name.includes('moonshot')
+
+  const targetModels = models.filter((m) => {
+    if (m.enable_groups?.includes(group)) return true
+    if (isDeepSeek) {
+      return (
+        m.vendor_name?.toLowerCase().includes('deepseek') ||
+        m.model_name?.toLowerCase().includes('deepseek')
+      )
+    }
+    if (isZai) {
+      return (
+        m.vendor_name?.toLowerCase().includes('zhipu') ||
+        m.vendor_name?.includes('智谱') ||
+        m.model_name?.toLowerCase().startsWith('glm')
+      )
+    }
+    if (isKimi) {
+      return (
+        m.vendor_name?.toLowerCase().includes('moonshot') ||
+        m.vendor_name?.toLowerCase().includes('kimi') ||
+        m.model_name?.toLowerCase().startsWith('kimi')
+      )
+    }
+    return false
+  })
+
+  for (const model of targetModels) {
+    const manualModelOff = lookupModelSavingsOff(model.model_name)
+    if (manualModelOff != null) {
+      hasModelOverride = true
+      if (manualModelOff > maxDiscount) {
+        maxDiscount = manualModelOff
+      }
+    }
+    if (isTimeTieredModel(model)) {
+      const offPeakMultiplier = getOffPeakMultiplier(model)
+      const baseDiscount = manualModelOff ?? groupDiscount
+      const offPeakSavings =
+        baseDiscount > 0
+          ? Math.round(100 - (100 - baseDiscount) * offPeakMultiplier)
+          : Math.round((1 - offPeakMultiplier) * 100)
+      if (offPeakSavings > maxDiscount) {
+        maxDiscount = offPeakSavings
+      }
+    }
+  }
+
+  if (!hasModelOverride && maxDiscount === 0) {
+    maxDiscount = groupDiscount
+  }
+
+  return maxDiscount
 }
 
 /** Format manual 折 number for badge, e.g. 1 → "1折", 1.4 → "1.4折" */
@@ -97,9 +175,21 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
           lookupGroupMapValue(MANUAL_GROUP_SAVINGS_OFF, group)
         )
         const manualLabel = lookupGroupMapValue(MANUAL_GROUP_OFF_LABEL, group)
-        // Fixed English copy — never i18n: "UP TO 50% OFF" or "85% OFF"
-        const offLabel =
-          manualLabel ?? (savingsOff != null ? `${savingsOff}%\u00A0OFF` : null)
+
+        let offLabel: string | null = null
+        if (manualLabel) {
+          offLabel = manualLabel
+        } else if (isDynamicUpToGroup(group)) {
+          // 针对 DeepSeek 与 Z.ai 等分组：根据下方模型最大折扣动态展示 UP TO X% OFF
+          const maxDiscount = getGroupMaxDiscount(
+            group,
+            props.models,
+            props.groupRatio
+          )
+          offLabel = maxDiscount > 0 ? `UP TO ${maxDiscount}%\u00A0OFF` : null
+        } else if (savingsOff != null) {
+          offLabel = `${savingsOff}%\u00A0OFF`
+        }
 
         return (
           <button

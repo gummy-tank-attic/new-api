@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Sparkles } from 'lucide-react'
+import { Film, MessageSquare, Sparkles } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -62,9 +62,16 @@ export interface SupplierPricingLayoutProps {
 export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
   const { t } = useTranslation()
 
-  const isVideoVendor =
-    isByteDancePricingVendor(props.vendor) ||
-    (props.models.length > 0 && props.models.every(isByteDanceOrVideoModel))
+  const isByteDanceVendor = isByteDancePricingVendor(props.vendor)
+
+  const videoModels = useMemo(
+    () => (isByteDanceVendor ? props.models : props.models.filter(isByteDanceOrVideoModel)),
+    [isByteDanceVendor, props.models]
+  )
+  const standardModels = useMemo(
+    () => (isByteDanceVendor ? [] : props.models.filter((m) => !isByteDanceOrVideoModel(m))),
+    [isByteDanceVendor, props.models]
+  )
 
   const rawGroupIntro = props.selectedGroup
     ? getUsableGroupDescription(props.usableGroup, props.selectedGroup)
@@ -85,6 +92,8 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
     )
   }, [isGroupMode, props.groupRatio, props.selectedGroup])
 
+  const hasMultipleGroups = props.groups.length > 1
+
   return (
     <div className={cn('space-y-6', props.className)}>
       {/* 1. Supplier Navigation Tabs */}
@@ -95,31 +104,36 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
       />
 
       {/* 2. Studio Control Bar */}
-      <div className='flex flex-col gap-3'>
-        {/* Top: Group Selector Tabs */}
-        <GroupPriceCards
-          groups={props.groups}
-          selectedGroup={props.selectedGroup}
-          onSelect={props.onGroupChange}
-          groupRatio={props.groupRatio}
-          usableGroup={props.usableGroup}
-        />
+      {(hasMultipleGroups || Boolean(groupIntroDisplay)) && (
+        <div className='flex flex-col gap-3'>
+          {/* Top: Group Selector Tabs (仅在多分组时展示切换胶囊，如 Anthropic、OpenAI) */}
+          {hasMultipleGroups && (
+            <GroupPriceCards
+              groups={props.groups}
+              selectedGroup={props.selectedGroup}
+              onSelect={props.onGroupChange}
+              groupRatio={props.groupRatio}
+              usableGroup={props.usableGroup}
+              models={props.models}
+            />
+          )}
 
-        {/* Group Intro Callout Banner (Clean Neutral Stripe/Linear Style) */}
-        {groupIntroDisplay ? (
-          <div className='flex items-center gap-2.5 rounded-xl border border-border/70 bg-muted/20 px-4 py-2 shadow-xs transition-all dark:bg-card/40 dark:border-border/50'>
-            <div className='flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground ring-1 ring-border/60'>
-              <Sparkles className='size-3.5' />
+          {/* Group Intro Callout Banner (Clean Neutral Stripe/Linear Style) */}
+          {groupIntroDisplay ? (
+            <div className='flex items-center gap-2.5 rounded-xl border border-border/70 bg-muted/20 px-4 py-2 shadow-xs transition-all dark:bg-card/40 dark:border-border/50'>
+              <div className='flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground ring-1 ring-border/60'>
+                <Sparkles className='size-3.5' />
+              </div>
+              <p
+                className='text-[12.5px] font-medium text-foreground/85 tracking-tight sm:text-[13px]'
+                title={groupIntroDisplay}
+              >
+                {groupIntroDisplay}
+              </p>
             </div>
-            <p
-              className='text-[12.5px] font-medium text-foreground/85 tracking-tight sm:text-[13px]'
-              title={groupIntroDisplay}
-            >
-              {groupIntroDisplay}
-            </p>
-          </div>
-        ) : null}
-      </div>
+          ) : null}
+        </div>
+      )}
 
       {/* 3. Main Content: Bento Grid or Clean Table */}
       {(() => {
@@ -131,10 +145,12 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
             />
           )
         }
-        if (isVideoVendor) {
+
+        // Pure video vendor (e.g. ByteDance / Seedance)
+        if (videoModels.length > 0 && standardModels.length === 0) {
           return (
             <VideoModelGrid
-              models={props.models}
+              models={videoModels}
               priceMode={props.priceMode}
               selectedGroup={props.selectedGroup}
               groupRatio={props.groupRatio}
@@ -145,16 +161,74 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
             />
           )
         }
+
+        // Pure text / standard vendor (e.g. Anthropic, OpenAI, Moonshot, DeepSeek)
+        if (videoModels.length === 0 && standardModels.length > 0) {
+          return (
+            <SupplierPriceTable
+              models={standardModels}
+              priceMode={props.priceMode}
+              selectedGroup={props.selectedGroup}
+              groupRatio={props.groupRatio}
+              priceRate={props.priceRate}
+              usdExchangeRate={props.usdExchangeRate}
+              onModelClick={props.onModelClick}
+            />
+          )
+        }
+
+        // Hybrid vendor with both video models and text models (e.g. MiniMax)
         return (
-          <SupplierPriceTable
-            models={props.models}
-            priceMode={props.priceMode}
-            selectedGroup={props.selectedGroup}
-            groupRatio={props.groupRatio}
-            priceRate={props.priceRate}
-            usdExchangeRate={props.usdExchangeRate}
-            onModelClick={props.onModelClick}
-          />
+          <div className='space-y-8'>
+            {/* Language & Chat Models Section (Top) */}
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2'>
+                <div className='flex size-6 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400'>
+                  <MessageSquare className='size-3.5' />
+                </div>
+                <h3 className='text-sm sm:text-base font-bold tracking-tight text-foreground'>
+                  {t('pricing.section.textModels', '语言与对话模型')}
+                </h3>
+                <span className='rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground tabular-nums'>
+                  {standardModels.length}
+                </span>
+              </div>
+              <SupplierPriceTable
+                models={standardModels}
+                priceMode={props.priceMode}
+                selectedGroup={props.selectedGroup}
+                groupRatio={props.groupRatio}
+                priceRate={props.priceRate}
+                usdExchangeRate={props.usdExchangeRate}
+                onModelClick={props.onModelClick}
+              />
+            </div>
+
+            {/* Video Generation Models Section (Bottom) */}
+            <div className='space-y-4 pt-4 border-t border-border/50'>
+              <div className='flex items-center gap-2'>
+                <div className='flex size-6 shrink-0 items-center justify-center rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400'>
+                  <Film className='size-3.5' />
+                </div>
+                <h3 className='text-sm sm:text-base font-bold tracking-tight text-foreground'>
+                  {t('pricing.section.videoModels', '视频生成模型')}
+                </h3>
+                <span className='rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground tabular-nums'>
+                  {videoModels.length}
+                </span>
+              </div>
+              <VideoModelGrid
+                models={videoModels}
+                priceMode={props.priceMode}
+                selectedGroup={props.selectedGroup}
+                groupRatio={props.groupRatio}
+                priceRate={props.priceRate}
+                usdExchangeRate={props.usdExchangeRate}
+                savings={savings}
+                onModelClick={props.onModelClick}
+              />
+            </div>
+          </div>
         )
       })()}
     </div>
