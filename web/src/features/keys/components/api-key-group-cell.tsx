@@ -330,41 +330,33 @@ function ApiKeyGroupCellInteractive(
   return (
     <>
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <PopoverTrigger
-                render={
-                  <button
-                    type='button'
-                    className='group/cell inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 -ml-1.5 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer'
-                  />
-                }
+        <PopoverTrigger
+          render={
+            <button
+              type='button'
+              aria-label={t('Click to switch group')}
+              className='group/cell inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 -ml-1.5 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer'
+            />
+          }
+        >
+          {group === 'auto' ? (
+            <div className='flex items-center gap-1.5'>
+              <StatusBadge
+                label={t('Cross-group')}
+                variant='info'
+                copyable={false}
               />
-            }
-          >
-            {group === 'auto' ? (
-              <div className='flex items-center gap-1.5'>
-                <StatusBadge
-                  label={t('Cross-group')}
-                  variant='info'
-                  copyable={false}
-                />
-                <GroupRatioBadge
-                  ratio={props.ratio}
-                  isAuto
-                  shouldReduceMotion={shouldReduceMotion}
-                />
-              </div>
-            ) : (
-              <GroupBadge group={group} ratio={numericRatio} />
-            )}
-            <ChevronDown className='size-3 text-muted-foreground transition-transform group-hover/cell:text-foreground shrink-0' />
-          </TooltipTrigger>
-          <TooltipContent>
-            <span>{t('Click to switch group')}</span>
-          </TooltipContent>
-        </Tooltip>
+              <GroupRatioBadge
+                ratio={props.ratio}
+                isAuto
+                shouldReduceMotion={shouldReduceMotion}
+              />
+            </div>
+          ) : (
+            <GroupBadge group={group} ratio={numericRatio} />
+          )}
+          <ChevronDown className='size-3 text-muted-foreground transition-transform group-hover/cell:text-foreground shrink-0' />
+        </PopoverTrigger>
 
         <PopoverContent
           className='w-[320px] p-0 shadow-lg'

@@ -82,18 +82,48 @@ export const useSystemConfigStore = create<SystemConfigState>()(
       loading: false,
       loadedLogoUrl: DEFAULT_LOGO,
       setConfig: (newConfig) =>
-        set((state) => ({
-          config: {
-            ...state.config,
-            ...newConfig,
-            currency: {
-              ...state.config.currency,
-              ...(newConfig.currency ?? {}),
+        set((state) => {
+          let currencyChanged = false
+          if (newConfig.currency) {
+            for (const [key, value] of Object.entries(newConfig.currency)) {
+              if (state.config.currency[key as keyof CurrencyConfig] !== value) {
+                currencyChanged = true
+                break
+              }
+            }
+          }
+
+          const nextCurrency = currencyChanged
+            ? { ...state.config.currency, ...newConfig.currency }
+            : state.config.currency
+
+          let configChanged = currencyChanged
+          if (!configChanged) {
+            for (const [key, value] of Object.entries(newConfig)) {
+              if (key === 'currency') continue
+              if (state.config[key as keyof SystemConfig] !== value) {
+                configChanged = true
+                break
+              }
+            }
+          }
+
+          if (!configChanged) {
+            return state
+          }
+
+          return {
+            config: {
+              ...state.config,
+              ...newConfig,
+              currency: nextCurrency,
             },
-          },
-        })),
-      setLoadedLogoUrl: (url) => set({ loadedLogoUrl: url }),
-      setLoading: (loading) => set({ loading }),
+          }
+        }),
+      setLoadedLogoUrl: (url) =>
+        set((state) => (state.loadedLogoUrl === url ? state : { loadedLogoUrl: url })),
+      setLoading: (loading) =>
+        set((state) => (state.loading === loading ? state : { loading })),
     }),
     {
       name: 'system-config-storage',

@@ -45,8 +45,12 @@ function getInitialStatus(): SystemStatus | undefined {
   return undefined
 }
 
+let lastSyncedStatus: unknown = null
+
 function syncStatusToSystemConfig(status: unknown) {
   if (!status || typeof status !== 'object') return
+  if (lastSyncedStatus === status) return
+  lastSyncedStatus = status
   try {
     const { setConfig, setLoading } = useSystemConfigStore.getState()
     setConfig(mapStatusDataToConfig(status as Record<string, unknown>))

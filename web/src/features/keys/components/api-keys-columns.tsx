@@ -18,6 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
 import type { ColumnDef } from '@tanstack/react-table'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { StatusBadge } from '@/components/status-badge'
@@ -72,9 +73,10 @@ export function useApiKeysColumns(now: number): ColumnDef<ApiKey>[] {
   const shouldReduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const locale = toIntlLocale(i18n.resolvedLanguage || i18n.language)
   const justNowLabel = t('Just now')
-  return [
-    {
-      id: 'select',
+  return useMemo(
+    () => [
+      {
+        id: 'select',
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
@@ -223,5 +225,7 @@ export function useApiKeysColumns(now: number): ColumnDef<ApiKey>[] {
       cell: ({ row }) => <DataTableRowActions row={row} />,
       meta: { pinned: 'right' as const },
     },
-  ]
+  ],
+  [t, quotaUnit, groupRatios, shouldReduceMotion, locale, justNowLabel, now]
+)
 }
