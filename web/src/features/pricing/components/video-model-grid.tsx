@@ -134,15 +134,15 @@ export function VideoModelGrid(props: VideoModelGridProps) {
 
             {/* Top Section */}
             <div className='space-y-2.5'>
-              {/* Row 1: Model Name (Prominent & Bold) + Discount Badge (No lightning) + Copy Button */}
-              <div className='flex items-center gap-2.5 min-w-0'>
-                <div className='bg-primary/10 text-primary border-primary/20 flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl border shadow-xs'>
-                  {vendorIcon}
-                </div>
-                <div className='min-w-0 flex-1 flex items-center flex-wrap gap-1.5 sm:gap-2'>
-                  <div className='inline-flex items-center gap-1.5 shrink-0'>
+              {/* Row 1: Model Identity (Left) & Discount Badge (Right end) */}
+              <div className='flex items-center justify-between gap-3 min-w-0'>
+                <div className='flex items-center gap-2.5 min-w-0'>
+                  <div className='bg-primary/10 text-primary border-primary/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border shadow-xs'>
+                    {vendorIcon}
+                  </div>
+                  <div className='inline-flex items-center gap-1.5 min-w-0'>
                     <h3
-                      className='text-foreground group-hover:text-primary text-[15.5px] sm:text-base font-bold tracking-tight transition-colors'
+                      className='text-foreground text-base font-semibold tracking-tight truncate'
                       title={model.model_name}
                     >
                       {model.model_name}
@@ -151,7 +151,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                       type='button'
                       aria-label={t('Copy model name')}
                       onClick={(e) => handleCopy(e, model.model_name)}
-                      className='inline-flex size-6 shrink-0 items-center justify-center rounded-md border border-border/30 bg-background/60 text-muted-foreground/80 shadow-2xs transition-colors hover:bg-accent hover:text-accent-foreground opacity-80 sm:opacity-0 group-hover:opacity-100'
+                      className='text-muted-foreground/60 hover:text-foreground inline-flex size-6 shrink-0 items-center justify-center rounded-md hover:bg-muted/80 transition-colors opacity-80 sm:opacity-0 group-hover:opacity-100'
                     >
                       {copiedName === model.model_name ? (
                         <Check className='text-emerald-600 dark:text-emerald-400 size-3.5' />
@@ -160,12 +160,16 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                       )}
                     </button>
                   </div>
-                  {discountOff != null && isGroupMode && (
-                    <span className='inline-flex items-center justify-center rounded-full bg-rose-500 px-2.5 h-[20px] text-[10.5px] sm:text-[11px] font-bold tracking-wide text-white shadow-xs tabular-nums shrink-0 leading-none'>
-                      {discountOff}% OFF
-                    </span>
-                  )}
                 </div>
+
+                {discountOff != null && isGroupMode && (
+                  <span
+                    translate='no'
+                    className='notranslate inline-flex items-center justify-center rounded-full bg-rose-500 min-w-[4.75rem] w-[4.75rem] h-[23px] text-xs font-bold tracking-wide text-white shadow-xs tabular-nums shrink-0 leading-none text-center'
+                  >
+                    {discountOff}% OFF
+                  </span>
+                )}
               </div>
 
               {/* Row 2: Capability Tag (clean and prominent) */}
