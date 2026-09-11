@@ -831,7 +831,12 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
 
                 {/* 1. Header: Model Identity */}
                 <div className='flex items-center justify-between border-b border-border/50 bg-muted/25 px-5 py-2.5'>
-                  <div className='flex items-center gap-2'>
+                  <div className='flex min-w-0 items-center gap-2.5'>
+                    <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)]'>
+                      {(model.vendor_icon || model.icon)
+                        ? getLobeIcon(model.vendor_icon || model.icon, 15)
+                        : <MessageSquare className='size-3.5 text-rose-500' />}
+                    </div>
                     <span className={MODEL_NAME_CLASS}>
                       {model.model_name}
                     </span>
