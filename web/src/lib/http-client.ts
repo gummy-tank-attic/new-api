@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import axios, { type AxiosRequestConfig } from 'axios'
 import { t } from 'i18next'
-import { toast } from 'sonner'
 
 import {
   applyAuthRotation,
@@ -26,7 +25,11 @@ import {
   getFreshAuthHeaders,
   refreshAuthentication,
 } from '@/lib/auth-session'
-import { getServerErrorMessageKey } from '@/lib/server-error-message'
+import { handleServerError } from '@/lib/handle-server-error'
+import {
+  getServerErrorMessage,
+  safeServerErrorMessage,
+} from '@/lib/server-error-message'
 import { useAuthStore } from '@/stores/auth-store'
 
 declare module 'axios' {
@@ -157,18 +160,6 @@ api.interceptors.response.use(
       applyAuthRotation(response.data.data)
     }
 
-    if (
-      !response.config.skipBusinessError &&
-      typeof response.data?.success === 'boolean' &&
-      !response.data.success
-    ) {
-      const messageKey = getServerErrorMessageKey(response.data)
-      toast.error(
-        messageKey
-          ? t(messageKey)
-          : response.data.message || t('Request failed')
-      )
-    }
     return response
   },
   async (error) => {
@@ -192,41 +183,35 @@ api.interceptors.response.use(
         }
 
         if (outcome.kind === 'anonymous' || outcome.kind === 'out_of_sync') {
-          // Silent on public pages; console still gets toast + sign-in.
-          handleSessionLost({
-            skipErrorHandler,
-            redirectToSignIn: true,
-          })
+          if (!skipErrorHandler) {
+            handleServerError({
+              message: t('Session expired!'),
+              [safeServerErrorMessage]: true,
+              cause: error,
+            })
+          }
+          redirectToSignIn()
         }
         // transient_error: do not toast "session expired" — may be network blip
       } else if (config?.authRetry) {
-        handleSessionLost({
-          skipErrorHandler,
-          redirectToSignIn: true,
-        })
-      } else {
-        // skipAuthRefresh 401 must not log the user out. Pricing/home attach a
-        // stale Bearer and opt out of refresh so the page can fall back to the
-        // public payload; the HttpOnly refresh cookie is still valid.
-        const requestUrl = String(config?.url ?? '')
-        if (
-          useAuthStore.getState().auth.user &&
-          !requestUrl.includes('/auth/logout')
-        ) {
-          void refreshAuthentication()
-        } else if (!skipErrorHandler && !isOnPublicAppPage()) {
-          toast.error(t('Session expired!'))
+        clearAuthentication(false)
+        if (!skipErrorHandler) {
+          handleServerError({
+            message: t('Session expired!'),
+            [safeServerErrorMessage]: true,
+            cause: error,
+          })
         }
+        redirectToSignIn()
+      } else if (!skipErrorHandler) {
+        handleServerError({
+          message: t('Session expired!'),
+          [safeServerErrorMessage]: true,
+          cause: error,
+        })
       }
-    } else if (!skipErrorHandler) {
-      const messageKey = getServerErrorMessageKey(error)
-      const message = messageKey
-        ? t(messageKey)
-        : error?.response?.data?.message ||
-          error?.message ||
-          t('Request failed')
-      toast.error(message)
     }
+    if (axios.isAxiosError(error)) error.message = getServerErrorMessage(error)
     throw error
   }
 )

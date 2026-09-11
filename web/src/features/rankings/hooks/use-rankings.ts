@@ -18,6 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
 
+import { requireServerSuccess } from '@/lib/server-error-message'
 import { useAuthStore } from '@/stores/auth-store'
 
 import { getRankings } from '../api'
@@ -37,7 +38,7 @@ export function useRankings(period: RankingPeriod) {
   return useQuery({
     queryKey: ['rankings', period, sessionSid ?? 'anon'],
     queryFn: async () => {
-      const fresh = await getRankings(period)
+      const fresh = requireServerSuccess(await getRankings(period))
       writeRankingsCache(period, fresh)
       memoryRankingsCache[period] = fresh
       return fresh

@@ -25,6 +25,7 @@ import { RichContent } from '@/components/rich-content'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { isHttpUrl, isLikelyHtml } from '@/lib/content-format'
 import { cn } from '@/lib/utils'
+import { requireServerSuccess } from '@/lib/server-error-message'
 
 import { getAboutContent } from './api'
 import { ContactSection } from './components/contact-section'
@@ -95,7 +96,7 @@ export function About() {
   // only upgrades the page when present; failures fall back to brand shell.
   const { data } = useQuery({
     queryKey: ['about-content'],
-    queryFn: getAboutContent,
+    queryFn: async () => requireServerSuccess(await getAboutContent()),
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
     retry: 0,

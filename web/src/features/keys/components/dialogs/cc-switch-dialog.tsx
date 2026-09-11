@@ -26,8 +26,9 @@ import { Button } from '@/components/ui/button'
 import { ComboboxInput } from '@/components/ui/combobox-input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { API_BASE_URL, SITE_URL } from '@/features/docs/constants'
+import { API_BASE_URL, API_HOST, SITE_URL } from '@/features/docs/constants'
 import { getUserModels } from '@/lib/api'
+import { requireServerSuccess } from '@/lib/server-error-message'
 
 const APP_CONFIGS = {
   claude: {
@@ -60,11 +61,12 @@ function buildCCSwitchURL(
   models: Record<string, string>,
   apiKey: string
 ): string {
+  const endpoint = app === 'codex' ? API_BASE_URL : API_HOST
   const params = new URLSearchParams()
   params.set('resource', 'provider')
   params.set('app', app)
   params.set('name', name)
-  params.set('endpoint', API_BASE_URL)
+  params.set('endpoint', endpoint)
   params.set('apiKey', apiKey)
   for (const [k, v] of Object.entries(models)) {
     if (v) params.set(k, v)
@@ -88,7 +90,7 @@ export function CCSwitchDialog(props: Props) {
 
   const { data: modelsData } = useQuery({
     queryKey: ['user-models-ccswitch'],
-    queryFn: getUserModels,
+    queryFn: async () => requireServerSuccess(await getUserModels()),
     enabled: props.open,
     staleTime: 5 * 60 * 1000,
   })
@@ -182,18 +184,13 @@ export function CCSwitchDialog(props: Props) {
             onValueChange={setName}
             placeholder={currentConfig.defaultName}
             emptyText=''
-            allowCustomValue={true}
+            allowCustomValue
           />
         </div>
 
         {currentConfig.modelFields.map((field) => (
           <div key={field.key} className='space-y-2'>
-            <Label>
-              {t(field.labelKey)}
-              {field.required && (
-                <span className='text-destructive ml-0.5'>*</span>
-              )}
-            </Label>
+            <Label required={field.required}>{t(field.labelKey)}</Label>
             <ComboboxInput
               options={modelOptions}
               value={models[field.key] || ''}

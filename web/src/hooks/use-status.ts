@@ -20,28 +20,27 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 import type { SystemStatus } from '@/features/auth/types'
-import { getStatus } from '@/lib/api'
+import {
+  mapStatusDataToConfig,
+  readCachedStatus,
+  statusQueryOptions,
+} from '@/lib/status-query'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 
-import { mapStatusDataToConfig } from './use-system-config'
-
-// Get initial cache from localStorage
+/** Seed value from the persisted snapshot, so the first render is not empty. */
 function getInitialStatus(): SystemStatus | undefined {
-  try {
+  const cached = readCachedStatus() as SystemStatus | null
+  if (cached?.telegram_oauth && !cached?.telegram_bot_name) {
     if (typeof window !== 'undefined') {
-      const saved = window.localStorage.getItem('status')
-      if (!saved) return undefined
-      const parsed = JSON.parse(saved) as SystemStatus
-      if (parsed?.telegram_oauth && !parsed?.telegram_bot_name) {
+      try {
         window.localStorage.removeItem('status')
-        return undefined
+      } catch {
+        /* empty */
       }
-      return parsed
     }
-  } catch {
-    /* empty */
+    return undefined
   }
-  return undefined
+  return cached ?? undefined
 }
 
 let lastSyncedStatus: unknown = null
@@ -53,9 +52,8 @@ function syncStatusToSystemConfig(status: unknown) {
   try {
     const { setConfig, setLoading } = useSystemConfigStore.getState()
     setConfig(mapStatusDataToConfig(status as Record<string, unknown>))
-    // Status is the sole brand-config loader on production Pages;
-    // clear the store loading flag so header logo/name are not stuck
-    // on skeletons forever (useSystemConfig autoLoad is disabled).
+    // Status is the sole brand-config loader on production;
+    // clear the store loading flag so header logo/name are not stuck on skeletons.
     setLoading(false)
   } catch (err) {
     if (import.meta.env.DEV) {
@@ -65,28 +63,17 @@ function syncStatusToSystemConfig(status: unknown) {
   }
 }
 
+/**
+ * Subscribe to the shared `/api/status` query.
+ *
+ * Every caller reads the same cache entry, so mounting this hook in several
+ * components costs one request. See `statusQueryOptions` for cache lifetimes.
+ */
 export function useStatus() {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['status'],
-    queryFn: async () => {
-      const status = await getStatus()
-      syncStatusToSystemConfig(status)
-      // Save to localStorage
-      try {
-        if (typeof window !== 'undefined' && status) {
-          window.localStorage.setItem('status', JSON.stringify(status))
-        }
-      } catch {
-        /* empty */
-      }
-      return status as SystemStatus | null
-    },
+    ...statusQueryOptions,
     // Use localStorage data as initial data
     placeholderData: getInitialStatus(),
-    // Data becomes stale after 5 minutes
-    staleTime: 5 * 60 * 1000,
-    // Cache expires after 30 minutes
-    gcTime: 30 * 60 * 1000,
   })
 
   // Sync placeholder/cached status into brand store (footer, logo, name).
@@ -96,7 +83,7 @@ export function useStatus() {
   }, [data])
 
   return {
-    status: data ?? null,
+    status: (data as SystemStatus | null) ?? null,
     loading: isLoading,
     error,
   }
