@@ -31,14 +31,9 @@ const sourceChecks = [
     message: 'LanguageDetector must not persist a temporary en locale',
   },
   {
-    file: 'src/features/home/index.tsx',
-    forbidden: 'if (!isLoaded)',
-    message: 'the default home must paint before custom-content revalidation',
-  },
-  {
-    file: 'src/features/home/components/hero-terminal-demo.tsx',
-    forbidden: 'setInterval(',
-    message: 'above-the-fold content must not auto-cycle and reset LCP',
+    file: 'src/routes/index.tsx',
+    forbidden: "from '@/features/home'",
+    message: 'public / must stay the pricing page, not restore Home',
   },
 ]
 
@@ -60,11 +55,7 @@ for (const file of ['src/lib/auth-session.ts', 'src/lib/http-client.ts']) {
   }
 }
 
-for (const file of [
-  'src/lib/api.ts',
-  'src/features/home/api.ts',
-  'src/features/setup/api.ts',
-]) {
+for (const file of ['src/lib/api.ts', 'src/features/setup/api.ts']) {
   if (!read(file).includes('PUBLIC_API_REQUEST_CONFIG')) {
     fail(`${file}: public reads must use PUBLIC_API_REQUEST_CONFIG`)
   }
