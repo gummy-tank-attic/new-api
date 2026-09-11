@@ -49,11 +49,7 @@ test('public startup reads use the public request policy', () => {
   assert.match(httpClient, /PUBLIC_API_REQUEST_CONFIG/)
   assert.match(httpClient, /skipAuth:\s*true/)
 
-  for (const file of [
-    '../api.ts',
-    '../../features/home/api.ts',
-    '../../features/setup/api.ts',
-  ]) {
+  for (const file of ['../api.ts', '../../features/setup/api.ts']) {
     assert.match(read(file), /PUBLIC_API_REQUEST_CONFIG/)
   }
 })

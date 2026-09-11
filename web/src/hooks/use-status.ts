@@ -20,7 +20,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 import type { SystemStatus } from '@/features/auth/types'
-import { invalidateHomePageContentCacheIfHashMismatch } from '@/features/home/lib/home-content-cache'
 import { getStatus } from '@/lib/api'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 
@@ -76,10 +75,6 @@ export function useStatus() {
       try {
         if (typeof window !== 'undefined' && status) {
           window.localStorage.setItem('status', JSON.stringify(status))
-          // Drop stale custom home body when admin changed/cleared content.
-          const hash = (status as { home_page_content_hash?: string })
-            .home_page_content_hash
-          invalidateHomePageContentCacheIfHashMismatch(hash)
         }
       } catch {
         /* empty */
