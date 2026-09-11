@@ -146,10 +146,33 @@ function resolvePrices(
   groupPrice: string,
   officialPrice: string,
   isGroupMode: boolean,
-  hasGroup: boolean
+  hasGroup: boolean,
+  effectiveSavings?: number | null
 ): { primary: string; official: string | null } {
   if (hasGroup && isGroupMode) {
-    return { primary: groupPrice, official: officialPrice }
+    if (officialPrice && officialPrice !== groupPrice && !isEmptyPrice(officialPrice)) {
+      return { primary: groupPrice, official: officialPrice }
+    }
+    if (
+      effectiveSavings != null &&
+      effectiveSavings > 0 &&
+      effectiveSavings < 100 &&
+      groupPrice &&
+      !isEmptyPrice(groupPrice)
+    ) {
+      const numMatch = groupPrice.match(/^([^\d-]*)([-\d,]+\.?\d*)(k?)$/)
+      if (numMatch) {
+        const [, symbol, numStr, suffix] = numMatch
+        const num = parseFloat(numStr.replaceAll(',', ''))
+        if (!isNaN(num) && num > 0) {
+          const original = num / (1 - effectiveSavings / 100)
+          const decimals = (numStr.split('.')[1] || '').length
+          const formattedOriginal = `${symbol}${original.toFixed(Math.max(decimals, 3))}${suffix}`
+          return { primary: groupPrice, official: formattedOriginal }
+        }
+      }
+    }
+    return { primary: groupPrice, official: null }
   }
   return { primary: officialPrice, official: null }
 }
@@ -1010,7 +1033,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               groupReq,
               offReq,
               isGroupMode,
-              Boolean(selectedGroup)
+              Boolean(selectedGroup),
+              effectiveSavings
             )
             inputPrice = res
           } else {
@@ -1037,7 +1061,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               inGroup,
               inOff,
               isGroupMode,
-              Boolean(selectedGroup)
+              Boolean(selectedGroup),
+              effectiveSavings
             )
 
             const outGroup = formatPrice(
@@ -1063,7 +1088,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               outGroup,
               outOff,
               isGroupMode,
-              Boolean(selectedGroup)
+              Boolean(selectedGroup),
+              effectiveSavings
             )
 
             const cacheGroup = formatPrice(
@@ -1089,7 +1115,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               cacheGroup,
               cacheOff,
               isGroupMode,
-              Boolean(selectedGroup)
+              Boolean(selectedGroup),
+              effectiveSavings
             )
 
             const cacheWriteGroup = formatPrice(
@@ -1115,7 +1142,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               cacheWriteGroup,
               cacheWriteOff,
               isGroupMode,
-              Boolean(selectedGroup)
+              Boolean(selectedGroup),
+              effectiveSavings
             )
           }
 
