@@ -23,6 +23,7 @@ import {
   MATCH_EQ,
   MATCH_GTE,
   MATCH_RANGE,
+  parseTiersFromExpr,
   type RequestCondition,
   type RequestRuleGroup,
   type TimeCondition,
@@ -214,5 +215,23 @@ describe('time range round-trip stability', () => {
     const parsed = tryParseRequestRuleExpr(expr)
     expect(parsed).not.toBeNull()
     expect(buildRequestRuleExpr(parsed ?? [])).toBe(expr)
+  })
+})
+
+describe('parseTiersFromExpr with peak/off-peak scale', () => {
+  test('keeps DeepSeek V4.1 Flash unit prices instead of dropping the expr', () => {
+    const expr =
+      'tier("base", p * 0.3 + c * 1.2 + cr * 0.006) * (((weekday("Asia/Shanghai") >= 1 && weekday("Asia/Shanghai") <= 5) && ((hour("Asia/Shanghai") >= 9 && hour("Asia/Shanghai") < 12) || (hour("Asia/Shanghai") >= 14 && hour("Asia/Shanghai") < 18))) ? 1 : 0.5)'
+    const tiers = parseTiersFromExpr(expr)
+    expect(tiers).toHaveLength(1)
+    expect(tiers[0]?.inputPrice).toBe(0.3)
+    expect(tiers[0]?.outputPrice).toBe(1.2)
+    expect(tiers[0]?.cacheReadPrice).toBe(0.006)
+  })
+
+  test('still rejects an unknown trailing multiplier', () => {
+    expect(
+      parseTiersFromExpr('tier("base", p * 0.3 + c * 1.2) * 2')
+    ).toEqual([])
   })
 })

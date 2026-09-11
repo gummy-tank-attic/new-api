@@ -301,6 +301,13 @@ function parseTierBody(bodyStr: string): Record<string, number> | null {
   return tier
 }
 
+function isTrailingPeakOffPeakScale(rest: string): boolean {
+  if (!rest.startsWith('*')) return false
+  return /^\*\s*\([\s\S]*\?\s*1(?:\.0+)?\s*:\s*(0\.\d+|1(?:\.0+)?)\)\s*$/.test(
+    rest
+  )
+}
+
 export function parseTiersFromExpr(exprStr: string): ParsedTier[] {
   if (!exprStr) return []
   try {
@@ -342,7 +349,12 @@ export function parseTiersFromExpr(exprStr: string): ParsedTier[] {
       tiers.push({ ...prices, label: m[2], conditions })
       end = tierRe.lastIndex
     }
-    if (body.slice(end).trim() || tiers.at(-1)?.conditions.length) return []
+    const rest = body.slice(end).trim()
+    // Peak/off-peak scale is applied by the time-tiered UI. Keep the inner
+    // tier() unit prices (the `? 1 : N` peak side) instead of dropping the
+    // whole expression and falling back to model_ratio.
+    if (rest && !isTrailingPeakOffPeakScale(rest)) return []
+    if (tiers.at(-1)?.conditions.length) return []
     return tiers
   } catch {
     return []
