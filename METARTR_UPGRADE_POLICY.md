@@ -9,10 +9,17 @@ behavior unless the operator explicitly approves a layout change.
 Before merging or deploying an upstream update, preserve and regression-check:
 
 - page structure, navigation, header, footer, and responsive layout;
+- public `/` is the pricing page (`web/src/routes/index.tsx` renders `Pricing`, shared `search-schema.ts`). Do not restore upstream Home as the root route. Keep `web/src/features/home/` in-tree (do not delete) but it is not the live landing page;
+- on merge conflict, keep MetaRtr (`ours`) for:
+  - `web/src/routes/index.tsx`
+  - `web/src/routes/pricing/index.tsx`
+  - `web/src/features/pricing/**` (including `constants.ts` `MANUAL_MODEL_SAVINGS_OFF` / `VENDOR_MODEL_DISPLAY_ORDER`, `billing-expr.ts` trailing peak/off-peak parse, `pricing-visual.css`, `supplier-price-table.tsx`, `video-model-grid.tsx`)
+- operator-entered unit prices live in the DB (`billing_expr` / ratios) — a git merge never changes them. Display `% OFF` is `MANUAL_MODEL_SAVINGS_OFF` in `constants.ts` — keep ours;
+- `parseTiersFromExpr` must still return inner `tier()` unit prices when the expression has a trailing `* (… ? 1 : 0.5)` peak/off-peak scale; do not drop the expr and fall back to `model_ratio`;
 - custom homepage architecture in `web/src/features/home/`:
   - modular React sections (`hero.tsx`, `stats.tsx`, `features.tsx`, `how-it-works.tsx`, `cta.tsx`, and `hero-terminal-demo.tsx`);
   - client-side SWR caching in `home-content-cache.ts` (`localStorage` fast-boot + hash invalidation);
-  - upstream New API/One API changes to root `/` or home routes must NEVER overwrite `web/src/features/home/`; merge conflicts must unconditionally keep MetaRtr (`ours`);
+  - upstream New API/One API changes must NEVER overwrite `web/src/features/home/`; merge conflicts must unconditionally keep MetaRtr (`ours`);
   - database `options.HomePageContent` is maintained empty so that dynamic client rendering is 100% driven by MetaRtr React code;
 - pricing page grouping, ordering (including `VENDOR_MODEL_DISPLAY_ORDER` in `constants.ts` and intelligent version self-adaptation `getModelEffectiveScore` in `model-helpers.ts`), presentation, group descriptions, and i18n;
 - pricing page title and subtitle contract: the subtitle under the main `h1` must strictly display the official upstream price & transparent ratio commitment (`t('Each model is quoted at the upstream official list price. Actual billing uses only your group ratio—with no hidden multipliers or extra fees.')`) instead of the upstream model count text (`This site currently has...`); the bottom duplicate text is removed to maintain a compact, clean layout;
@@ -66,9 +73,8 @@ security fixes forward selectively, then reapply MetaRtr frontend changes.
    blockers, including the production-entry check for invalid undefined calls.
 3. There is **no Pages preview**. Verify locally (`npm run build` + `npm run
    dev` against the protected contract on desktop and mobile) first. Specifically
-   open `http://localhost:5173/` to visually inspect the custom MetaRtr homepage
-   (Hero, Terminal Demo, Stats, Features, How-It-Works, CTA) before running
-   `deploy-web.ps1`.
+   open `/` and confirm it is the MetaRtr **pricing** page (vendor pills, model
+   prices), not the upstream Home/Hero landing, before running `deploy-web.ps1`.
 4. Deploy the accepted candidate with parent `scripts/deploy-web.ps1`.
 5. Treat `NO_FCP`, an empty `#root`, console startup errors, or a mismatched
    entry asset as a failed release even when HTTP status is 200.

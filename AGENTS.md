@@ -32,7 +32,7 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 | Public Base URLs | OpenAI-compatible clients use `https://api.metartr.com/v1`; Claude/Gemini native use `https://api.metartr.com`; never use www. Parent PRODUCTION §4.2 |
 | Pricing display order | Only `web/src/features/pricing/constants.ts` (`MODEL_DISPLAY_ORDER` etc.); must redeploy frontend after change |
 | Where to edit | Go/web code = **this** tree (`newapi源码/`); ops docs/compose/deploy scripts = **parent** `newapi/` |
-| Upstream upgrade | Parent README 铁律 11–12 + `METARTR_UPGRADE_POLICY.md`. Never replace `web/` wholesale. Merge on `upgrade/<ver>`. Do not `deploy-web.ps1` until `/` still shows MetaRtr home |
+| Upstream upgrade | Parent README 铁律 11–12 + `METARTR_UPGRADE_POLICY.md`. Never replace `web/` wholesale. Merge on `upgrade/<ver>`. Conflicts on `routes/index.tsx` and `features/pricing/**` keep ours. Do not `deploy-web.ps1` until `/` still shows the MetaRtr pricing page |
 | Critical rate limit | Login/register/reset/oauth entry = mark **CTA**; pay/refresh/ratio_config/etc = **CT**; whitelist env `CRITICAL_RATE_LIMIT_IP_WHITELIST`; do not disable Critical long-term (parent PRODUCTION §3) |
 | Session / 401 | `skipAuthRefresh` 401 must **not** `clearAuthentication`; silent refresh only (except logout). Access TTL 15m; keep-alive in `auth-session.ts`. SID restore must **not** `queryClient.clear()` — use `applySessionQuerySync`. Parent PRODUCTION §9 / `docs/authentication.md` |
 | About / contact | `/about` contact cards; links only in `web/src/lib/contact-links.ts`; About uses `showFooter={false}`; do not block paint on empty `/api/about` (parent PRODUCTION §7.9) |
