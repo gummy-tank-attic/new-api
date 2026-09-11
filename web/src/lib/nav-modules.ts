@@ -191,7 +191,7 @@ export async function getModuleAccessForGuard(
   } catch {
     // Network/proxy failure: keep last cached status if any, otherwise allow
     // public modules so local preview is not a blank redirect loop.
-    const cached = getCachedStatus()
+    const cached = readCachedStatus()
     if (cached) {
       return getModuleAccessFromStatus(cached, module)
     }

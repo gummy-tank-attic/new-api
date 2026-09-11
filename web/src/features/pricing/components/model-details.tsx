@@ -1729,6 +1729,7 @@ function ProviderGroupPricingSection(
                                     dynamicTiers.length > 1
                                       ? 'Other cases'
                                       : 'All requests'
+                                  )
                                 )
                               }
                               if (tier.conditionText) {

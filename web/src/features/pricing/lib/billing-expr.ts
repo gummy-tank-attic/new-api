@@ -322,6 +322,9 @@ export function parseTiersFromExpr(exprStr: string): ParsedTier[] {
   if (split.length > 1) {
     const base = split[0]
     const rest = '* ' + split.slice(1).join(' * ')
+    // Peak/off-peak scale is applied by the time-tiered UI. Keep the inner
+    // tier() unit prices (the `? 1 : N` peak side) instead of dropping the
+    // whole expression and falling back to model_ratio.
     if (isTrailingPeakOffPeakScale(rest)) {
       const compiledBase = compileBillingExpression(base)
       if (compiledBase.status === 'ready') {

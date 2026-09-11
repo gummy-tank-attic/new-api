@@ -96,64 +96,6 @@ function redirectToSignIn(): void {
 }
 
 /** Marketing / auth entry routes: never spam "session expired" toasts. */
-function isPublicAppPath(pathname: string): boolean {
-  const p = pathname.replace(/\/+$/, '') || '/'
-  if (p === '/') return true
-  const prefixes = [
-    '/pricing',
-    '/about',
-    '/docs',
-    '/rankings',
-    '/user-agreement',
-    '/privacy-policy',
-    '/sign-in',
-    '/sign-up',
-    '/forgot-password',
-    '/reset-password',
-    '/reset-password-confirm',
-    '/otp',
-    '/oauth',
-    '/setup',
-    '/401',
-    '/403',
-    '/404',
-    '/500',
-    '/503',
-  ]
-  return prefixes.some((prefix) => p === prefix || p.startsWith(`${prefix}/`))
-}
-
-function isOnPublicAppPage(): boolean {
-  return (
-    typeof window !== 'undefined' && isPublicAppPath(window.location.pathname)
-  )
-}
-
-/**
- * Session is gone (expired / revoked / refresh failed).
- * - Public pages: demote to guest quietly (no toast, no hard redirect).
- * - Console / authenticated app: toast + send user to sign-in.
- */
-function handleSessionLost(options: {
-  skipErrorHandler?: boolean
-  /** When true, redirect to sign-in on non-public pages. */
-  redirectToSignIn?: boolean
-}): void {
-  // Ensure local UI does not keep showing a ghost logged-in avatar.
-  clearAuthentication(false)
-
-  if (isOnPublicAppPage()) {
-    return
-  }
-
-  if (!options.skipErrorHandler) {
-    toast.error(t('Session expired!'))
-  }
-  if (options.redirectToSignIn !== false) {
-    redirectToSignIn()
-  }
-}
-
 api.interceptors.response.use(
   (response) => {
     if (response.config.acceptAuthRotation && response.data?.success === true) {
