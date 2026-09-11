@@ -396,4 +396,23 @@ describe('task visual pricing preview', () => {
     assert.equal(tiers[1].secondPrice, 0.0975)
     assert.equal(tiers[1].est5sPrice, 0.0975 * 5)
   })
+
+  test('parses MiniMax-H3 duration video tiers from live compound expression with zero fields', () => {
+    const expr =
+      'u("resolution") == "512P" ? tier("512P", u("input_images") * 0 + u("input_video_seconds") * 0 + u("seconds") * 0.06) : u("resolution") == "768P" ? tier("768P", u("input_images") * 0 + u("input_video_seconds") * 0 + u("seconds") * 0.06) : u("resolution") == "720P" ? tier("720P", u("input_images") * 0 + u("input_video_seconds") * 0 + u("seconds") * 0.06) : u("resolution") == "1080P" ? tier("1080P", u("input_images") * 0 + u("input_video_seconds") * 0 + u("seconds") * 0.06) : tier("2K", u("input_images") * 0 + u("input_video_seconds") * 0 + u("seconds") * 0.0975)'
+    const schema: BillingUsageSchema = {
+      seconds: { type: 'number', unit: 'second' },
+      input_images: { type: 'number', unit: 'count' },
+      input_video_seconds: { type: 'number', unit: 'second' },
+      resolution: { enum: ['512P', '768P', '720P', '1080P', '2K'] },
+    }
+    const tiers = parseDurationVideoTiers(expr, schema)
+    assert.equal(tiers.length, 2)
+    assert.equal(tiers[0].resolution, '768p')
+    assert.equal(tiers[0].secondPrice, 0.06)
+    assert.equal(tiers[0].est5sPrice, 0.3)
+    assert.equal(tiers[1].resolution, '2k')
+    assert.equal(tiers[1].secondPrice, 0.0975)
+    assert.equal(tiers[1].est5sPrice, 0.0975 * 5)
+  })
 })
