@@ -339,11 +339,11 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                           </div>
                           <div className='col-span-4 text-right'>
                             <div className='font-bold text-foreground text-xs sm:text-[13px] tabular-nums leading-tight'>
-                              ${billedSecond.toFixed(3)}/s
+                              ${billedSecond >= 0.01 && !Number.isInteger(billedSecond * 1000) ? billedSecond.toFixed(4).replace(/0$/, '') : billedSecond.toFixed(3)}/s
                             </div>
                             {showOfficial && (
                               <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
-                                ${officialSecond.toFixed(3)}/s
+                                ${officialSecond >= 0.01 && !Number.isInteger(officialSecond * 1000) ? officialSecond.toFixed(4).replace(/0$/, '') : officialSecond.toFixed(3)}/s
                               </div>
                             )}
                           </div>

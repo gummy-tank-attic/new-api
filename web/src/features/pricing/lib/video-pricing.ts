@@ -17,7 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { isByteDancePricingVendor, lookupModelSavingsOff } from '../constants'
-import type { PricingModel } from '../types'
+import type { BillingUsageSchema, PricingModel } from '../types'
+import { parseTaskTiersFromExpr } from './billing-expr'
 import { getTaskMatrixDisplayTiers } from './task-matrix-display'
 
 export interface VideoUpscaleTier {
@@ -663,7 +664,10 @@ export function getVideoModelHeroPrice(
     : null
 
   if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo') || isDurationBasedVideoModel(model)) {
-    const billed = 0.400 * rate
+    const durationTiers = getDurationVideoTiers(model)
+    const minTier = durationTiers.length > 0 ? durationTiers[0] : null
+    const baseEst5s = minTier ? minTier.est5sPrice : 0.400
+    const billed = baseEst5s * rate
     return {
       priceText: `$${billed.toFixed(3)}`,
       officialPriceText: null,
@@ -771,38 +775,130 @@ export interface DurationVideoTier {
   officialSecondPrice?: number
 }
 
-export function getDurationVideoTiers(model: PricingModel): DurationVideoTier[] {
-  const name = model.model_name.toLowerCase()
-  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) {
-    return [
-      {
-        resolution: '768p',
-        resLabel: '768P',
-        est5sPrice: 0.400,
-        secondPrice: 0.080,
-      },
-      {
-        resolution: '2k',
-        resLabel: '2K',
-        est5sPrice: 0.650,
-        secondPrice: 0.130,
-      },
-    ]
-  }
-  return [
+export function parseDurationVideoTiers(
+  expression: string | null | undefined,
+  schema?: BillingUsageSchema | null
+): DurationVideoTier[] {
+  const defaultTiers: DurationVideoTier[] = [
     {
       resolution: '768p',
       resLabel: '768P',
       est5sPrice: 0.400,
       secondPrice: 0.080,
+      officialEst5sPrice: 0.400,
+      officialSecondPrice: 0.080,
     },
     {
       resolution: '2k',
       resLabel: '2K',
       est5sPrice: 0.650,
       secondPrice: 0.130,
+      officialEst5sPrice: 0.650,
+      officialSecondPrice: 0.130,
     },
   ]
+
+  if (!expression || typeof expression !== 'string' || !expression.trim()) {
+    return defaultTiers
+  }
+
+  let sec768: number | null = null
+  let sec2k: number | null = null
+
+  // 1. Structured AST parsing using parseTaskTiersFromExpr
+  if (schema) {
+    try {
+      const parsedTiers = parseTaskTiersFromExpr(expression, schema)
+      for (const tier of parsedTiers) {
+        const sec = tier.unitPrices['seconds']
+        if (typeof sec === 'number' && Number.isFinite(sec) && sec > 0) {
+          const resCond = tier.conditions.find((c) => c.field === 'resolution')?.value?.toUpperCase()
+          const label = (tier.label || '').toUpperCase()
+          if (resCond === '768P' || label.includes('768')) {
+            sec768 = sec
+          } else if (resCond === '2K' || label.includes('2K')) {
+            sec2k = sec
+          }
+        }
+      }
+      // Check fallback tier (no conditions) in ternary chain
+      const fallbackTier = parsedTiers.find((t) => t.conditions.length === 0)
+      if (fallbackTier) {
+        const sec = fallbackTier.unitPrices['seconds']
+        if (typeof sec === 'number' && Number.isFinite(sec) && sec > 0) {
+          const label = (fallbackTier.label || '').toUpperCase()
+          if (label.includes('2K') && sec2k === null) {
+            sec2k = sec
+          } else if (label.includes('768') && sec768 === null) {
+            sec768 = sec
+          }
+        }
+      }
+    } catch {
+      // Proceed to regex fallback
+    }
+  }
+
+  // 2. Regex fallback for any expression variants (e.g. raw expressions, partial schema)
+  if (sec768 === null) {
+    const m768 =
+      expression.match(/tier\s*\(\s*["'](?:768[Pp]|768)["']\s*,\s*(?:u\("seconds"\)\s*\*\s*)?([\d.]+)/) ||
+      expression.match(/(?:768[Pp]|768)[\s\S]*?u\("seconds"\)\s*\*\s*([\d.]+)/) ||
+      expression.match(/u\("seconds"\)\s*\*\s*([\d.]+)[\s\S]*?(?:768[Pp]|768)/)
+    if (m768 && m768[1]) {
+      const parsed = parseFloat(m768[1])
+      if (Number.isFinite(parsed) && parsed > 0) sec768 = parsed
+    }
+  }
+
+  if (sec2k === null) {
+    const m2k =
+      expression.match(/tier\s*\(\s*["'](?:2[Kk])["']\s*,\s*(?:u\("seconds"\)\s*\*\s*)?([\d.]+)/) ||
+      expression.match(/(?:2[Kk])[\s\S]*?u\("seconds"\)\s*\*\s*([\d.]+)/) ||
+      expression.match(/u\("seconds"\)\s*\*\s*([\d.]+)[\s\S]*?(?:2[Kk])/)
+    if (m2k && m2k[1]) {
+      const parsed = parseFloat(m2k[1])
+      if (Number.isFinite(parsed) && parsed > 0) sec2k = parsed
+    }
+  }
+
+  // If uniform tier (single tier for seconds):
+  if (sec768 === null && sec2k === null) {
+    const mUniform = expression.match(/u\("seconds"\)\s*\*\s*([\d.]+)/)
+    if (mUniform && mUniform[1]) {
+      const parsed = parseFloat(mUniform[1])
+      if (Number.isFinite(parsed) && parsed > 0) {
+        sec768 = parsed
+        sec2k = parsed
+      }
+    }
+  }
+
+  const final768 = sec768 ?? 0.080
+  const final2k = sec2k ?? (sec768 !== null ? sec768 * 1.6 : 0.130)
+
+  return [
+    {
+      resolution: '768p',
+      resLabel: '768P',
+      est5sPrice: final768 * 5,
+      secondPrice: final768,
+      officialEst5sPrice: 0.400,
+      officialSecondPrice: 0.080,
+    },
+    {
+      resolution: '2k',
+      resLabel: '2K',
+      est5sPrice: final2k * 5,
+      secondPrice: final2k,
+      officialEst5sPrice: 0.650,
+      officialSecondPrice: 0.130,
+    },
+  ]
+}
+
+export function getDurationVideoTiers(model: PricingModel): DurationVideoTier[] {
+  return parseDurationVideoTiers(model.billing_expr, model.billing_usage_schema)
 }
 
 export function getVideoModelEstimateNote(_modelName: string): string {
