@@ -96,8 +96,8 @@ export function VideoModelGrid(props: VideoModelGridProps) {
 
         const vendorIcon =
           model.vendor_icon || model.icon
-            ? getLobeIcon(model.vendor_icon || model.icon, 22)
-            : <Film className='text-rose-500 h-5 w-5' />
+            ? getLobeIcon(model.vendor_icon || model.icon, 15)
+            : <Film className='size-3.5 text-rose-500' />
 
         const showOfficial = isGroupMode && discountOff != null
 
@@ -125,29 +125,28 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               {/* Row 1: Model Identity (Left) & Discount Badge (Right end) */}
               <div className='flex items-center justify-between gap-3 min-w-0'>
                 <div className='flex items-center gap-2.5 min-w-0'>
-                  <div className='flex size-9 shrink-0 items-center justify-center rounded-[9px] border border-rose-200 bg-rose-50 dark:border-rose-800/60 dark:bg-rose-950/40'>
+                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)]'>
                     {vendorIcon}
                   </div>
-                  <div className='inline-flex items-center gap-1.5 min-w-0 flex-wrap'>
-                    <h3
-                      className='truncate text-[16px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'
-                      title={model.model_name}
-                    >
-                      {model.model_name}
-                    </h3>
-                    <button
-                      type='button'
-                      aria-label={t('Copy model name')}
-                      onClick={(e) => handleCopy(e, model.model_name)}
-                      className='inline-flex size-6 shrink-0 items-center justify-center rounded-md text-[#94A3B8] opacity-80 transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]'
-                    >
-                      {copiedName === model.model_name ? (
-                        <Check className='size-[15.5px] text-emerald-600' />
-                      ) : (
-                        <Copy className='size-[15.5px]' />
-                      )}
-                    </button>
-                  </div>
+                  <span
+                    translate='no'
+                    className='notranslate min-w-0 truncate text-[15.5px] font-semibold tracking-[-0.01em] text-[var(--p-text-main,#0F172A)]'
+                    title={model.model_name}
+                  >
+                    {model.model_name}
+                  </span>
+                  <button
+                    type='button'
+                    aria-label={t('Copy model name')}
+                    onClick={(e) => handleCopy(e, model.model_name)}
+                    className='size-6 shrink-0 inline-flex items-center justify-center rounded-md text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
+                  >
+                    {copiedName === model.model_name ? (
+                      <Check className='size-[15.5px] text-emerald-600' />
+                    ) : (
+                      <Copy className='size-[15.5px]' />
+                    )}
+                  </button>
                 </div>
 
                 {discountOff != null && isGroupMode && (
