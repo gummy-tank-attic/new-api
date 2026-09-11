@@ -61,7 +61,7 @@ export function usePricingColumns(
         return (
           <div className='flex max-w-full min-w-0 items-center gap-2'>
             {modelIcon}
-            <span className='truncate font-mono text-sm font-medium'>
+            <span className='break-all font-mono text-sm font-medium leading-snug'>
               {model.model_name}
             </span>
           </div>

@@ -99,7 +99,13 @@ export function VideoModelGrid(props: VideoModelGridProps) {
             ? getLobeIcon(model.vendor_icon || model.icon, 15)
             : <Film className='size-3.5 text-rose-500' />
 
-        const showOfficial = isGroupMode && discountOff != null
+        const nameLen = (model.model_name || '').length
+        const titleClass =
+          nameLen > 28
+            ? 'text-[13.5px] sm:text-[14px] leading-snug tracking-[-0.015em]'
+            : nameLen > 20
+              ? 'text-[14.5px] sm:text-[15px] leading-snug tracking-[-0.01em]'
+              : 'text-[15px] sm:text-[15.5px] leading-normal tracking-[-0.01em]'
 
         return (
           <div
@@ -122,15 +128,18 @@ export function VideoModelGrid(props: VideoModelGridProps) {
 
             {/* Top Section */}
             <div className='space-y-2.5'>
-              {/* Row 1: Model Identity (Left) & Discount Badge (Right end) */}
-              <div className='flex items-center justify-between gap-3 min-w-0'>
-                <div className='flex items-center gap-2.5 min-w-0'>
-                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)]'>
-                    {vendorIcon}
-                  </div>
+              {/* Row 1: Model Identity (Full Width, No Crowding) */}
+              <div className='flex items-center gap-2.5 min-w-0'>
+                <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)]'>
+                  {vendorIcon}
+                </div>
+                <div className='flex min-w-0 flex-1 items-center gap-1.5'>
                   <span
                     translate='no'
-                    className='notranslate min-w-0 truncate text-[15.5px] font-semibold tracking-[-0.01em] text-[var(--p-text-main,#0F172A)]'
+                    className={cn(
+                      'notranslate break-words font-semibold text-[var(--p-text-main,#0F172A)]',
+                      titleClass
+                    )}
                     title={model.model_name}
                   >
                     {model.model_name}
@@ -148,30 +157,32 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                     )}
                   </button>
                 </div>
-
-                {discountOff != null && isGroupMode && (
-                  <span
-                    translate='no'
-                    className='notranslate inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#F43F5E] to-[#E11D48] min-w-[4.75rem] w-[4.75rem] h-[23px] text-xs font-bold tracking-wide text-white shadow-[0_1px_2px_rgba(225,29,72,0.22),inset_0_1px_0_rgba(255,255,255,0.25)] tabular-nums shrink-0 leading-none text-center'
-                  >
-                    {discountOff}% OFF
-                  </span>
-                )}
               </div>
 
-              {/* Row 2: Capability Tag (clean and prominent) */}
-              {capTag && (
-                <div className='flex items-center'>
+              {/* Row 2: Capability Tag (Left) & Discount Badge (Right) - Perfect Balance */}
+              <div className='flex items-center justify-between gap-2.5 min-h-[24px]'>
+                {capTag ? (
                   <span
                     className={cn(
-                      'inline-block rounded-full border px-[9px] py-[2.5px] text-[12px] font-semibold tracking-tight',
+                      'inline-block rounded-full border px-[9px] py-[2px] text-[11.5px] font-semibold tracking-tight',
                       capTag.className
                     )}
                   >
                     {t(capTag.key, capTag.label)}
                   </span>
-                </div>
-              )}
+                ) : (
+                  <div />
+                )}
+
+                {discountOff != null && isGroupMode && (
+                  <span
+                    translate='no'
+                    className='notranslate inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#F43F5E] to-[#E11D48] min-w-[4.5rem] px-2.5 h-[22px] text-[11.5px] font-bold tracking-wide text-white shadow-[0_1px_2px_rgba(225,29,72,0.22),inset_0_1px_0_rgba(255,255,255,0.25)] tabular-nums shrink-0 leading-none text-center'
+                  >
+                    {discountOff}% OFF
+                  </span>
+                )}
+              </div>
 
               {/* Row 3: Prominent Supported Resolutions */}
               <div className='mb-2.5 flex items-center gap-[7px] text-[12.5px]'>

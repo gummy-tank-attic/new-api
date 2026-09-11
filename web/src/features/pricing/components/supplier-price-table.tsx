@@ -77,7 +77,7 @@ function isEmptyPrice(value: string): boolean {
 }
 
 const MODEL_NAME_CLASS =
-  'min-w-0 truncate text-[15.5px] font-semibold tracking-[-0.01em] text-[var(--p-text-main,#0F172A)]'
+  'min-w-0 break-words text-[14.5px] sm:text-[15.5px] font-semibold tracking-[-0.01em] text-[var(--p-text-main,#0F172A)] leading-snug'
 
 const MINIMAX_COLS =
   'md:grid-cols-[minmax(0,3.2fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,1.6fr)]'
