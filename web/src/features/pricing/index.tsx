@@ -268,8 +268,8 @@ export function Pricing() {
   // Always paint chrome (title). Only block the pricing body while first load
   // has no cache — avoids full-page "frozen" grey on every hard refresh.
   return (
-    <PublicLayout showMainContainer={false}>
-      <PageTransition className='metartr-pricing relative mx-auto w-full max-w-[1200px] px-4 pt-16 pb-12 sm:px-6 sm:pt-20 sm:pb-14'>
+    <PublicLayout className='metartr-pricing' showMainContainer={false}>
+      <PageTransition className='relative mx-auto w-full max-w-[1200px] px-4 pt-16 pb-12 sm:px-6 sm:pt-20 sm:pb-14'>
         <header className='mb-7 sm:mb-8'>
           <div className='flex flex-wrap items-end justify-between gap-3'>
             <div>

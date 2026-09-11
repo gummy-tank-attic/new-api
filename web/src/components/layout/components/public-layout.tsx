@@ -16,12 +16,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { cn } from '@/lib/utils'
+
 import type { TopNavLink } from '../types'
 import { Footer } from './footer'
 import { PublicHeader, type PublicHeaderProps } from './public-header'
 
 type PublicLayoutProps = {
   children: React.ReactNode
+  className?: string
   showMainContainer?: boolean
   /** Site footer with Telegram support/channel (default true). */
   showFooter?: boolean
@@ -39,7 +42,12 @@ export function PublicLayout(props: PublicLayoutProps) {
   const showFooter = props.showFooter !== false
 
   return (
-    <div className='bg-background text-foreground relative flex min-h-svh flex-col overflow-x-clip'>
+    <div
+      className={cn(
+        'bg-background text-foreground relative flex min-h-svh flex-col overflow-x-clip',
+        props.className
+      )}
+    >
       <PublicHeader
         navContent={props.navContent}
         navLinks={props.navLinks}
