@@ -58,7 +58,7 @@ export function SupplierTabs(props: SupplierTabsProps) {
       aria-label={t('Vendors')}
       className={cn(
         // Surface: Apple / Linear segmented control surface with mobile horizontal scroll track
-        'bg-muted/40 dark:bg-card/60 flex w-full flex-nowrap overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap gap-1 rounded-2xl border border-border/70 p-1 shadow-xs',
+        'flex w-full flex-nowrap overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap gap-1 rounded-[14px] border border-[#E2E8F0] bg-[#F1F5F9] p-[5px]',
         props.className
       )}
     >
@@ -75,10 +75,10 @@ export function SupplierTabs(props: SupplierTabsProps) {
             onClick={() => props.onChange(option.value)}
             className={cn(
               // UI 14px — Apple / Linear segmented item (touch-friendly on mobile, auto-flex on desktop)
-              'shrink-0 sm:shrink sm:flex-1 sm:min-w-0 sm:basis-0 inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-all duration-150',
+              'shrink-0 sm:shrink sm:flex-1 sm:min-w-0 sm:basis-0 inline-flex items-center justify-center gap-2 rounded-[10px] px-3.5 py-[8.5px] text-sm font-medium whitespace-nowrap transition-all duration-150',
               active
-                ? 'bg-background text-foreground font-semibold shadow-xs border border-border/70'
-                : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
+                ? 'border border-[#E2E8F0] bg-white font-semibold text-[#0F172A] shadow-[0_1px_3px_rgba(15,23,42,0.06)]'
+                : 'border border-transparent text-[#334155] hover:bg-white/75 hover:text-[#0F172A]'
             )}
           >
             {icon}

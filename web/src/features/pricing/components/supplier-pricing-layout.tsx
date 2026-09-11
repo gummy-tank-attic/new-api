@@ -120,12 +120,12 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
 
           {/* Group Intro Callout Banner (Clean Neutral Stripe/Linear Style) */}
           {groupIntroDisplay ? (
-            <div className='flex items-center gap-2.5 rounded-xl border border-border/70 bg-muted/20 px-4 py-2 shadow-xs transition-all dark:bg-card/40 dark:border-border/50'>
-              <div className='flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground ring-1 ring-border/60'>
+            <div className='mb-1 flex items-center gap-2.5 rounded-xl border border-[var(--p-border,#E2E8F0)] bg-white px-[15px] py-[8.5px] shadow-[0_1px_2px_rgba(15,23,42,0.02)]'>
+              <div className='flex size-6 shrink-0 items-center justify-center rounded-md border border-[#E2E8F0] bg-[#F1F5F9] text-[#475569]'>
                 <Sparkles className='size-3.5' />
               </div>
               <p
-                className='text-[12.5px] font-medium text-foreground/85 tracking-tight sm:text-[13px]'
+                className='text-[13.5px] font-medium text-[var(--p-text-body,#1E293B)]'
                 title={groupIntroDisplay}
               >
                 {groupIntroDisplay}
@@ -186,10 +186,10 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
                 <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-400'>
                   <MessageSquare className='size-3.5' />
                 </div>
-                <h3 className='text-[15.5px] sm:text-[16.5px] font-semibold tracking-tight text-foreground'>
+                <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
                   {t('pricing.section.textModels', '语言与对话模型')}
                 </h3>
-                <span className='rounded-full bg-muted border border-border/60 px-2 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums'>
+                <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums'>
                   {standardModels.length}
                 </span>
               </div>
@@ -210,10 +210,10 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
                 <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-purple-200 bg-purple-50 text-purple-600 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-400'>
                   <Film className='size-3.5' />
                 </div>
-                <h3 className='text-[15.5px] sm:text-[16.5px] font-semibold tracking-tight text-foreground'>
+                <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
                   {t('pricing.section.videoModels', '视频生成模型')}
                 </h3>
-                <span className='rounded-full bg-muted border border-border/60 px-2 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums'>
+                <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums'>
                   {videoModels.length}
                 </span>
               </div>

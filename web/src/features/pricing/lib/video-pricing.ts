@@ -118,25 +118,25 @@ export function getResolutionBadgeStyle(res: string): { label: string; className
   const clean = res.trim().toLowerCase()
   if (clean === '480p') {
     return {
-      label: '480p',
+      label: '480P',
       className: 'border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300',
     }
   }
   if (clean === '720p') {
     return {
-      label: '720p',
+      label: '720P',
       className: 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-300',
     }
   }
   if (clean === '768p') {
     return {
-      label: '768p',
+      label: '768P',
       className: 'border-cyan-300 bg-cyan-50 text-cyan-700 dark:border-cyan-800/60 dark:bg-cyan-950/40 dark:text-cyan-300 font-semibold',
     }
   }
   if (clean === '1080p') {
     return {
-      label: '1080p',
+      label: '1080P',
       className: 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-800/60 dark:bg-indigo-950/40 dark:text-indigo-300 font-semibold',
     }
   }
@@ -149,7 +149,7 @@ export function getResolutionBadgeStyle(res: string): { label: string; className
   if (clean === '4k') {
     return {
       label: '4K',
-      className: 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-300 font-bold',
+      className: 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-300 font-semibold',
     }
   }
   return {
@@ -169,7 +169,7 @@ export function getVideoModelCapabilityTag(modelName: string): {
       key: 'videoPricing.badge.h3',
       label: '旗舰多模态视频',
       className:
-        'bg-violet-100 text-violet-800 border-violet-200 dark:bg-violet-900/40 dark:text-violet-300 dark:border-violet-800',
+        'border-[#F3E8FF] bg-[#FAF5FF] text-[12px] font-semibold text-[#7E22CE] dark:border-violet-800 dark:bg-violet-900/40 dark:text-violet-300',
     }
   }
   if (name.includes('upscale') || name.includes('chaofen')) {

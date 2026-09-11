@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useNavigate, useRouterState, useSearch } from '@tanstack/react-router'
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -26,10 +26,12 @@ import { PageTransition } from '@/components/page-transition'
 import { Button } from '@/components/ui/button'
 
 import { LoadingSkeleton, ModelDetailsDrawer } from './components'
+import './pricing-visual.css'
 import type { PriceMode } from './components/supplier-price-table'
 import { SupplierPricingLayout } from './components/supplier-pricing-layout'
 import { FILTER_ALL, VIEW_MODES, getCanonicalVendorName, getDisplayVendorName } from './constants'
 import { usePricingData } from './hooks/use-pricing-data'
+import type { PricingSearch } from './search-schema'
 import {
   buildVendorTabOptions,
   deriveGroupsForVendor,
@@ -41,7 +43,9 @@ import { comparePricingModels } from './lib/model-helpers'
 export function Pricing() {
   const { t } = useTranslation()
   const navigate = useNavigate({ from: '/pricing/' })
-  const search = useSearch({ from: '/pricing/' })
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const search = useSearch({ strict: false }) as PricingSearch
+  const pricingTo = (pathname === '/' ? '/' : '/pricing') as '/pricing'
 
   const [selectedModelName, setSelectedModelName] = useState<string | null>(
     null
@@ -139,6 +143,7 @@ export function Pricing() {
   const handleVendorChange = useCallback(
     (nextVendor: string) => {
       void navigate({
+        to: pricingTo,
         search: (prev) => {
           const next = { ...prev }
           if (nextVendor === FILTER_ALL) {
@@ -152,25 +157,27 @@ export function Pricing() {
         replace: true,
       })
     },
-    [navigate]
+    [navigate, pricingTo]
   )
 
   const handleGroupChange = useCallback(
     (nextGroup: string) => {
       void navigate({
+        to: pricingTo,
         search: (prev) => ({ ...prev, group: nextGroup }),
         replace: true,
       })
     },
-    [navigate]
+    [navigate, pricingTo]
   )
 
   const handleClearFilters = useCallback(() => {
     void navigate({
+      to: pricingTo,
       search: () => ({}),
       replace: true,
     })
-  }, [navigate])
+  }, [navigate, pricingTo])
 
   const handleModelClick = useCallback((modelName: string) => {
     setSelectedModelName(modelName)
@@ -187,18 +194,89 @@ export function Pricing() {
 
   const hasActiveFilters = vendor !== FILTER_ALL || Boolean(groupFromUrl)
 
+  let pricingBody
+  if (error && !isLoading) {
+    pricingBody = (
+      <div className='flex flex-col items-center py-16 text-center'>
+        <h2 className='text-foreground text-lg font-semibold'>
+          {t('Failed to load pricing')}
+        </h2>
+        <p className='text-muted-foreground mt-2 max-w-md text-sm'>
+          {t('Could not load price data. Please try again.')}
+        </p>
+        <Button
+          className='mt-4'
+          variant='outline'
+          onClick={() => void refetch()}
+        >
+          {t('Retry')}
+        </Button>
+      </div>
+    )
+  } else if (isLoading) {
+    pricingBody = (
+      <LoadingSkeleton viewMode={VIEW_MODES.TABLE} variant='content' />
+    )
+  } else {
+    pricingBody = (
+      <>
+        <SupplierPricingLayout
+          vendorOptions={vendorOptions}
+          vendor={vendor}
+          onVendorChange={handleVendorChange}
+          groups={groups}
+          selectedGroup={selectedGroup}
+          onGroupChange={handleGroupChange}
+          groupRatio={groupRatio || {}}
+          usableGroup={usableGroupMap}
+          priceMode={priceMode}
+          onPriceModeChange={setPriceMode}
+          models={tableModels}
+          priceRate={priceRate ?? 1}
+          usdExchangeRate={usdExchangeRate ?? 1}
+          onModelClick={handleModelClick}
+          onClearFilters={handleClearFilters}
+          hasActiveFilters={hasActiveFilters}
+        />
+
+        {selectedModel && (
+          <ModelDetailsDrawer
+            open={Boolean(selectedModel)}
+            onOpenChange={(open) => {
+              if (!open) setSelectedModelName(null)
+            }}
+            model={selectedModel}
+            groupRatio={groupRatio || {}}
+            usableGroup={usableGroupMap}
+            endpointMap={
+              (endpointMap as Record<
+                string,
+                { path?: string; method?: string }
+              >) || {}
+            }
+            autoGroups={autoGroups || []}
+            priceRate={priceRate ?? 1}
+            usdExchangeRate={usdExchangeRate ?? 1}
+            tokenUnit='M'
+            showRechargePrice={false}
+          />
+        )}
+      </>
+    )
+  }
+
   // Always paint chrome (title). Only block the pricing body while first load
   // has no cache — avoids full-page "frozen" grey on every hard refresh.
   return (
     <PublicLayout showMainContainer={false}>
-      <PageTransition className='relative mx-auto w-full max-w-[1200px] px-4 pt-16 pb-12 sm:px-6 sm:pt-20 sm:pb-14'>
+      <PageTransition className='metartr-pricing relative mx-auto w-full max-w-[1200px] px-4 pt-16 pb-12 sm:px-6 sm:pt-20 sm:pb-14'>
         <header className='mb-7 sm:mb-8'>
           <div className='flex flex-wrap items-end justify-between gap-3'>
             <div>
-              <h1 className='text-foreground text-3xl font-semibold tracking-tight sm:text-4xl sm:leading-tight'>
+              <h1 className='text-[26px] font-bold tracking-[-0.025em] text-[var(--p-text-main)] sm:text-[32px] sm:leading-tight'>
                 {t('Model Square')}
               </h1>
-              <p className='text-muted-foreground mt-2.5 text-sm leading-relaxed sm:text-base'>
+              <p className='mt-2 mb-[22px] max-w-[840px] text-[14px] leading-[1.6] text-[var(--p-text-muted)] sm:text-[15px]'>
                 {isLoading
                   ? t('Loading model prices…')
                   : t(
@@ -227,69 +305,7 @@ export function Pricing() {
           ) : null}
         </header>
 
-        {error && !isLoading ? (
-          <div className='flex flex-col items-center py-16 text-center'>
-            <h2 className='text-foreground text-lg font-semibold'>
-              {t('Failed to load pricing')}
-            </h2>
-            <p className='text-muted-foreground mt-2 max-w-md text-sm'>
-              {t('Could not load price data. Please try again.')}
-            </p>
-            <Button
-              className='mt-4'
-              variant='outline'
-              onClick={() => void refetch()}
-            >
-              {t('Retry')}
-            </Button>
-          </div>
-        ) : isLoading ? (
-          <LoadingSkeleton viewMode={VIEW_MODES.TABLE} variant='content' />
-        ) : (
-          <>
-            <SupplierPricingLayout
-              vendorOptions={vendorOptions}
-              vendor={vendor}
-              onVendorChange={handleVendorChange}
-              groups={groups}
-              selectedGroup={selectedGroup}
-              onGroupChange={handleGroupChange}
-              groupRatio={groupRatio || {}}
-              usableGroup={usableGroupMap}
-              priceMode={priceMode}
-              onPriceModeChange={setPriceMode}
-              models={tableModels}
-              priceRate={priceRate ?? 1}
-              usdExchangeRate={usdExchangeRate ?? 1}
-              onModelClick={handleModelClick}
-              onClearFilters={handleClearFilters}
-              hasActiveFilters={hasActiveFilters}
-            />
-
-            {selectedModel && (
-              <ModelDetailsDrawer
-                open={Boolean(selectedModel)}
-                onOpenChange={(open) => {
-                  if (!open) setSelectedModelName(null)
-                }}
-                model={selectedModel}
-                groupRatio={groupRatio || {}}
-                usableGroup={usableGroupMap}
-                endpointMap={
-                  (endpointMap as Record<
-                    string,
-                    { path?: string; method?: string }
-                  >) || {}
-                }
-                autoGroups={autoGroups || []}
-                priceRate={priceRate ?? 1}
-                usdExchangeRate={usdExchangeRate ?? 1}
-                tokenUnit='M'
-                showRechargePrice={false}
-              />
-            )}
-          </>
-        )}
+        {pricingBody}
       </PageTransition>
     </PublicLayout>
   )

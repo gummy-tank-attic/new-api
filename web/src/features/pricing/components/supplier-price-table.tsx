@@ -76,6 +76,12 @@ function isEmptyPrice(value: string): boolean {
   return value === '-' || value === '—' || value === ''
 }
 
+const MODEL_NAME_CLASS =
+  'min-w-0 truncate text-[15.5px] font-semibold tracking-[-0.01em] text-[var(--p-text-main,#0F172A)]'
+
+const MINIMAX_COLS =
+  'md:grid-cols-[minmax(0,3.2fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,1.6fr)]'
+
 export function isTimeTieredModel(model: PricingModel): boolean {
   // 核心守卫：必须后端启用了表达式计费（tiered_expr），才进入分时展示；若后端为普通按量/Token模式，严格跟随展示为标准按量
   if (!isDynamicPricingModel(model)) return false
@@ -194,7 +200,7 @@ function PriceColumn(props: {
         )}
       >
         {props.label && (
-          <span className='text-muted-foreground/70 text-[11px] font-medium mb-0.5 md:hidden'>
+          <span className='mb-0.5 text-[11.5px] font-medium text-slate-500 md:hidden'>
             {props.label}
           </span>
         )}
@@ -211,27 +217,27 @@ function PriceColumn(props: {
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center text-center py-1.5 px-2 rounded-lg bg-muted/25 border border-border/40 md:bg-transparent md:border-0 md:p-0 md:py-1',
+        'flex flex-col items-center justify-center text-center rounded-lg bg-[#F8FAFC] border border-[#F1F5F9] px-2.5 py-2 md:bg-transparent md:border-0 md:p-0 md:py-1',
         props.className
       )}
     >
       {props.label && (
-        <span className='text-muted-foreground/75 text-[11px] font-medium mb-0.5 md:hidden'>
+        <span className='mb-0.5 text-[11.5px] font-medium text-slate-500 md:hidden'>
           {props.label}
         </span>
       )}
       <div className='flex items-baseline justify-center gap-1'>
-        <span className='text-foreground text-[15.5px] font-semibold tabular-nums tracking-tight sm:text-[16px]'>
+        <span className='text-[16px] font-semibold tabular-nums tracking-[-0.01em] text-[var(--p-text-main,#0F172A)] max-md:text-[15.5px]'>
           {stripTrailingZeros(props.primary)}
         </span>
         {props.unit && (
-          <span className='text-muted-foreground/75 text-[11.5px] font-normal'>
+          <span className='text-[11.5px] font-normal text-[var(--p-text-subtle,#64748B)]'>
             {props.unit}
           </span>
         )}
       </div>
       {showOfficial && props.official && (
-        <span className='text-muted-foreground/60 decoration-muted-foreground/40 mt-0.5 text-[12px] sm:text-[12.5px] font-normal tabular-nums line-through'>
+        <span className='mt-[1.5px] text-[12.5px] font-normal tabular-nums text-[var(--p-text-strike,#94A3B8)] line-through max-md:text-[12px]'>
           {stripTrailingZeros(props.official)}
         </span>
       )}
@@ -245,7 +251,7 @@ function SavingsBadge({ savings, className }: { savings: number | null; classNam
     <span
       translate='no'
       className={cn(
-        'notranslate inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#F43F5E] to-[#E11D48] min-w-[4.75rem] w-[4.75rem] h-[23px] text-xs font-bold tracking-wide whitespace-nowrap text-white tabular-nums shadow-[0_1px_2px_rgba(225,29,72,0.22),inset_0_1px_0_rgba(255,255,255,0.25)] leading-none text-center',
+        'notranslate inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#F43F5E] to-[#E11D48] min-w-[4.75rem] w-[4.75rem] h-[23px] text-xs font-bold tracking-[0.02em] whitespace-nowrap text-white tabular-nums shadow-[0_1px_2px_rgba(225,29,72,0.22),inset_0_1px_0_rgba(255,255,255,0.25)] leading-none text-center',
         className
       )}
     >
@@ -285,16 +291,24 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
   const isGenerationTable =
     isImageTable || props.models.some((m) => isByteDanceOrVideoModel(m))
 
+  const modelRowClass = cn(
+    'group relative grid cursor-pointer items-center rounded-[14px] border border-[var(--p-border,#E2E8F0)] bg-[var(--p-card,#fff)] px-[22px] py-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.02)] transition-all duration-150 hover:border-[var(--p-border-hover,#CBD5E1)] hover:bg-[#FAFAFA] hover:shadow-[0_3px_8px_rgba(15,23,42,0.04)]',
+    isMiniMaxTable
+      ? cn('grid-cols-1 gap-x-2.5 gap-y-3 max-md:px-4 max-md:py-4', MINIMAX_COLS)
+      : 'grid-cols-1 gap-4 md:grid-cols-12'
+  )
+
   return (
     <div className={cn('w-full space-y-3', props.className)}>
       {/* 1. Refined Column Legend Header with Crisp Baseline */}
       <div
         className={cn(
-          'text-muted-foreground/85 border-border hidden grid-cols-12 items-center gap-4 border-b px-5 pb-2 text-[13px] font-semibold tracking-normal',
-          !isImageTable && 'md:grid'
+          'mb-2.5 hidden items-center border-b border-[var(--p-border,#E2E8F0)] px-[22px] py-2.5 text-[13px] font-semibold text-[var(--p-text-muted,#334155)]',
+          !isImageTable && 'md:grid',
+          isMiniMaxTable ? MINIMAX_COLS : 'grid-cols-12 gap-4'
         )}
       >
-        <div className={isMiniMaxTable ? 'col-span-3' : 'col-span-4'}>
+        <div className={isMiniMaxTable ? undefined : 'col-span-4'}>
           {t('Model', '模型名称')}
         </div>
         {(() => {
@@ -314,27 +328,27 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           if (isMiniMaxTable) {
             return (
               <>
-                <div className='col-span-2 text-center'>
+                <div className='text-center'>
                   {t('Input price')}
-                  <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                  <span className='ml-[3px] text-[11.5px] font-normal text-[var(--p-text-subtle,#64748B)]'>
                     / {unitHint}
                   </span>
                 </div>
-                <div className='col-span-2 text-center'>
+                <div className='text-center'>
                   {t('Output price')}
-                  <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                  <span className='ml-[3px] text-[11.5px] font-normal text-[var(--p-text-subtle,#64748B)]'>
                     / {unitHint}
                   </span>
                 </div>
-                <div className='col-span-2 text-center'>
+                <div className='text-center'>
                   {t('Cache Read', '缓存读取')}
-                  <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                  <span className='ml-[3px] text-[11.5px] font-normal text-[var(--p-text-subtle,#64748B)]'>
                     / {unitHint}
                   </span>
                 </div>
-                <div className='col-span-2 text-center'>
+                <div className='text-center'>
                   {t('Cache Write', '缓存写入')}
-                  <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                  <span className='ml-[3px] text-[11.5px] font-normal text-[var(--p-text-subtle,#64748B)]'>
                     / {unitHint}
                   </span>
                 </div>
@@ -345,19 +359,19 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
             <>
               <div className='col-span-2 text-center'>
                 {t('Input price')}
-                <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                <span className='ml-[3px] text-[11.5px] font-normal text-[var(--p-text-subtle,#64748B)]'>
                   / {unitHint}
                 </span>
               </div>
               <div className='col-span-2 text-center'>
                 {t('Output price')}
-                <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                <span className='ml-[3px] text-[11.5px] font-normal text-[var(--p-text-subtle,#64748B)]'>
                   / {unitHint}
                 </span>
               </div>
               <div className='col-span-2 text-center'>
                 {t('Cache & Details', '缓存与扩展')}
-                <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                <span className='ml-[3px] text-[11.5px] font-normal text-[var(--p-text-subtle,#64748B)]'>
                   / {unitHint}
                 </span>
               </div>
@@ -368,7 +382,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           <div
             className={cn(
               'text-center',
-              isMiniMaxTable ? 'col-span-1' : 'col-span-2'
+              !isMiniMaxTable && 'col-span-2'
             )}
           >
             {isMiniMaxTable ? t('Discount', '优惠') : t('Discount', '优惠幅度')}
@@ -389,17 +403,20 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
             return (
               <div
                 key={model.model_name}
-                className='group relative grid grid-cols-1 items-center gap-4 rounded-xl border border-border bg-card px-5 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-150 hover:border-foreground/15 hover:bg-muted/30 hover:shadow-xs md:grid-cols-12'
+                className={cn(modelRowClass, 'cursor-default')}
               >
                 <div className='col-span-12 flex min-w-0 items-center gap-2.5 md:col-span-3'>
-                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 dark:border-rose-800/60 dark:bg-rose-950/40'>
+                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)]'>
                     {(model.vendor_icon || model.icon)
                       ? getLobeIcon(model.vendor_icon || model.icon, 15)
                       : <MessageSquare className='size-3.5 text-rose-500' />}
                   </div>
                   <button
                     type='button'
-                    className='text-foreground group-hover:text-primary min-w-0 break-all rounded-sm text-left font-sans text-[15px] font-medium antialiased transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current sm:text-[15.5px] sm:font-semibold'
+                    className={cn(
+                      MODEL_NAME_CLASS,
+                      'rounded-sm text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current'
+                    )}
                     onClick={() => props.onModelClick?.(model.model_name)}
                   >
                     {model.model_name}
@@ -408,8 +425,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     value={model.model_name}
                     size='icon'
                     variant='ghost'
-                    className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
-                    iconClassName='size-3.5'
+                    className='size-6 shrink-0 text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[#0F172A] sm:opacity-0 sm:group-hover:opacity-[0.85]'
+                    iconClassName='size-[15.5px]'
                   />
                 </div>
                 <div className='col-span-12 min-w-0 md:col-span-9'>
@@ -448,7 +465,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               <div
                 key={model.model_name}
                 onClick={() => props.onModelClick?.(model.model_name)}
-                className='group relative grid cursor-pointer grid-cols-1 items-center gap-4 rounded-xl border border-border bg-card px-5 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50/40 hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:border-border/80 dark:hover:border-border dark:hover:bg-accent/20 md:grid-cols-12'
+                className={modelRowClass}
               >
                 {/* Left: Model Identity (Mobile: row header with name left and SavingsBadge right) */}
                 <div
@@ -458,12 +475,12 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                   )}
                 >
                   <div className='flex min-w-0 items-center gap-2.5'>
-                    <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 dark:border-rose-800/60 dark:bg-rose-950/40'>
+                    <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)]'>
                       {(model.vendor_icon || model.icon)
                         ? getLobeIcon(model.vendor_icon || model.icon, 15)
                         : <MessageSquare className='size-3.5 text-rose-500' />}
                     </div>
-                    <span className='text-foreground group-hover:text-primary break-all font-sans text-[15px] font-medium antialiased transition-colors sm:text-[15.5px] sm:font-semibold'>
+                    <span className={MODEL_NAME_CLASS}>
                       {model.model_name}
                     </span>
                     <span onClick={(e) => e.stopPropagation()}>
@@ -471,8 +488,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                         value={model.model_name}
                         size='icon'
                         variant='ghost'
-                        className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
-                        iconClassName='size-3.5'
+                        className='size-6 shrink-0 text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[#0F172A] sm:opacity-0 sm:group-hover:opacity-[0.85]'
+                        iconClassName='size-[15.5px]'
                       />
                     </span>
                   </div>
@@ -505,8 +522,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                             className='bg-muted/20 border-border/40 flex flex-col rounded-lg border px-3 py-1.5 text-xs'
                           >
                             <div className='border-border/20 text-foreground mb-1 flex items-center justify-between border-b pb-1 text-[11px] font-semibold'>
-                              <span className='font-bold'>{dt.resLabel}</span>
-                              <span className='text-muted-foreground/75 font-mono text-[10.5px]'>
+                              <span className='font-semibold'>{dt.resLabel}</span>
+                              <span className='text-muted-foreground/75 tabular-nums text-[10.5px]'>
                                 5s 约 ${billed5s.toFixed(3)}
                                 {showOff && (
                                   <span className='line-through ml-1 text-muted-foreground/50'>
@@ -519,7 +536,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                               <span className='text-muted-foreground/75'>
                                 每秒单价:
                               </span>
-                              <span className='text-foreground font-semibold tabular-nums font-mono'>
+                              <span className='text-foreground font-semibold tabular-nums'>
                                 ${billedSec >= 0.01 && !Number.isInteger(billedSec * 1000)
                                   ? billedSec.toFixed(4).replace(/0$/, '')
                                   : billedSec.toFixed(3)}/s
@@ -809,18 +826,13 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               <div
                 key={model.model_name}
                 onClick={() => props.onModelClick?.(model.model_name)}
-                className='group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-border/80 bg-card/95 shadow-sm transition-all duration-200 hover:border-blue-400/40 hover:shadow-md hover:shadow-blue-500/5 dark:border-border/70 dark:hover:border-blue-500/30'
+                className='group relative flex cursor-pointer flex-col overflow-hidden rounded-[14px] border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.02)] transition-all duration-150 hover:border-slate-300 hover:bg-slate-50/80 hover:shadow-[0_3px_8px_rgba(15,23,42,0.04)] dark:hover:border-border dark:hover:bg-accent/20'
               >
-                {/* Ambient subtle glow */}
-                <div
-                  className='pointer-events-none absolute -top-14 -right-14 h-32 w-32 rounded-full bg-blue-500/10 blur-3xl transition-all duration-500 group-hover:bg-blue-500/15'
-                  aria-hidden='true'
-                />
 
                 {/* 1. Header: Model Identity */}
                 <div className='flex items-center justify-between border-b border-border/50 bg-muted/25 px-5 py-2.5'>
                   <div className='flex items-center gap-2'>
-                    <span className='font-sans text-[15px] font-semibold text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors sm:text-[15.5px]'>
+                    <span className={MODEL_NAME_CLASS}>
                       {model.model_name}
                     </span>
                     <span onClick={(e) => e.stopPropagation()}>
@@ -828,8 +840,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                         value={model.model_name}
                         size='icon'
                         variant='ghost'
-                        className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
-                        iconClassName='size-3.5'
+                        className='size-6 shrink-0 text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[#0F172A] sm:opacity-0 sm:group-hover:opacity-[0.85]'
+                        iconClassName='size-[15.5px]'
                       />
                     </span>
                     <span
@@ -1151,24 +1163,26 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
             <div
               key={model.model_name}
               onClick={() => props.onModelClick?.(model.model_name)}
-              className='group relative grid cursor-pointer grid-cols-1 items-center gap-4 rounded-xl border border-border bg-card px-5 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-150 hover:border-foreground/15 hover:bg-muted/30 hover:shadow-xs md:grid-cols-12'
+              className={modelRowClass}
             >
               {/* Left: Model Identity (Mobile: row header with name left and SavingsBadge right) */}
               <div
                 className={cn(
-                  'col-span-12 flex min-w-0 items-center justify-between gap-2.5',
-                  isMiniMaxTable ? 'md:col-span-3' : 'md:col-span-4'
+                  'flex min-w-0 items-center justify-between gap-2.5',
+                  isMiniMaxTable
+                    ? 'col-span-2 md:col-auto'
+                    : 'col-span-12 md:col-span-4'
                 )}
               >
                 <div className='flex min-w-0 items-center gap-2.5'>
-                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 dark:border-rose-800/60 dark:bg-rose-950/40'>
+                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)]'>
                     {(model.vendor_icon || model.icon)
                       ? getLobeIcon(model.vendor_icon || model.icon, 15)
                       : <MessageSquare className='size-3.5 text-rose-500' />}
                   </div>
                   <span
                     translate='no'
-                    className='notranslate text-foreground group-hover:text-primary break-all font-sans text-[15px] font-semibold antialiased transition-colors sm:text-[15.5px]'
+                    className={cn('notranslate', MODEL_NAME_CLASS)}
                   >
                     {model.model_name}
                   </span>
@@ -1177,8 +1191,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                       value={model.model_name}
                       size='icon'
                       variant='ghost'
-                      className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
-                      iconClassName='size-3.5'
+                      className='size-6 shrink-0 text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[#0F172A] sm:opacity-0 sm:group-hover:opacity-[0.85]'
+                      iconClassName='size-[15.5px]'
                     />
                   </span>
                 </div>
@@ -1191,7 +1205,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
 
               {/* Middle: Standard Price Columns (Mobile: 2x2 with labels & subtle card background) */}
               {isMiniMaxTable ? (
-                <div className='col-span-12 grid grid-cols-2 gap-2 sm:grid-cols-4 md:col-span-8'>
+                <div className='col-span-2 grid grid-cols-2 gap-x-2.5 gap-y-3 md:contents'>
                   <PriceColumn
                     primary={inputPrice.primary}
                     official={inputPrice.official}
@@ -1238,8 +1252,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               {/* Right: Savings (Desktop only, mobile rendered in card header) */}
               <div
                 className={cn(
-                  'col-span-12 hidden md:flex items-center justify-center',
-                  isMiniMaxTable ? 'md:col-span-1' : 'md:col-span-2'
+                  'hidden items-center justify-center md:flex',
+                  !isMiniMaxTable && 'col-span-2'
                 )}
               >
                 {effectiveSavings != null ? (

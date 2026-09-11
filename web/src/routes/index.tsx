@@ -18,8 +18,16 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { createFileRoute } from '@tanstack/react-router'
 
-import { Home } from '@/features/home'
+import { Pricing } from '@/features/pricing'
+import {
+  ensurePricingAuth,
+  pricingSearchSchema,
+} from '@/features/pricing/search-schema'
 
 export const Route = createFileRoute('/')({
-  component: Home,
+  validateSearch: pricingSearchSchema,
+  beforeLoad: async ({ location }) => {
+    await ensurePricingAuth(location.href)
+  },
+  component: Pricing,
 })

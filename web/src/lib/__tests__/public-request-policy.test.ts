@@ -32,6 +32,12 @@ test('global API clients do not force preflight-only headers', () => {
   }
 })
 
+test('root route renders the public pricing page', () => {
+  const source = read('../../routes/index.tsx')
+  assert.match(source, /from '@\/features\/pricing'/)
+  assert.match(source, /component:\s*Pricing/)
+})
+
 test('public startup reads use the public request policy', () => {
   const httpClient = read('../http-client.ts')
   assert.match(httpClient, /PUBLIC_API_REQUEST_CONFIG/)
