@@ -113,7 +113,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               }
             }}
             className={cn(
-              'group relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#E2E8F0]/90 p-6 text-left shadow-[0_1px_3px_rgba(15,23,42,0.03)] transition-all duration-200',
+              'group relative flex w-full flex-col justify-start overflow-hidden rounded-2xl border border-[#E2E8F0]/90 p-6 text-left shadow-[0_1px_3px_rgba(15,23,42,0.03)] transition-all duration-200',
               '[background:radial-gradient(circle_at_95%_5%,rgba(255,59,128,0.04)_0%,transparent_60%),#fff]',
               'hover:-translate-y-px hover:border-[#CBD5E1] hover:shadow-[0_6px_18px_rgba(15,23,42,0.06)] cursor-pointer',
               'dark:border-border dark:bg-card dark:[background:unset]'
@@ -195,13 +195,13 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               </div>
 
               {/* Row 4: Tagline */}
-              <p className='mb-4 text-[13px] leading-[1.6] font-normal text-[#334155] dark:text-muted-foreground'>
+              <p className='text-[13px] leading-[1.6] font-normal text-[#334155] dark:text-muted-foreground'>
                 {t(tagline.key, tagline.defaultText)}
               </p>
             </div>
 
             {/* Middle Section: Hero Price & Rate Breakdown */}
-            <div className='mt-1'>
+            <div className='mt-4'>
               {/* Hero Starting Price */}
               <div className='flex items-baseline justify-between border-t border-[#E2E8F0] pt-3'>
                 <span className='text-[12px] font-semibold uppercase tracking-[0.05em] text-[#64748B]'>
@@ -329,7 +329,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                 </div>
               )}
               {!isUpscale && !isDurationBased && (
-                <div className='rounded-xl border border-border/70 bg-muted/20 overflow-hidden text-xs shadow-2xs'>
+                <div className='mt-4 overflow-hidden rounded-xl border border-[#E2E8F0] bg-white text-xs shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
                   <div className='grid grid-cols-12 bg-muted/40 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground'>
                     <div className='col-span-4'>{t('Resolution')}</div>
                     <div className='col-span-4 text-right'>{t('Without Video Input')}</div>
