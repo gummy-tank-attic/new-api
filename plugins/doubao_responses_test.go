@@ -33,7 +33,7 @@ func TestDoubaoResponsesProtocol(t *testing.T) {
 				"resolution": "1080p",
 			},
 		},
-		wantUsageKeys:  []string{"resolution", "seconds", "tokens", "video_input"},
+		wantUsageKeys:  []string{"resolution", "tokens", "video_input"},
 		wantVendorName: "doubao",
 	})
 }
@@ -50,17 +50,17 @@ func TestDoubaoCompletionUsageFacts(t *testing.T) {
 		want map[string]any
 	}{
 		{
-			name: "ark succeeded overlays tokens resolution seconds",
+			name: "ark succeeded overlays tokens resolution",
 			body: map[string]any{
 				"status":     "succeeded",
 				"duration":   5,
 				"resolution": "720p",
 				"usage":      map[string]any{"completion_tokens": 102880, "total_tokens": 102880},
 			},
-			want: map[string]any{"tokens": float64(102880), "resolution": "720p", "seconds": float64(5)},
+			want: map[string]any{"tokens": float64(102880), "resolution": "720p"},
 		},
 		{
-			name: "tokease completed overlays duration",
+			name: "tokease completed does not overlay on factory",
 			body: map[string]any{
 				"status":     "completed",
 				"duration":   5,
@@ -68,7 +68,7 @@ func TestDoubaoCompletionUsageFacts(t *testing.T) {
 				"usage":      map[string]any{"completion_tokens": 102880},
 				"content":    map[string]any{"video_url": "https://example.com/upscale.mp4"},
 			},
-			want: map[string]any{"tokens": float64(102880), "resolution": "720p", "seconds": float64(5)},
+			want: map[string]any{},
 		},
 		{
 			name: "in progress does not overlay",

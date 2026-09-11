@@ -7,7 +7,7 @@ export const meta = {
     en: "Volcengine Doubao Seedance video generation (text-to-video, image-to-video, and video-to-video)",
     zh: "火山引擎豆包 Seedance 视频生成（文生视频、图生视频、视频生视频）",
   },
-  version: "1.0.4",
+  version: "1.0.2",
   author: { name: "QuantumNous" },
   channelTypes: [54, 45], // VolcEngine-type channels serve Ark video models with the same wire format
   models: [
@@ -19,12 +19,6 @@ export const meta = {
     "doubao-seedance-2-0-fast-260128",
     "doubao-seedance-2-0-mini-260615",
     "doubao-seedance-2-5-260628",
-    "seedance2.5",
-    "Seedance 2.0",
-    "Seedance2.0-4k",
-    "seedance2.0-fast",
-    "seedance2.0-mini",
-    "seedance-2.5-upscale",
   ],
   fetchMode: "per_task",
   usageSchema: {
@@ -51,24 +45,16 @@ export const meta = {
       enumLabels: { none: { en: "No reference video", zh: "无参考视频" }, video: { en: "With reference video", zh: "有参考视频" } },
       description: { en: "Reference video input", zh: "参考视频输入" },
     },
-    seconds: {
-      type: "number",
-      unit: "second",
-      description: {
-        en: "Billed video duration in seconds (estimated at submit, actual on completion).",
-        zh: "计费视频时长，单位秒（提交时预估，完成后按实际值）。",
-      },
-    },
   },
   // Official Ark formula tokens = (input + output seconds) × W × H × 24 / 1024,
   // 16:9 max-pixel sizes, cross-checked against Volcengine price examples.
   usageExamples: [
-    { label: "480p · 5s", facts: { tokens: 48038, resolution: "480p", video_input: "none", seconds: 5 } },
-    { label: "720p · 5s", facts: { tokens: 108000, resolution: "720p", video_input: "none", seconds: 5 } },
-    { label: "1080p · 5s", facts: { tokens: 243000, resolution: "1080p", video_input: "none", seconds: 5 } },
-    { label: "4k · 5s", facts: { tokens: 972000, resolution: "4k", video_input: "none", seconds: 5 } },
-    { label: "720p · 10s", facts: { tokens: 216000, resolution: "720p", video_input: "none", seconds: 10 } },
-    { label: "720p · 5s (+4s 输入视频)", facts: { tokens: 194400, resolution: "720p", video_input: "video", seconds: 5 } },
+    { label: "480p · 5s", facts: { tokens: 48038, resolution: "480p", video_input: "none" } },
+    { label: "720p · 5s", facts: { tokens: 108000, resolution: "720p", video_input: "none" } },
+    { label: "1080p · 5s", facts: { tokens: 243000, resolution: "1080p", video_input: "none" } },
+    { label: "4k · 5s", facts: { tokens: 972000, resolution: "4k", video_input: "none" } },
+    { label: "720p · 10s", facts: { tokens: 216000, resolution: "720p", video_input: "none" } },
+    { label: "720p · 5s (+4s 输入视频)", facts: { tokens: 194400, resolution: "720p", video_input: "video" } },
   ],
   routes: [
     { method: "POST", path: "/doubao/api/v3/contents/generations/tasks", type: "submit", decode: "createTask", render: "taskCreated" },
@@ -312,7 +298,6 @@ export function extractUsage(ctx) {
     tokens: estimateTokens(seconds, resolution),
     resolution: resolution,
     video_input: hasVideo(metadata.content) ? "video" : "none",
-    seconds: seconds,
   };
 }
 
@@ -326,8 +311,8 @@ export function buildQueryRequest(ctx) {
 
 export function parseTaskResult(ctx, body) {
   if (body.status === "pending" || body.status === "queued") return { status: "QUEUED", progress: "10%" };
-  if (body.status === "processing" || body.status === "running" || body.status === "in_progress") return { status: "IN_PROGRESS", progress: "50%" };
-  if (body.status === "succeeded" || body.status === "completed") {
+  if (body.status === "processing" || body.status === "running") return { status: "IN_PROGRESS", progress: "50%" };
+  if (body.status === "succeeded") {
     const result = { status: "SUCCESS", progress: "100%", url: body.content && body.content.video_url ? body.content.video_url : "" };
     const usage = body.usage || {};
     const completionTokens = Number(usage.completion_tokens || 0);
@@ -367,9 +352,7 @@ export function buildContentRequest(ctx) {
 }
 
 export function extractUsageOnComplete(task, taskResult, body) {
-  if (!body) return {};
-  const status = trimmed(body.status).toLowerCase();
-  if (status !== "succeeded" && status !== "completed") return {};
+  if (!body || body.status !== "succeeded") return {};
   const facts = {};
   const usage = body.usage || {};
   let tokens = Number(usage.completion_tokens);
@@ -378,9 +361,6 @@ export function extractUsageOnComplete(task, taskResult, body) {
   const content = body.content || {};
   const resolution = trimmed(content.resolution || body.resolution).toLowerCase();
   if (["480p", "720p", "1080p", "4k"].includes(resolution)) facts.resolution = resolution;
-  let seconds = Number(body.duration);
-  if (!Number.isFinite(seconds) || seconds <= 0) seconds = Number(content.duration);
-  if (Number.isFinite(seconds) && seconds > 0) facts.seconds = Math.min(seconds, 3600);
   return facts;
 }
 
