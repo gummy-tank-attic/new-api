@@ -186,17 +186,17 @@ function PriceColumn(props: {
       )}
     >
       <div className='flex items-baseline justify-center gap-1'>
-        <span className='text-foreground text-[15px] font-semibold tabular-nums tracking-tight sm:text-[15.5px]'>
+        <span className='text-foreground text-[15.5px] font-semibold tabular-nums tracking-tight sm:text-[16px]'>
           {stripTrailingZeros(props.primary)}
         </span>
         {props.unit && (
-          <span className='text-muted-foreground/75 text-[11px] font-normal'>
+          <span className='text-muted-foreground/75 text-[11.5px] font-normal'>
             {props.unit}
           </span>
         )}
       </div>
       {showOfficial && props.official && (
-        <span className='text-muted-foreground/50 decoration-muted-foreground/35 mt-0.5 text-[11.5px] font-normal tabular-nums line-through'>
+        <span className='text-muted-foreground/50 decoration-muted-foreground/35 mt-0.5 text-[12px] sm:text-[12.5px] font-normal tabular-nums line-through'>
           {stripTrailingZeros(props.official)}
         </span>
       )}
@@ -209,7 +209,7 @@ function SavingsBadge({ savings }: { savings: number | null }) {
   return (
     <span
       translate='no'
-      className='notranslate inline-flex items-center justify-center rounded-full bg-rose-500 px-2.5 pt-[3px] pb-[2px] text-xs font-bold tracking-wide whitespace-nowrap text-white tabular-nums shadow-xs leading-none'
+      className='notranslate inline-flex items-center justify-center rounded-full bg-rose-500 min-w-[4.75rem] w-[4.75rem] h-[23px] text-xs font-bold tracking-wide whitespace-nowrap text-white tabular-nums shadow-xs leading-none text-center'
     >
       {savings}% OFF
     </span>
@@ -238,8 +238,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
   const isMiniMaxTable = useMemo(() => {
     return props.models.some((m) => {
       const name = (m.model_name || '').toLowerCase()
-      const owner = (m.owner_by || '').toLowerCase()
-      return name.startsWith('minimax') || owner.includes('minimax')
+      const vendor = (m.vendor_name || '').toLowerCase()
+      return name.startsWith('minimax') || vendor.includes('minimax')
     })
   }, [props.models])
 
@@ -259,67 +259,73 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
         <div className={isMiniMaxTable ? 'col-span-3' : 'col-span-4'}>
           {t('Model', '模型名称')}
         </div>
-        {isGenerationTable ? (
-          <div
-            className={
-              isImageTable
-                ? 'col-span-9'
-                : isMiniMaxTable
-                  ? 'col-span-8 text-center'
-                  : 'col-span-6 text-center'
+        {(() => {
+          if (isGenerationTable) {
+            let genColClass = 'col-span-6 text-center'
+            if (isImageTable) {
+              genColClass = 'col-span-9'
+            } else if (isMiniMaxTable) {
+              genColClass = 'col-span-8 text-center'
             }
-          >
-            {t('Generation Mode & Pricing', '生成模式与计费价格')}
-          </div>
-        ) : isMiniMaxTable ? (
-          <>
-            <div className='col-span-2 text-center'>
-              {t('Input price')}
-              <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
-                / {unitHint}
-              </span>
-            </div>
-            <div className='col-span-2 text-center'>
-              {t('Output price')}
-              <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
-                / {unitHint}
-              </span>
-            </div>
-            <div className='col-span-2 text-center'>
-              {t('Cache Read', '缓存读取')}
-              <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
-                / {unitHint}
-              </span>
-            </div>
-            <div className='col-span-2 text-center'>
-              {t('Cache Write', '缓存写入')}
-              <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
-                / {unitHint}
-              </span>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className='col-span-2 text-center'>
-              {t('Input price')}
-              <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
-                / {unitHint}
-              </span>
-            </div>
-            <div className='col-span-2 text-center'>
-              {t('Output price')}
-              <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
-                / {unitHint}
-              </span>
-            </div>
-            <div className='col-span-2 text-center'>
-              {t('Cache & Details', '缓存与扩展')}
-              <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
-                / {unitHint}
-              </span>
-            </div>
-          </>
-        )}
+            return (
+              <div className={genColClass}>
+                {t('Generation Mode & Pricing', '生成模式与计费价格')}
+              </div>
+            )
+          }
+          if (isMiniMaxTable) {
+            return (
+              <>
+                <div className='col-span-2 text-center'>
+                  {t('Input price')}
+                  <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                    / {unitHint}
+                  </span>
+                </div>
+                <div className='col-span-2 text-center'>
+                  {t('Output price')}
+                  <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                    / {unitHint}
+                  </span>
+                </div>
+                <div className='col-span-2 text-center'>
+                  {t('Cache Read', '缓存读取')}
+                  <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                    / {unitHint}
+                  </span>
+                </div>
+                <div className='col-span-2 text-center'>
+                  {t('Cache Write', '缓存写入')}
+                  <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                    / {unitHint}
+                  </span>
+                </div>
+              </>
+            )
+          }
+          return (
+            <>
+              <div className='col-span-2 text-center'>
+                {t('Input price')}
+                <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                  / {unitHint}
+                </span>
+              </div>
+              <div className='col-span-2 text-center'>
+                {t('Output price')}
+                <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                  / {unitHint}
+                </span>
+              </div>
+              <div className='col-span-2 text-center'>
+                {t('Cache & Details', '缓存与扩展')}
+                <span className='text-muted-foreground/60 ml-1 font-sans text-[11px] font-normal'>
+                  / {unitHint}
+                </span>
+              </div>
+            </>
+          )
+        })()}
         {!isImageTable && (
           <div
             className={cn(
@@ -359,8 +365,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     value={model.model_name}
                     size='icon'
                     variant='ghost'
-                    className='text-muted-foreground/40 hover:text-foreground size-5 shrink-0 transition-opacity duration-150 sm:opacity-0 group-hover:opacity-100'
-                    iconClassName='size-3'
+                    className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
+                    iconClassName='size-3.5'
                   />
                 </div>
                 <div className='col-span-12 min-w-0 md:col-span-9'>
@@ -416,8 +422,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                       value={model.model_name}
                       size='icon'
                       variant='ghost'
-                      className='text-muted-foreground/40 hover:text-foreground size-5'
-                      iconClassName='size-3'
+                      className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
+                      iconClassName='size-3.5'
                     />
                   </span>
                 </div>
@@ -767,8 +773,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                         value={model.model_name}
                         size='icon'
                         variant='ghost'
-                        className='text-muted-foreground/40 hover:text-foreground size-5 shrink-0 transition-opacity duration-150 sm:opacity-0 group-hover:opacity-100'
-                        iconClassName='size-3'
+                        className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
+                        iconClassName='size-3.5'
                       />
                     </span>
                     <span
@@ -1105,8 +1111,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     value={model.model_name}
                     size='icon'
                     variant='ghost'
-                    className='text-muted-foreground/40 hover:text-foreground size-5 transition-opacity duration-150 sm:opacity-0 group-hover:opacity-100'
-                    iconClassName='size-3'
+                    className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
+                    iconClassName='size-3.5'
                   />
                 </span>
               </div>

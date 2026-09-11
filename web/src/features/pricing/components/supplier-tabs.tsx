@@ -57,8 +57,8 @@ export function SupplierTabs(props: SupplierTabsProps) {
       role='tablist'
       aria-label={t('Vendors')}
       className={cn(
-        // Surface: Apple / Linear segmented control surface
-        'bg-muted/40 dark:bg-card/60 flex w-full flex-wrap gap-1 rounded-2xl border border-border/70 p-1 shadow-xs',
+        // Surface: Apple / Linear segmented control surface with mobile horizontal scroll track
+        'bg-muted/40 dark:bg-card/60 flex w-full flex-nowrap overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap gap-1 rounded-2xl border border-border/70 p-1 shadow-xs',
         props.className
       )}
     >
@@ -74,8 +74,8 @@ export function SupplierTabs(props: SupplierTabsProps) {
             aria-selected={active}
             onClick={() => props.onChange(option.value)}
             className={cn(
-              // UI 14px — Apple / Linear segmented item
-              'flex-1 min-w-[7rem] sm:min-w-0 sm:basis-0 inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150',
+              // UI 14px — Apple / Linear segmented item (touch-friendly on mobile, auto-flex on desktop)
+              'shrink-0 sm:shrink sm:flex-1 sm:min-w-0 sm:basis-0 inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-all duration-150',
               active
                 ? 'bg-background text-foreground font-semibold shadow-xs border border-border/70'
                 : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
