@@ -225,6 +225,7 @@ export function getVideoModelCapabilityTag(modelName: string): {
 
 export function getModelSpecificDiscountPercent(modelName: string): number {
   const name = modelName.toLowerCase()
+  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) return 25
   if (name.includes('minimax')) return 0
   if (name.includes('mini')) return 50
   if (name.includes('upscale') || name.includes('chaofen')) return 30
@@ -338,7 +339,10 @@ export function getDefaultVideoModelTierGroups(modelName: string): VideoTierGrou
       },
     ]
   }
-  if (name.includes('mini')) {
+  if (name.includes('minimax') || name.includes('hailuo') || name.includes('h3')) {
+    return []
+  }
+  if (name.includes('mini') && !name.includes('minimax')) {
     return [
       {
         title: '480p · 720p',
@@ -399,6 +403,9 @@ export function getDefaultVideoModelTierGroups(modelName: string): VideoTierGrou
 }
 
 export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
+  if (isDurationBasedVideoModel(model)) {
+    return []
+  }
   const allowedResolutions = getModelSupportedResolutions(model)
   const tiers = getTaskMatrixDisplayTiers(model.billing_expr, model.billing_usage_schema)
   if (!tiers || tiers.length === 0) {
@@ -459,7 +466,7 @@ export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
       officialVideo = 3.2258
       billedNone = item.none || 4.34
       billedVideo = item.video || 2.581
-    } else if (modelName.includes('mini')) {
+    } else if (modelName.includes('mini') && !modelName.includes('minimax')) {
       title = '480p · 720p'
       resLabel = '480p · 720p'
       officialNone = 3.3724
@@ -668,9 +675,10 @@ export function getVideoModelHeroPrice(
     const minTier = durationTiers.length > 0 ? durationTiers[0] : null
     const baseEst5s = minTier ? minTier.est5sPrice : 0.400
     const billed = baseEst5s * rate
+    const officialEst5s = (minTier?.officialEst5sPrice ?? 0.400) * rate
     return {
       priceText: `$${billed.toFixed(3)}`,
-      officialPriceText: null,
+      officialPriceText: isGroupMode && discountOff != null ? `$${officialEst5s.toFixed(3)}` : null,
       unitText: '/ 5秒 起',
       unitKey: 'videoPricing.unitPer5sFrom',
       isStartingPrice: true,

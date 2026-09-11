@@ -48,8 +48,10 @@ import {
   stripTrailingZeros,
 } from '../lib/price'
 import {
+  getDurationVideoTiers,
   getVideoModelTierGroups,
   isByteDanceOrVideoModel,
+  isDurationBasedVideoModel,
   isVideoUpscaleModel,
 } from '../lib/video-pricing'
 import type { PriceType, PricingModel, TokenUnit } from '../types'
@@ -387,7 +389,9 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           // Video Model Branch
           if (isByteDanceOrVideoModel(model)) {
             const isUpscale = isVideoUpscaleModel(model)
-            const tierGroups = isUpscale ? [] : getVideoModelTierGroups(model)
+            const isDurationBased = isDurationBasedVideoModel(model)
+            const tierGroups = isUpscale || isDurationBased ? [] : getVideoModelTierGroups(model)
+            const durationTiers = isDurationBased ? getDurationVideoTiers(model) : []
             const upscaleRatio =
               isGroupMode && savings != null ? (100 - savings) / 100 : 1
 
@@ -425,6 +429,53 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     isMiniMaxTable ? 'md:col-span-8' : 'md:col-span-6'
                   )}
                 >
+                  {isDurationBased && (
+                    <div className='grid grid-cols-1 gap-2.5 sm:grid-cols-2'>
+                      {durationTiers.map((dt) => {
+                        const billedSec = dt.secondPrice * priceRate
+                        const officialSec = (dt.officialSecondPrice ?? dt.secondPrice) * priceRate
+                        const billed5s = dt.est5sPrice * priceRate
+                        const official5s = (dt.officialEst5sPrice ?? dt.est5sPrice) * priceRate
+                        const showOff = isGroupMode && Math.abs(billedSec - officialSec) > 0.0001
+
+                        return (
+                          <div
+                            key={dt.resolution}
+                            className='bg-muted/20 border-border/40 flex flex-col rounded-lg border px-3 py-1.5 text-xs'
+                          >
+                            <div className='border-border/20 text-foreground mb-1 flex items-center justify-between border-b pb-1 text-[11px] font-semibold'>
+                              <span className='font-bold'>{dt.resLabel}</span>
+                              <span className='text-muted-foreground/75 font-mono text-[10.5px]'>
+                                5s 约 ${billed5s.toFixed(3)}
+                                {showOff && (
+                                  <span className='line-through ml-1 text-muted-foreground/50'>
+                                    ${official5s.toFixed(3)}
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                            <div className='flex items-center justify-between text-[11px]'>
+                              <span className='text-muted-foreground/75'>
+                                每秒单价:
+                              </span>
+                              <span className='text-foreground font-semibold tabular-nums font-mono'>
+                                ${billedSec >= 0.01 && !Number.isInteger(billedSec * 1000)
+                                  ? billedSec.toFixed(4).replace(/0$/, '')
+                                  : billedSec.toFixed(3)}/s
+                                {showOff && (
+                                  <span className='text-muted-foreground/50 ml-1.5 text-[10px] font-normal line-through'>
+                                    ${officialSec >= 0.01 && !Number.isInteger(officialSec * 1000)
+                                      ? officialSec.toFixed(4).replace(/0$/, '')
+                                      : officialSec.toFixed(3)}/s
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
                   {isUpscale && (
                     <div className='grid grid-cols-1 gap-2 sm:grid-cols-3'>
                       <PriceColumn
@@ -509,7 +560,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                       })}
                     </div>
                   )}
-                  {!isUpscale && tierGroups.length === 0 && (
+                  {!isUpscale && !isDurationBased && tierGroups.length === 0 && (
                     <div className='text-muted-foreground py-2 text-center text-sm'>
                       {t('Special billing expression')}
                     </div>

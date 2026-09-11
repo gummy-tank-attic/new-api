@@ -510,6 +510,8 @@ export const MANUAL_MODEL_SAVINGS_OFF: Record<string, number> = {
   'minimax-m3': 25,
   'minimax-m2.7': 15,
   'minimax-m2.5': 15,
+  'minimax-h3': 25,
+  'hailuo-h3': 25,
 }
 
 export function lookupModelSavingsOff(modelName: string): number | undefined {

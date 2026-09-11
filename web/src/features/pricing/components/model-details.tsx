@@ -60,7 +60,8 @@ import {
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
-import { DEFAULT_TOKEN_UNIT } from '../constants'
+import { DEFAULT_TOKEN_UNIT, lookupModelSavingsOff } from '../constants'
+import { resolveGroupSavingsOffPercent } from '../lib/group-discount'
 import { usePricingData } from '../hooks/use-pricing-data'
 import type { ParsedTaskTier } from '../lib/billing-expr'
 import {
@@ -95,10 +96,13 @@ import {
 } from '../lib/task-price-display'
 import {
   formatHumanFriendlyTierLabel,
+  getDurationVideoTiers,
+  getModelSpecificDiscountPercent,
   getModelSupportedResolutions,
   getResolutionBadgeStyle,
   getVideoModelTierGroups,
   isByteDanceOrVideoModel,
+  isDurationBasedVideoModel,
   isVideoUpscaleModel,
   parseVideoUpscaleTiers,
 } from '../lib/video-pricing'
@@ -849,6 +853,124 @@ function VideoUpscaleGroupPricingSection(props: {
   )
 }
 
+function DurationVideoModelGroupPricingSection(props: {
+  model: PricingModel
+  groupRatio: Record<string, number>
+  usableGroup: Record<string, string>
+  autoGroups: string[]
+  priceRate: number
+  availableGroups: string[]
+}) {
+  const { i18n } = useTranslation()
+  const isZh = i18n.language?.startsWith('zh') ?? true
+  const tiers = getDurationVideoTiers(props.model)
+  const modelDiscountOff =
+    lookupModelSavingsOff(props.model.model_name) ??
+    (getModelSpecificDiscountPercent(props.model.model_name) || null)
+
+  return (
+    <section className='space-y-3'>
+      <AutoGroupChain model={props.model} autoGroups={props.autoGroups} />
+      <div className='space-y-3'>
+        {props.availableGroups.map((group) => {
+          const ratio = props.groupRatio[group] || 1
+          const groupDiscount =
+            resolveGroupSavingsOffPercent(
+              getConfiguredGroupRatio(props.groupRatio || {}, group)
+            ) ?? 0
+          const effectiveDiscount =
+            modelDiscountOff ?? (groupDiscount > 0 ? groupDiscount : null)
+          const showOfficial = effectiveDiscount != null
+
+          return (
+            <div
+              key={group}
+              className='overflow-hidden rounded-xl border border-border/70 bg-card/60 shadow-2xs'
+            >
+              <div className='bg-muted/30 flex items-center justify-between gap-3 border-b border-border/50 px-3.5 py-2.5'>
+                <GroupBadge group={group} size='sm' />
+                <div className='flex items-center gap-2'>
+                  {effectiveDiscount != null && (
+                    <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
+                      {effectiveDiscount}% OFF
+                    </span>
+                  )}
+                  <span className='text-muted-foreground font-mono text-xs'>{ratio}x</span>
+                </div>
+              </div>
+              <div className='grid grid-cols-12 bg-muted/50 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground'>
+                <div className='col-span-3'>{isZh ? '分辨率' : 'Resolution'}</div>
+                <div className='col-span-3 text-right'>{isZh ? '5s 预估价格' : 'Est. 5s Price'}</div>
+                <div className='col-span-3 text-right'>{isZh ? '每秒单价' : 'Rate / sec'}</div>
+                <div className='col-span-3 text-right'>{isZh ? '优惠幅度' : 'Discount'}</div>
+              </div>
+              <div className='divide-y divide-border/40 bg-card/40'>
+                {tiers.map((tier) => {
+                  const billedEst5s = tier.est5sPrice * ratio * props.priceRate
+                  const billedSecond = tier.secondPrice * ratio * props.priceRate
+                  const officialEst5s =
+                    (tier.officialEst5sPrice ?? tier.est5sPrice) * props.priceRate
+                  const officialSecond =
+                    (tier.officialSecondPrice ?? tier.secondPrice) * props.priceRate
+
+                  return (
+                    <div
+                      key={tier.resolution}
+                      className='grid grid-cols-12 items-center px-3.5 py-2.5 transition-colors hover:bg-muted/30'
+                    >
+                      <div className='col-span-3 font-bold text-foreground text-xs sm:text-sm'>
+                        {tier.resLabel}
+                      </div>
+                      <div className='col-span-3 text-right'>
+                        <div className='font-mono font-bold text-foreground text-xs sm:text-sm tabular-nums'>
+                          ${billedEst5s.toFixed(3)}
+                        </div>
+                        {showOfficial && (
+                          <div className='text-[10px] text-muted-foreground/55 line-through font-mono'>
+                            ${officialEst5s.toFixed(3)}
+                          </div>
+                        )}
+                      </div>
+                      <div className='col-span-3 text-right'>
+                        <div className='font-mono font-bold text-foreground text-xs sm:text-sm tabular-nums'>
+                          ${billedSecond >= 0.01 && !Number.isInteger(billedSecond * 1000)
+                            ? billedSecond.toFixed(4).replace(/0$/, '')
+                            : billedSecond.toFixed(3)}/s
+                        </div>
+                        {showOfficial && (
+                          <div className='text-[10px] text-muted-foreground/55 line-through font-mono'>
+                            ${officialSecond >= 0.01 && !Number.isInteger(officialSecond * 1000)
+                              ? officialSecond.toFixed(4).replace(/0$/, '')
+                              : officialSecond.toFixed(3)}/s
+                          </div>
+                        )}
+                      </div>
+                      <div className='col-span-3 text-right'>
+                        {effectiveDiscount != null ? (
+                          <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
+                            {effectiveDiscount}% OFF
+                          </span>
+                        ) : (
+                          <span className='text-muted-foreground/40 text-xs'>-</span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className='border-t border-border/40 bg-muted/15 px-3.5 py-1.5 text-right text-[10px] text-muted-foreground/75 font-mono'>
+                {isZh
+                  ? '计费单位：/ 秒 · 支持 4~15 秒自定义时长 · 单次扣费 = 视频实际秒数 × 分辨率秒单价'
+                  : 'Unit: / second · Supports 4-15s custom duration · Charge = Duration (s) × Rate / sec'}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 function VideoModelGroupPricingSection(props: {
   model: PricingModel
   groupRatio: Record<string, number>
@@ -1311,6 +1433,18 @@ function GroupPricingSection(props: {
     if (isVideoUpscaleModel(props.model)) {
       return (
         <VideoUpscaleGroupPricingSection
+          model={props.model}
+          groupRatio={props.groupRatio}
+          usableGroup={props.usableGroup}
+          autoGroups={props.autoGroups}
+          priceRate={props.priceRate}
+          availableGroups={availableGroups}
+        />
+      )
+    }
+    if (isDurationBasedVideoModel(props.model)) {
+      return (
+        <DurationVideoModelGroupPricingSection
           model={props.model}
           groupRatio={props.groupRatio}
           usableGroup={props.usableGroup}

@@ -31,8 +31,13 @@ import {
   tryParseTaskVisualConfig,
   type TaskVisualConfig,
 } from '../lib/task-expr'
-import { parseDurationVideoTiers } from '../lib/video-pricing'
-import type { BillingUsageSchema } from '../types'
+import {
+  getModelSpecificDiscountPercent,
+  getVideoModelHeroPrice,
+  getVideoModelTierGroups,
+  parseDurationVideoTiers,
+} from '../lib/video-pricing'
+import type { BillingUsageSchema, PricingModel } from '../types'
 
 const schema: BillingUsageSchema = {
   seconds: { type: 'number', unit: 'second' },
@@ -414,5 +419,34 @@ describe('task visual pricing preview', () => {
     assert.equal(tiers[1].resolution, '2k')
     assert.equal(tiers[1].secondPrice, 0.0975)
     assert.equal(tiers[1].est5sPrice, 0.0975 * 5)
+  })
+
+  test('correctly sets MiniMax-H3 discount to 25% and generates strikethrough official starting price', () => {
+    assert.equal(getModelSpecificDiscountPercent('MiniMax-H3'), 25)
+    assert.equal(getModelSpecificDiscountPercent('hailuo-h3'), 25)
+
+    const model: PricingModel = {
+      id: 1,
+      model_name: 'MiniMax-H3',
+      vendor_name: 'MiniMax',
+      billing_expr: 'tier("768P", u("seconds") * 0.06)',
+      billing_usage_schema: {
+        seconds: { type: 'number', unit: 'second' },
+        resolution: { enum: ['768P', '2K'] },
+      },
+      quota_type: 1,
+      model_ratio: 1,
+      model_price: 0,
+      completion_ratio: 1,
+    }
+
+    const hero = getVideoModelHeroPrice(model, true, 1)
+    assert.equal(hero.priceText, '$0.300')
+    assert.equal(hero.officialPriceText, '$0.400')
+    assert.equal(hero.discountOff, 25)
+
+    // Ensure MiniMax-H3 does NOT get misclassified into Seedance 2.0 Mini token table
+    const groups = getVideoModelTierGroups(model)
+    assert.equal(groups.length, 0)
   })
 })

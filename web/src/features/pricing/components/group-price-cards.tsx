@@ -62,6 +62,7 @@ function getGroupMaxDiscount(
   const isZai =
     name.includes('z.ai') || name.includes('zhipu') || name.includes('智谱')
   const isKimi = name.includes('kimi') || name.includes('moonshot')
+  const isMiniMax = name.includes('minimax')
 
   const targetModels = models.filter((m) => {
     if (m.enable_groups?.includes(group)) return true
@@ -83,6 +84,13 @@ function getGroupMaxDiscount(
         m.vendor_name?.toLowerCase().includes('moonshot') ||
         m.vendor_name?.toLowerCase().includes('kimi') ||
         m.model_name?.toLowerCase().startsWith('kimi')
+      )
+    }
+    if (isMiniMax) {
+      return (
+        m.vendor_name?.toLowerCase().includes('minimax') ||
+        m.model_name?.toLowerCase().includes('minimax') ||
+        m.model_name?.toLowerCase().includes('hailuo')
       )
     }
     return false
