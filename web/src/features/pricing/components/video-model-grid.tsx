@@ -140,9 +140,9 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                   <div className='bg-primary/10 text-primary border-primary/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border shadow-xs'>
                     {vendorIcon}
                   </div>
-                  <div className='inline-flex items-center gap-1.5 min-w-0'>
+                  <div className='inline-flex items-center gap-1.5 min-w-0 flex-wrap'>
                     <h3
-                      className='text-foreground text-base font-semibold tracking-tight truncate'
+                      className='text-foreground text-base font-semibold tracking-tight break-all'
                       title={model.model_name}
                     >
                       {model.model_name}

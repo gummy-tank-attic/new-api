@@ -356,7 +356,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-3'>
                   <button
                     type='button'
-                    className='text-foreground group-hover:text-primary min-w-0 truncate rounded-sm text-left font-sans text-[15px] font-medium antialiased transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current sm:text-[15.5px] sm:font-semibold'
+                    className='text-foreground group-hover:text-primary min-w-0 break-all rounded-sm text-left font-sans text-[15px] font-medium antialiased transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current sm:text-[15.5px] sm:font-semibold'
                     onClick={() => props.onModelClick?.(model.model_name)}
                   >
                     {model.model_name}
@@ -414,7 +414,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     isMiniMaxTable ? 'md:col-span-3' : 'md:col-span-4'
                   )}
                 >
-                  <span className='text-foreground group-hover:text-primary truncate font-sans text-[15px] font-medium antialiased transition-colors sm:text-[15.5px] sm:font-semibold'>
+                  <span className='text-foreground group-hover:text-primary break-all font-sans text-[15px] font-medium antialiased transition-colors sm:text-[15.5px] sm:font-semibold'>
                     {model.model_name}
                   </span>
                   <span onClick={(e) => e.stopPropagation()}>
@@ -1102,7 +1102,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               >
                 <span
                   translate='no'
-                  className='notranslate text-foreground group-hover:text-primary truncate font-sans text-[15px] font-semibold antialiased transition-colors sm:text-[15.5px]'
+                  className='notranslate text-foreground group-hover:text-primary break-all font-sans text-[15px] font-semibold antialiased transition-colors sm:text-[15.5px]'
                 >
                   {model.model_name}
                 </span>
