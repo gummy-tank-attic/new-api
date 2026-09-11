@@ -165,7 +165,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                 {discountOff != null && isGroupMode && (
                   <span
                     translate='no'
-                    className='notranslate inline-flex items-center justify-center rounded-full bg-rose-500 min-w-[4.75rem] w-[4.75rem] h-[23px] text-xs font-bold tracking-wide text-white shadow-xs tabular-nums shrink-0 leading-none text-center'
+                    className='notranslate inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#F43F5E] to-[#E11D48] min-w-[4.75rem] w-[4.75rem] h-[23px] text-xs font-bold tracking-wide text-white shadow-[0_1px_2px_rgba(225,29,72,0.22),inset_0_1px_0_rgba(255,255,255,0.25)] tabular-nums shrink-0 leading-none text-center'
                   >
                     {discountOff}% OFF
                   </span>
@@ -309,7 +309,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                 <div className='rounded-xl border border-border/70 bg-muted/20 overflow-hidden text-xs shadow-2xs'>
                   <div className='grid grid-cols-12 bg-muted/50 border-b border-border/50 px-3 py-2 text-[11px] font-semibold text-muted-foreground'>
                     <div className='col-span-4'>{t('Resolution', '分辨率')}</div>
-                    <div className='col-span-4 text-right'>{t('videoPricing.est5s', '5s 预估价格')}</div>
+                    <div className='col-span-4 text-center'>{t('videoPricing.est5s', '5s 预估价格')}</div>
                     <div className='col-span-4 text-right'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
                   </div>
                   <div className='divide-y divide-border/40 bg-card/60'>
@@ -331,7 +331,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                               {tier.resLabel}
                             </div>
                           </div>
-                          <div className='col-span-4 text-right'>
+                          <div className='col-span-4 text-center'>
                             <div className='font-bold text-foreground text-xs sm:text-[13px] tabular-nums leading-tight'>
                               ${billedEst5s.toFixed(3)}
                             </div>
@@ -343,11 +343,13 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                           </div>
                           <div className='col-span-4 text-right'>
                             <div className='font-bold text-foreground text-xs sm:text-[13px] tabular-nums leading-tight'>
-                              ${billedSecond >= 0.01 && !Number.isInteger(billedSecond * 1000) ? billedSecond.toFixed(4).replace(/0$/, '') : billedSecond.toFixed(3)}/s
+                              ${billedSecond >= 0.01 && !Number.isInteger(billedSecond * 1000) ? billedSecond.toFixed(4).replace(/0$/, '') : billedSecond.toFixed(3)}
+                              <span className='text-muted-foreground/75 text-[11px] font-normal ml-0.5'>/s</span>
                             </div>
                             {showOfficial && (
                               <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
-                                ${officialSecond >= 0.01 && !Number.isInteger(officialSecond * 1000) ? officialSecond.toFixed(4).replace(/0$/, '') : officialSecond.toFixed(3)}/s
+                                ${officialSecond >= 0.01 && !Number.isInteger(officialSecond * 1000) ? officialSecond.toFixed(4).replace(/0$/, '') : officialSecond.toFixed(3)}
+                                <span className='text-muted-foreground/50 text-[10px] font-normal ml-0.5'>/s</span>
                               </div>
                             )}
                           </div>

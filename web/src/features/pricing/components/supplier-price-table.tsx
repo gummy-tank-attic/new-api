@@ -158,6 +158,7 @@ function PriceColumn(props: {
   primary: string
   official?: string | null
   unit?: string
+  label?: string
   className?: string
   primaryClassName?: string
 }) {
@@ -165,10 +166,15 @@ function PriceColumn(props: {
     return (
       <div
         className={cn(
-          'flex flex-col items-center justify-center text-center py-1',
+          'flex flex-col items-center justify-center text-center py-1.5 px-2 rounded-lg bg-muted/20 border border-border/30 md:bg-transparent md:border-0 md:p-0 md:py-1',
           props.className
         )}
       >
+        {props.label && (
+          <span className='text-muted-foreground/70 text-[11px] font-medium mb-0.5 md:hidden'>
+            {props.label}
+          </span>
+        )}
         <span className='text-muted-foreground/30 text-sm font-light'>—</span>
       </div>
     )
@@ -182,10 +188,15 @@ function PriceColumn(props: {
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center text-center py-1',
+        'flex flex-col items-center justify-center text-center py-1.5 px-2 rounded-lg bg-muted/25 border border-border/40 md:bg-transparent md:border-0 md:p-0 md:py-1',
         props.className
       )}
     >
+      {props.label && (
+        <span className='text-muted-foreground/75 text-[11px] font-medium mb-0.5 md:hidden'>
+          {props.label}
+        </span>
+      )}
       <div className='flex items-baseline justify-center gap-1'>
         <span className='text-foreground text-[15.5px] font-semibold tabular-nums tracking-tight sm:text-[16px]'>
           {stripTrailingZeros(props.primary)}
@@ -205,12 +216,15 @@ function PriceColumn(props: {
   )
 }
 
-function SavingsBadge({ savings }: { savings: number | null }) {
+function SavingsBadge({ savings, className }: { savings: number | null; className?: string }) {
   if (savings == null) return null
   return (
     <span
       translate='no'
-      className='notranslate inline-flex items-center justify-center rounded-full bg-rose-500 min-w-[4.75rem] w-[4.75rem] h-[23px] text-xs font-bold tracking-wide whitespace-nowrap text-white tabular-nums shadow-xs leading-none text-center'
+      className={cn(
+        'notranslate inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#F43F5E] to-[#E11D48] min-w-[4.75rem] w-[4.75rem] h-[23px] text-xs font-bold tracking-wide whitespace-nowrap text-white tabular-nums shadow-[0_1px_2px_rgba(225,29,72,0.22),inset_0_1px_0_rgba(255,255,255,0.25)] leading-none text-center',
+        className
+      )}
     >
       {savings}% OFF
     </span>
@@ -413,30 +427,37 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 onClick={() => props.onModelClick?.(model.model_name)}
                 className='group relative grid cursor-pointer grid-cols-1 items-center gap-4 rounded-xl border border-border bg-card px-5 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50/40 hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:border-border/80 dark:hover:border-border dark:hover:bg-accent/20 md:grid-cols-12'
               >
-                {/* Left: Model Identity (Only model name + copy, no icon) */}
+                {/* Left: Model Identity (Mobile: row header with name left and SavingsBadge right) */}
                 <div
                   className={cn(
-                    'col-span-12 flex min-w-0 items-center gap-2.5',
+                    'col-span-12 flex min-w-0 items-center justify-between gap-2.5',
                     isMiniMaxTable ? 'md:col-span-3' : 'md:col-span-4'
                   )}
                 >
-                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 dark:border-rose-800/60 dark:bg-rose-950/40'>
-                    {(model.vendor_icon || model.icon)
-                      ? getLobeIcon(model.vendor_icon || model.icon, 15)
-                      : <MessageSquare className='size-3.5 text-rose-500' />}
+                  <div className='flex min-w-0 items-center gap-2.5'>
+                    <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 dark:border-rose-800/60 dark:bg-rose-950/40'>
+                      {(model.vendor_icon || model.icon)
+                        ? getLobeIcon(model.vendor_icon || model.icon, 15)
+                        : <MessageSquare className='size-3.5 text-rose-500' />}
+                    </div>
+                    <span className='text-foreground group-hover:text-primary break-all font-sans text-[15px] font-medium antialiased transition-colors sm:text-[15.5px] sm:font-semibold'>
+                      {model.model_name}
+                    </span>
+                    <span onClick={(e) => e.stopPropagation()}>
+                      <CopyButton
+                        value={model.model_name}
+                        size='icon'
+                        variant='ghost'
+                        className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
+                        iconClassName='size-3.5'
+                      />
+                    </span>
                   </div>
-                  <span className='text-foreground group-hover:text-primary break-all font-sans text-[15px] font-medium antialiased transition-colors sm:text-[15.5px] sm:font-semibold'>
-                    {model.model_name}
-                  </span>
-                  <span onClick={(e) => e.stopPropagation()}>
-                    <CopyButton
-                      value={model.model_name}
-                      size='icon'
-                      variant='ghost'
-                      className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
-                      iconClassName='size-3.5'
-                    />
-                  </span>
+                  {effectiveSavings != null && (
+                    <div className='shrink-0 md:hidden'>
+                      <SavingsBadge savings={effectiveSavings} />
+                    </div>
+                  )}
                 </div>
 
                 {/* Center: Video Mode Pricing */}
@@ -587,7 +608,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 {/* Right: Savings */}
                 <div
                   className={cn(
-                    'col-span-12 flex items-center justify-center',
+                    'col-span-12 hidden md:flex items-center justify-center',
                     isMiniMaxTable ? 'md:col-span-1' : 'md:col-span-2'
                   )}
                 >
@@ -1104,54 +1125,65 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               onClick={() => props.onModelClick?.(model.model_name)}
               className='group relative grid cursor-pointer grid-cols-1 items-center gap-4 rounded-xl border border-border bg-card px-5 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-150 hover:border-foreground/15 hover:bg-muted/30 hover:shadow-xs md:grid-cols-12'
             >
-              {/* Left: Model Identity: Only model name + copy */}
+              {/* Left: Model Identity (Mobile: row header with name left and SavingsBadge right) */}
               <div
                 className={cn(
-                  'col-span-12 flex min-w-0 items-center gap-2.5',
+                  'col-span-12 flex min-w-0 items-center justify-between gap-2.5',
                   isMiniMaxTable ? 'md:col-span-3' : 'md:col-span-4'
                 )}
               >
-                <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 dark:border-rose-800/60 dark:bg-rose-950/40'>
-                  {(model.vendor_icon || model.icon)
-                    ? getLobeIcon(model.vendor_icon || model.icon, 15)
-                    : <MessageSquare className='size-3.5 text-rose-500' />}
+                <div className='flex min-w-0 items-center gap-2.5'>
+                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 dark:border-rose-800/60 dark:bg-rose-950/40'>
+                    {(model.vendor_icon || model.icon)
+                      ? getLobeIcon(model.vendor_icon || model.icon, 15)
+                      : <MessageSquare className='size-3.5 text-rose-500' />}
+                  </div>
+                  <span
+                    translate='no'
+                    className='notranslate text-foreground group-hover:text-primary break-all font-sans text-[15px] font-semibold antialiased transition-colors sm:text-[15.5px]'
+                  >
+                    {model.model_name}
+                  </span>
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <CopyButton
+                      value={model.model_name}
+                      size='icon'
+                      variant='ghost'
+                      className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
+                      iconClassName='size-3.5'
+                    />
+                  </span>
                 </div>
-                <span
-                  translate='no'
-                  className='notranslate text-foreground group-hover:text-primary break-all font-sans text-[15px] font-semibold antialiased transition-colors sm:text-[15.5px]'
-                >
-                  {model.model_name}
-                </span>
-                <span onClick={(e) => e.stopPropagation()}>
-                  <CopyButton
-                    value={model.model_name}
-                    size='icon'
-                    variant='ghost'
-                    className='text-muted-foreground/50 hover:text-foreground size-6 shrink-0 transition-opacity duration-150 opacity-70 sm:opacity-0 group-hover:opacity-100'
-                    iconClassName='size-3.5'
-                  />
-                </span>
+                {effectiveSavings != null && (
+                  <div className='shrink-0 md:hidden'>
+                    <SavingsBadge savings={effectiveSavings} />
+                  </div>
+                )}
               </div>
 
-              {/* Middle: Standard Price Columns */}
+              {/* Middle: Standard Price Columns (Mobile: 2x2 with labels & subtle card background) */}
               {isMiniMaxTable ? (
                 <div className='col-span-12 grid grid-cols-2 gap-2 sm:grid-cols-4 md:col-span-8'>
                   <PriceColumn
                     primary={inputPrice.primary}
                     official={inputPrice.official}
                     unit={!isToken ? '/ 次' : undefined}
+                    label={`${t('Input price')} (/${unitHint})`}
                   />
                   <PriceColumn
                     primary={outputPrice.primary}
                     official={outputPrice.official}
+                    label={`${t('Output price')} (/${unitHint})`}
                   />
                   <PriceColumn
                     primary={cacheReadPrice.primary}
                     official={cacheReadPrice.official}
+                    label={`${t('Cache Read', '缓存读取')} (/${unitHint})`}
                   />
                   <PriceColumn
                     primary={cacheWritePrice.primary}
                     official={cacheWritePrice.official}
+                    label={`${t('Cache Write', '缓存写入')} (/${unitHint})`}
                   />
                 </div>
               ) : (
@@ -1160,22 +1192,25 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     primary={inputPrice.primary}
                     official={inputPrice.official}
                     unit={!isToken ? '/ 次' : undefined}
+                    label={`${t('Input price')} (/${unitHint})`}
                   />
                   <PriceColumn
                     primary={outputPrice.primary}
                     official={outputPrice.official}
+                    label={`${t('Output price')} (/${unitHint})`}
                   />
                   <PriceColumn
                     primary={cacheReadPrice.primary}
                     official={cacheReadPrice.official}
+                    label={`${t('Cache & Details', '缓存与扩展')} (/${unitHint})`}
                   />
                 </div>
               )}
 
-              {/* Right: Savings */}
+              {/* Right: Savings (Desktop only, mobile rendered in card header) */}
               <div
                 className={cn(
-                  'col-span-12 flex items-center justify-center',
+                  'col-span-12 hidden md:flex items-center justify-center',
                   isMiniMaxTable ? 'md:col-span-1' : 'md:col-span-2'
                 )}
               >
