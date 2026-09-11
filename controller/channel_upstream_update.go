@@ -416,7 +416,7 @@ func fetchChannelUpstreamModelIDs(channel *model.Channel) ([]string, error) {
 		} else {
 			url = fmt.Sprintf("%s/api/paas/v4/models", baseURL)
 		}
-	case constant.ChannelTypeVolcEngine:
+	case constant.ChannelTypeVolcEngine, constant.ChannelTypeDoubaoVideo:
 		// 火山方舟 OpenAI 兼容 API 根路径是 /api/v3（chat/embeddings 均为
 		// {base}/api/v3/...，见 relay/channel/volcengine 的 GetRequestURL），
 		// 不存在 /v1/models 端点。原拼接会导致「获取模型列表」固定 404 失败。
