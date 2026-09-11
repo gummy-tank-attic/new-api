@@ -493,7 +493,7 @@ export const MANUAL_GROUP_OFF_LABEL: Record<string, string> = {
  */
 export const MANUAL_MODEL_SAVINGS_OFF: Record<string, number> = {
   'deepseek-v4-pro-0813': 35,
-  'deepseek-v4-pro': 45,
+  'deepseek-v4-pro': 35,
   'deepseek-v4-flash': 35,
   'deepseek-v4-flash-0731': 35,
   'glm-5.3': 25,
