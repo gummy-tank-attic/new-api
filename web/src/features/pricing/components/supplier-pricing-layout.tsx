@@ -183,13 +183,13 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
             {/* Language & Chat Models Section (Top) */}
             <div className='space-y-4'>
               <div className='flex items-center gap-2.5'>
-                <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400'>
+                <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-400'>
                   <MessageSquare className='size-3.5' />
                 </div>
-                <h3 className='text-[15.5px] sm:text-[16.5px] font-bold tracking-tight text-foreground'>
+                <h3 className='text-[15.5px] sm:text-[16.5px] font-semibold tracking-tight text-foreground'>
                   {t('pricing.section.textModels', '语言与对话模型')}
                 </h3>
-                <span className='rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums'>
+                <span className='rounded-full bg-muted border border-border/60 px-2 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums'>
                   {standardModels.length}
                 </span>
               </div>
@@ -207,13 +207,13 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
             {/* Video Generation Models Section (Bottom) */}
             <div className='space-y-4 pt-6 border-t border-border/50'>
               <div className='flex items-center gap-2.5'>
-                <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400'>
+                <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-purple-200 bg-purple-50 text-purple-600 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-400'>
                   <Film className='size-3.5' />
                 </div>
-                <h3 className='text-[15.5px] sm:text-[16.5px] font-bold tracking-tight text-foreground'>
+                <h3 className='text-[15.5px] sm:text-[16.5px] font-semibold tracking-tight text-foreground'>
                   {t('pricing.section.videoModels', '视频生成模型')}
                 </h3>
-                <span className='rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums'>
+                <span className='rounded-full bg-muted border border-border/60 px-2 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums'>
                   {videoModels.length}
                 </span>
               </div>

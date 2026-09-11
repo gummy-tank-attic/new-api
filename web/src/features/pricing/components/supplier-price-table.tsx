@@ -16,11 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Clock } from 'lucide-react'
+import { Clock, MessageSquare } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
+import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
 import {
@@ -196,7 +197,7 @@ function PriceColumn(props: {
         )}
       </div>
       {showOfficial && props.official && (
-        <span className='text-muted-foreground/50 decoration-muted-foreground/35 mt-0.5 text-[12px] sm:text-[12.5px] font-normal tabular-nums line-through'>
+        <span className='text-muted-foreground/60 decoration-muted-foreground/40 mt-0.5 text-[12px] sm:text-[12.5px] font-normal tabular-nums line-through'>
           {stripTrailingZeros(props.official)}
         </span>
       )}
@@ -252,7 +253,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
       {/* 1. Refined Column Legend Header with Crisp Baseline */}
       <div
         className={cn(
-          'text-muted-foreground/85 border-border hidden grid-cols-12 items-center gap-4 border-b px-5 pb-2 text-[12px] font-medium tracking-normal',
+          'text-muted-foreground/85 border-border hidden grid-cols-12 items-center gap-4 border-b px-5 pb-2 text-[13px] font-semibold tracking-normal',
           !isImageTable && 'md:grid'
         )}
       >
@@ -353,7 +354,12 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 key={model.model_name}
                 className='group relative grid grid-cols-1 items-center gap-4 rounded-xl border border-border bg-card px-5 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] transition-all duration-150 hover:border-foreground/15 hover:bg-muted/30 hover:shadow-xs md:grid-cols-12'
               >
-                <div className='col-span-12 flex min-w-0 items-center gap-2 md:col-span-3'>
+                <div className='col-span-12 flex min-w-0 items-center gap-2.5 md:col-span-3'>
+                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 dark:border-rose-800/60 dark:bg-rose-950/40'>
+                    {(model.vendor_icon || model.icon)
+                      ? getLobeIcon(model.vendor_icon || model.icon, 15)
+                      : <MessageSquare className='size-3.5 text-rose-500' />}
+                  </div>
                   <button
                     type='button'
                     className='text-foreground group-hover:text-primary min-w-0 break-all rounded-sm text-left font-sans text-[15px] font-medium antialiased transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current sm:text-[15.5px] sm:font-semibold'
@@ -410,10 +416,15 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 {/* Left: Model Identity (Only model name + copy, no icon) */}
                 <div
                   className={cn(
-                    'col-span-12 flex min-w-0 items-center gap-2',
+                    'col-span-12 flex min-w-0 items-center gap-2.5',
                     isMiniMaxTable ? 'md:col-span-3' : 'md:col-span-4'
                   )}
                 >
+                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 dark:border-rose-800/60 dark:bg-rose-950/40'>
+                    {(model.vendor_icon || model.icon)
+                      ? getLobeIcon(model.vendor_icon || model.icon, 15)
+                      : <MessageSquare className='size-3.5 text-rose-500' />}
+                  </div>
                   <span className='text-foreground group-hover:text-primary break-all font-sans text-[15px] font-medium antialiased transition-colors sm:text-[15.5px] sm:font-semibold'>
                     {model.model_name}
                   </span>
@@ -1096,10 +1107,15 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               {/* Left: Model Identity: Only model name + copy */}
               <div
                 className={cn(
-                  'col-span-12 flex min-w-0 items-center gap-2',
+                  'col-span-12 flex min-w-0 items-center gap-2.5',
                   isMiniMaxTable ? 'md:col-span-3' : 'md:col-span-4'
                 )}
               >
+                <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 dark:border-rose-800/60 dark:bg-rose-950/40'>
+                  {(model.vendor_icon || model.icon)
+                    ? getLobeIcon(model.vendor_icon || model.icon, 15)
+                    : <MessageSquare className='size-3.5 text-rose-500' />}
+                </div>
                 <span
                   translate='no'
                   className='notranslate text-foreground group-hover:text-primary break-all font-sans text-[15px] font-semibold antialiased transition-colors sm:text-[15.5px]'

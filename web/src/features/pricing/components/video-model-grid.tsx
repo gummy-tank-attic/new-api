@@ -117,7 +117,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               }
             }}
             className={cn(
-              'group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-card p-5 text-left shadow-sm transition-all duration-300',
+              'group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-card p-6 text-left shadow-sm transition-all duration-300',
               'hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 cursor-pointer',
               isFlagship
                 ? 'border-primary/25 dark:border-primary/20'
