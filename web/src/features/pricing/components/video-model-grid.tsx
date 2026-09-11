@@ -107,6 +107,8 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               ? 'text-[14.5px] sm:text-[15px] leading-snug tracking-[-0.01em]'
               : 'text-[15px] sm:text-[15.5px] leading-normal tracking-[-0.01em]'
 
+        const showOfficial = isGroupMode && discountOff != null
+
         return (
           <div
             key={model.id || model.model_name}
