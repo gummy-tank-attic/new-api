@@ -38,6 +38,12 @@ test('root route renders the public pricing page', () => {
   assert.match(source, /component:\s*Pricing/)
 })
 
+test('billing expr keeps peak unit prices under a trailing off-peak scale', () => {
+  const source = read('../../features/pricing/lib/billing-expr.ts')
+  assert.match(source, /isTrailingPeakOffPeakScale/)
+  assert.match(source, /falling back to model_ratio/)
+})
+
 test('public startup reads use the public request policy', () => {
   const httpClient = read('../http-client.ts')
   assert.match(httpClient, /PUBLIC_API_REQUEST_CONFIG/)
