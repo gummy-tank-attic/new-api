@@ -704,7 +704,7 @@ export function getVideoModelTagline(modelName: string): {
     if (name.includes('unfiltered')) {
       return {
         key: 'imagePricing.tagline.seedreamUnfiltered',
-        defaultText: '无审查限制旗舰生图 · 完整释放 Seedream 5.0 原生图像创作与自由表达能力',
+        defaultText: '宽松审查限制',
       }
     }
     return {
@@ -751,7 +751,7 @@ export function getVideoModelTagline(modelName: string): {
     if (name.includes('unfiltered')) {
       return {
         key: 'videoPricing.tagline.flagshipUnfiltered',
-        defaultText: '新一代多模态主力 · 支持 1080p 影视级生成（真人免审 · 创作尺度更宽松）',
+        defaultText: '真人免审 · 创作尺度更宽松',
       }
     }
     return {
@@ -768,7 +768,7 @@ export function getVideoModelTagline(modelName: string): {
     if (name.includes('unfiltered')) {
       return {
         key: 'videoPricing.tagline.classicUnfiltered',
-        defaultText: '经典视频主力 · 稳定支持文生/图生视频（真人免审 · 创作尺度更宽松）',
+        defaultText: '真人免审 · 创作尺度更宽松',
       }
     }
     return {
