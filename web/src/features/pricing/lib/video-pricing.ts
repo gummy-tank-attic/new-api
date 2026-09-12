@@ -756,7 +756,7 @@ export function getVideoModelTagline(modelName: string): {
     }
     return {
       key: 'videoPricing.tagline.flagship',
-      defaultText: '新一代多模态主力 · 支持 1080p 生成、运镜与首尾帧控制',
+      defaultText: '新一代多模态主力 · 支持 1080p 影视级生成',
     }
   }
   if (
