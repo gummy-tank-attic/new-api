@@ -182,8 +182,9 @@ export function inferVendorFromModelName(modelName: string): string {
   if (
     lower.startsWith('gpt-') ||
     lower.startsWith('chatgpt-') ||
-    lower.startsWith('o1') ||
-    lower.startsWith('o3')
+    /^o\d(?:-|\b)/i.test(lower) ||
+    lower.startsWith('dall-e') ||
+    lower.startsWith('sora')
   ) {
     return 'OpenAI'
   }
@@ -192,19 +193,54 @@ export function inferVendorFromModelName(modelName: string): string {
   if (lower.startsWith('grok-')) return 'xAI'
   if (lower.startsWith('deepseek-')) return 'DeepSeek'
   if (lower.startsWith('glm-')) return 'ZHIPU'
-  if (lower.startsWith('kimi-')) return 'Moonshot'
-  if (lower.startsWith('minimax-')) return 'MiniMax'
-  if (lower.startsWith('seedance') || lower.startsWith('doubao')) {
+  if (lower.startsWith('kimi-') || lower.startsWith('moonshot-')) return 'Moonshot'
+  if (
+    lower.startsWith('minimax-') ||
+    lower.startsWith('hailuo-') ||
+    lower.startsWith('hailuo')
+  ) {
+    return 'MiniMax'
+  }
+  if (
+    lower.startsWith('seedance') ||
+    lower.startsWith('doubao') ||
+    lower.startsWith('seedream')
+  ) {
     return 'ByteDance'
   }
   return ''
+}
+
+const KNOWN_SUB_FAMILIES = [
+  'fable',
+  'opus',
+  'sonnet',
+  'haiku',
+  'flash',
+  'pro',
+  'preview',
+  'mini',
+  'ultra',
+  'spark',
+  'turbo',
+  'lite',
+  'fast',
+] as const
+
+function findSubFamily(modelName: string): string | null {
+  const lower = modelName.toLowerCase()
+  for (const fam of KNOWN_SUB_FAMILIES) {
+    if (lower.includes(fam)) return fam
+  }
+  return null
 }
 
 /**
  * 计算模型在其供应商基准列表中的动态排序权重。
  * 1. 若在基准表中已列出：按其索引固定排序 ((idx + 1) * 10000)。
  * 2. 若未在基准表中列出：
- *    - 若提取出自然版本号高于已有基准项，自动插槽置于该项上方 (例如高于第一名时赋 5000 自动置顶)。
+ *    - 优先寻找同子家族 (如 sonnet, opus, flash)，高版本排在该子家族顶端。
+ *    - 若无同子家族，则在全供应商基准中比对自然版本号智能插槽。
  *    - 若低于所有已知基准项，排在最后 ((vendorModels.length + 1) * 10000)。
  */
 export function getModelEffectiveScore(
@@ -219,6 +255,29 @@ export function getModelEffectiveScore(
 
   const ver = extractModelVersion(modelName)
   if (ver.length > 0) {
+    const subFamily = findSubFamily(modelName)
+    if (subFamily) {
+      // 1. 优先在同子家族项中定位版本
+      const familyIndices: number[] = []
+      for (let i = 0; i < vendorModels.length; i++) {
+        if (findSubFamily(vendorModels[i]) === subFamily) {
+          familyIndices.push(i)
+        }
+      }
+      if (familyIndices.length > 0) {
+        for (const fIdx of familyIndices) {
+          const listedVer = extractModelVersion(vendorModels[fIdx])
+          if (listedVer.length > 0 && compareModelVersions(ver, listedVer) > 0) {
+            return fIdx * 10000 + 5000
+          }
+        }
+        // 版本低于该家族所有已知项，插在该子家族最底部的后方
+        const lastIdx = familyIndices[familyIndices.length - 1]
+        return (lastIdx + 1) * 10000 + 5000
+      }
+    }
+
+    // 2. 全供应商基准比对兜底
     for (let i = 0; i < vendorModels.length; i++) {
       const listedVer = extractModelVersion(vendorModels[i])
       if (listedVer.length > 0 && compareModelVersions(ver, listedVer) > 0) {

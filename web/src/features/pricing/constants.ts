@@ -522,9 +522,35 @@ export const MANUAL_MODEL_SAVINGS_OFF: Record<string, number> = {
 export function lookupModelSavingsOff(modelName: string): number | undefined {
   const needle = (modelName || '').trim().toLowerCase()
   if (!needle) return undefined
+
+  // 1. 精确全等匹配（最高优先级）
   for (const [key, value] of Object.entries(MANUAL_MODEL_SAVINGS_OFF)) {
     if (key.trim().toLowerCase() === needle) return value
   }
+
+  // 2. 智能子版本/日期后缀归一化（如 deepseek-v4.1-flash -> deepseek-v4-flash）
+  const normalizedNeedle = needle
+    .replaceAll(/(?:19|20)\d{6}/g, '')
+    .replaceAll(/[-_](?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\b/g, '')
+    .replace(/\.\d+(?=-|\b)/g, '')
+
+  // 3. 按规则长度降序优先匹配最细化的家族前缀
+  const sortedEntries = Object.entries(MANUAL_MODEL_SAVINGS_OFF).sort(
+    ([a], [b]) => b.length - a.length
+  )
+
+  for (const [key, value] of sortedEntries) {
+    const cleanKey = key.trim().toLowerCase()
+    const normalizedKey = cleanKey
+      .replaceAll(/(?:19|20)\d{6}/g, '')
+      .replaceAll(/[-_](?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\b/g, '')
+      .replace(/\.\d+(?=-|\b)/g, '')
+
+    if (needle.startsWith(cleanKey) || normalizedNeedle.startsWith(normalizedKey)) {
+      return value
+    }
+  }
+
   return undefined
 }
 

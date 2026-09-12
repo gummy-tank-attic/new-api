@@ -1068,6 +1068,13 @@ export function getVideoModelHeroPrice(
             : discountOff && discountOff < 100
               ? minBilled / (1 - discountOff / 100)
               : null
+        let effectiveDiscount = discountOff
+        if (effectiveDiscount == null && minOfficial && minOfficial > minBilled) {
+          const computed = Math.round((1 - minBilled / minOfficial) * 100)
+          if (computed > 0) {
+            effectiveDiscount = computed
+          }
+        }
         const is4k = name.includes('4k')
         let dynamicPriceText = `$${minBilled.toFixed(3)}`
         if (!isGroupMode && minOfficial) {
@@ -1079,7 +1086,7 @@ export function getVideoModelHeroPrice(
           unitText: is4k ? '/ 1M Tokens' : '/ 1M Tokens 起',
           unitKey: is4k ? 'videoPricing.unitPer1MTokens' : 'videoPricing.unitPer1MTokensFrom',
           isStartingPrice: !is4k,
-          discountOff,
+          discountOff: effectiveDiscount,
         }
       }
     }

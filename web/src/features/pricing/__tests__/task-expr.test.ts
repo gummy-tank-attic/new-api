@@ -499,5 +499,46 @@ describe('task visual pricing preview', () => {
     assert.equal(hero50.resolutionPrices?.['1k']?.priceText, '$0.0225')
     assert.equal(hero50.resolutionPrices?.['2k']?.priceText, '$0.045')
   })
+
+  test('dynamically inherits model family savings without manual dictionary bloat', async () => {
+    const { lookupModelSavingsOff } = await import('../constants')
+    assert.equal(lookupModelSavingsOff('deepseek-v4-pro-0813'), 35)
+    assert.equal(lookupModelSavingsOff('deepseek-v4.1-flash'), 35)
+    assert.equal(lookupModelSavingsOff('deepseek-v4-flash-vision-exp'), 35)
+    assert.equal(lookupModelSavingsOff('glm-5.3-flash'), 25)
+    assert.equal(lookupModelSavingsOff('glm-5.3-turbo'), 25)
+    assert.equal(lookupModelSavingsOff('kimi-k3-pro'), 25)
+    assert.equal(lookupModelSavingsOff('minimax-h3-v2'), 25)
+    assert.equal(lookupModelSavingsOff('unknown-brand-new'), undefined)
+  })
+
+  test('correctly infers vendor from new and expanded model prefixes', async () => {
+    const { inferVendorFromModelName } = await import('../lib/model-helpers')
+    assert.equal(inferVendorFromModelName('o4-mini'), 'OpenAI')
+    assert.equal(inferVendorFromModelName('sora-2'), 'OpenAI')
+    assert.equal(inferVendorFromModelName('seedream-5-0-pro'), 'ByteDance')
+    assert.equal(inferVendorFromModelName('hailuo-01'), 'MiniMax')
+    assert.equal(inferVendorFromModelName('moonshot-v1-8k'), 'Moonshot')
+  })
+
+  test('correctly slots new version models into their sub-family bracket without breaking product hierarchy', async () => {
+    const { getModelEffectiveScore } = await import('../lib/model-helpers')
+    const { VENDOR_MODEL_DISPLAY_ORDER } = await import('../constants')
+    const anthropicModels = VENDOR_MODEL_DISPLAY_ORDER.Anthropic
+
+    // claude-fable-5-1 is index 0 -> score 10000
+    // claude-fable-5 is index 1 -> score 20000
+    // claude-opus-5 is index 2 -> score 30000
+    // claude-sonnet-5 is index 7 -> score 80000
+    // claude-sonnet-4-6 is index 8 -> score 90000
+
+    // claude-sonnet-5.2 should slot above claude-sonnet-5 (score 75000), NOT above fable or opus!
+    const sonnetScore = getModelEffectiveScore('claude-sonnet-5.2', anthropicModels)
+    const opusScore = getModelEffectiveScore('claude-opus-5', anthropicModels)
+    const sonnetBaseScore = getModelEffectiveScore('claude-sonnet-5', anthropicModels)
+
+    assert.ok(sonnetScore > opusScore, 'Sonnet 5.2 must stay below Opus')
+    assert.ok(sonnetScore < sonnetBaseScore, 'Sonnet 5.2 must slot above Sonnet 5')
+  })
 })
 
