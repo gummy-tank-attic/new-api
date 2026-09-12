@@ -553,8 +553,8 @@ export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
       resLabel = '4K'
       officialNone = 6.57
       officialVideo = 6.57
-      billedNone = 5.913
-      billedVideo = 5.913
+      billedNone = item.none || 5.913
+      billedVideo = item.video || 5.913
     } else if (modelName.includes('fast')) {
       title = '480p · 720p'
       resLabel = '480p · 720p'
@@ -575,15 +575,15 @@ export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
         resLabel = '1080p'
         officialNone = 11.290322
         officialVideo = 6.744868
-        billedNone = 10.16129
-        billedVideo = 6.070381
+        billedNone = item.none || 10.16129
+        billedVideo = item.video || 6.070381
       } else {
         title = '480p · 720p'
         resLabel = '480p · 720p'
         officialNone = 10.263929
         officialVideo = 6.160
-        billedNone = 9.237536
-        billedVideo = 5.544
+        billedNone = item.none || 9.237536
+        billedVideo = item.video || 5.544
       }
     } else if (modelName.includes('2.0')) {
       if (item.resList.includes('1080p')) {
@@ -591,15 +591,15 @@ export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
         resLabel = '1080p'
         officialNone = 7.478
         officialVideo = 4.5455
-        billedNone = 6.2815
-        billedVideo = 3.8182
+        billedNone = item.none || 6.2815
+        billedVideo = item.video || 3.8182
       } else {
         title = '480p · 720p'
         resLabel = '480p · 720p'
         officialNone = 6.745
         officialVideo = 4.1056
-        billedNone = 5.6658
-        billedVideo = 3.4487
+        billedNone = item.none || 5.6658
+        billedVideo = item.video || 3.4487
       }
     } else if (item.resList.includes('480p') && item.resList.includes('720p')) {
       title = '480p · 720p'
@@ -985,8 +985,20 @@ export function getVideoModelHeroPrice(
   }
 
   if (name.includes('upscale') || name.includes('chaofen')) {
-    const billedSecond = 0.0091 * rate
-    const officialSecond = 0.013 * rate
+    let billedSec = 0.0091
+    let officialSec = 0.013
+    if (model.billing_expr) {
+      const m = model.billing_expr.match(/u\("seconds"\)\s*\*\s*([\d.]+)/)
+      if (m && m[1]) {
+        const val = Number.parseFloat(m[1])
+        if (Number.isFinite(val) && val > 0) {
+          billedSec = val
+          officialSec = discountOff ? val / (1 - discountOff / 100) : val / 0.7
+        }
+      }
+    }
+    const billedSecond = billedSec * rate
+    const officialSecond = officialSec * rate
     return {
       priceText: isGroupMode ? `$${billedSecond.toFixed(4)}` : `$${officialSecond.toFixed(4)}`,
       officialPriceText: isGroupMode ? `$${officialSecond.toFixed(4)}` : null,
@@ -994,6 +1006,37 @@ export function getVideoModelHeroPrice(
       unitKey: 'videoPricing.unitPerSecUpscale',
       isStartingPrice: true,
       discountOff,
+    }
+  }
+
+  // Dynamic extraction from matrix tier groups if configured in backend billing_expr / schema
+  const matrixTiers = getTaskMatrixDisplayTiers(model.billing_expr, model.billing_usage_schema)
+  if (matrixTiers && matrixTiers.length > 0) {
+    const groups = getVideoModelTierGroups(model)
+    if (groups.length > 0) {
+      const validBilled = groups.flatMap((g) =>
+        [g.billedVideo, g.billedNone].filter((p) => typeof p === 'number' && p > 0)
+      )
+      const validOfficial = groups.flatMap((g) =>
+        [g.officialVideo, g.officialNone].filter((p) => typeof p === 'number' && p > 0)
+      )
+      if (validBilled.length > 0) {
+        const minBilled = Math.min(...validBilled) * rate
+        const minOfficial = validOfficial.length > 0 ? Math.min(...validOfficial) * rate : null
+        const is4k = name.includes('4k')
+        let dynamicPriceText = `$${minBilled.toFixed(3)}`
+        if (!isGroupMode && minOfficial) {
+          dynamicPriceText = `$${minOfficial.toFixed(3)}`
+        }
+        return {
+          priceText: dynamicPriceText,
+          officialPriceText: isGroupMode && minOfficial ? `$${minOfficial.toFixed(3)}` : null,
+          unitText: is4k ? '/ 1M Tokens' : '/ 1M Tokens 起',
+          unitKey: is4k ? 'videoPricing.unitPer1MTokens' : 'videoPricing.unitPer1MTokensFrom',
+          isStartingPrice: !is4k,
+          discountOff,
+        }
+      }
     }
   }
 

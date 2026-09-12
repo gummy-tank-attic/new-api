@@ -54,6 +54,7 @@ import {
   isByteDanceOrVideoModel,
   isDurationBasedVideoModel,
   isVideoUpscaleModel,
+  parseVideoUpscaleTiers,
 } from '../lib/video-pricing'
 import type { PriceType, PricingModel, TokenUnit } from '../types'
 import { ImageTierPrices } from './image-tier-prices'
@@ -116,15 +117,18 @@ function getModelUnitPrice(
     if (tiers.length > 0) {
       const tier = tiers[0]
       if ('inputPrice' in tier) {
-        let val = 0
-        if (type === 'input') val = Number(tier.inputPrice) || 0
-        else if (type === 'output') val = Number(tier.outputPrice) || 0
-        else if (type === 'cache') val = Number(tier.cacheReadPrice) || 0
-        else if (type === 'create_cache') {
-          val = Number(tier.cacheCreatePrice) || 0
+        let val: number | undefined
+        if (type === 'input' && typeof tier.inputPrice === 'number') {
+          val = tier.inputPrice
+        } else if (type === 'output' && typeof tier.outputPrice === 'number') {
+          val = tier.outputPrice
+        } else if (type === 'cache' && typeof tier.cacheReadPrice === 'number') {
+          val = tier.cacheReadPrice
+        } else if (type === 'create_cache' && typeof tier.cacheCreatePrice === 'number') {
+          val = tier.cacheCreatePrice
         }
 
-        if (val > 0) {
+        if (typeof val === 'number') {
           return formatDynamicUnitPrice(val, {
             tokenUnit,
             priceRate,
@@ -458,6 +462,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
             const isDurationBased = isDurationBasedVideoModel(model)
             const tierGroups = isUpscale || isDurationBased ? [] : getVideoModelTierGroups(model)
             const durationTiers = isDurationBased ? getDurationVideoTiers(model) : []
+            const upscaleTiers = isUpscale ? parseVideoUpscaleTiers(model.billing_expr) : []
+            const minUpscale = upscaleTiers.length > 0 ? upscaleTiers[0] : null
             const upscaleRatio =
               isGroupMode && savings != null ? (100 - savings) / 100 : 1
 
@@ -557,13 +563,13 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                   {isUpscale && (
                     <div className='grid grid-cols-1 gap-2 sm:grid-cols-3'>
                       <PriceColumn
-                        primary={`$${(0.0091 * upscaleRatio * priceRate).toFixed(4)}`}
-                        official={`$${(0.013 * priceRate).toFixed(4)}`}
+                        primary={`$${(((minUpscale?.secondPrice ?? 0.0091) * upscaleRatio) * priceRate).toFixed(4)}`}
+                        official={`$${((minUpscale?.officialSecondPrice ?? 0.013) * priceRate).toFixed(4)}`}
                         unit='/ 秒起'
                       />
                       <PriceColumn
-                        primary={`$${(7.1848 * upscaleRatio * priceRate).toFixed(2)}`}
-                        official={`$${(10.2639 * priceRate).toFixed(2)}`}
+                        primary={`$${(((minUpscale?.tokenPricePerM ?? 7.1848) * upscaleRatio) * priceRate).toFixed(2)}`}
+                        official={`$${((minUpscale?.officialTokenPricePerM ?? 10.2639) * priceRate).toFixed(2)}`}
                         unit='/ 1M'
                       />
                       <div className='flex flex-col items-center justify-center py-1 text-center'>
@@ -1055,24 +1061,26 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
             )
             inputPrice = res
           } else {
-            const inGroup = formatPrice(
+            const baseRatio = getConfiguredGroupRatio(
+              props.groupRatio,
+              selectedGroup || ''
+            )
+            const inGroup = getModelUnitPrice(
               model,
               'input',
+              baseRatio,
               tokenUnit,
-              false,
               priceRate,
               usdExchangeRate,
               selectedGroup
             )
-            const inOff = formatPrice(
+            const inOff = getModelUnitPrice(
               model,
               'input',
+              1,
               tokenUnit,
-              false,
               priceRate,
-              usdExchangeRate,
-              undefined,
-              1
+              usdExchangeRate
             )
             inputPrice = resolvePrices(
               inGroup,
@@ -1082,24 +1090,22 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               effectiveSavings
             )
 
-            const outGroup = formatPrice(
+            const outGroup = getModelUnitPrice(
               model,
               'output',
+              baseRatio,
               tokenUnit,
-              false,
               priceRate,
               usdExchangeRate,
               selectedGroup
             )
-            const outOff = formatPrice(
+            const outOff = getModelUnitPrice(
               model,
               'output',
+              1,
               tokenUnit,
-              false,
               priceRate,
-              usdExchangeRate,
-              undefined,
-              1
+              usdExchangeRate
             )
             outputPrice = resolvePrices(
               outGroup,
@@ -1109,24 +1115,22 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               effectiveSavings
             )
 
-            const cacheGroup = formatPrice(
+            const cacheGroup = getModelUnitPrice(
               model,
               'cache',
+              baseRatio,
               tokenUnit,
-              false,
               priceRate,
               usdExchangeRate,
               selectedGroup
             )
-            const cacheOff = formatPrice(
+            const cacheOff = getModelUnitPrice(
               model,
               'cache',
+              1,
               tokenUnit,
-              false,
               priceRate,
-              usdExchangeRate,
-              undefined,
-              1
+              usdExchangeRate
             )
             cacheReadPrice = resolvePrices(
               cacheGroup,
@@ -1136,24 +1140,22 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               effectiveSavings
             )
 
-            const cacheWriteGroup = formatPrice(
+            const cacheWriteGroup = getModelUnitPrice(
               model,
               'create_cache',
+              baseRatio,
               tokenUnit,
-              false,
               priceRate,
               usdExchangeRate,
               selectedGroup
             )
-            const cacheWriteOff = formatPrice(
+            const cacheWriteOff = getModelUnitPrice(
               model,
               'create_cache',
+              1,
               tokenUnit,
-              false,
               priceRate,
-              usdExchangeRate,
-              undefined,
-              1
+              usdExchangeRate
             )
             cacheWritePrice = resolvePrices(
               cacheWriteGroup,
