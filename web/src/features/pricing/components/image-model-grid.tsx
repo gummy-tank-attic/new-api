@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { ArrowUpRight, Check, Copy, ImageIcon } from 'lucide-react'
+import { ArrowUpRight, Check, Copy, ImageIcon, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -72,6 +72,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
       )}
     >
       {props.models.map((model) => {
+        const isUnfiltered = (model.model_name || '').toLowerCase().includes('unfiltered')
         const resolutions = getModelSupportedResolutions(model)
         const capTag = getVideoModelCapabilityTag(model.model_name)
         const tagline = getVideoModelTagline(model.model_name)
@@ -273,10 +274,33 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                 </div>
               </div>
 
-              {/* Bottom Details Link */}
-              <div className='mt-4 flex items-center justify-end text-xs text-primary/80 transition-colors group-hover:text-primary'>
-                <span className='font-medium'>{t('Details', '详情')}</span>
-                <ArrowUpRight className='ml-0.5 size-3.5' />
+              {/* Unfiltered Feature Callout Banner (Aligned with Image 2 / Upscale style) */}
+              {isUnfiltered && (
+                <div className='relative mt-3.5 overflow-hidden rounded-xl border border-purple-300/70 bg-gradient-to-br from-purple-500/12 via-indigo-500/8 to-purple-500/16 p-3 shadow-2xs dark:border-purple-700/60 dark:from-purple-950/50 dark:to-indigo-950/40'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <span className='inline-flex items-center gap-1 rounded-md bg-purple-600 px-2 py-0.5 text-xs font-semibold text-white shadow-xs dark:bg-purple-500'>
+                      <Sparkles className='h-3 w-3' />
+                      {t('imagePricing.unfilteredCalloutBadge', '原生自由')}
+                    </span>
+                    <span className='text-[13px] font-semibold text-purple-950 dark:text-purple-200 tracking-tight'>
+                      {t('imagePricing.unfilteredCalloutTitle', '无审查限制与纯粹创意')}
+                    </span>
+                  </div>
+                  <p className='text-[12.5px] leading-[1.6] text-foreground/85'>
+                    {t(
+                      'imagePricing.unfilteredCalloutDesc',
+                      '完全解除提示词与艺术表现审查限制，原生释放 Seedream 5.0 的概念设计、超现实幻想与艺术生成潜能，适合专业创意设计与无拘无束的视觉探索。'
+                    )}
+                  </p>
+                </div>
+              )}
+
+              {/* Card Footer: clean, zero duplicate estimate note text */}
+              <div className='mt-3.5 flex items-center justify-end border-t border-[#F1F5F9] pt-2.5 dark:border-border/40'>
+                <span className='inline-flex items-center gap-[3px] text-[12.5px] font-medium text-[#2563EB]'>
+                  {t('Details', '详情')}
+                  <ArrowUpRight className='size-[13px] stroke-[2.2]' />
+                </span>
               </div>
             </div>
           </div>
