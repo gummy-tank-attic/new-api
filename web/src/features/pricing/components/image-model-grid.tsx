@@ -1,0 +1,313 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+import { ArrowUpRight, Check, Copy, ImageIcon, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
+import { getLobeIcon } from '@/lib/lobe-icon'
+import { cn } from '@/lib/utils'
+
+import { lookupModelSavingsOff } from '../constants'
+import {
+  getModelSpecificDiscountPercent,
+  getModelSupportedResolutions,
+  getResolutionBadgeStyle,
+  getVideoModelCapabilityTag,
+  getVideoModelHeroPrice,
+  getVideoModelTagline,
+} from '../lib/video-pricing'
+import type { PricingModel } from '../types'
+import type { PriceMode } from './supplier-price-table'
+
+export interface ImageModelGridProps {
+  models: PricingModel[]
+  onModelClick: (modelName: string) => void
+  priceMode: PriceMode
+  selectedGroup: string | null
+  groupRatio: Record<string, number>
+  priceRate: number
+  usdExchangeRate: number
+  savings?: number | null
+  className?: string
+}
+
+export function ImageModelGrid(props: ImageModelGridProps) {
+  const { t } = useTranslation()
+  const { copyToClipboard } = useCopyToClipboard()
+  const [copiedName, setCopiedName] = useState<string | null>(null)
+
+  const isGroupMode = props.priceMode === 'group'
+
+  const handleCopy = (e: React.MouseEvent, modelName: string) => {
+    e.stopPropagation()
+    copyToClipboard(modelName)
+    setCopiedName(modelName)
+    setTimeout(() => {
+      setCopiedName((curr) => (curr === modelName ? null : curr))
+    }, 1800)
+  }
+
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 sm:gap-6',
+        props.className
+      )}
+    >
+      {props.models.map((model) => {
+        const nameLower = (model.model_name || '').toLowerCase()
+        const isUnfiltered = nameLower.includes('unfiltered')
+        const isSeedream = nameLower.includes('seedream')
+        const resolutions = getModelSupportedResolutions(model)
+        const capTag = getVideoModelCapabilityTag(model.model_name)
+        const tagline = getVideoModelTagline(model.model_name)
+        const discountOff = isGroupMode
+          ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || null))
+          : null
+        const hero = getVideoModelHeroPrice(model, isGroupMode, props.priceRate)
+
+        const vendorIcon =
+          model.vendor_icon || model.icon
+            ? getLobeIcon(model.vendor_icon || model.icon, 15)
+            : <ImageIcon className='size-3.5 text-emerald-600' />
+
+        const nameLen = (model.model_name || '').length
+        const titleClass =
+          nameLen > 28
+            ? 'text-[13.5px] sm:text-[14px] leading-snug tracking-[-0.015em]'
+            : nameLen > 20
+              ? 'text-[14.5px] sm:text-[15px] leading-snug tracking-[-0.01em]'
+              : 'text-[15px] sm:text-[15.5px] leading-normal tracking-[-0.01em]'
+
+        return (
+          <div
+            key={model.id || model.model_name}
+            role='button'
+            tabIndex={0}
+            onClick={() => props.onModelClick(model.model_name)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                props.onModelClick(model.model_name)
+              }
+            }}
+            className={cn(
+              'group relative flex w-full flex-col justify-start overflow-hidden rounded-2xl border border-[#E2E8F0]/90 p-6 text-left shadow-[0_1px_3px_rgba(15,23,42,0.03)] transition-all duration-200',
+              '[background:radial-gradient(circle_at_95%_5%,rgba(16,185,129,0.04)_0%,transparent_60%),#fff]',
+              'hover:-translate-y-px hover:border-[#CBD5E1] hover:shadow-[0_6px_18px_rgba(15,23,42,0.06)] cursor-pointer',
+              'dark:border-border dark:bg-card dark:[background:unset]'
+            )}
+          >
+            {/* Top Section */}
+            <div className='space-y-2.5'>
+              {/* Row 1: Model Identity (Full Width, No Crowding) */}
+              <div className='flex items-center gap-2.5 min-w-0'>
+                <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-emerald-100 bg-emerald-50/70 dark:border-emerald-800/40 dark:bg-emerald-950/30'>
+                  {vendorIcon}
+                </div>
+                <div className='flex min-w-0 flex-1 items-center gap-1.5'>
+                  <span
+                    translate='no'
+                    className={cn(
+                      'notranslate break-words font-semibold text-[var(--p-text-main,#0F172A)]',
+                      titleClass
+                    )}
+                    title={model.model_name}
+                  >
+                    {model.model_name}
+                  </span>
+                  <button
+                    type='button'
+                    aria-label={t('Copy model name')}
+                    onClick={(e) => handleCopy(e, model.model_name)}
+                    className='size-6 shrink-0 inline-flex items-center justify-center rounded-md text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
+                  >
+                    {copiedName === model.model_name ? (
+                      <Check className='size-[15.5px] text-emerald-600' />
+                    ) : (
+                      <Copy className='size-[15.5px]' />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Row 2: Capability Tag (Left) & Discount Badge (Right) - Perfect Balance */}
+              <div className='flex items-center justify-between gap-2.5 min-h-[24px]'>
+                {capTag ? (
+                  <span
+                    className={cn(
+                      'inline-block rounded-full border px-[9px] py-[2px] text-[11.5px] font-semibold tracking-tight',
+                      capTag.className
+                    )}
+                  >
+                    {t(capTag.key, capTag.label)}
+                  </span>
+                ) : (
+                  <div />
+                )}
+
+                {discountOff != null && isGroupMode && (
+                  <span
+                    translate='no'
+                    className='notranslate inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#F43F5E] to-[#E11D48] min-w-[4.5rem] px-2.5 h-[22px] text-[11.5px] font-bold tracking-wide text-white shadow-[0_1px_2px_rgba(225,29,72,0.22),inset_0_1px_0_rgba(255,255,255,0.25)] tabular-nums shrink-0 leading-none text-center'
+                  >
+                    {discountOff}% OFF
+                  </span>
+                )}
+              </div>
+
+              {/* Row 3: Prominent Supported Resolutions */}
+              <div className='mb-2.5 flex items-center gap-[7px] text-[12.5px]'>
+                <span className='shrink-0 text-[12px] font-medium text-[#64748B]'>
+                  {t('Supported Resolutions:', '支持分辨率:')}
+                </span>
+                <div className='flex flex-wrap items-center gap-[7px]'>
+                  {resolutions.map((res) => {
+                    const style = getResolutionBadgeStyle(res)
+                    return (
+                      <span
+                        key={res}
+                        className={cn(
+                          'inline-flex items-center justify-center rounded-md border px-2 py-[2.5px] text-[12px] font-semibold tracking-[0.01em] tabular-nums',
+                          style.className
+                        )}
+                      >
+                        {style.label}
+                      </span>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Row 4: Tagline */}
+              <p className='text-[13px] leading-[1.6] font-normal text-[#334155] dark:text-muted-foreground'>
+                {t(tagline.key, tagline.defaultText)}
+              </p>
+            </div>
+
+            {/* Middle Section: Hero Price & Image Spec Matrix */}
+            <div className='mt-4 flex-1 flex flex-col justify-between'>
+              {/* Hero Starting Price */}
+              <div className='flex items-baseline justify-between border-t border-[#E2E8F0] pt-3'>
+                <span className='text-[12px] font-semibold uppercase tracking-[0.05em] text-[#64748B]'>
+                  {t('Starting Price', '起步价格')}
+                </span>
+                <div className='text-right'>
+                  <div className='flex items-baseline justify-end gap-1'>
+                    <span className='text-[22px] font-semibold tabular-nums text-[#0F172A] dark:text-foreground'>
+                      {hero.priceText}
+                    </span>
+                    {hero.officialPriceText && isGroupMode && (
+                      <span className='text-[13px] font-normal tabular-nums text-[#94A3B8] line-through'>
+                        {hero.officialPriceText}
+                      </span>
+                    )}
+                    <span className='ml-0.5 text-[12.5px] font-normal text-[#64748B]'>
+                      {t(hero.unitKey, hero.unitText)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pricing Spec Matrix (Clean Image Specs) */}
+              <div className='mt-4 overflow-hidden rounded-xl border border-[#E2E8F0] bg-white text-xs shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
+                <div className='grid grid-cols-[36%_64%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 text-xs font-semibold text-[#334155] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                  <div>{t('imagePricing.specCol', '规格属性')}</div>
+                  <div className='text-right'>{t('imagePricing.detailCol', '详细配置')}</div>
+                </div>
+                <div className='divide-y divide-[#F1F5F9] dark:divide-border/40 text-[12.5px]'>
+                  <div className='grid grid-cols-[36%_64%] items-center px-3.5 py-2.5 transition-colors hover:bg-muted/30'>
+                    <span className='text-[#64748B] dark:text-muted-foreground'>
+                      {t('imagePricing.featureRow', '生成能力')}
+                    </span>
+                    <span className='text-right font-medium text-[#0F172A] dark:text-foreground'>
+                      {t('imagePricing.featureVal', '文生图 / 交互编辑 / 风格重绘')}
+                    </span>
+                  </div>
+                  <div className='grid grid-cols-[36%_64%] items-center px-3.5 py-2.5 transition-colors hover:bg-muted/30'>
+                    <span className='text-[#64748B] dark:text-muted-foreground'>
+                      {t('imagePricing.resRow', '最大画质')}
+                    </span>
+                    <span className='text-right font-medium text-[#0F172A] dark:text-foreground'>
+                      {t('imagePricing.resVal', '2K 超高清 · 常见比例全支持')}
+                    </span>
+                  </div>
+                  <div className='grid grid-cols-[36%_64%] items-center px-3.5 py-2.5 transition-colors hover:bg-muted/30'>
+                    <span className='text-[#64748B] dark:text-muted-foreground'>
+                      {t('imagePricing.billingRow', '计费模式')}
+                    </span>
+                    <span className='text-right font-semibold text-[#0F172A] dark:text-foreground tabular-nums'>
+                      {hero.priceText} / 1M Tokens
+                    </span>
+                  </div>
+                </div>
+                <div className='border-t border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-[7px] text-right text-[11.5px] font-normal text-[#64748B] dark:border-border dark:bg-muted/30 dark:text-slate-400'>
+                  {t('imagePricing.footerNotice', '计费单位：/ 1M Tokens · 极速出片与高保真画质')}
+                </div>
+              </div>
+
+              {/* Seedream 5.0 Feature Highlight Callout */}
+              {isSeedream && (
+                <div
+                  className={cn(
+                    'relative mt-3.5 overflow-hidden rounded-xl border p-3 shadow-2xs',
+                    isUnfiltered
+                      ? 'border-rose-200/80 bg-gradient-to-br from-rose-500/8 via-pink-500/5 to-rose-500/10 dark:border-rose-800/50 dark:from-rose-950/40 dark:to-pink-950/30'
+                      : 'border-emerald-300/70 bg-gradient-to-br from-emerald-500/10 via-teal-500/6 to-emerald-500/12 dark:border-emerald-800/50 dark:from-emerald-950/40 dark:to-teal-950/30'
+                  )}
+                >
+                  <div className='flex items-center gap-2 mb-1.5'>
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold text-white shadow-xs',
+                        isUnfiltered ? 'bg-rose-600 dark:bg-rose-500' : 'bg-emerald-600 dark:bg-emerald-500'
+                      )}
+                    >
+                      <Sparkles className='size-3' />
+                      {isUnfiltered ? t('imagePricing.unfilteredCalloutBadge', '原生自由') : t('imagePricing.calloutBadge', '交互编辑')}
+                    </span>
+                    <span
+                      className={cn(
+                        'text-[13px] font-semibold tracking-tight',
+                        isUnfiltered ? 'text-rose-950 dark:text-rose-200' : 'text-emerald-950 dark:text-emerald-200'
+                      )}
+                    >
+                      {isUnfiltered ? t('imagePricing.unfilteredCalloutTitle', '无审查限制与纯粹创意') : t('imagePricing.calloutTitle', '真实质感与局部重绘')}
+                    </span>
+                  </div>
+                  <p className='text-[12.5px] leading-[1.6] text-foreground/85'>
+                    {isUnfiltered
+                      ? t('imagePricing.unfilteredCalloutDesc', '完全解除提示词与艺术表现审查限制，原生释放 Seedream 5.0 的概念设计、超现实幻想与艺术生成潜能，适合专业创意设计与无拘无束的视觉探索。')
+                      : t('imagePricing.calloutDesc', '基于原生 Seedream 5.0 架构，支持文生图、参考图局部重绘与风格无缝微调。无需推倒重来，保持人物面部特征与主体一致性，还原超逼真光影与写实质感。')}
+                  </p>
+                </div>
+              )}
+
+              {/* Bottom Details Link */}
+              <div className='mt-4 flex items-center justify-end text-xs text-primary/80 transition-colors group-hover:text-primary'>
+                <span className='font-medium'>{t('Details', '详情')}</span>
+                <ArrowUpRight className='ml-0.5 size-3.5' />
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}

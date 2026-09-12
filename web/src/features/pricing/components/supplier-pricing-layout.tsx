@@ -16,14 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Film, MessageSquare, Sparkles } from 'lucide-react'
+import { Film, ImageIcon, MessageSquare, Sparkles } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
 
 import {
-  isByteDancePricingVendor,
   lookupGroupMapValue,
   MANUAL_GROUP_SAVINGS_OFF,
 } from '../constants'
@@ -31,10 +30,11 @@ import { getUsableGroupDescription } from '../lib/derive-vendor-groups'
 import { resolveGroupSavingsOffPercent } from '../lib/group-discount'
 import { resolveGroupDescription } from '../lib/group-intro-i18n'
 import { getConfiguredGroupRatio } from '../lib/model-helpers'
-import { isByteDanceOrVideoModel } from '../lib/video-pricing'
+import { isByteDanceOrVideoModel, isImageModel } from '../lib/video-pricing'
 import type { PricingModel } from '../types'
 import { EmptyState } from './empty-state'
 import { GroupPriceCards } from './group-price-cards'
+import { ImageModelGrid } from './image-model-grid'
 import { SupplierPriceTable, type PriceMode } from './supplier-price-table'
 import { SupplierTabs, type SupplierTabOption } from './supplier-tabs'
 import { VideoModelGrid } from './video-model-grid'
@@ -62,16 +62,23 @@ export interface SupplierPricingLayoutProps {
 export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
   const { t } = useTranslation()
 
-  const isByteDanceVendor = isByteDancePricingVendor(props.vendor)
-
+  const imageModels = useMemo(
+    () => props.models.filter(isImageModel),
+    [props.models]
+  )
   const videoModels = useMemo(
-    () => (isByteDanceVendor ? props.models : props.models.filter(isByteDanceOrVideoModel)),
-    [isByteDanceVendor, props.models]
+    () => props.models.filter(isByteDanceOrVideoModel),
+    [props.models]
   )
   const standardModels = useMemo(
-    () => (isByteDanceVendor ? [] : props.models.filter((m) => !isByteDanceOrVideoModel(m))),
-    [isByteDanceVendor, props.models]
+    () => props.models.filter((m) => !isImageModel(m) && !isByteDanceOrVideoModel(m)),
+    [props.models]
   )
+
+  const activeCategoryCount =
+    (standardModels.length > 0 ? 1 : 0) +
+    (imageModels.length > 0 ? 1 : 0) +
+    (videoModels.length > 0 ? 1 : 0)
 
   const rawGroupIntro = props.selectedGroup
     ? getUsableGroupDescription(props.usableGroup, props.selectedGroup)
@@ -135,7 +142,7 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
         </div>
       )}
 
-      {/* 3. Main Content: Bento Grid or Clean Table */}
+      {/* 3. Main Content: Single Category or Multi-category Bento Sections */}
       {(() => {
         if (props.models.length === 0) {
           return (
@@ -146,8 +153,8 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
           )
         }
 
-        // Pure video vendor (e.g. ByteDance / Seedance)
-        if (videoModels.length > 0 && standardModels.length === 0) {
+        // Single Category: Pure video vendor
+        if (activeCategoryCount === 1 && videoModels.length > 0) {
           return (
             <VideoModelGrid
               models={videoModels}
@@ -162,8 +169,24 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
           )
         }
 
-        // Pure text / standard vendor (e.g. Anthropic, OpenAI, Moonshot, DeepSeek)
-        if (videoModels.length === 0 && standardModels.length > 0) {
+        // Single Category: Pure image vendor
+        if (activeCategoryCount === 1 && imageModels.length > 0) {
+          return (
+            <ImageModelGrid
+              models={imageModels}
+              priceMode={props.priceMode}
+              selectedGroup={props.selectedGroup}
+              groupRatio={props.groupRatio}
+              priceRate={props.priceRate}
+              usdExchangeRate={props.usdExchangeRate}
+              savings={savings}
+              onModelClick={props.onModelClick}
+            />
+          )
+        }
+
+        // Single Category: Pure text / standard vendor (e.g. Anthropic, OpenAI, Moonshot, DeepSeek)
+        if (activeCategoryCount === 1 && standardModels.length > 0) {
           return (
             <SupplierPriceTable
               models={standardModels}
@@ -177,57 +200,88 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
           )
         }
 
-        // Hybrid vendor with both video models and text models (e.g. MiniMax)
+        // Multi-modal vendor with multiple categories (e.g. ByteDance with Image + Video, MiniMax with Text + Video)
         return (
           <div className='space-y-8'>
-            {/* Language & Chat Models Section (Top) */}
-            <div className='space-y-4'>
-              <div className='flex items-center gap-2.5'>
-                <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-400'>
-                  <MessageSquare className='size-3.5' />
+            {/* 1. Language & Chat Models Section */}
+            {standardModels.length > 0 && (
+              <div className='space-y-4'>
+                <div className='flex items-center gap-2.5'>
+                  <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-400'>
+                    <MessageSquare className='size-3.5' />
+                  </div>
+                  <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
+                    {t('pricing.section.textModels', '语言与对话模型')}
+                  </h3>
+                  <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums'>
+                    {standardModels.length}
+                  </span>
                 </div>
-                <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
-                  {t('pricing.section.textModels', '语言与对话模型')}
-                </h3>
-                <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums'>
-                  {standardModels.length}
-                </span>
+                <SupplierPriceTable
+                  models={standardModels}
+                  priceMode={props.priceMode}
+                  selectedGroup={props.selectedGroup}
+                  groupRatio={props.groupRatio}
+                  priceRate={props.priceRate}
+                  usdExchangeRate={props.usdExchangeRate}
+                  onModelClick={props.onModelClick}
+                />
               </div>
-              <SupplierPriceTable
-                models={standardModels}
-                priceMode={props.priceMode}
-                selectedGroup={props.selectedGroup}
-                groupRatio={props.groupRatio}
-                priceRate={props.priceRate}
-                usdExchangeRate={props.usdExchangeRate}
-                onModelClick={props.onModelClick}
-              />
-            </div>
+            )}
 
-            {/* Video Generation Models Section (Bottom) */}
-            <div className='space-y-4 pt-6 border-t border-border/50'>
-              <div className='flex items-center gap-2.5'>
-                <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-purple-200 bg-purple-50 text-purple-600 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-400'>
-                  <Film className='size-3.5' />
+            {/* 2. Image Generation Models Section */}
+            {imageModels.length > 0 && (
+              <div className={cn('space-y-4', standardModels.length > 0 && 'pt-6 border-t border-border/50')}>
+                <div className='flex items-center gap-2.5'>
+                  <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-400'>
+                    <ImageIcon className='size-3.5' />
+                  </div>
+                  <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
+                    {t('pricing.section.imageModels', '图像生成模型')}
+                  </h3>
+                  <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums'>
+                    {imageModels.length}
+                  </span>
                 </div>
-                <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
-                  {t('pricing.section.videoModels', '视频生成模型')}
-                </h3>
-                <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums'>
-                  {videoModels.length}
-                </span>
+                <ImageModelGrid
+                  models={imageModels}
+                  priceMode={props.priceMode}
+                  selectedGroup={props.selectedGroup}
+                  groupRatio={props.groupRatio}
+                  priceRate={props.priceRate}
+                  usdExchangeRate={props.usdExchangeRate}
+                  savings={savings}
+                  onModelClick={props.onModelClick}
+                />
               </div>
-              <VideoModelGrid
-                models={videoModels}
-                priceMode={props.priceMode}
-                selectedGroup={props.selectedGroup}
-                groupRatio={props.groupRatio}
-                priceRate={props.priceRate}
-                usdExchangeRate={props.usdExchangeRate}
-                savings={savings}
-                onModelClick={props.onModelClick}
-              />
-            </div>
+            )}
+
+            {/* 3. Video Generation Models Section */}
+            {videoModels.length > 0 && (
+              <div className={cn('space-y-4', (standardModels.length > 0 || imageModels.length > 0) && 'pt-6 border-t border-border/50')}>
+                <div className='flex items-center gap-2.5'>
+                  <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-purple-200 bg-purple-50 text-purple-600 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-400'>
+                    <Film className='size-3.5' />
+                  </div>
+                  <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
+                    {t('pricing.section.videoModels', '视频生成模型')}
+                  </h3>
+                  <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums'>
+                    {videoModels.length}
+                  </span>
+                </div>
+                <VideoModelGrid
+                  models={videoModels}
+                  priceMode={props.priceMode}
+                  selectedGroup={props.selectedGroup}
+                  groupRatio={props.groupRatio}
+                  priceRate={props.priceRate}
+                  usdExchangeRate={props.usdExchangeRate}
+                  savings={savings}
+                  onModelClick={props.onModelClick}
+                />
+              </div>
+            )}
           </div>
         )
       })()}

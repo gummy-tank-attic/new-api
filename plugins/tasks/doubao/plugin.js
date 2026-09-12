@@ -7,7 +7,7 @@ export const meta = {
     en: "Volcengine Doubao Seedance video generation (text-to-video, image-to-video, and video-to-video)",
     zh: "火山引擎豆包 Seedance 视频生成（文生视频、图生视频、视频生视频）",
   },
-  version: "1.0.2",
+  version: "1.0.3",
   author: { name: "QuantumNous" },
   channelTypes: [54, 45], // VolcEngine-type channels serve Ark video models with the same wire format
   models: [
@@ -19,6 +19,19 @@ export const meta = {
     "doubao-seedance-2-0-fast-260128",
     "doubao-seedance-2-0-mini-260615",
     "doubao-seedance-2-5-260628",
+    "seedance2.5",
+    "seedance-2.5",
+    "seedance-2.5-unfiltered",
+    "doubao-seedance-2.5",
+    "Seedance 2.0",
+    "seedance2.0",
+    "seedance-2.0",
+    "seedance-2.0-unfiltered",
+    "doubao-seedance-2.0",
+    "Seedance2.0-4k",
+    "seedance2.0-fast",
+    "seedance2.0-mini",
+    "seedance-2.5-upscale",
   ],
   fetchMode: "per_task",
   usageSchema: {
@@ -137,17 +150,18 @@ function estimateTokens(seconds, resolution) {
 function videoInputRatio(model, resolution, content) {
   const video = hasVideo(content);
   const res = trimmed(resolution).toLowerCase();
-  if (model === "doubao-seedance-2-5-260628") {
+  const m = trimmed(model).toLowerCase();
+  if (m.includes("2-5") || m.includes("2.5")) {
     if (res === "1080p") return video ? 7.0 / 10.7 : 11.7 / 10.7;
     return video ? 42 / 70 : 1;
   }
-  if (model === "doubao-seedance-2-0-260128") {
+  if (m.includes("fast")) return video ? 22 / 37 : 1;
+  if (m.includes("mini")) return video ? 14 / 23 : 1;
+  if (m.includes("2-0") || m.includes("2.0")) {
     if (res === "1080p") return video ? 31 / 46 : 51 / 46;
     if (res === "4k") return video ? 16 / 46 : 26 / 46;
     return video ? 28 / 46 : 1;
   }
-  if (model === "doubao-seedance-2-0-fast-260128") return video ? 22 / 37 : 1;
-  if (model === "doubao-seedance-2-0-mini-260615") return video ? 14 / 23 : 1;
   return 1;
 }
 

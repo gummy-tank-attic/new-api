@@ -316,10 +316,14 @@ export const VENDOR_MODEL_DISPLAY_ORDER: Record<string, readonly string[]> = {
   Moonshot: ['kimi-k3', 'kimi-k2.7-code', 'kimi-k2.6'],
   // —— MiniMax ——
   MiniMax: ['minimax-m3', 'minimax-m2.7', 'minimax-m2.5', 'MiniMax-H3'],
-  // —— ByteDance / Seedance ——
+  // —— ByteDance (豆包) ——
   ByteDance: [
+    'doubao-seedream-5-0-pro',
+    'doubao-seedream-5-0-pro-unfiltered',
     'seedance2.5',
+    'seedance-2.5-unfiltered',
     'Seedance 2.0',
+    'seedance-2.0-unfiltered',
     'Seedance2.0-4k',
     'seedance2.0-fast',
     'seedance2.0-mini',

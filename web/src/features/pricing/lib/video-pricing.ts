@@ -44,8 +44,20 @@ export interface VideoTierGroup {
   officialWithVideoPrice?: number
 }
 
+export function isImageModel(model: PricingModel | string): boolean {
+  const name = (typeof model === 'string' ? model : model.model_name).toLowerCase()
+  if (name.includes('seedream')) return true
+  if (name.includes('flux') || name.includes('midjourney') || name.startsWith('mj_') || name.startsWith('mj-')) return true
+  if (name === 'gpt-image-2' || name.startsWith('dall-e')) return true
+  if (name.includes('grok-imagine-image')) return true
+  if (typeof model !== 'string') {
+    if (model.supported_endpoint_types?.includes('image-generation') && !name.includes('video')) return true
+  }
+  return false
+}
+
 export function isByteDanceOrVideoModel(model: PricingModel): boolean {
-  if (isByteDancePricingVendor(model.vendor_name)) return true
+  if (isImageModel(model)) return false
   const name = model.model_name.toLowerCase()
   if (name.startsWith('seedance') || name.includes('seedance')) return true
   if (name === 'grok-imagine-video') return true
@@ -54,7 +66,13 @@ export function isByteDanceOrVideoModel(model: PricingModel): boolean {
   if (schema?.seconds && (schema?.resolution || schema?.input_images || schema?.input_video_seconds)) {
     return true
   }
-  return Boolean(schema?.resolution || schema?.video_input)
+  if (Boolean(schema?.resolution || schema?.video_input)) {
+    return true
+  }
+  if (isByteDancePricingVendor(model.vendor_name) && !name.includes('doubao-') && !name.includes('seedream')) {
+    return true
+  }
+  return false
 }
 
 export function isDurationBasedVideoModel(model: PricingModel | string): boolean {
@@ -86,6 +104,9 @@ export function isVideoUpscaleModel(model: PricingModel | string): boolean {
  */
 export function getModelSupportedResolutions(model: PricingModel): string[] {
   const name = model.model_name.toLowerCase().trim()
+  if (name.includes('seedream')) {
+    return ['1k', '2k']
+  }
   if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) {
     return ['768p', '2k']
   }
@@ -98,11 +119,37 @@ export function getModelSupportedResolutions(model: PricingModel): string[] {
   if (name.includes('fast') || (name.includes('mini') && !name.includes('minimax'))) {
     return ['480p', '720p']
   }
-  if (name.includes('seedance2.5') || name.includes('seedance 2.5')) {
+  if (
+    name.includes('seedance2.5') ||
+    name.includes('seedance 2.5') ||
+    name.includes('seedance-2.5') ||
+    name.includes('seedance-2-5')
+  ) {
     return ['480p', '720p', '1080p']
   }
-  if (name.includes('seedance 2.0') || name.includes('seedance2.0')) {
+  if (
+    name.includes('seedance 2.0') ||
+    name.includes('seedance2.0') ||
+    name.includes('seedance-2.0') ||
+    name.includes('seedance-2-0')
+  ) {
     return ['480p', '720p', '1080p']
+  }
+  if (
+    name.includes('seedance 1.5') ||
+    name.includes('seedance1.5') ||
+    name.includes('seedance-1.5') ||
+    name.includes('seedance-1-5')
+  ) {
+    return ['480p', '720p', '1080p']
+  }
+  if (
+    name.includes('seedance 1.0') ||
+    name.includes('seedance1.0') ||
+    name.includes('seedance-1.0') ||
+    name.includes('seedance-1-0')
+  ) {
+    return ['480p', '720p']
   }
   if (name === 'grok-imagine-video') {
     return ['480p', '720p']
@@ -116,6 +163,12 @@ export function getModelSupportedResolutions(model: PricingModel): string[] {
 
 export function getResolutionBadgeStyle(res: string): { label: string; className: string } {
   const clean = res.trim().toLowerCase()
+  if (clean === '1k') {
+    return {
+      label: '1K',
+      className: 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300 font-semibold',
+    }
+  }
   if (clean === '480p') {
     return {
       label: '480P',
@@ -164,6 +217,22 @@ export function getVideoModelCapabilityTag(modelName: string): {
   className: string
 } | null {
   const name = modelName.toLowerCase()
+  if (name.includes('seedream')) {
+    if (name.includes('unfiltered')) {
+      return {
+        key: 'imagePricing.badge.unfiltered',
+        label: '原生未过滤',
+        className:
+          'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300',
+      }
+    }
+    return {
+      key: 'imagePricing.badge.interactive',
+      label: '交互编辑',
+      className:
+        'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300',
+    }
+  }
   if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) {
     return {
       key: 'videoPricing.badge.h3',
@@ -175,7 +244,7 @@ export function getVideoModelCapabilityTag(modelName: string): {
   if (name.includes('upscale') || name.includes('chaofen')) {
     return {
       key: 'videoPricing.badge.upscale',
-      label: 'Upscale Image Reconstruction',
+      label: '画质超分重建',
       className:
         'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800',
     }
@@ -204,7 +273,20 @@ export function getVideoModelCapabilityTag(modelName: string): {
         'bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-900/40 dark:text-cyan-300 dark:border-cyan-800',
     }
   }
-  if (name === 'seedance2.5' || name === 'seedance 2.5') {
+  if (name.includes('unfiltered')) {
+    return {
+      key: 'videoPricing.badge.unfiltered',
+      label: '原生未过滤',
+      className:
+        'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300',
+    }
+  }
+  if (
+    name.includes('seedance2.5') ||
+    name.includes('seedance 2.5') ||
+    name.includes('seedance-2.5') ||
+    name.includes('seedance-2-5')
+  ) {
     return {
       key: 'videoPricing.badge.flagship',
       label: '全能旗舰主力',
@@ -212,12 +294,43 @@ export function getVideoModelCapabilityTag(modelName: string): {
         'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800',
     }
   }
-  if (name === 'seedance 2.0' || name === 'seedance2.0') {
+  if (
+    name.includes('seedance 2.0') ||
+    name.includes('seedance2.0') ||
+    name.includes('seedance-2.0') ||
+    name.includes('seedance-2-0')
+  ) {
     return {
       key: 'videoPricing.badge.classic',
       label: '经典主力',
       className:
         'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800',
+    }
+  }
+  if (
+    name.includes('seedance 1.5') ||
+    name.includes('seedance1.5') ||
+    name.includes('seedance-1.5') ||
+    name.includes('seedance-1-5')
+  ) {
+    return {
+      key: 'videoPricing.badge.v15',
+      label: '进阶主力',
+      className:
+        'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-900/40 dark:text-slate-300 dark:border-slate-800',
+    }
+  }
+  if (
+    name.includes('seedance 1.0') ||
+    name.includes('seedance1.0') ||
+    name.includes('seedance-1.0') ||
+    name.includes('seedance-1-0')
+  ) {
+    return {
+      key: 'videoPricing.badge.v10',
+      label: '基础主力',
+      className:
+        'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-900/40 dark:text-slate-300 dark:border-slate-800',
     }
   }
   return null
@@ -233,6 +346,7 @@ export function getModelSpecificDiscountPercent(modelName: string): number {
   if (name.includes('2.0') && !name.includes('2.5') && !name.includes('4k')) return 16
   if (name.includes('2.5')) return 10
   if (name.includes('4k')) return 10
+  if (name.includes('seedream')) return 10
   return 0
 }
 
@@ -604,6 +718,18 @@ export function getVideoModelTagline(modelName: string): {
   defaultText: string
 } {
   const name = modelName.toLowerCase()
+  if (name.includes('seedream')) {
+    if (name.includes('unfiltered')) {
+      return {
+        key: 'imagePricing.tagline.seedreamUnfiltered',
+        defaultText: '无审查限制旗舰生图 · 完整释放 Seedream 5.0 原生图像创作与自由表达能力',
+      }
+    }
+    return {
+      key: 'imagePricing.tagline.seedreamPro',
+      defaultText: '新一代旗舰图像创作 · 支持复杂真实场景超高清生成与交互编辑，效果更自然',
+    }
+  }
   if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) {
     return {
       key: 'videoPricing.tagline.h3',
@@ -613,8 +739,7 @@ export function getVideoModelTagline(modelName: string): {
   if (name.includes('upscale') || name.includes('chaofen')) {
     return {
       key: 'videoPricing.tagline.upscale',
-      defaultText:
-        'Intelligent restoration & Upscale · Dual-track billing: Video Tokens + per-second fee',
+      defaultText: '视频超分重建 · 视频 Tokens + 时长按秒计费',
     }
   }
   if (name.includes('4k')) {
@@ -635,16 +760,60 @@ export function getVideoModelTagline(modelName: string): {
       defaultText: '轻量经济高性价比 · 极低成本满足日常视频内容生产',
     }
   }
-  if (name.includes('seedance2.5') || name.includes('seedance 2.5')) {
+  if (
+    name.includes('seedance2.5') ||
+    name.includes('seedance 2.5') ||
+    name.includes('seedance-2.5') ||
+    name.includes('seedance-2-5')
+  ) {
+    if (name.includes('unfiltered')) {
+      return {
+        key: 'videoPricing.tagline.flagshipUnfiltered',
+        defaultText: '新一代多模态主力 · 支持 1080p 影视级出片、运镜与首尾帧控制（未过滤版）',
+      }
+    }
     return {
       key: 'videoPricing.tagline.flagship',
       defaultText: '新一代多模态主力 · 支持 1080p 生成、运镜与首尾帧控制',
     }
   }
-  if (name.includes('seedance 2.0') || name.includes('seedance2.0')) {
+  if (
+    name.includes('seedance 2.0') ||
+    name.includes('seedance2.0') ||
+    name.includes('seedance-2.0') ||
+    name.includes('seedance-2-0')
+  ) {
+    if (name.includes('unfiltered')) {
+      return {
+        key: 'videoPricing.tagline.classicUnfiltered',
+        defaultText: '经典视频主力 · 稳定支持文生/图生视频与首尾帧控制（未过滤版）',
+      }
+    }
     return {
       key: 'videoPricing.tagline.classic',
       defaultText: '经典视频主力 · 稳定支持文生/图生视频与首尾帧控制',
+    }
+  }
+  if (
+    name.includes('seedance 1.5') ||
+    name.includes('seedance1.5') ||
+    name.includes('seedance-1.5') ||
+    name.includes('seedance-1-5')
+  ) {
+    return {
+      key: 'videoPricing.tagline.v15',
+      defaultText: '进阶视频生成 · 支持文生与图生视频创作',
+    }
+  }
+  if (
+    name.includes('seedance 1.0') ||
+    name.includes('seedance1.0') ||
+    name.includes('seedance-1.0') ||
+    name.includes('seedance-1-0')
+  ) {
+    return {
+      key: 'videoPricing.tagline.v10',
+      defaultText: '基础视频生成 · 稳定高效视频生成与轻量渲染',
     }
   }
   return {
@@ -669,6 +838,22 @@ export function getVideoModelHeroPrice(
   const discountOff = isGroupMode
     ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(name) || null))
     : null
+
+  if (isImageModel(model)) {
+    const unitPrice =
+      model.model_ratio > 0
+        ? model.model_ratio * 2 * rate
+        : 1.026 * rate
+    const officialUnitPrice = discountOff ? unitPrice / (1 - discountOff / 100) : 1.140 * rate
+    return {
+      priceText: `$${unitPrice.toFixed(3)}`,
+      officialPriceText: isGroupMode && discountOff != null ? `$${officialUnitPrice.toFixed(3)}` : null,
+      unitText: '/ 1M Tokens 起',
+      unitKey: 'videoPricing.unitPer1MTokensFrom',
+      isStartingPrice: true,
+      discountOff,
+    }
+  }
 
   if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo') || isDurationBasedVideoModel(model)) {
     const durationTiers = getDurationVideoTiers(model)
@@ -725,7 +910,7 @@ export function getVideoModelHeroPrice(
     }
   }
 
-  if (name.includes('2.0') && !name.includes('2.5') && !name.includes('4k')) {
+  if ((name.includes('2.0') || name.includes('2-0')) && !name.includes('2.5') && !name.includes('2-5') && !name.includes('4k')) {
     const billed = 3.449 * rate
     const official = 4.106 * rate
     return {
@@ -751,7 +936,7 @@ export function getVideoModelHeroPrice(
     }
   }
 
-  if (name.includes('2.5')) {
+  if (name.includes('2.5') || name.includes('2-5')) {
     const billed = 5.544 * rate
     const official = 6.16 * rate
     return {
