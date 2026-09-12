@@ -786,7 +786,7 @@ export function getVideoModelTagline(modelName: string): {
     if (name.includes('unfiltered')) {
       return {
         key: 'videoPricing.tagline.classicUnfiltered',
-        defaultText: '经典视频主力 · 稳定支持文生/图生视频与首尾帧控制（真人免审版）',
+        defaultText: '经典视频主力 · 稳定支持文生/图生视频（真人免审 · 创作尺度更宽松）',
       }
     }
     return {

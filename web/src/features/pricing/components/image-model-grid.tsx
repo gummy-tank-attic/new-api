@@ -197,7 +197,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
             </div>
 
             {/* Middle Section: Hero Price & Image Spec Matrix */}
-            <div className='mt-4 flex-1 flex flex-col justify-between'>
+            <div className='mt-4 flex-1 flex flex-col'>
               {/* Hero Starting Price */}
               <div className='flex items-baseline justify-between border-t border-[#E2E8F0] pt-3'>
                 <span className='text-[12px] font-semibold uppercase tracking-[0.05em] text-[#64748B]'>
@@ -221,7 +221,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
               </div>
 
               {/* Pricing Matrix (Aligned with Video Model Cards) */}
-              <div className='mt-4 overflow-hidden rounded-xl border border-[#E2E8F0] bg-white text-xs shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
+              <div className='mt-3.5 overflow-hidden rounded-xl border border-[#E2E8F0] bg-white text-xs shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
                 <div className='grid grid-cols-12 bg-muted/40 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground'>
                   <div className='col-span-4'>{t('Resolution', '分辨率')}</div>
                   <div className='col-span-4 text-right'>{t('imagePricing.textToImage', '文生图')}</div>
@@ -293,7 +293,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
               )}
 
               {/* Card Footer: clean, zero duplicate estimate note text */}
-              <div className='mt-3.5 flex items-center justify-end border-t border-[#F1F5F9] pt-2.5 dark:border-border/40'>
+              <div className='mt-auto pt-3 flex items-center justify-end border-t border-[#F1F5F9] dark:border-border/40'>
                 <span className='inline-flex items-center gap-[3px] text-[12.5px] font-medium text-[#2563EB]'>
                   {t('Details', '详情')}
                   <ArrowUpRight className='size-[13px] stroke-[2.2]' />
