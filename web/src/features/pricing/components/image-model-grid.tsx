@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { ArrowUpRight, Check, Copy, ImageIcon, Sparkles } from 'lucide-react'
+import { ArrowUpRight, Check, Copy, ImageIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -72,9 +72,6 @@ export function ImageModelGrid(props: ImageModelGridProps) {
       )}
     >
       {props.models.map((model) => {
-        const nameLower = (model.model_name || '').toLowerCase()
-        const isUnfiltered = nameLower.includes('unfiltered')
-        const isSeedream = nameLower.includes('seedream')
         const resolutions = getModelSupportedResolutions(model)
         const capTag = getVideoModelCapabilityTag(model.model_name)
         const tagline = getVideoModelTagline(model.model_name)
@@ -225,79 +222,56 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                 </div>
               </div>
 
-              {/* Pricing Spec Matrix (Clean Image Specs) */}
+              {/* Pricing Matrix (Aligned with Video Model Cards) */}
               <div className='mt-4 overflow-hidden rounded-xl border border-[#E2E8F0] bg-white text-xs shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
-                <div className='grid grid-cols-[36%_64%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 text-xs font-semibold text-[#334155] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
-                  <div>{t('imagePricing.specCol', '规格属性')}</div>
-                  <div className='text-right'>{t('imagePricing.detailCol', '详细配置')}</div>
+                <div className='grid grid-cols-12 bg-muted/40 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground'>
+                  <div className='col-span-4'>{t('Resolution', '分辨率')}</div>
+                  <div className='col-span-4 text-right'>{t('imagePricing.textToImage', '文生图')}</div>
+                  <div className='col-span-4 text-right'>{t('imagePricing.imageToImage', '图生图')}</div>
                 </div>
-                <div className='divide-y divide-[#F1F5F9] dark:divide-border/40 text-[12.5px]'>
-                  <div className='grid grid-cols-[36%_64%] items-center px-3.5 py-2.5 transition-colors hover:bg-muted/30'>
-                    <span className='text-[#64748B] dark:text-muted-foreground'>
-                      {t('imagePricing.featureRow', '生成能力')}
-                    </span>
-                    <span className='text-right font-medium text-[#0F172A] dark:text-foreground'>
-                      {t('imagePricing.featureVal', '文生图 / 交互编辑 / 风格重绘')}
-                    </span>
-                  </div>
-                  <div className='grid grid-cols-[36%_64%] items-center px-3.5 py-2.5 transition-colors hover:bg-muted/30'>
-                    <span className='text-[#64748B] dark:text-muted-foreground'>
-                      {t('imagePricing.resRow', '最大画质')}
-                    </span>
-                    <span className='text-right font-medium text-[#0F172A] dark:text-foreground'>
-                      {t('imagePricing.resVal', '2K 超高清 · 常见比例全支持')}
-                    </span>
-                  </div>
-                  <div className='grid grid-cols-[36%_64%] items-center px-3.5 py-2.5 transition-colors hover:bg-muted/30'>
-                    <span className='text-[#64748B] dark:text-muted-foreground'>
-                      {t('imagePricing.billingRow', '计费模式')}
-                    </span>
-                    <span className='text-right font-semibold text-[#0F172A] dark:text-foreground tabular-nums'>
-                      {hero.priceText} / 1M Tokens
-                    </span>
-                  </div>
+                <div className='divide-y divide-border/40 bg-card/60'>
+                  {resolutions.map((res) => {
+                    const style = getResolutionBadgeStyle(res)
+                    const showOfficial = isGroupMode && hero.officialPriceText != null
+
+                    return (
+                      <div
+                        key={res}
+                        className='grid grid-cols-12 items-center px-3.5 py-2.5 transition-colors hover:bg-muted/30'
+                      >
+                        <div className='col-span-4 pr-1'>
+                          <span className='font-semibold text-foreground text-[13px]'>
+                            {style.label}
+                          </span>
+                        </div>
+                        <div className='col-span-4 text-right'>
+                          <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
+                            {hero.priceText}
+                          </div>
+                          {showOfficial && (
+                            <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
+                              {hero.officialPriceText}
+                            </div>
+                          )}
+                        </div>
+                        <div className='col-span-4 text-right'>
+                          <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
+                            {hero.priceText}
+                          </div>
+                          {showOfficial && (
+                            <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
+                              {hero.officialPriceText}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
-                <div className='border-t border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-[7px] text-right text-[11.5px] font-normal text-[#64748B] dark:border-border dark:bg-muted/30 dark:text-slate-400'>
-                  {t('imagePricing.footerNotice', '计费单位：/ 1M Tokens · 极速出片与高保真画质')}
+                <div className='border-t border-border bg-slate-50 px-3.5 py-[7px] text-right text-[11.5px] font-medium text-slate-500 dark:bg-muted/30 dark:text-slate-400'>
+                  {t('Unit: / 1M Tokens', '计费单位：/ 1M Tokens')}
                 </div>
               </div>
-
-              {/* Seedream 5.0 Feature Highlight Callout */}
-              {isSeedream && (
-                <div
-                  className={cn(
-                    'relative mt-3.5 overflow-hidden rounded-xl border p-3 shadow-2xs',
-                    isUnfiltered
-                      ? 'border-rose-200/80 bg-gradient-to-br from-rose-500/8 via-pink-500/5 to-rose-500/10 dark:border-rose-800/50 dark:from-rose-950/40 dark:to-pink-950/30'
-                      : 'border-emerald-300/70 bg-gradient-to-br from-emerald-500/10 via-teal-500/6 to-emerald-500/12 dark:border-emerald-800/50 dark:from-emerald-950/40 dark:to-teal-950/30'
-                  )}
-                >
-                  <div className='flex items-center gap-2 mb-1.5'>
-                    <span
-                      className={cn(
-                        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold text-white shadow-xs',
-                        isUnfiltered ? 'bg-rose-600 dark:bg-rose-500' : 'bg-emerald-600 dark:bg-emerald-500'
-                      )}
-                    >
-                      <Sparkles className='size-3' />
-                      {isUnfiltered ? t('imagePricing.unfilteredCalloutBadge', '原生自由') : t('imagePricing.calloutBadge', '交互编辑')}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-[13px] font-semibold tracking-tight',
-                        isUnfiltered ? 'text-rose-950 dark:text-rose-200' : 'text-emerald-950 dark:text-emerald-200'
-                      )}
-                    >
-                      {isUnfiltered ? t('imagePricing.unfilteredCalloutTitle', '无审查限制与纯粹创意') : t('imagePricing.calloutTitle', '真实质感与局部重绘')}
-                    </span>
-                  </div>
-                  <p className='text-[12.5px] leading-[1.6] text-foreground/85'>
-                    {isUnfiltered
-                      ? t('imagePricing.unfilteredCalloutDesc', '完全解除提示词与艺术表现审查限制，原生释放 Seedream 5.0 的概念设计、超现实幻想与艺术生成潜能，适合专业创意设计与无拘无束的视觉探索。')
-                      : t('imagePricing.calloutDesc', '基于原生 Seedream 5.0 架构，支持文生图、参考图局部重绘与风格无缝微调。无需推倒重来，保持人物面部特征与主体一致性，还原超逼真光影与写实质感。')}
-                  </p>
-                </div>
-              )}
 
               {/* Bottom Details Link */}
               <div className='mt-4 flex items-center justify-end text-xs text-primary/80 transition-colors group-hover:text-primary'>

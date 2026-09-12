@@ -227,8 +227,8 @@ export function getVideoModelCapabilityTag(modelName: string): {
       }
     }
     return {
-      key: 'imagePricing.badge.interactive',
-      label: '交互编辑',
+      key: 'imagePricing.badge.flagship',
+      label: '旗舰生图',
       className:
         'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300',
     }
@@ -727,7 +727,7 @@ export function getVideoModelTagline(modelName: string): {
     }
     return {
       key: 'imagePricing.tagline.seedreamPro',
-      defaultText: '新一代旗舰图像创作 · 支持复杂真实场景超高清生成与交互编辑，效果更自然',
+      defaultText: '新一代旗舰图像创作 · 支持复杂真实场景超高清生成，质感更自然逼真',
     }
   }
   if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) {
