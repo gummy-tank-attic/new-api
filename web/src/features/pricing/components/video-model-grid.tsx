@@ -131,7 +131,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
             {/* Top Section */}
             <div className='space-y-2.5'>
               {/* Row 1: Model Identity (Full Width, No Crowding) */}
-              <div className='flex items-center gap-2.5 min-w-0'>
+              <div className='flex items-center gap-2.5 min-w-0 min-h-[26px]'>
                 <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)]'>
                   {vendorIcon}
                 </div>
@@ -187,7 +187,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               </div>
 
               {/* Row 3: Prominent Supported Resolutions */}
-              <div className='mb-2.5 flex items-center gap-[7px] text-[12.5px]'>
+              <div className='mb-2.5 flex items-center gap-[7px] text-[12.5px] min-h-[24px]'>
                 <span className='shrink-0 text-[12px] font-medium text-[#64748B]'>
                   {t('Supported Resolutions:')}
                 </span>
@@ -207,7 +207,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               </div>
 
               {/* Row 4: Tagline */}
-              <p className='text-[13px] leading-[1.6] font-normal text-[#334155] dark:text-muted-foreground'>
+              <p className='min-h-[42px] text-[13px] leading-[21px] font-normal text-[#334155] dark:text-muted-foreground'>
                 {t(tagline.key, tagline.defaultText)}
               </p>
             </div>
