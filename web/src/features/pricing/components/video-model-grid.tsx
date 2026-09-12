@@ -197,7 +197,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                     return (
                       <span
                         key={res}
-                        className='inline-flex items-center justify-center rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-[2.5px] text-[12px] font-semibold tracking-[0.01em] text-[#1E293B] tabular-nums'
+                        className='inline-flex items-center justify-center rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2.5 py-[2px] text-[12px] font-semibold tracking-[0.01em] text-[#334155] tabular-nums dark:border-border dark:bg-muted dark:text-foreground'
                       >
                         {style.label}
                       </span>

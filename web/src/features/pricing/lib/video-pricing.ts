@@ -163,51 +163,33 @@ export function getModelSupportedResolutions(model: PricingModel): string[] {
 
 export function getResolutionBadgeStyle(res: string): { label: string; className: string } {
   const clean = res.trim().toLowerCase()
+  const neutralClass =
+    'border-[#E2E8F0] bg-[#F1F5F9] text-[#334155] dark:border-border dark:bg-muted dark:text-foreground font-semibold'
+
   if (clean === '1k') {
-    return {
-      label: '1K',
-      className: 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300 font-semibold',
-    }
+    return { label: '1K', className: neutralClass }
   }
   if (clean === '480p') {
-    return {
-      label: '480P',
-      className: 'border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300',
-    }
+    return { label: '480P', className: neutralClass }
   }
   if (clean === '720p') {
-    return {
-      label: '720P',
-      className: 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-300',
-    }
+    return { label: '720P', className: neutralClass }
   }
   if (clean === '768p') {
-    return {
-      label: '768P',
-      className: 'border-cyan-300 bg-cyan-50 text-cyan-700 dark:border-cyan-800/60 dark:bg-cyan-950/40 dark:text-cyan-300 font-semibold',
-    }
+    return { label: '768P', className: neutralClass }
   }
   if (clean === '1080p') {
-    return {
-      label: '1080P',
-      className: 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-800/60 dark:bg-indigo-950/40 dark:text-indigo-300 font-semibold',
-    }
+    return { label: '1080P', className: neutralClass }
   }
   if (clean === '2k') {
-    return {
-      label: '2K',
-      className: 'border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-300 font-semibold',
-    }
+    return { label: '2K', className: neutralClass }
   }
   if (clean === '4k') {
-    return {
-      label: '4K',
-      className: 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-300 font-semibold',
-    }
+    return { label: '4K', className: neutralClass }
   }
   return {
     label: res.toUpperCase(),
-    className: 'border-muted bg-muted/40 text-muted-foreground',
+    className: neutralClass,
   }
 }
 
