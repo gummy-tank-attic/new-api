@@ -87,7 +87,10 @@ export function isTimeTieredModel(model: PricingModel): boolean {
   // 核心守卫：必须后端启用了表达式计费（tiered_expr），才进入分时展示；若后端为普通按量/Token模式，严格跟随展示为标准按量
   if (!isDynamicPricingModel(model)) return false
   const expr = model.billing_expr || ''
-  const hasTimeRule = /(?:hour|minute|weekday)\s*\(/i.test(expr)
+  const hasTimeRule =
+    /(?:hour|minute|weekday|month|day|is_bj_daytime|is_bj_workday|time)\s*\(/i.test(
+      expr
+    )
   const name = (model.model_name || '').trim().toLowerCase()
   const isWhitelisted = TIME_TIERED_MODEL_NAMES.some((t) => t.toLowerCase() === name)
   return hasTimeRule || isWhitelisted
