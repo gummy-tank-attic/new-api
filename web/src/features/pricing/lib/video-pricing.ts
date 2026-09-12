@@ -751,7 +751,7 @@ export function getVideoModelTagline(modelName: string): {
     if (name.includes('unfiltered')) {
       return {
         key: 'videoPricing.tagline.flagshipUnfiltered',
-        defaultText: '新一代多模态主力 · 支持 1080p 影视级出片、运镜与首尾帧控制（真人免审版）',
+        defaultText: '新一代多模态主力 · 支持 1080p 影视级生成（真人免审 · 创作尺度更宽松）',
       }
     }
     return {
