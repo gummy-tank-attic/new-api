@@ -840,10 +840,13 @@ export function getVideoModelHeroPrice(
     : null
 
   if (isImageModel(model)) {
-    const unitPrice =
-      model.model_ratio > 0
-        ? model.model_ratio * 2 * rate
-        : 1.026 * rate
+    let unitPrice = 1.026 * rate
+    if (model.billing_expr) {
+      const match = model.billing_expr.match(/u\("tokens"\)\s*\*\s*([\d.]+)\s*\/\s*1000000/)
+      if (match) {
+        unitPrice = Number(match[1]) * rate
+      }
+    }
     const officialUnitPrice = discountOff ? unitPrice / (1 - discountOff / 100) : 1.140 * rate
     return {
       priceText: `$${unitPrice.toFixed(3)}`,
