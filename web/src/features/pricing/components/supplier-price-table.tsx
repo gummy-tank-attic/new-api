@@ -98,10 +98,17 @@ export function isTimeTieredModel(model: PricingModel): boolean {
 
 export function getOffPeakMultiplier(model: PricingModel): number {
   const expr = model.billing_expr || ''
-  const m = expr.match(/\?\s*1(?:\.0+)?\s*:\s*([\d.]+)/)
+  const m = expr.match(/\?\s*([\d.]+)\s*:\s*([\d.]+)/)
   if (m) {
-    const val = Number(m[1])
-    if (Number.isFinite(val) && val > 0 && val < 1) return val
+    const v1 = Number(m[1])
+    const v2 = Number(m[2])
+    if (Number.isFinite(v1) && Number.isFinite(v2)) {
+      const minVal = Math.min(v1, v2)
+      const maxVal = Math.max(v1, v2)
+      if (minVal > 0 && maxVal > 0 && minVal < maxVal) {
+        return minVal / maxVal
+      }
+    }
   }
   return 0.5
 }

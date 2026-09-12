@@ -406,8 +406,16 @@ export function parseVideoUpscaleTiers(expression: string | null | undefined): V
     const secondPrice = Number(match[3]) || 0.01
     const res = rawKey === '2k' ? '2k' : rawKey === '1080p' ? '1080p' : '720p'
     const name = res === '2k' ? '2K' : res === '1080p' ? '1080p' : '720p'
-    const officialToken = res === '2k' ? 11.290322 : 10.263929
-    const officialSec = res === '2k' ? 0.051 : res === '1080p' ? 0.028 : 0.013
+    const discountPercent = getModelSpecificDiscountPercent('seedance-2.5-upscale') || 30
+    const discountMultiplier = 1 - discountPercent / 100
+    const officialToken =
+      discountMultiplier > 0
+        ? Number((tokenPrice / discountMultiplier).toFixed(6))
+        : tokenPrice
+    const officialSec =
+      discountMultiplier > 0
+        ? Number((secondPrice / discountMultiplier).toFixed(4))
+        : secondPrice
     const est5sTokens = 85_000
     const est5s = Number((secondPrice * 5 + (tokenPrice * est5sTokens) / 1_000_000).toFixed(2))
     const officialEst5s = Number((officialSec * 5 + (officialToken * est5sTokens) / 1_000_000).toFixed(2))
@@ -572,60 +580,7 @@ export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
     let billedNone = item.none
     let billedVideo = item.video
 
-    if (modelName.includes('4k')) {
-      title = '4K'
-      resLabel = '4K'
-      officialNone = 6.57
-      officialVideo = 6.57
-      billedNone = item.none || 5.913
-      billedVideo = item.video || 5.913
-    } else if (modelName.includes('fast')) {
-      title = '480p · 720p'
-      resLabel = '480p · 720p'
-      officialNone = 5.425
-      officialVideo = 3.2258
-      billedNone = item.none || 4.34
-      billedVideo = item.video || 2.581
-    } else if (modelName.includes('mini') && !modelName.includes('minimax')) {
-      title = '480p · 720p'
-      resLabel = '480p · 720p'
-      officialNone = 3.3724
-      officialVideo = 2.0528
-      billedNone = item.none || 1.6862
-      billedVideo = item.video || 1.0264
-    } else if (modelName.includes('2.5')) {
-      if (item.resList.includes('1080p')) {
-        title = '1080p'
-        resLabel = '1080p'
-        officialNone = 11.290322
-        officialVideo = 6.744868
-        billedNone = item.none || 10.16129
-        billedVideo = item.video || 6.070381
-      } else {
-        title = '480p · 720p'
-        resLabel = '480p · 720p'
-        officialNone = 10.263929
-        officialVideo = 6.160
-        billedNone = item.none || 9.237536
-        billedVideo = item.video || 5.544
-      }
-    } else if (modelName.includes('2.0')) {
-      if (item.resList.includes('1080p')) {
-        title = '1080p'
-        resLabel = '1080p'
-        officialNone = 7.478
-        officialVideo = 4.5455
-        billedNone = item.none || 6.2815
-        billedVideo = item.video || 3.8182
-      } else {
-        title = '480p · 720p'
-        resLabel = '480p · 720p'
-        officialNone = 6.745
-        officialVideo = 4.1056
-        billedNone = item.none || 5.6658
-        billedVideo = item.video || 3.4487
-      }
-    } else if (item.resList.includes('480p') && item.resList.includes('720p')) {
+    if (item.resList.includes('480p') && item.resList.includes('720p')) {
       title = '480p · 720p'
       resLabel = '480p · 720p'
     } else if (item.resList.includes('1080p')) {
@@ -637,6 +592,67 @@ export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
     } else {
       title = item.resList.map((r) => r.toUpperCase()).join(' · ')
       resLabel = item.resList.map((r) => r.toUpperCase()).join(' · ')
+    }
+
+    const discountPercent = getModelSpecificDiscountPercent(modelName)
+    const hasDynamicPrices = item.none > 0
+
+    if (hasDynamicPrices) {
+      if (modelName.includes('fast') || modelName.includes('mini')) {
+        // Expressions define billed prices
+        billedNone = item.none
+        billedVideo = item.video > 0 ? item.video : item.none
+        officialNone = discountPercent > 0 ? Number((item.none / (1 - discountPercent / 100)).toFixed(4)) : item.none
+        officialVideo = discountPercent > 0 ? Number((billedVideo / (1 - discountPercent / 100)).toFixed(4)) : billedVideo
+      } else {
+        // Expressions define official base prices (e.g. 2.5, 2.0, 4k)
+        officialNone = item.none
+        officialVideo = item.video > 0 ? item.video : item.none
+        billedNone = discountPercent > 0 ? Number((item.none * (1 - discountPercent / 100)).toFixed(6)) : item.none
+        billedVideo = discountPercent > 0 ? Number((officialVideo * (1 - discountPercent / 100)).toFixed(6)) : officialVideo
+      }
+    } else {
+      // Safety net fallback for missing expression prices
+      if (modelName.includes('4k')) {
+        officialNone = 6.57
+        officialVideo = 6.57
+        billedNone = 5.913
+        billedVideo = 5.913
+      } else if (modelName.includes('fast')) {
+        officialNone = 5.425
+        officialVideo = 3.2258
+        billedNone = 4.34
+        billedVideo = 2.581
+      } else if (modelName.includes('mini') && !modelName.includes('minimax')) {
+        officialNone = 3.3724
+        officialVideo = 2.0528
+        billedNone = 1.6862
+        billedVideo = 1.0264
+      } else if (modelName.includes('2.5')) {
+        if (item.resList.includes('1080p')) {
+          officialNone = 11.290322
+          officialVideo = 6.744868
+          billedNone = 10.16129
+          billedVideo = 6.070381
+        } else {
+          officialNone = 10.263929
+          officialVideo = 6.160
+          billedNone = 9.237536
+          billedVideo = 5.544
+        }
+      } else if (modelName.includes('2.0')) {
+        if (item.resList.includes('1080p')) {
+          officialNone = 7.478
+          officialVideo = 4.5455
+          billedNone = 6.2815
+          billedVideo = 3.8182
+        } else {
+          officialNone = 6.745
+          officialVideo = 4.1056
+          billedNone = 5.6658
+          billedVideo = 3.4487
+        }
+      }
     }
 
     groups.push({
@@ -1039,14 +1055,19 @@ export function getVideoModelHeroPrice(
     const groups = getVideoModelTierGroups(model)
     if (groups.length > 0) {
       const validBilled = groups.flatMap((g) =>
-        [g.billedVideo, g.billedNone].filter((p) => typeof p === 'number' && p > 0)
+        [g.withVideoPrice, g.withoutVideoPrice].filter((p) => typeof p === 'number' && p > 0)
       )
       const validOfficial = groups.flatMap((g) =>
-        [g.officialVideo, g.officialNone].filter((p) => typeof p === 'number' && p > 0)
+        [g.officialWithVideoPrice, g.officialWithoutVideoPrice].filter((p) => typeof p === 'number' && p > 0)
       )
       if (validBilled.length > 0) {
         const minBilled = Math.min(...validBilled) * rate
-        const minOfficial = validOfficial.length > 0 ? Math.min(...validOfficial) * rate : null
+        const minOfficial =
+          validOfficial.length > 0
+            ? Math.min(...validOfficial) * rate
+            : discountOff && discountOff < 100
+              ? minBilled / (1 - discountOff / 100)
+              : null
         const is4k = name.includes('4k')
         let dynamicPriceText = `$${minBilled.toFixed(3)}`
         if (!isGroupMode && minOfficial) {
@@ -1183,22 +1204,36 @@ export function parseDurationVideoTiers(
   // 1. Structured AST parsing using parseTaskTiersFromExpr
   if (schema) {
     try {
-      const parsedTiers = parseTaskTiersFromExpr(expression, schema)
+      const dynamicTiers: DurationVideoTier[] = []
       for (const tier of parsedTiers) {
         const sec = tier.unitPrices['seconds']
         if (typeof sec === 'number' && Number.isFinite(sec) && sec > 0) {
-          const resCond = tier.conditions.find((c) => c.field === 'resolution' || c.field === 'size')?.value?.toUpperCase()
-          const label = (tier.label || '').toUpperCase()
-          if (resCond === '768P' || label.includes('768')) {
+          const rawRes = tier.conditions.find((c) => c.field === 'resolution' || c.field === 'size')?.value || tier.label || ''
+          const resUpper = rawRes.toUpperCase()
+          const resLower = rawRes.toLowerCase()
+
+          if (resUpper === '768P' || resUpper.includes('768')) {
             sec768 = sec
-          } else if (resCond === '2K' || label.includes('2K')) {
+          } else if (resUpper === '2K' || resUpper.includes('2K')) {
             sec2k = sec
-          } else if (resCond === '480P' || label.includes('480')) {
+          } else if (resUpper === '480P' || resUpper.includes('480')) {
             sec480 = sec
-          } else if (resCond === '720P' || label.includes('720')) {
+          } else if (resUpper === '720P' || resUpper.includes('720')) {
             sec720 = sec
+          } else if (resLower) {
+            dynamicTiers.push({
+              resolution: resLower,
+              resLabel: resUpper,
+              est5sPrice: sec * 5,
+              secondPrice: sec,
+              officialEst5sPrice: sec * 5,
+              officialSecondPrice: sec,
+            })
           }
         }
+      }
+      if (dynamicTiers.length > 0 && sec480 === null && sec720 === null && sec768 === null && sec2k === null) {
+        return dynamicTiers
       }
       // Check fallback tier (no conditions) in ternary chain
       const fallbackTier = parsedTiers.find((t) => t.conditions.length === 0)
@@ -1252,6 +1287,53 @@ export function parseDurationVideoTiers(
     }
   }
 
+  if (sec768 === null) {
+    const m768 =
+      expression.match(/tier\s*\(\s*["'](?:768[Pp]|768)["']\s*,\s*(?:u\("seconds"\)\s*\*\s*)?([\d.]+)/) ||
+      expression.match(/(?:768[Pp]|768)[\s\S]*?u\("seconds"\)\s*\*\s*([\d.]+)/) ||
+      expression.match(/u\("seconds"\)\s*\*\s*([\d.]+)[\s\S]*?(?:768[Pp]|768)/)
+    if (m768 && m768[1]) {
+      const parsed = parseFloat(m768[1])
+      if (Number.isFinite(parsed) && parsed > 0) sec768 = parsed
+    }
+  }
+
+  if (sec2k === null) {
+    const m2k =
+      expression.match(/tier\s*\(\s*["'](?:2[Kk])["']\s*,\s*(?:u\("seconds"\)\s*\*\s*)?([\d.]+)/) ||
+      expression.match(/(?:2[Kk])[\s\S]*?u\("seconds"\)\s*\*\s*([\d.]+)/) ||
+      expression.match(/u\("seconds"\)\s*\*\s*([\d.]+)[\s\S]*?(?:2[Kk])/)
+    if (m2k && m2k[1]) {
+      const parsed = parseFloat(m2k[1])
+      if (Number.isFinite(parsed) && parsed > 0) sec2k = parsed
+    }
+  }
+
+  // If 768p or 2k is detected (MiniMax / Hailuo Video):
+  if (sec768 !== null || sec2k !== null || expression.includes('768') || (!expression.includes('480') && expression.includes('2K'))) {
+    const final768 = sec768 ?? 0.080
+    const final2k = sec2k ?? (sec768 !== null ? sec768 * 1.6 : 0.130)
+
+    return [
+      {
+        resolution: '768p',
+        resLabel: '768P',
+        est5sPrice: final768 * 5,
+        secondPrice: final768,
+        officialEst5sPrice: 0.400,
+        officialSecondPrice: 0.080,
+      },
+      {
+        resolution: '2k',
+        resLabel: '2K',
+        est5sPrice: final2k * 5,
+        secondPrice: final2k,
+        officialEst5sPrice: 0.650,
+        officialSecondPrice: 0.130,
+      },
+    ]
+  }
+
   // If 480p or 720p is detected (Grok Video):
   if (sec480 !== null || sec720 !== null || expression.includes('480') || expression.includes('720')) {
     const final480 = sec480 ?? 0.050
@@ -1274,28 +1356,6 @@ export function parseDurationVideoTiers(
         officialSecondPrice: 0.070,
       },
     ]
-  }
-
-  if (sec768 === null) {
-    const m768 =
-      expression.match(/tier\s*\(\s*["'](?:768[Pp]|768)["']\s*,\s*(?:u\("seconds"\)\s*\*\s*)?([\d.]+)/) ||
-      expression.match(/(?:768[Pp]|768)[\s\S]*?u\("seconds"\)\s*\*\s*([\d.]+)/) ||
-      expression.match(/u\("seconds"\)\s*\*\s*([\d.]+)[\s\S]*?(?:768[Pp]|768)/)
-    if (m768 && m768[1]) {
-      const parsed = parseFloat(m768[1])
-      if (Number.isFinite(parsed) && parsed > 0) sec768 = parsed
-    }
-  }
-
-  if (sec2k === null) {
-    const m2k =
-      expression.match(/tier\s*\(\s*["'](?:2[Kk])["']\s*,\s*(?:u\("seconds"\)\s*\*\s*)?([\d.]+)/) ||
-      expression.match(/(?:2[Kk])[\s\S]*?u\("seconds"\)\s*\*\s*([\d.]+)/) ||
-      expression.match(/u\("seconds"\)\s*\*\s*([\d.]+)[\s\S]*?(?:2[Kk])/)
-    if (m2k && m2k[1]) {
-      const parsed = parseFloat(m2k[1])
-      if (Number.isFinite(parsed) && parsed > 0) sec2k = parsed
-    }
   }
 
   // If uniform tier (single tier for seconds):
