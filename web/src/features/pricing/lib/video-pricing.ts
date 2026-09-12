@@ -276,7 +276,7 @@ export function getVideoModelCapabilityTag(modelName: string): {
   if (name.includes('unfiltered')) {
     return {
       key: 'videoPricing.badge.unfiltered',
-      label: '原生未过滤',
+      label: '真人免审',
       className:
         'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300',
     }
@@ -769,7 +769,7 @@ export function getVideoModelTagline(modelName: string): {
     if (name.includes('unfiltered')) {
       return {
         key: 'videoPricing.tagline.flagshipUnfiltered',
-        defaultText: '新一代多模态主力 · 支持 1080p 影视级出片、运镜与首尾帧控制（未过滤版）',
+        defaultText: '新一代多模态主力 · 支持 1080p 影视级出片、运镜与首尾帧控制（真人免审版）',
       }
     }
     return {
@@ -786,7 +786,7 @@ export function getVideoModelTagline(modelName: string): {
     if (name.includes('unfiltered')) {
       return {
         key: 'videoPricing.tagline.classicUnfiltered',
-        defaultText: '经典视频主力 · 稳定支持文生/图生视频与首尾帧控制（未过滤版）',
+        defaultText: '经典视频主力 · 稳定支持文生/图生视频与首尾帧控制（真人免审版）',
       }
     }
     return {

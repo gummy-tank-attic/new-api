@@ -181,10 +181,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                     return (
                       <span
                         key={res}
-                        className={cn(
-                          'inline-flex items-center justify-center rounded-md border px-2 py-[2.5px] text-[12px] font-semibold tracking-[0.01em] tabular-nums',
-                          style.className
-                        )}
+                        className='inline-flex items-center justify-center rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-[2.5px] text-[12px] font-semibold tracking-[0.01em] text-[#1E293B] tabular-nums dark:border-border dark:bg-muted dark:text-foreground'
                       >
                         {style.label}
                       </span>
