@@ -322,12 +322,12 @@ export const VENDOR_MODEL_DISPLAY_ORDER: Record<string, readonly string[]> = {
     'doubao-seedream-5-0-pro-unfiltered',
     'seedance2.5',
     'seedance-2.5-unfiltered',
+    'seedance-2.5-upscale',
     'Seedance 2.0',
     'seedance-2.0-unfiltered',
     'Seedance2.0-4k',
     'seedance2.0-fast',
     'seedance2.0-mini',
-    'seedance-2.5-upscale',
   ],
 }
 
