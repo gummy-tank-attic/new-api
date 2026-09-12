@@ -31,8 +31,16 @@ import type { PricingModel } from '../types'
 // ----------------------------------------------------------------------------
 
 export function isPerImageExpressionModel(model: PricingModel): boolean {
+  if (model.billing_mode !== 'tiered_expr') return false
+  if (model.model_name === 'gpt-image-2') return true
+  const schema = model.billing_usage_schema
+  if (Boolean(schema?.images || schema?.image)) return true
+  const name = model.model_name.toLowerCase()
   return (
-    model.model_name === 'gpt-image-2' && model.billing_mode === 'tiered_expr'
+    name.includes('image') ||
+    name.startsWith('dall-e') ||
+    name.includes('flux') ||
+    name.includes('seedream')
   )
 }
 

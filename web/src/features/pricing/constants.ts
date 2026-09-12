@@ -279,6 +279,7 @@ export const VENDOR_MODEL_DISPLAY_ORDER: Record<string, readonly string[]> = {
     'grok-build-0.1',
     'grok-imagine-image-quality',
     'grok-imagine-image',
+    'grok-imagine-video-1.5',
     'grok-imagine-video',
   ],
   // —— Google / Gemini：版本号大的在上 ——

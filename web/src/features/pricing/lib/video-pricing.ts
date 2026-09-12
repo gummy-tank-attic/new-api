@@ -59,10 +59,7 @@ export function isImageModel(model: PricingModel | string): boolean {
 
 export function isByteDanceOrVideoModel(model: PricingModel): boolean {
   if (isImageModel(model)) return false
-  const name = model.model_name.toLowerCase()
-  if (name.startsWith('seedance') || name.includes('seedance')) return true
-  if (name === 'grok-imagine-video') return true
-  if (name.includes('minimax-h3') || name.includes('hailuo') || (name.includes('minimax') && name.includes('h3'))) return true
+  // 1. 动态能力优先：Schema 声明或端点类型或表达式中包含视频任务维度
   const schema = model.billing_usage_schema
   if (schema?.seconds && (schema?.resolution || schema?.input_images || schema?.input_video_seconds)) {
     return true
@@ -70,6 +67,22 @@ export function isByteDanceOrVideoModel(model: PricingModel): boolean {
   if (Boolean(schema?.resolution || schema?.video_input)) {
     return true
   }
+  if (model.supported_endpoint_types?.some((t) => t.includes('video') || t.includes('task'))) {
+    return true
+  }
+  if (
+    model.billing_expr &&
+    (model.billing_expr.includes('duration') || model.billing_expr.includes('seconds')) &&
+    !model.billing_expr.includes('prompt_tokens')
+  ) {
+    return true
+  }
+
+  // 2. 业务家族兜底（保留现有产品家族策略）
+  const name = model.model_name.toLowerCase()
+  if (name.startsWith('seedance') || name.includes('seedance')) return true
+  if (name.includes('grok-imagine-video')) return true
+  if (name.includes('minimax-h3') || name.includes('hailuo') || (name.includes('minimax') && name.includes('h3'))) return true
   if (isByteDancePricingVendor(model.vendor_name) && !name.includes('doubao-') && !name.includes('seedream')) {
     return true
   }
@@ -77,12 +90,23 @@ export function isByteDanceOrVideoModel(model: PricingModel): boolean {
 }
 
 export function isDurationBasedVideoModel(model: PricingModel | string): boolean {
-  const name = (typeof model === 'string' ? model : model.model_name).toLowerCase()
-  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) return true
+  // 1. 动态能力优先
   if (typeof model !== 'string') {
     const schema = model.billing_usage_schema
     if (schema?.seconds && !schema?.tokens) return true
+    if (
+      model.billing_expr &&
+      (model.billing_expr.includes('duration') || model.billing_expr.includes('seconds')) &&
+      !model.billing_expr.includes('tokens')
+    ) {
+      return true
+    }
   }
+
+  // 2. 业务家族兜底
+  const name = (typeof model === 'string' ? model : model.model_name).toLowerCase()
+  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) return true
+  if (name.includes('grok-imagine-video')) return true
   return false
 }
 
@@ -102,8 +126,25 @@ export function isVideoUpscaleModel(model: PricingModel | string): boolean {
 
 /**
  * Returns supported resolutions accurately aligned with upstream Volcengine & Tokease specs.
+ * 动态自适应优先（Schema 与 表达式 AST 自发现），业务字典保底。
  */
 export function getModelSupportedResolutions(model: PricingModel): string[] {
+  // 1. 动态自适应优先：Schema 枚举
+  const schemaRes = model.billing_usage_schema?.resolution?.enum
+  if (Array.isArray(schemaRes) && schemaRes.length > 0) {
+    return schemaRes
+  }
+
+  // 2. 动态自适应优先：直接从 billing_expr 中自发现 tier("480p", ...) 标签
+  const expr = model.billing_expr || ''
+  if (expr.includes('tier(')) {
+    const tierMatches = [...expr.matchAll(/tier\s*\(\s*["']([^"']+)["']/g)].map((m) => m[1])
+    if (tierMatches.length > 0) {
+      return [...new Set(tierMatches)]
+    }
+  }
+
+  // 3. 业务家族兜底（保留原有已知老模型的默认安全网）
   const name = model.model_name.toLowerCase().trim()
   if (name.includes('seedream')) {
     return ['1k', '2k']
@@ -121,30 +162,6 @@ export function getModelSupportedResolutions(model: PricingModel): string[] {
     return ['480p', '720p']
   }
   if (
-    name.includes('seedance2.5') ||
-    name.includes('seedance 2.5') ||
-    name.includes('seedance-2.5') ||
-    name.includes('seedance-2-5')
-  ) {
-    return ['480p', '720p', '1080p']
-  }
-  if (
-    name.includes('seedance 2.0') ||
-    name.includes('seedance2.0') ||
-    name.includes('seedance-2.0') ||
-    name.includes('seedance-2-0')
-  ) {
-    return ['480p', '720p', '1080p']
-  }
-  if (
-    name.includes('seedance 1.5') ||
-    name.includes('seedance1.5') ||
-    name.includes('seedance-1.5') ||
-    name.includes('seedance-1-5')
-  ) {
-    return ['480p', '720p', '1080p']
-  }
-  if (
     name.includes('seedance 1.0') ||
     name.includes('seedance1.0') ||
     name.includes('seedance-1.0') ||
@@ -152,12 +169,11 @@ export function getModelSupportedResolutions(model: PricingModel): string[] {
   ) {
     return ['480p', '720p']
   }
-  if (name === 'grok-imagine-video') {
-    return ['480p', '720p']
+  if (name.includes('seedance')) {
+    return ['480p', '720p', '1080p']
   }
-  const schemaRes = model.billing_usage_schema?.resolution?.enum
-  if (Array.isArray(schemaRes) && schemaRes.length > 0) {
-    return schemaRes
+  if (name.includes('grok-imagine-video')) {
+    return ['480p', '720p']
   }
   return []
 }
@@ -222,6 +238,14 @@ export function getVideoModelCapabilityTag(modelName: string): {
       label: '旗舰多模态视频',
       className:
         'border-[#F3E8FF] bg-[#FAF5FF] text-[12px] font-semibold text-[#7E22CE] dark:border-violet-800 dark:bg-violet-900/40 dark:text-violet-300',
+    }
+  }
+  if (name.includes('grok-imagine-video')) {
+    return {
+      key: 'videoPricing.badge.grokVideo',
+      label: 'xAI 视频生成',
+      className:
+        'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300',
     }
   }
   if (name.includes('upscale') || name.includes('chaofen')) {
@@ -1153,6 +1177,8 @@ export function parseDurationVideoTiers(
 
   let sec768: number | null = null
   let sec2k: number | null = null
+  let sec480: number | null = null
+  let sec720: number | null = null
 
   // 1. Structured AST parsing using parseTaskTiersFromExpr
   if (schema) {
@@ -1161,12 +1187,16 @@ export function parseDurationVideoTiers(
       for (const tier of parsedTiers) {
         const sec = tier.unitPrices['seconds']
         if (typeof sec === 'number' && Number.isFinite(sec) && sec > 0) {
-          const resCond = tier.conditions.find((c) => c.field === 'resolution')?.value?.toUpperCase()
+          const resCond = tier.conditions.find((c) => c.field === 'resolution' || c.field === 'size')?.value?.toUpperCase()
           const label = (tier.label || '').toUpperCase()
           if (resCond === '768P' || label.includes('768')) {
             sec768 = sec
           } else if (resCond === '2K' || label.includes('2K')) {
             sec2k = sec
+          } else if (resCond === '480P' || label.includes('480')) {
+            sec480 = sec
+          } else if (resCond === '720P' || label.includes('720')) {
+            sec720 = sec
           }
         }
       }
@@ -1180,6 +1210,10 @@ export function parseDurationVideoTiers(
             sec2k = sec
           } else if (label.includes('768') && sec768 === null) {
             sec768 = sec
+          } else if (label.includes('480') && sec480 === null) {
+            sec480 = sec
+          } else if (label.includes('720') && sec720 === null) {
+            sec720 = sec
           }
         }
       }
@@ -1189,6 +1223,59 @@ export function parseDurationVideoTiers(
   }
 
   // 2. Regex fallback for any expression variants (e.g. raw expressions, partial schema)
+  // Check for Grok Video (480p / 720p)
+  if (sec480 === null) {
+    const m480 =
+      expression.match(/tier\s*\(\s*["'](?:480[Pp]|480)["']\s*,\s*([\d.]+)(?:\s*\*\s*\(?param\("duration"\)?)?/) ||
+      expression.match(/tier\s*\(\s*["'](?:480[Pp]|480)["']\s*,\s*(?:u\("seconds"\)\s*\*\s*)?([\d.]+)/) ||
+      expression.match(/(?:480[Pp]|480)[\s\S]*?u\("seconds"\)\s*\*\s*([\d.]+)/)
+    if (m480 && m480[1]) {
+      let parsed = parseFloat(m480[1])
+      if (Number.isFinite(parsed) && parsed > 0) {
+        if (parsed > 100) parsed = parsed / 500000.0 // Quota to USD rate
+        sec480 = parsed
+      }
+    }
+  }
+
+  if (sec720 === null) {
+    const m720 =
+      expression.match(/tier\s*\(\s*["'](?:720[Pp]|720)["']\s*,\s*([\d.]+)(?:\s*\*\s*\(?param\("duration"\)?)?/) ||
+      expression.match(/tier\s*\(\s*["'](?:720[Pp]|720)["']\s*,\s*(?:u\("seconds"\)\s*\*\s*)?([\d.]+)/) ||
+      expression.match(/(?:720[Pp]|720)[\s\S]*?u\("seconds"\)\s*\*\s*([\d.]+)/)
+    if (m720 && m720[1]) {
+      let parsed = parseFloat(m720[1])
+      if (Number.isFinite(parsed) && parsed > 0) {
+        if (parsed > 100) parsed = parsed / 500000.0 // Quota to USD rate
+        sec720 = parsed
+      }
+    }
+  }
+
+  // If 480p or 720p is detected (Grok Video):
+  if (sec480 !== null || sec720 !== null || expression.includes('480') || expression.includes('720')) {
+    const final480 = sec480 ?? 0.050
+    const final720 = sec720 ?? 0.070
+    return [
+      {
+        resolution: '480p',
+        resLabel: '480P',
+        est5sPrice: final480 * 5,
+        secondPrice: final480,
+        officialEst5sPrice: 0.250,
+        officialSecondPrice: 0.050,
+      },
+      {
+        resolution: '720p',
+        resLabel: '720P',
+        est5sPrice: final720 * 5,
+        secondPrice: final720,
+        officialEst5sPrice: 0.350,
+        officialSecondPrice: 0.070,
+      },
+    ]
+  }
+
   if (sec768 === null) {
     const m768 =
       expression.match(/tier\s*\(\s*["'](?:768[Pp]|768)["']\s*,\s*(?:u\("seconds"\)\s*\*\s*)?([\d.]+)/) ||
