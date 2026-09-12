@@ -7020,6 +7020,7 @@
     "videoPricing.tagline.upscale": "Intelligent restoration & Upscale · Dual-track billing: Video Tokens + per-second fee",
     "videoPricing.tagline.v10": "Standard video generation · Efficient video synthesis & lightweight rendering",
     "videoPricing.tagline.v15": "Advanced video generation · Text-to-video and image-to-video creation",
+    "imagePricing.unitPerImageFrom": "/ image from",
     "videoPricing.unitPer1MTokens": "/ 1M Tokens",
     "videoPricing.unitPer1MTokensFrom": "/ 1M Tokens from",
     "videoPricing.unitPer5sFrom": "/ 5s from",

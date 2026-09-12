@@ -449,4 +449,55 @@ describe('task visual pricing preview', () => {
     const groups = getVideoModelTierGroups(model)
     assert.equal(groups.length, 0)
   })
+
+  test('dynamically parses Doubao Seedream fixed image pricing without hardcoding', () => {
+    const model: PricingModel = {
+      id: 2,
+      model_name: 'doubao-seedream-5-0-pro',
+      vendor_name: 'ByteDance',
+      billing_expr:
+        'tier("image", fixed(0.02925)) * image_count * ((has(param("size"), "2048") || has(param("size"), "2560") || has(param("size"), "2K")) ? 2 : 1)',
+      quota_type: 1,
+      model_ratio: 1,
+      model_price: 0,
+      completion_ratio: 1,
+    }
+
+    // 1. Group Mode: selling at $0.02925 (1K) and $0.0585 (2K), official is $0.045 / $0.09
+    // Discount is dynamically calculated: (1 - 0.02925 / 0.045) * 100 = 35%
+    const hero = getVideoModelHeroPrice(model, true, 1)
+    assert.equal(hero.isPerImage, true)
+    assert.equal(hero.priceText, '$0.02925')
+    assert.equal(hero.officialPriceText, '$0.045')
+    assert.equal(hero.discountOff, 35)
+    assert.equal(hero.unitText, '/ 张 起')
+    assert.equal(hero.resolutionPrices?.['1k']?.priceText, '$0.02925')
+    assert.equal(hero.resolutionPrices?.['1k']?.officialPriceText, '$0.045')
+    assert.equal(hero.resolutionPrices?.['2k']?.priceText, '$0.0585')
+    assert.equal(hero.resolutionPrices?.['2k']?.officialPriceText, '$0.09')
+
+    // 2. Official Mode: shows official benchmarks ($0.045 / $0.09), discount is null
+    const officialHero = getVideoModelHeroPrice(model, false, 1)
+    assert.equal(officialHero.priceText, '$0.045')
+    assert.equal(officialHero.officialPriceText, null)
+    assert.equal(officialHero.discountOff, null)
+    assert.equal(officialHero.resolutionPrices?.['1k']?.priceText, '$0.045')
+    assert.equal(officialHero.resolutionPrices?.['1k']?.officialPriceText, null)
+    assert.equal(officialHero.resolutionPrices?.['2k']?.priceText, '$0.09')
+    assert.equal(officialHero.resolutionPrices?.['2k']?.officialPriceText, null)
+
+    // 3. Dynamic test: If user changes to 50% discount (selling at $0.0225)
+    const model50: PricingModel = {
+      ...model,
+      billing_expr:
+        'tier("image", fixed(0.0225)) * image_count * ((has(param("size"), "2048")) ? 2 : 1)',
+    }
+    const hero50 = getVideoModelHeroPrice(model50, true, 1)
+    assert.equal(hero50.priceText, '$0.0225')
+    assert.equal(hero50.officialPriceText, '$0.045')
+    assert.equal(hero50.discountOff, 50)
+    assert.equal(hero50.resolutionPrices?.['1k']?.priceText, '$0.0225')
+    assert.equal(hero50.resolutionPrices?.['2k']?.priceText, '$0.045')
+  })
 })
+

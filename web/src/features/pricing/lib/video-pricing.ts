@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { isByteDancePricingVendor, lookupModelSavingsOff } from '../constants'
 import type { BillingUsageSchema, PricingModel } from '../types'
 import { parseTaskTiersFromExpr } from './billing-expr'
+import { stripTrailingZeros } from './price'
 import { getTaskMatrixDisplayTiers } from './task-matrix-display'
 
 export interface VideoUpscaleTier {
@@ -203,7 +204,7 @@ export function getVideoModelCapabilityTag(modelName: string): {
     if (name.includes('unfiltered')) {
       return {
         key: 'imagePricing.badge.unfiltered',
-        label: '原生未过滤',
+        label: '宽松审查',
         className:
           'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300',
       }
@@ -328,7 +329,6 @@ export function getModelSpecificDiscountPercent(modelName: string): number {
   if (name.includes('2.0') && !name.includes('2.5') && !name.includes('4k')) return 16
   if (name.includes('2.5')) return 10
   if (name.includes('4k')) return 10
-  if (name.includes('seedream')) return 10
   return 0
 }
 
@@ -804,41 +804,169 @@ export function getVideoModelTagline(modelName: string): {
   }
 }
 
-export function getVideoModelHeroPrice(
-  model: PricingModel,
-  isGroupMode = true,
-  rate = 1
-): {
+export interface ImageResolutionPrice {
+  priceText: string
+  officialPriceText: string | null
+  price: number
+  officialPrice: number | null
+}
+
+export interface VideoModelHeroPriceResult {
   priceText: string
   officialPriceText: string | null
   unitText: string
   unitKey: string
   isStartingPrice: boolean
   discountOff: number | null
-} {
+  isPerImage?: boolean
+  resolutionPrices?: Record<string, ImageResolutionPrice>
+}
+
+export function parseImageModelPricing(
+  model: PricingModel,
+  isGroupMode = true,
+  rate = 1
+): VideoModelHeroPriceResult {
+  const name = model.model_name.toLowerCase()
+  const expr = (model.billing_expr || '').trim()
+
+  const fixedMatch = expr.match(/fixed\(\s*["']?([\d.]+)["']?\s*\)/i)
+  const tier1kMatch = expr.match(/tier\(\s*["'](?:1k|image|default)["']\s*,\s*fixed\(\s*["']?([\d.]+)["']?\s*\)\s*\)/i)
+  const tier2kMatch = expr.match(/tier\(\s*["']2k["']\s*,\s*fixed\(\s*["']?([\d.]+)["']?\s*\)\s*\)/i)
+  const isPerImageExpr = Boolean(fixedMatch || tier1kMatch || expr.includes('fixed('))
+
+  const tokenMatch = expr.match(/u\("tokens"\)\s*\*\s*([\d.]+)\s*\/\s*1000000/)
+
+  let officialBase1k = 0.045
+  let officialBase2k = 0.090
+  if (!name.includes('seedream')) {
+    officialBase1k = 0.040
+    officialBase2k = 0.080
+  }
+
+  const formatImgPrice = (v: number) => stripTrailingZeros(`$${v.toFixed(5)}`)
+
+  if (isPerImageExpr || (model.quota_type === 1 && !tokenMatch)) {
+    let basePrice = 0.02925
+    if (tier1kMatch) {
+      basePrice = Number(tier1kMatch[1])
+    } else if (fixedMatch) {
+      basePrice = Number(fixedMatch[1])
+    } else if (typeof model.model_price === 'number' && model.model_price > 0) {
+      basePrice = model.model_price
+    }
+
+    const actual1k = basePrice * rate
+    let actual2k = actual1k * 2
+    if (tier2kMatch) {
+      actual2k = Number(tier2kMatch[1]) * rate
+    } else {
+      const multMatch = expr.match(/\?\s*([\d.]+)\s*:\s*1(?:\.0*)?(?:\b|\s|\))/i)
+      if (multMatch) {
+        const mult = Number(multMatch[1])
+        if (!Number.isNaN(mult) && mult > 0) {
+          actual2k = actual1k * mult
+        }
+      }
+    }
+
+    const official1k = officialBase1k * rate
+    const official2k = officialBase2k * rate
+
+    let discountOff: number | null = null
+    if (isGroupMode) {
+      const manualOff = lookupModelSavingsOff(model.model_name)
+      if (manualOff != null) {
+        discountOff = manualOff
+      } else if (official1k > 0 && actual1k < official1k) {
+        const computed = Math.round((1 - actual1k / official1k) * 100)
+        if (computed > 0) {
+          discountOff = computed
+        }
+      }
+    }
+
+    const display1k = isGroupMode ? actual1k : official1k
+    const display2k = isGroupMode ? actual2k : official2k
+    const displayOfficial1k = isGroupMode && discountOff != null ? official1k : null
+    const displayOfficial2k = isGroupMode && discountOff != null ? official2k : null
+
+    return {
+      priceText: formatImgPrice(display1k),
+      officialPriceText: displayOfficial1k != null ? formatImgPrice(displayOfficial1k) : null,
+      unitText: '/ 张 起',
+      unitKey: 'imagePricing.unitPerImageFrom',
+      isStartingPrice: true,
+      discountOff,
+      isPerImage: true,
+      resolutionPrices: {
+        '1k': {
+          priceText: formatImgPrice(display1k),
+          officialPriceText: displayOfficial1k != null ? formatImgPrice(displayOfficial1k) : null,
+          price: display1k,
+          officialPrice: displayOfficial1k,
+        },
+        '2k': {
+          priceText: formatImgPrice(display2k),
+          officialPriceText: displayOfficial2k != null ? formatImgPrice(displayOfficial2k) : null,
+          price: display2k,
+          officialPrice: displayOfficial2k,
+        },
+      },
+    }
+  }
+
+  let unitPrice = 1.026 * rate
+  if (tokenMatch) {
+    unitPrice = Number(tokenMatch[1]) * rate
+  }
+  const manualOff = isGroupMode
+    ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(name) || null))
+    : null
+  const officialUnitPrice = manualOff ? unitPrice / (1 - manualOff / 100) : 1.140 * rate
+  const displayToken = isGroupMode ? unitPrice : officialUnitPrice
+  const displayOfficialToken = isGroupMode && manualOff != null ? officialUnitPrice : null
+  const tokenPriceFormatted = `$${displayToken.toFixed(3)}`
+  const tokenOfficialFormatted = displayOfficialToken != null ? `$${displayOfficialToken.toFixed(3)}` : null
+
+  return {
+    priceText: tokenPriceFormatted,
+    officialPriceText: tokenOfficialFormatted,
+    unitText: '/ 1M Tokens 起',
+    unitKey: 'videoPricing.unitPer1MTokensFrom',
+    isStartingPrice: true,
+    discountOff: manualOff,
+    isPerImage: false,
+    resolutionPrices: {
+      '1k': {
+        priceText: tokenPriceFormatted,
+        officialPriceText: tokenOfficialFormatted,
+        price: displayToken,
+        officialPrice: displayOfficialToken,
+      },
+      '2k': {
+        priceText: tokenPriceFormatted,
+        officialPriceText: tokenOfficialFormatted,
+        price: displayToken,
+        officialPrice: displayOfficialToken,
+      },
+    },
+  }
+}
+
+export function getVideoModelHeroPrice(
+  model: PricingModel,
+  isGroupMode = true,
+  rate = 1
+): VideoModelHeroPriceResult {
+  if (isImageModel(model)) {
+    return parseImageModelPricing(model, isGroupMode, rate)
+  }
+
   const name = model.model_name.toLowerCase()
   const discountOff = isGroupMode
     ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(name) || null))
     : null
-
-  if (isImageModel(model)) {
-    let unitPrice = 1.026 * rate
-    if (model.billing_expr) {
-      const match = model.billing_expr.match(/u\("tokens"\)\s*\*\s*([\d.]+)\s*\/\s*1000000/)
-      if (match) {
-        unitPrice = Number(match[1]) * rate
-      }
-    }
-    const officialUnitPrice = discountOff ? unitPrice / (1 - discountOff / 100) : 1.140 * rate
-    return {
-      priceText: `$${unitPrice.toFixed(3)}`,
-      officialPriceText: isGroupMode && discountOff != null ? `$${officialUnitPrice.toFixed(3)}` : null,
-      unitText: '/ 1M Tokens 起',
-      unitKey: 'videoPricing.unitPer1MTokensFrom',
-      isStartingPrice: true,
-      discountOff,
-    }
-  }
 
   if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo') || isDurationBasedVideoModel(model)) {
     const durationTiers = getDurationVideoTiers(model)

@@ -75,10 +75,10 @@ export function ImageModelGrid(props: ImageModelGridProps) {
         const resolutions = getModelSupportedResolutions(model)
         const capTag = getVideoModelCapabilityTag(model.model_name)
         const tagline = getVideoModelTagline(model.model_name)
-        const discountOff = isGroupMode
-          ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || null))
-          : null
         const hero = getVideoModelHeroPrice(model, isGroupMode, props.priceRate)
+        const discountOff = isGroupMode
+          ? (hero.discountOff ?? lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || null))
+          : null
 
         const vendorIcon =
           model.vendor_icon || model.icon
@@ -228,8 +228,12 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                 </div>
                 <div className='divide-y divide-border/40 bg-card/60'>
                   {resolutions.map((res) => {
+                    const resKey = res.toLowerCase()
+                    const resPrice = hero.resolutionPrices?.[resKey]
+                    const currentPriceText = resPrice?.priceText ?? hero.priceText
+                    const currentOfficialText = resPrice?.officialPriceText ?? hero.officialPriceText
                     const style = getResolutionBadgeStyle(res)
-                    const showOfficial = isGroupMode && hero.officialPriceText != null
+                    const showOfficial = isGroupMode && currentOfficialText != null
 
                     return (
                       <div
@@ -243,21 +247,21 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                         </div>
                         <div className='col-span-4 text-right'>
                           <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
-                            {hero.priceText}
+                            {currentPriceText}
                           </div>
                           {showOfficial && (
                             <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
-                              {hero.officialPriceText}
+                              {currentOfficialText}
                             </div>
                           )}
                         </div>
                         <div className='col-span-4 text-right'>
                           <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
-                            {hero.priceText}
+                            {currentPriceText}
                           </div>
                           {showOfficial && (
                             <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
-                              {hero.officialPriceText}
+                              {currentOfficialText}
                             </div>
                           )}
                         </div>
@@ -266,7 +270,9 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                   })}
                 </div>
                 <div className='border-t border-border bg-slate-50 px-3.5 py-[7px] text-right text-[11.5px] font-medium text-slate-500 dark:bg-muted/30 dark:text-slate-400'>
-                  {t('Unit: / 1M Tokens', '计费单位：/ 1M Tokens')}
+                  {hero.isPerImage
+                    ? `${t('Billing Unit:', '计费单位：')}/ ${t('image (unit)', '张')}`
+                    : t('Unit: / 1M Tokens', '计费单位：/ 1M Tokens')}
                 </div>
               </div>
 
