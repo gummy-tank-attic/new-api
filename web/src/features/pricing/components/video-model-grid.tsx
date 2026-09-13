@@ -228,31 +228,33 @@ export function VideoModelGrid(props: VideoModelGridProps) {
             {/* Middle Section: Hero Price & Rate Breakdown */}
             <div className='mt-4'>
               {/* Hero Starting Price */}
-              <div className='flex items-baseline justify-between border-t border-[#E2E8F0] pt-3'>
-                <span className='text-[12px] font-semibold uppercase tracking-[0.05em] text-[#64748B]'>
-                  {t('Starting Price')}
-                </span>
-                <div className='text-right'>
-                  <div className='flex items-baseline justify-end gap-1'>
-                    <span className='text-[22px] font-semibold tabular-nums text-[#0F172A] dark:text-foreground'>
-                      {hero.priceText}
-                    </span>
-                    {hero.officialPriceText && isGroupMode && (
-                      <span className='text-[13px] font-normal tabular-nums text-[#94A3B8] line-through'>
-                        {hero.officialPriceText}
+              {!isDurationBased && (
+                <div className='flex items-baseline justify-between border-t border-[#E2E8F0] pt-3'>
+                  <span className='text-[12px] font-semibold uppercase tracking-[0.05em] text-[#64748B]'>
+                    {t('Starting Price')}
+                  </span>
+                  <div className='text-right'>
+                    <div className='flex items-baseline justify-end gap-1'>
+                      <span className='text-[22px] font-semibold tabular-nums text-[#0F172A] dark:text-foreground'>
+                        {hero.priceText}
                       </span>
-                    )}
-                    <span className='ml-0.5 text-[12.5px] font-normal text-[#64748B]'>
-                      {t(hero.unitKey, hero.unitText)}
-                    </span>
-                  </div>
-                  {isUpscale && (
-                    <div className='text-[10px] text-muted-foreground/80 mt-0.5 font-medium'>
-                      {t('Upscale Service · Video Tokens $7.18/1M+')}
+                      {hero.officialPriceText && isGroupMode && (
+                        <span className='text-[13px] font-normal tabular-nums text-[#94A3B8] line-through'>
+                          {hero.officialPriceText}
+                        </span>
+                      )}
+                      <span className='ml-0.5 text-[12.5px] font-normal text-[#64748B]'>
+                        {t(hero.unitKey, hero.unitText)}
+                      </span>
                     </div>
-                  )}
+                    {isUpscale && (
+                      <div className='text-[10px] text-muted-foreground/80 mt-0.5 font-medium'>
+                        {t('Upscale Service · Video Tokens $7.18/1M+')}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Pricing Spec Matrix (Seedance 官方规格表) */}
               {isUpscale && (
@@ -315,47 +317,73 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                 </div>
               )}
               {isDurationBased && (
-                <div className='mt-4 overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
-                  <div className='grid grid-cols-[28%_40%_32%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[12px] font-semibold text-[#334155] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
-                    <div className='text-left'>{t('Resolution', '分辨率')}</div>
-                    <div className='text-center'>{t('videoPricing.est5s', '5s 预估价格')}</div>
-                    <div className='text-right'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
-                  </div>
-                  <div className='flex flex-col'>
-                    {durationTiers.length === 0 ? (
-                      <div className='px-[14px] py-3 text-sm text-muted-foreground'>
-                        {t('Unable to parse structured pricing')}
-                      </div>
-                    ) : (
-                      durationTiers.map((tier, index) => {
-                      const billedEst5s = tier.est5sPrice * props.priceRate
-                      const billedSecond = tier.secondPrice * props.priceRate
-
-                      return (
-                        <div
-                          key={tier.resolution}
-                          className={cn(
-                            'grid grid-cols-[28%_40%_32%] items-center px-[14px] py-[9.5px] transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
-                            index < durationTiers.length - 1 && 'border-b border-[#F1F5F9] dark:border-border/40'
-                          )}
-                        >
-                          <div className='text-left text-[13px] font-semibold text-[#0F172A] dark:text-foreground'>
-                            {tier.resLabel}
-                          </div>
-                          <div className='text-center text-[13.5px] font-semibold tabular-nums text-[#0F172A] dark:text-foreground'>
-                            ${billedEst5s.toFixed(3)}
-                          </div>
-                          <div className='text-right text-[13.5px] font-semibold tabular-nums text-[#0F172A] dark:text-foreground'>
-                            ${billedSecond >= 0.01 && !Number.isInteger(billedSecond * 1000) ? billedSecond.toFixed(4).replace(/0$/, '') : billedSecond.toFixed(3)}
-                            <span className='ml-0.5 text-[12px] font-normal text-[#64748B]'>/s</span>
-                          </div>
+                <div className='border-t border-[#E2E8F0] pt-3.5 dark:border-border'>
+                  <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
+                    <div className='grid grid-cols-[28%_40%_32%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[12px] font-semibold text-[#334155] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                      <div className='text-left'>{t('Resolution', '分辨率')}</div>
+                      <div className='text-center'>{t('videoPricing.est5s', '5s 预估价格')}</div>
+                      <div className='text-right'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
+                    </div>
+                    <div className='flex flex-col'>
+                      {durationTiers.length === 0 ? (
+                        <div className='px-[14px] py-3 text-sm text-muted-foreground'>
+                          {t('Unable to parse structured pricing')}
                         </div>
-                      )
-                      })
-                    )}
-                  </div>
-                  <div className='border-t border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-[7px] text-right text-[11.5px] font-normal text-[#64748B] dark:border-border dark:bg-muted/30 dark:text-slate-400'>
-                    {t('videoPricing.durationUnitFooter', '计费单位：/ 秒 · 支持 4~15 秒自定义时长')}
+                      ) : (
+                        durationTiers.map((tier, index) => {
+                          const billedEst5s =
+                            (isGroupMode ? tier.est5sPrice : tier.officialEst5sPrice ?? tier.est5sPrice) *
+                            props.priceRate
+                          const officialEst5s =
+                            (tier.officialEst5sPrice ?? tier.est5sPrice) * props.priceRate
+                          const billedSecond =
+                            (isGroupMode ? tier.secondPrice : tier.officialSecondPrice ?? tier.secondPrice) *
+                            props.priceRate
+                          const officialSecond =
+                            (tier.officialSecondPrice ?? tier.secondPrice) * props.priceRate
+                          const showOffPrice =
+                            showOfficial && Math.abs(billedSecond - officialSecond) > 0.0001
+
+                          return (
+                            <div
+                              key={tier.resolution}
+                              className={cn(
+                                'grid grid-cols-[28%_40%_32%] items-center px-[14px] py-[9.5px] transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
+                                index < durationTiers.length - 1 && 'border-b border-[#F1F5F9] dark:border-border/40'
+                              )}
+                            >
+                              <div className='text-left text-[13px] font-semibold text-[#0F172A] dark:text-foreground'>
+                                {tier.resLabel}
+                              </div>
+                              <div className='text-center'>
+                                <div className='text-[13.5px] font-semibold tabular-nums text-[#0F172A] dark:text-foreground leading-tight'>
+                                  ${billedEst5s.toFixed(3)}
+                                </div>
+                                {showOffPrice && (
+                                  <div className='text-[10.5px] text-muted-foreground/60 line-through tabular-nums font-normal'>
+                                    ${officialEst5s.toFixed(3)}
+                                  </div>
+                                )}
+                              </div>
+                              <div className='text-right'>
+                                <div className='text-[13.5px] font-semibold tabular-nums text-[#0F172A] dark:text-foreground leading-tight'>
+                                  ${billedSecond >= 0.01 && !Number.isInteger(billedSecond * 1000) ? billedSecond.toFixed(4).replace(/0$/, '') : billedSecond.toFixed(3)}
+                                  <span className='ml-0.5 text-[12px] font-normal text-[#64748B]'>/s</span>
+                                </div>
+                                {showOffPrice && (
+                                  <div className='text-[10.5px] text-muted-foreground/60 line-through tabular-nums font-normal'>
+                                    ${officialSecond.toFixed(3)}/s
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })
+                      )}
+                    </div>
+                    <div className='border-t border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-[7px] text-right text-[11.5px] font-normal text-[#64748B] dark:border-border dark:bg-muted/30 dark:text-slate-400'>
+                      {t('videoPricing.durationUnitFooter', '计费单位：/ 秒 · 支持 4~15 秒自定义时长')}
+                    </div>
                   </div>
                 </div>
               )}

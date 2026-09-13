@@ -33,6 +33,7 @@ import {
 } from '../lib/task-expr'
 import {
   getModelSpecificDiscountPercent,
+  getModelSupportedResolutions,
   getVideoModelHeroPrice,
   getVideoModelTierGroups,
   parseDurationVideoTiers,
@@ -550,6 +551,16 @@ describe('task visual pricing preview', () => {
     assert.equal(hero.priceText, '$0.300')
     assert.equal(hero.officialPriceText, '$0.400')
     assert.equal(hero.discountOff, 25)
+
+    // Ensure MiniMax-H3 strictly returns 768P and 2K supported resolutions even with generic Hailuo schema
+    const h3WithGenericSchema: PricingModel = {
+      ...model,
+      billing_usage_schema: {
+        seconds: { type: 'number', unit: 'second' },
+        resolution: { enum: ['512P', '768P', '720P', '1080P', '2K'] },
+      },
+    }
+    assert.deepEqual(getModelSupportedResolutions(h3WithGenericSchema), ['768P', '2K'])
 
     // Ensure MiniMax-H3 does NOT get misclassified into Seedance 2.0 Mini token table
     const groups = getVideoModelTierGroups(model)

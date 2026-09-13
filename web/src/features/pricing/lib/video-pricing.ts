@@ -131,27 +131,12 @@ export function isVideoUpscaleModel(model: PricingModel | string): boolean {
  * 动态自适应优先（Schema 与 表达式 AST 自发现），业务字典保底。
  */
 export function getModelSupportedResolutions(model: PricingModel): string[] {
-  // 1. 动态自适应优先：Schema 枚举
-  const schemaRes = model.billing_usage_schema?.resolution?.enum
-  if (Array.isArray(schemaRes) && schemaRes.length > 0) {
-    return schemaRes
-  }
-
-  // 2. 动态自适应优先：直接从 billing_expr 中自发现 tier("480p", ...) 标签
-  const expr = model.billing_expr || ''
-  if (expr.includes('tier(')) {
-    const tierMatches = [...expr.matchAll(/tier\s*\(\s*["']([^"']+)["']/g)].map((m) => m[1])
-    // 过滤掉非分辨率维度的计费分级/服务等级（如 standard, long_context, default, base 等）
-    const resolutionTiers = tierMatches.filter(
-      (t) => !['standard', 'long_context', 'default', 'base'].includes(t.toLowerCase())
-    )
-    if (resolutionTiers.length > 0) {
-      return [...new Set(resolutionTiers)]
-    }
-  }
-
-  // 3. 业务家族兜底（对齐官方权威规格）
   const name = model.model_name.toLowerCase().trim()
+
+  // 1. 官方权威模型规格约束（优先级高于共享插件通配 Schema 枚举）
+  if (name.includes('minimax-h3') || (name.includes('minimax') && name.includes('h3')) || name === 'h3') {
+    return ['768P', '2K']
+  }
   if (name.startsWith('gpt-image') || name.includes('gpt-image')) {
     // 官方 OpenAI 图像支持任意自定义尺寸至 4K，以单一规格胶囊呈现，避免小白用户误以为仅支持固定三档
     return ['custom_4k']
@@ -165,9 +150,35 @@ export function getModelSupportedResolutions(model: PricingModel): string[] {
   if (name.includes('seedream')) {
     return ['1k', '2k']
   }
-  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) {
-    return ['768p', '2k']
+
+  // 2. 动态时长/任务阶梯自适应：从已解析的时长阶梯中提取真实计费分辨率
+  if (isDurationBasedVideoModel(model)) {
+    const durationTiers = getDurationVideoTiers(model)
+    if (durationTiers.length > 0) {
+      return durationTiers.map((t) => t.resLabel)
+    }
   }
+
+  // 3. 动态自适应优先：直接从 billing_expr 中自发现 tier("480p", ...) 标签
+  const expr = model.billing_expr || ''
+  if (expr.includes('tier(')) {
+    const tierMatches = [...expr.matchAll(/tier\s*\(\s*["']([^"']+)["']/g)].map((m) => m[1])
+    // 过滤掉非分辨率维度的计费分级/服务等级（如 standard, long_context, default, base 等）
+    const resolutionTiers = tierMatches.filter(
+      (t) => !['standard', 'long_context', 'default', 'base'].includes(t.toLowerCase())
+    )
+    if (resolutionTiers.length > 0) {
+      return [...new Set(resolutionTiers)]
+    }
+  }
+
+  // 4. Schema 枚举自适应
+  const schemaRes = model.billing_usage_schema?.resolution?.enum
+  if (Array.isArray(schemaRes) && schemaRes.length > 0) {
+    return schemaRes
+  }
+
+  // 5. 业务家族兜底（对齐官方权威规格）
   if (name.includes('upscale') || name.includes('chaofen')) {
     return ['720p', '1080p', '2k']
   }
