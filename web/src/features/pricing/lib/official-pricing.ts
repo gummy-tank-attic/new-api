@@ -79,12 +79,107 @@ export const MINIMAX_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
 }
 
 /**
- * 汇总官方标准字典（Z.ai + Kimi / Moonshot + MiniMax 等）
+ * DeepSeek 官方标准定价字典
+ * 数据来源：https://api-docs.deepseek.com/quick_start/pricing
+ */
+export const DEEPSEEK_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
+  'deepseek-v4-pro': { input: 1.32, output: 3.96, cache: 0.044 },
+  'deepseek-flash': { input: 0.30, output: 1.20, cache: 0.006 },
+  'deepseek-chat': { input: 0.27, output: 1.10, cache: 0.07 },
+  'deepseek-reasoner': { input: 0.55, output: 2.19, cache: 0.14 },
+}
+
+/**
+ * Anthropic (Claude) 官方标准定价字典
+ * 数据来源：https://www.anthropic.com/pricing
+ */
+export const ANTHROPIC_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
+  'claude-sonnet-4-6': { input: 3.0, output: 15.0, cache: 0.3, cache_write: 3.75 },
+  'claude-3-7-sonnet': { input: 3.0, output: 15.0, cache: 0.3, cache_write: 3.75 },
+  'claude-3-5-sonnet': { input: 3.0, output: 15.0, cache: 0.3, cache_write: 3.75 },
+  'claude-haiku-4-5': { input: 1.0, output: 5.0, cache: 0.1, cache_write: 1.25 },
+  'claude-3-5-haiku': { input: 1.0, output: 5.0, cache: 0.1, cache_write: 1.25 },
+  'claude-sonnet-5': { input: 2.0, output: 10.0, cache: 0.2, cache_write: 2.5 },
+  'claude-opus-4-6': { input: 5.0, output: 25.0, cache: 0.5, cache_write: 6.25 },
+  'claude-opus-4-7': { input: 5.0, output: 25.0, cache: 0.5, cache_write: 6.25 },
+  'claude-opus-4-8': { input: 5.0, output: 25.0, cache: 0.5, cache_write: 6.25 },
+  'claude-opus-5': { input: 5.0, output: 25.0, cache: 0.5, cache_write: 6.25 },
+  'claude-3-opus': { input: 15.0, output: 75.0, cache: 1.5, cache_write: 18.75 },
+  'claude-fable-5': { input: 10.0, output: 50.0, cache: 1.0, cache_write: 12.5 },
+  'claude-fable-5-1': { input: 10.0, output: 50.0, cache: 0.25, cache_write: 12.5 },
+}
+
+/**
+ * OpenAI 官方标准定价字典
+ * 数据来源：https://openai.com/api/pricing/
+ */
+export const OPENAI_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
+  'gpt-6-astra': { input: 10.0, output: 50.0, cache: 1.0, cache_write: 12.5 },
+  'gpt-5.5': { input: 5.0, output: 30.0, cache: 0.5 },
+  'gpt-5.6-sol': { input: 4.0, output: 20.0, cache: 0.4, cache_write: 5.0 },
+  'gpt-5.6-terra': { input: 2.0, output: 12.0, cache: 0.2, cache_write: 2.5 },
+  'gpt-5.6-luna': { input: 0.2, output: 1.2, cache: 0.02, cache_write: 0.25 },
+  'gpt-5.3-codex-spark': { input: 1.75, output: 14.0, cache: 0.175 },
+  'gpt-image-2.5-sunburst': { input: 5.0, output: 30.0, cache: 1.25 },
+  'gpt-image-2.5-flare': { input: 5.0, output: 30.0, cache: 1.25 },
+  'gpt-image-2': { input: 5.0, output: 30.0, cache: 1.25 },
+  'gpt-4o': { input: 2.5, output: 10.0, cache: 1.25 },
+  'gpt-4o-mini': { input: 0.15, output: 0.6, cache: 0.075 },
+  'o1': { input: 15.0, output: 60.0, cache: 7.5 },
+  'o1-mini': { input: 1.1, output: 4.4, cache: 0.55 },
+  'o3-mini': { input: 1.1, output: 4.4, cache: 0.55 },
+}
+
+/**
+ * Google (Gemini) 官方标准定价字典
+ * 数据来源：https://ai.google.dev/pricing
+ */
+export const GOOGLE_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
+  'gemini-3.7-flash': { input: 0.75, output: 3.75, cache: 0.075 },
+  'gemini-3.1-pro': { input: 2.0, output: 12.0, cache: 0.2 },
+  'gemini-3.1-flash-lite': { input: 0.25, output: 1.5, cache: 0.025 },
+  'gemini-3.1-flash-lite-preview': { input: 0.25, output: 1.5, cache: 0.025 },
+  'gemini-3.5-flash': { input: 1.5, output: 9.0, cache: 0.15 },
+  'gemini-3.5-flash-lite': { input: 0.3, output: 2.5, cache: 0.03 },
+  'gemini-3.6-flash': { input: 0.75, output: 3.75, cache: 0.075 },
+  'gemini-3.8-flash': { input: 0.75, output: 3.75, cache: 0.075 },
+  'gemini-3-flash': { input: 0.5, output: 3.0, cache: 0.05 },
+  'gemini-3-flash-preview': { input: 0.5, output: 3.0, cache: 0.05 },
+  'gemini-2.5-pro': { input: 1.25, output: 10.0, cache: 0.125 },
+  'gemini-2.5-flash': { input: 0.3, output: 2.5, cache: 0.03 },
+  'gemini-2.5-flash-lite': { input: 0.1, output: 0.4, cache: 0.01 },
+  'gemini-3-pro': { input: 75.0, output: 450.0, cache: 7.5 },
+  'gemini-3-pro-preview': { input: 75.0, output: 450.0, cache: 7.5 },
+}
+
+/**
+ * xAI (Grok) 官方标准定价字典
+ * 数据来源：https://docs.x.ai/docs/overview
+ */
+export const XAI_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
+  'grok-4.6': { input: 2.0, output: 6.0, cache: 0.5 },
+  'grok-4.5': { input: 2.0, output: 6.0, cache: 0.3 },
+  'grok-4.3': { input: 1.25, output: 2.5, cache: 0.2 },
+  'grok-build-0.1': { input: 1.0, output: 2.0, cache: 0.2 },
+  'grok-4.20-multi-agent-0309': { input: 1.25, output: 2.5, cache: 0.2 },
+  'grok-4.20-0309-reasoning': { input: 1.25, output: 2.5, cache: 0.2 },
+  'grok-4.20-0309-non-reasoning': { input: 1.25, output: 2.5, cache: 0.2 },
+  'grok-2': { input: 2.0, output: 10.0 },
+  'grok-2-mini': { input: 0.2, output: 1.0 },
+}
+
+/**
+ * 汇总官方标准字典（Z.ai + Kimi + MiniMax + DeepSeek + Anthropic + OpenAI + Google + xAI 等）
  */
 export const ALL_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
   ...ZAI_OFFICIAL_PRICES,
   ...KIMI_OFFICIAL_PRICES,
   ...MINIMAX_OFFICIAL_PRICES,
+  ...DEEPSEEK_OFFICIAL_PRICES,
+  ...ANTHROPIC_OFFICIAL_PRICES,
+  ...OPENAI_OFFICIAL_PRICES,
+  ...GOOGLE_OFFICIAL_PRICES,
+  ...XAI_OFFICIAL_PRICES,
 }
 
 const ALL_OFFICIAL_ENTRIES = Object.entries(ALL_OFFICIAL_PRICES).sort(

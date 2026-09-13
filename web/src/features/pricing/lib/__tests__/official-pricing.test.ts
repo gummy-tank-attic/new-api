@@ -60,6 +60,21 @@ describe('Official Pricing & Dynamic Savings', () => {
 
       const m25 = getOfficialModelPrice('minimax-m2.5')
       expect(m25).toEqual({ input: 0.30, output: 1.20, cache: 0.03, cache_write: 0.375 })
+
+      const dsv4 = getOfficialModelPrice('deepseek-v4-pro')
+      expect(dsv4).toEqual({ input: 1.32, output: 3.96, cache: 0.044 })
+
+      const sonnet = getOfficialModelPrice('claude-sonnet-4-6')
+      expect(sonnet).toEqual({ input: 3.0, output: 15.0, cache: 0.3, cache_write: 3.75 })
+
+      const astra = getOfficialModelPrice('gpt-6-astra')
+      expect(astra).toEqual({ input: 10.0, output: 50.0, cache: 1.0, cache_write: 12.5 })
+
+      const gemini = getOfficialModelPrice('gemini-3.7-flash')
+      expect(gemini).toEqual({ input: 0.75, output: 3.75, cache: 0.075 })
+
+      const grok = getOfficialModelPrice('grok-4.6')
+      expect(grok).toEqual({ input: 2.0, output: 6.0, cache: 0.5 })
     })
 
     it('supports case-insensitivity and prefix matching', () => {
@@ -109,6 +124,18 @@ describe('Official Pricing & Dynamic Savings', () => {
 
       // MiniMax-M2.5: Selling at $0.255 against official $0.30 -> exactly 15% OFF
       expect(computeAutoSavingsOff('minimax-m2.5', 0.255)).toBe(15)
+
+      // DeepSeek-v4-pro: Selling at $0.858 against official $1.32 -> exactly 35% OFF
+      expect(computeAutoSavingsOff('deepseek-v4-pro', 0.858)).toBe(35)
+
+      // Claude Sonnet 4-6: Selling at $0.60 against official $3.00 -> 80% OFF
+      expect(computeAutoSavingsOff('claude-sonnet-4-6', 0.60)).toBe(80)
+
+      // GPT-6 Astra: Selling at $1.50 against official $10.00 -> 85% OFF
+      expect(computeAutoSavingsOff('gpt-6-astra', 1.50)).toBe(85)
+
+      // Grok 4.6: Selling at $0.50 against official $2.00 -> 75% OFF
+      expect(computeAutoSavingsOff('grok-4.6', 0.50)).toBe(75)
     })
 
     it('returns undefined if selling at or above official price', () => {
