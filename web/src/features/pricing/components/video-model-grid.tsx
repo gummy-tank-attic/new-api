@@ -95,12 +95,13 @@ export function VideoModelGrid(props: VideoModelGridProps) {
         const durationTiers = isDurationBased
           ? getDurationVideoTiers(model)
           : []
+        const durationRatio = isGroupMode && modelRate > 0 ? modelRate / (props.priceRate ?? 1) : 1
         const dynamicDurationDiscount =
           isDurationBased &&
           durationTiers.length > 0 &&
           durationTiers[0].officialSecondPrice != null &&
-          durationTiers[0].secondPrice < durationTiers[0].officialSecondPrice
-            ? Math.round((1 - durationTiers[0].secondPrice / durationTiers[0].officialSecondPrice) * 100)
+          durationTiers[0].secondPrice * durationRatio < durationTiers[0].officialSecondPrice
+            ? Math.round((1 - (durationTiers[0].secondPrice * durationRatio) / durationTiers[0].officialSecondPrice) * 100)
             : null
         const discountOff = isGroupMode
           ? (dynamicDurationDiscount ?? lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || props.savings || null))

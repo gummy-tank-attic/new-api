@@ -435,13 +435,14 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
           let durationModelSavings: number | undefined
           if (isDurationBasedVideoModel(model)) {
             const tiers = getDurationVideoTiers(model)
+            const durationRatio = isGroupMode && baseRatio > 0 ? baseRatio : 1
             if (
               tiers.length > 0 &&
               tiers[0].officialSecondPrice != null &&
-              tiers[0].secondPrice < tiers[0].officialSecondPrice
+              tiers[0].secondPrice * durationRatio < tiers[0].officialSecondPrice
             ) {
               durationModelSavings = Math.round(
-                (1 - tiers[0].secondPrice / tiers[0].officialSecondPrice) * 100
+                (1 - (tiers[0].secondPrice * durationRatio) / tiers[0].officialSecondPrice) * 100
               )
             }
           }
@@ -570,9 +571,10 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                         </div>
                       ) : (
                         durationTiers.map((dt) => {
-                        const billedSec = dt.secondPrice * priceRate
+                        const durationRatio = isGroupMode && baseRatio > 0 ? baseRatio : 1
+                        const billedSec = dt.secondPrice * durationRatio * priceRate
                         const officialSec = (dt.officialSecondPrice ?? dt.secondPrice) * priceRate
-                        const billed5s = dt.est5sPrice * priceRate
+                        const billed5s = dt.est5sPrice * durationRatio * priceRate
                         const official5s = (dt.officialEst5sPrice ?? dt.est5sPrice) * priceRate
                         const showOff = isGroupMode && Math.abs(billedSec - officialSec) > 0.0001
 

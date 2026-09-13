@@ -1170,10 +1170,11 @@ export function getVideoModelHeroPrice(
     )
     const baseEst5s = minTier ? minTier.est5sPrice : 0.400
     const billed = baseEst5s * rate
-    const officialEst5s = (minTier?.officialEst5sPrice ?? 0.400) * rate
+    const officialEst5s = minTier?.officialEst5sPrice ?? 0.400
+    const effectiveSecondPrice = (minTier?.secondPrice ?? 0.060) * rate
     const dynamicDiscountOff =
-      minTier?.officialSecondPrice && minTier.secondPrice < minTier.officialSecondPrice
-        ? Math.round((1 - minTier.secondPrice / minTier.officialSecondPrice) * 100)
+      minTier?.officialSecondPrice && effectiveSecondPrice < minTier.officialSecondPrice
+        ? Math.round((1 - effectiveSecondPrice / minTier.officialSecondPrice) * 100)
         : discountOff
     return {
       priceText: `$${billed.toFixed(3)}`,
