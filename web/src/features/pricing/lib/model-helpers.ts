@@ -21,6 +21,7 @@ import {
   FILTER_ALL,
   getCanonicalVendorName,
   getVendorTabRank,
+  lookupGroupMapValue,
   QUOTA_TYPE_VALUES,
   VENDOR_MODEL_DISPLAY_ORDER,
 } from '../constants'
@@ -34,7 +35,7 @@ export function isPerImageExpressionModel(model: PricingModel): boolean {
   if (model.billing_mode !== 'tiered_expr') return false
   if (model.model_name === 'gpt-image-2') return true
   const schema = model.billing_usage_schema
-  if (Boolean(schema?.images || schema?.image)) return true
+  if (schema?.images || schema?.image) return true
   const name = model.model_name.toLowerCase()
   return (
     name.includes('image') ||
@@ -67,8 +68,11 @@ export function getConfiguredGroupRatio(
   groupRatio: Record<string, number>,
   group: string
 ): number {
-  const ratio = groupRatio[group]
-  return typeof ratio === 'number' && Number.isFinite(ratio) ? ratio : 1
+  const direct = groupRatio[group]
+  if (typeof direct === 'number' && Number.isFinite(direct)) return direct
+  const lookedUp = lookupGroupMapValue(groupRatio, group)
+  if (typeof lookedUp === 'number' && Number.isFinite(lookedUp)) return lookedUp
+  return 1
 }
 
 /**
@@ -211,37 +215,12 @@ export function inferVendorFromModelName(modelName: string): string {
   return ''
 }
 
-const KNOWN_SUB_FAMILIES = [
-  'fable',
-  'opus',
-  'sonnet',
-  'haiku',
-  'flash',
-  'pro',
-  'preview',
-  'mini',
-  'ultra',
-  'spark',
-  'turbo',
-  'lite',
-  'fast',
-] as const
-
-function findSubFamily(modelName: string): string | null {
-  const lower = modelName.toLowerCase()
-  for (const fam of KNOWN_SUB_FAMILIES) {
-    if (lower.includes(fam)) return fam
-  }
-  return null
-}
-
 /**
  * 计算模型在其供应商基准列表中的动态排序权重。
  * 1. 若在基准表中已列出：按其索引固定排序 ((idx + 1) * 10000)。
- * 2. 若未在基准表中列出：
- *    - 优先寻找同子家族 (如 sonnet, opus, flash)，高版本排在该子家族顶端。
- *    - 若无同子家族，则在全供应商基准中比对自然版本号智能插槽。
- *    - 若低于所有已知基准项，排在最后 ((vendorModels.length + 1) * 10000)。
+ * 2. 若未在基准表中列出：排在基准表之后，由 comparePricingModels 按名称自然排序。
+ *
+ * 新模型是否是旗舰由产品配置显式决定，不能仅凭版本号越过已配置的产品层级。
  */
 export function getModelEffectiveScore(
   modelName: string,
@@ -253,45 +232,12 @@ export function getModelEffectiveScore(
     return (idx + 1) * 10000
   }
 
-  const ver = extractModelVersion(modelName)
-  if (ver.length > 0) {
-    const subFamily = findSubFamily(modelName)
-    if (subFamily) {
-      // 1. 优先在同子家族项中定位版本
-      const familyIndices: number[] = []
-      for (let i = 0; i < vendorModels.length; i++) {
-        if (findSubFamily(vendorModels[i]) === subFamily) {
-          familyIndices.push(i)
-        }
-      }
-      if (familyIndices.length > 0) {
-        for (const fIdx of familyIndices) {
-          const listedVer = extractModelVersion(vendorModels[fIdx])
-          if (listedVer.length > 0 && compareModelVersions(ver, listedVer) > 0) {
-            return fIdx * 10000 + 5000
-          }
-        }
-        // 版本低于该家族所有已知项，插在该子家族最底部的后方
-        const lastIdx = familyIndices[familyIndices.length - 1]
-        return (lastIdx + 1) * 10000 + 5000
-      }
-    }
-
-    // 2. 全供应商基准比对兜底
-    for (let i = 0; i < vendorModels.length; i++) {
-      const listedVer = extractModelVersion(vendorModels[i])
-      if (listedVer.length > 0 && compareModelVersions(ver, listedVer) > 0) {
-        return i * 10000 + 5000
-      }
-    }
-  }
-
   return (vendorModels.length + 1) * 10000
 }
 
 /**
  * 稳定且智能的定价表模型排序：
- * 供应商固定顺序 → 智能版本自适应插槽/置顶 → 相同区间内版本自然降序。
+ * 供应商固定顺序 → 已配置模型顺序 → 未配置模型自然降序。
  */
 export function comparePricingModels(a: PricingModel, b: PricingModel): number {
   const va = a.vendor_name || inferVendorFromModelName(a.model_name)

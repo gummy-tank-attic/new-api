@@ -266,6 +266,8 @@ export const VENDOR_MODEL_DISPLAY_ORDER: Record<string, readonly string[]> = {
     'gpt-5.5',
     'gpt-5.4',
     'gpt-5.3-codex-spark',
+    'gpt-image-2.5-sunburst',
+    'gpt-image-2.5-flare',
     'gpt-image-2',
   ],
   // —— xAI / Grok：主推 → 4.x 系列 → build → imagine ——
@@ -427,12 +429,12 @@ export function normalizeGroupName(name: string): string {
     (name || '')
       .trim()
       .toLowerCase()
-      .replace(/\uFF08/g, '(')
-      .replace(/\uFF09/g, ')')
-      .replace(/\s+/g, ' ')
+      .replaceAll('（', '(')
+      .replaceAll('）', ')')
+      .replaceAll(/\s+/g, ' ')
       // 全角转半角后常出现 "lite(sale)" vs "lite (sale)"，统一去括号两侧空白
-      .replace(/\s*\(\s*/g, '(')
-      .replace(/\s*\)\s*/g, ')')
+      .replaceAll(/\s*\(\s*/g, '(')
+      .replaceAll(/\s*\)\s*/g, ')')
   )
 }
 
@@ -442,7 +444,7 @@ export function lookupGroupMapValue<T>(
   group: string
 ): T | undefined {
   if (!map || !group) return undefined
-  if (Object.prototype.hasOwnProperty.call(map, group)) {
+  if (Object.hasOwn(map, group)) {
     return map[group]
   }
   const needle = normalizeGroupName(group)
@@ -497,6 +499,7 @@ export const MANUAL_GROUP_OFF_LABEL: Record<string, string> = {
  * 单个模型的自定义折扣覆盖（百分比，例如 35 对应 35% OFF）
  */
 export const MANUAL_MODEL_SAVINGS_OFF: Record<string, number> = {
+  'deepseek-v4': 35,
   'deepseek-v4-pro-0813': 35,
   'deepseek-v4-pro': 35,
   'deepseek-v4-flash': 35,
@@ -519,34 +522,33 @@ export const MANUAL_MODEL_SAVINGS_OFF: Record<string, number> = {
   'hailuo-h3': 25,
 }
 
+const MANUAL_MODEL_SAVINGS_EXACT = new Map(
+  Object.entries(MANUAL_MODEL_SAVINGS_OFF).map(([key, value]) => [
+    key.trim().toLowerCase(),
+    value,
+  ])
+)
+
+const MANUAL_MODEL_SAVINGS_PREFIXES = Object.entries(
+  MANUAL_MODEL_SAVINGS_OFF
+)
+  .map(([key, value]) => [key.trim().toLowerCase(), value] as const)
+  .sort(([left], [right]) => right.length - left.length)
+
 export function lookupModelSavingsOff(modelName: string): number | undefined {
   const needle = (modelName || '').trim().toLowerCase()
   if (!needle) return undefined
 
-  // 1. 精确全等匹配（最高优先级）
-  for (const [key, value] of Object.entries(MANUAL_MODEL_SAVINGS_OFF)) {
-    if (key.trim().toLowerCase() === needle) return value
-  }
+  const exact = MANUAL_MODEL_SAVINGS_EXACT.get(needle)
+  if (exact !== undefined) return exact
 
-  // 2. 智能子版本/日期后缀归一化（如 deepseek-v4.1-flash -> deepseek-v4-flash）
-  const normalizedNeedle = needle
-    .replaceAll(/(?:19|20)\d{6}/g, '')
-    .replaceAll(/[-_](?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\b/g, '')
-    .replace(/\.\d+(?=-|\b)/g, '')
-
-  // 3. 按规则长度降序优先匹配最细化的家族前缀
-  const sortedEntries = Object.entries(MANUAL_MODEL_SAVINGS_OFF).sort(
-    ([a], [b]) => b.length - a.length
-  )
-
-  for (const [key, value] of sortedEntries) {
-    const cleanKey = key.trim().toLowerCase()
-    const normalizedKey = cleanKey
-      .replaceAll(/(?:19|20)\d{6}/g, '')
-      .replaceAll(/[-_](?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\b/g, '')
-      .replace(/\.\d+(?=-|\b)/g, '')
-
-    if (needle.startsWith(cleanKey) || normalizedNeedle.startsWith(normalizedKey)) {
+  // Prefix inheritance is explicit and longest-first so overlapping keys are deterministic.
+  for (const [key, value] of MANUAL_MODEL_SAVINGS_PREFIXES) {
+    if (
+      needle.startsWith(`${key}-`) ||
+      needle.startsWith(`${key}.`) ||
+      needle.startsWith(`${key}_`)
+    ) {
       return value
     }
   }
@@ -571,5 +573,3 @@ export function isDynamicUpToGroup(group?: string | null): boolean {
     name.includes('minimax')
   )
 }
-
-

@@ -30,7 +30,6 @@ import {
   lookupGroupMapValue,
   lookupModelSavingsOff,
   MANUAL_GROUP_SAVINGS_OFF,
-  TIME_TIERED_MODEL_NAMES,
 } from '../constants'
 import {
   formatDynamicUnitPrice,
@@ -58,6 +57,7 @@ import {
 } from '../lib/video-pricing'
 import type { PriceType, PricingModel, TokenUnit } from '../types'
 import { ImageTierPrices } from './image-tier-prices'
+import { getOffPeakMultiplier, isTimeTieredModel } from '../lib/time-pricing'
 
 export type PriceMode = 'group' | 'official'
 
@@ -82,36 +82,6 @@ const MODEL_NAME_CLASS =
 
 const MINIMAX_COLS =
   'md:grid-cols-[minmax(0,3.2fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,1.6fr)]'
-
-export function isTimeTieredModel(model: PricingModel): boolean {
-  // 核心守卫：必须后端启用了表达式计费（tiered_expr），才进入分时展示；若后端为普通按量/Token模式，严格跟随展示为标准按量
-  if (!isDynamicPricingModel(model)) return false
-  const expr = model.billing_expr || ''
-  const hasTimeRule =
-    /(?:hour|minute|weekday|month|day|is_bj_daytime|is_bj_workday|time)\s*\(/i.test(
-      expr
-    )
-  const name = (model.model_name || '').trim().toLowerCase()
-  const isWhitelisted = TIME_TIERED_MODEL_NAMES.some((t) => t.toLowerCase() === name)
-  return hasTimeRule || isWhitelisted
-}
-
-export function getOffPeakMultiplier(model: PricingModel): number {
-  const expr = model.billing_expr || ''
-  const m = expr.match(/\?\s*([\d.]+)\s*:\s*([\d.]+)/)
-  if (m) {
-    const v1 = Number(m[1])
-    const v2 = Number(m[2])
-    if (Number.isFinite(v1) && Number.isFinite(v2)) {
-      const minVal = Math.min(v1, v2)
-      const maxVal = Math.max(v1, v2)
-      if (minVal > 0 && maxVal > 0 && minVal < maxVal) {
-        return minVal / maxVal
-      }
-    }
-  }
-  return 0.5
-}
 
 function getModelUnitPrice(
   model: PricingModel,
@@ -183,8 +153,8 @@ function resolvePrices(
       const numMatch = groupPrice.match(/^([^\d-]*)([-\d,]+\.?\d*)(k?)$/)
       if (numMatch) {
         const [, symbol, numStr, suffix] = numMatch
-        const num = parseFloat(numStr.replaceAll(',', ''))
-        if (!isNaN(num) && num > 0) {
+        const num = Number.parseFloat(numStr.replaceAll(',', ''))
+        if (!Number.isNaN(num) && num > 0) {
           const original = num / (1 - effectiveSavings / 100)
           const decimals = (numStr.split('.')[1] || '').length
           const formattedOriginal = `${symbol}${original.toFixed(Math.max(decimals, 3))}${suffix}`
@@ -525,7 +495,12 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                 >
                   {isDurationBased && (
                     <div className='grid grid-cols-1 gap-2.5 sm:grid-cols-2'>
-                      {durationTiers.map((dt) => {
+                      {durationTiers.length === 0 ? (
+                        <div className='col-span-full text-sm text-muted-foreground'>
+                          {t('Unable to parse structured pricing')}
+                        </div>
+                      ) : (
+                        durationTiers.map((dt) => {
                         const billedSec = dt.secondPrice * priceRate
                         const officialSec = (dt.officialSecondPrice ?? dt.secondPrice) * priceRate
                         const billed5s = dt.est5sPrice * priceRate
@@ -567,7 +542,8 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                             </div>
                           </div>
                         )
-                      })}
+                        })
+                      )}
                     </div>
                   )}
                   {isUpscale && (

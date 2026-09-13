@@ -25,6 +25,7 @@ import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
 import { lookupModelSavingsOff } from '../constants'
+import { getConfiguredGroupRatio } from '../lib/model-helpers'
 import {
   getModelSpecificDiscountPercent,
   getModelSupportedResolutions,
@@ -54,6 +55,10 @@ export function ImageModelGrid(props: ImageModelGridProps) {
   const [copiedName, setCopiedName] = useState<string | null>(null)
 
   const isGroupMode = props.priceMode === 'group'
+  const groupRatioVal = isGroupMode && props.selectedGroup
+    ? getConfiguredGroupRatio(props.groupRatio, props.selectedGroup)
+    : 1
+  const effectiveRate = groupRatioVal * (props.priceRate ?? 1)
 
   const handleCopy = (e: React.MouseEvent, modelName: string) => {
     e.stopPropagation()
@@ -75,9 +80,14 @@ export function ImageModelGrid(props: ImageModelGridProps) {
         const resolutions = getModelSupportedResolutions(model)
         const capTag = getVideoModelCapabilityTag(model.model_name)
         const tagline = getVideoModelTagline(model.model_name)
-        const hero = getVideoModelHeroPrice(model, isGroupMode, props.priceRate)
+        const modelRate = isGroupMode
+          ? (model.group_ratio && props.selectedGroup && typeof model.group_ratio[props.selectedGroup] === 'number'
+              ? model.group_ratio[props.selectedGroup] * (props.priceRate ?? 1)
+              : effectiveRate)
+          : 1
+        const hero = getVideoModelHeroPrice(model, isGroupMode, modelRate)
         const discountOff = isGroupMode
-          ? (hero.discountOff ?? lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || null))
+          ? (hero.discountOff ?? lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || props.savings || null))
           : null
 
         const vendorIcon =
@@ -232,8 +242,11 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                     const resPrice = hero.resolutionPrices?.[resKey]
                     const currentPriceText = resPrice?.priceText ?? hero.priceText
                     const currentOfficialText = resPrice?.officialPriceText ?? hero.officialPriceText
+                    const currentImgToImgPriceText = resPrice?.imgToImgPriceText ?? currentPriceText
+                    const currentOfficialImgToImgText = resPrice?.officialImgToImgPriceText ?? currentOfficialText
                     const style = getResolutionBadgeStyle(res)
                     const showOfficial = isGroupMode && currentOfficialText != null
+                    const showOfficialImgToImg = isGroupMode && currentOfficialImgToImgText != null
 
                     return (
                       <div
@@ -257,11 +270,11 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                         </div>
                         <div className='col-span-4 text-right'>
                           <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
-                            {currentPriceText}
+                            {currentImgToImgPriceText}
                           </div>
-                          {showOfficial && (
+                          {showOfficialImgToImg && (
                             <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
-                              {currentOfficialText}
+                              {currentOfficialImgToImgText}
                             </div>
                           )}
                         </div>
@@ -272,7 +285,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                 <div className='border-t border-border bg-slate-50 px-3.5 py-[7px] text-right text-[11.5px] font-medium text-slate-500 dark:bg-muted/30 dark:text-slate-400'>
                   {hero.isPerImage
                     ? `${t('Billing Unit:', '计费单位：')}/ ${t('image (unit)', '张')}`
-                    : t('Unit: / 1M Tokens', '计费单位：/ 1M Tokens')}
+                    : `${t('Billing Unit:', '计费单位：')}/ 1M Tokens`}
                 </div>
               </div>
 

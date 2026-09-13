@@ -25,6 +25,7 @@ import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
 import { lookupModelSavingsOff } from '../constants'
+import { getConfiguredGroupRatio } from '../lib/model-helpers'
 import {
   getDurationVideoTiers,
   getModelSpecificDiscountPercent,
@@ -59,6 +60,10 @@ export function VideoModelGrid(props: VideoModelGridProps) {
   const [copiedName, setCopiedName] = useState<string | null>(null)
 
   const isGroupMode = props.priceMode === 'group'
+  const groupRatioVal = isGroupMode && props.selectedGroup
+    ? getConfiguredGroupRatio(props.groupRatio, props.selectedGroup)
+    : 1
+  const effectiveRate = groupRatioVal * (props.priceRate ?? 1)
 
   const handleCopy = (e: React.MouseEvent, modelName: string) => {
     e.stopPropagation()
@@ -82,10 +87,15 @@ export function VideoModelGrid(props: VideoModelGridProps) {
         const resolutions = getModelSupportedResolutions(model)
         const capTag = getVideoModelCapabilityTag(model.model_name)
         const tagline = getVideoModelTagline(model.model_name)
+        const modelRate = isGroupMode
+          ? (model.group_ratio && props.selectedGroup && typeof model.group_ratio[props.selectedGroup] === 'number'
+              ? model.group_ratio[props.selectedGroup] * (props.priceRate ?? 1)
+              : effectiveRate)
+          : 1
         const discountOff = isGroupMode
-          ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || null))
+          ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || props.savings || null))
           : null
-        const hero = getVideoModelHeroPrice(model, isGroupMode, props.priceRate)
+        const hero = getVideoModelHeroPrice(model, isGroupMode, modelRate)
         const tierGroups = isUpscale || isDurationBased ? [] : getVideoModelTierGroups(model)
         const upscaleTiers = isUpscale
           ? parseVideoUpscaleTiers(model.billing_expr)
@@ -100,12 +110,15 @@ export function VideoModelGrid(props: VideoModelGridProps) {
             : <Film className='size-3.5 text-rose-500' />
 
         const nameLen = (model.model_name || '').length
-        const titleClass =
-          nameLen > 28
-            ? 'text-[13.5px] sm:text-[14px] leading-snug tracking-[-0.015em]'
-            : nameLen > 20
-              ? 'text-[14.5px] sm:text-[15px] leading-snug tracking-[-0.01em]'
-              : 'text-[15px] sm:text-[15.5px] leading-normal tracking-[-0.01em]'
+        let titleClass =
+          'text-[15px] sm:text-[15.5px] leading-normal tracking-[-0.01em]'
+        if (nameLen > 28) {
+          titleClass =
+            'text-[13.5px] sm:text-[14px] leading-snug tracking-[-0.015em]'
+        } else if (nameLen > 20) {
+          titleClass =
+            'text-[14.5px] sm:text-[15px] leading-snug tracking-[-0.01em]'
+        }
 
         const showOfficial = isGroupMode && discountOff != null
 
@@ -309,7 +322,12 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                     <div className='text-right'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
                   </div>
                   <div className='flex flex-col'>
-                    {durationTiers.map((tier, index) => {
+                    {durationTiers.length === 0 ? (
+                      <div className='px-[14px] py-3 text-sm text-muted-foreground'>
+                        {t('Unable to parse structured pricing')}
+                      </div>
+                    ) : (
+                      durationTiers.map((tier, index) => {
                       const billedEst5s = tier.est5sPrice * props.priceRate
                       const billedSecond = tier.secondPrice * props.priceRate
 
@@ -333,7 +351,8 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                           </div>
                         </div>
                       )
-                    })}
+                      })
+                    )}
                   </div>
                   <div className='border-t border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-[7px] text-right text-[11.5px] font-normal text-[#64748B] dark:border-border dark:bg-muted/30 dark:text-slate-400'>
                     {t('videoPricing.durationUnitFooter', '计费单位：/ 秒 · 支持 4~15 秒自定义时长')}

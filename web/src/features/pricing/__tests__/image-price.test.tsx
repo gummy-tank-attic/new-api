@@ -2,7 +2,6 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, test } from 'vitest'
 
 import { ImageTierPrices } from '../components/image-tier-prices'
-import { ModelCard } from '../components/model-card'
 import { SupplierPriceTable } from '../components/supplier-price-table'
 import { parseImageTiersFromExpr } from '../lib/billing-expr'
 import type { PricingModel } from '../types'
@@ -56,10 +55,9 @@ describe('per-image pricing', () => {
   test('model cards show both image prices without a token unit', () => {
     const group = model.enable_groups[0]
     render(
-      <ModelCard
+      <ImageTierPrices
         model={{ ...model, group_ratio: { [group]: 0.15 } }}
-        selectedGroup={group}
-        onClick={() => {}}
+        groupRatio={0.15}
       />
     )
     expect(screen.getByText(/\$0\.02\b/)).toBeTruthy()

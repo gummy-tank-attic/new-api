@@ -24,6 +24,7 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 
 | Rule | Do this |
 |------|---------|
+| 核心架构规范 | **以官方原生为主，自制仅为补充**：计费计算与数据结构 100% 遵照官方原生引擎；非空 `billing_expr` 严禁在自制层硬编码单价或旁路官方 AST，解析失败必须显示不可用；仅允许无表达式历史模型保留明确标注的展示兜底；自制仅限供应商 Tab、原价划线与折扣徽章等表现层包装 |
 | Frontend production deploy | From parent `newapi/`: `.\scripts\deploy-web.ps1` → success = `OK: live https://www.metartr.com` → hard-refresh browser |
 | `git push` / GHA green | **NOT** enough for production www; never claim shipped without `deploy-web.ps1` OK |
 | Default `npm ci` | **Forbidden** for routine deploys; only `deploy-web.ps1 -Install` when node_modules is broken |

@@ -452,7 +452,7 @@ function ModelBackendQuickStats(props: { model: PricingModel }) {
       key: 'resolutions',
       icon: Film,
       label: t('Resolutions', '支持分辨率'),
-      value: supportedRes.map((r) => r.toUpperCase()).join(' · '),
+      value: supportedRes.map((r) => getResolutionBadgeStyle(r).label).join(' · '),
       hint: t('Supported output resolutions', '模型支持输出的分辨率规格'),
     })
   }
@@ -873,7 +873,7 @@ function DurationVideoModelGroupPricingSection(props: {
   priceRate: number
   availableGroups: string[]
 }) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const isZh = i18n.language?.startsWith('zh') ?? true
   const tiers = getDurationVideoTiers(props.model)
   const modelDiscountOff =
@@ -917,7 +917,12 @@ function DurationVideoModelGroupPricingSection(props: {
                 <div className='col-span-3 text-right'>{isZh ? '优惠幅度' : 'Discount'}</div>
               </div>
               <div className='divide-y divide-border/40 bg-card/40'>
-                {tiers.map((tier) => {
+                {tiers.length === 0 ? (
+                  <div className='px-3.5 py-3 text-sm text-muted-foreground'>
+                    {t('Unable to parse structured pricing')}
+                  </div>
+                ) : (
+                  tiers.map((tier) => {
                   const billedEst5s = tier.est5sPrice * ratio * props.priceRate
                   const billedSecond = tier.secondPrice * ratio * props.priceRate
                   const officialEst5s =
@@ -968,7 +973,8 @@ function DurationVideoModelGroupPricingSection(props: {
                       </div>
                     </div>
                   )
-                })}
+                  })
+                )}
               </div>
               <div className='border-t border-border/40 bg-muted/15 px-3.5 py-1.5 text-right text-[10px] text-muted-foreground/75 font-mono'>
                 {isZh

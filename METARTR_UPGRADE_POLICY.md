@@ -1,5 +1,49 @@
 # MetaRtr Upgrade Policy
 
+## 核心架构总纲（Core Architectural Law）
+
+> **「以官方原生为主，自制仅为补充」**
+>
+> 1. **官方原生为“主”（唯一真实源与计算内核）**：
+>    - 官方原生定义的架构、数据模型（`billing_mode`、`billing_expr`、`billing_usage_schema`）、表达式 AST 解析器、分时判定、阶梯分档、单位折算与配额扣除逻辑，是系统唯一的权威源。
+>    - 无论官方版本后续如何迭代升级，底层数据解析与计算一律直接调用官方引擎，坚决杜绝自建平行计算体系或脱节分支。
+> 2. **自制代码为“辅”（仅作表现层补充与视觉包装）**：
+>    - MetaRtr 自制代码的职责严格收敛为**表现层呈现**：供应商分类导航 Tab、聚合卡片视图、划线原价对比与折扣气泡、多规格参数面板等。
+>    - 自制组件必须消费官方引擎输出的数据，**严禁对非空表达式私自硬编码业务单价、严禁绕过官方表达式自行推算**。仅允许对没有表达式的历史模型保留明确标注的展示兜底；一旦存在表达式但无法解析，必须显示不可用状态。
+
+## 定价展示审计记录（2026-09-12）
+
+本次审计与重构只涉及 MetaRtr 前端定价表现层，未修改 Go 后端扣费链路，也未修改官方表达式运行时。主页价格的职责是读取 `/api/pricing` 返回的数据并进行展示换算；实际预扣、结算和配额变更仍由 `relay/`、`service/`、`model/` 负责。
+
+### 实际修改范围
+
+- `web/src/features/pricing/lib/model-helpers.ts`：移除基于 13 个关键词子家族的模型排序分类器；已配置模型按供应商配置顺序，未配置模型按自然名称排序。
+- `web/src/features/pricing/constants.ts`：折扣字典增加 `deepseek-v4` 基准项；查找改为精确匹配和确定性的分隔符前缀匹配。
+- `web/src/features/pricing/lib/video-pricing.ts`：视频动态价格直接消费官方 AST；非空表达式不再补齐缺失分辨率，不再对无效表达式静默套用默认视频阶梯；空表达式仍保留历史展示兜底。
+- Grok Imagine 视频表达式使用 `param("duration")` 时，前端必须从官方 AST 提取每秒配额系数并按 `1,000,000` 换算为美元；主页“起价”取 AST 返回阶梯中的最低 5 秒价格，不得回退到固定 `$0.400`。
+- `web/src/features/pricing/lib/time-pricing.ts`：承载时间计价展示辅助逻辑，避免把普通展示辅助函数混在表格组件导出中。
+- `web/src/features/pricing/components/`：表格、详情抽屉和 Bento 卡片在结构化价格不可解析时显示明确状态。
+- `web/src/features/pricing/__tests__/`：迁移已删除组件的测试引用，并增加单分辨率不得虚构缺失阶梯的回归测试。
+- `AGENTS.md`、本策略文件：补充官方计费引擎与 MetaRtr 展示层的边界说明。
+
+### 展示与实际扣费边界
+
+前端允许进行以下展示转换：用户组倍率、充值倍率、汇率、单位换算、原价划线和折扣标签。这些转换只产生 React 文本或卡片，不会写回模型配置，也不会调用扣费接口。系统设置中的“重置价格”属于另一条管理链路，调用 `POST /api/option/rest_model_ratio` 并整体恢复模型倍率，不能误认为主页展示逻辑。
+
+### 已完成验证
+
+- `npm exec -- vitest run src/features/pricing/__tests__ src/features/pricing/lib/__tests__`：10 个测试文件、240 个测试通过。
+- `npm run typecheck`：通过。
+- `npm run build`：通过，生产构建和性能检查通过。
+- 修改后的定价文件定向 `oxlint`：通过。
+- `git diff --check`：通过。
+
+仓库全量 lint 仍有其他历史文件报错；该基线问题与本次定价展示修改无关，不能表述为全仓库 lint 已清零。
+
+### 后续维护边界
+
+时间折扣和 Upscale 仍保留旧模型兼容识别逻辑。后续只有在官方 AST 提供等价结构化输出后，才允许移除这些兼容分支；不得为了“统一”而重新引入宽松正则或推测性价格。任何新增供应商价格优先修改后端官方表达式或配置数据，前端只增加对应展示适配和回归测试。
+
 This private deployment keeps a deliberately customized frontend. Upstream
 updates must preserve the established MetaRtr frontend layout and visual
 behavior unless the operator explicitly approves a layout change.
@@ -17,7 +61,8 @@ Before merging or deploying an upstream update, preserve and regression-check:
 - operator-entered unit prices live in the DB (`billing_expr` / ratios) — a git merge never changes them. Display `% OFF` is `MANUAL_MODEL_SAVINGS_OFF` in `constants.ts` — keep ours;
 - `parseTiersFromExpr` must still return inner `tier()` unit prices when the expression has a trailing `* (… ? 1 : 0.5)` peak/off-peak scale; do not drop the expr and fall back to `model_ratio`;
 - `web/src/features/pricing/pricing-visual.css` must keep the preview font stack (`Inter, Segoe UI, Microsoft YaHei` — **not** `Inter Variable`), Slate tokens (`#0F172A` / `#334155`), and `text-rendering: auto`; do not restore global Inter Variable or `optimizeLegibility` on the public pricing page;
-- pricing page grouping, ordering (including `VENDOR_MODEL_DISPLAY_ORDER` in `constants.ts` and intelligent version self-adaptation `getModelEffectiveScore` in `model-helpers.ts`), presentation, group descriptions, and i18n;
+- pricing page grouping, ordering (configured `VENDOR_MODEL_DISPLAY_ORDER` first, then natural model-name ordering for unlisted models), presentation, group descriptions, and i18n;
+- for non-empty `billing_expr`, display only tiers returned by the official parser; do not fabricate missing resolution prices or silently replace an invalid expression with an unrelated model default;
 - pricing page title and subtitle contract: the subtitle under the main `h1` must strictly display the official upstream price & transparent ratio commitment (`t('Each model is quoted at the upstream official list price. Actual billing uses only your group ratio—with no hidden multipliers or extra fees.')`) instead of the upstream model count text (`This site currently has...`); the bottom duplicate text is removed to maintain a compact, clean layout;
 - group pill single-line defensive sanitation: `formatGroupDisplayName` in `group-price-cards.tsx` must be preserved to prevent multi-line or bilingual newline inputs from expanding pill heights unevenly;
 - Inter Variable typography system and antialiasing contract:
@@ -67,6 +112,8 @@ security fixes forward selectively, then reapply MetaRtr frontend changes.
    committed immediately after recovery.
 2. Run `npm run build:check`. Its startup policy and bundle budgets are release
    blockers, including the production-entry check for invalid undefined calls.
+   Also run the focused pricing suites and `npm run typecheck` when pricing
+   files or billing-expression consumers change.
 3. There is **no Pages preview**. Verify locally (`npm run build` + `npm run
    dev` against the protected contract on desktop and mobile) first. Specifically
    open `/` and confirm it is the MetaRtr **pricing** page (vendor pills, model

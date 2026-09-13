@@ -402,6 +402,56 @@ describe('task visual pricing preview', () => {
     assert.equal(tiers[1].est5sPrice, 0.0975 * 5)
   })
 
+  test('does not fabricate a missing duration resolution tier', () => {
+    const tiers = parseDurationVideoTiers(
+      'tier("768P", u("seconds") * 0.06)',
+      {
+        seconds: { type: 'number', unit: 'second' },
+        resolution: { enum: ['768P', '2K'] },
+      }
+    )
+    assert.deepEqual(tiers, [
+      {
+        resolution: '768p',
+        resLabel: '768P',
+        est5sPrice: 0.3,
+        secondPrice: 0.06,
+        officialEst5sPrice: 0.4,
+        officialSecondPrice: 0.08,
+      },
+    ])
+  })
+
+  test('reads Grok Imagine video param-duration prices from the official AST', () => {
+    const expression =
+      '(has(param("size"), "720") || has(param("resolution"), "720")) ? tier("720p", 138889.0 * (param("duration") == nil ? 8.0 : max(param("duration"), 1.0))) : tier("480p", 99206.0 * (param("duration") == nil ? 8.0 : max(param("duration"), 1.0)))'
+    const tiers = parseDurationVideoTiers(expression)
+    assert.deepEqual(
+      tiers.map((tier) => [tier.resolution, tier.secondPrice]),
+      [
+        ['720p', 0.138889],
+        ['480p', 0.099206],
+      ]
+    )
+
+    const hero = getVideoModelHeroPrice(
+      {
+        id: 7,
+        model_name: 'grok-imagine-video',
+        billing_mode: 'tiered_expr',
+        billing_expr: expression,
+        quota_type: 0,
+        model_ratio: 37.5,
+        model_price: 0,
+        completion_ratio: 1,
+      },
+      true,
+      1
+    )
+    assert.equal(hero.priceText, '$0.496')
+    assert.equal(hero.unitKey, 'videoPricing.unitPer5sFrom')
+  })
+
   test('parses MiniMax-H3 duration video tiers from live compound expression with zero fields', () => {
     const expr =
       'u("resolution") == "512P" ? tier("512P", u("input_images") * 0 + u("input_video_seconds") * 0 + u("seconds") * 0.06) : u("resolution") == "768P" ? tier("768P", u("input_images") * 0 + u("input_video_seconds") * 0 + u("seconds") * 0.06) : u("resolution") == "720P" ? tier("720P", u("input_images") * 0 + u("input_video_seconds") * 0 + u("seconds") * 0.06) : u("resolution") == "1080P" ? tier("1080P", u("input_images") * 0 + u("input_video_seconds") * 0 + u("seconds") * 0.06) : tier("2K", u("input_images") * 0 + u("input_video_seconds") * 0 + u("seconds") * 0.0975)'
@@ -419,6 +469,62 @@ describe('task visual pricing preview', () => {
     assert.equal(tiers[1].resolution, '2k')
     assert.equal(tiers[1].secondPrice, 0.0975)
     assert.equal(tiers[1].est5sPrice, 0.0975 * 5)
+  })
+
+  test('preserves AST tiers for resolutions outside built-in presets', () => {
+    const tiers = parseDurationVideoTiers(
+      'tier("1080P", u("seconds") * 0.2)',
+      {
+        seconds: { type: 'number', unit: 'second' },
+        resolution: { enum: ['1080P'] },
+      }
+    )
+    assert.deepEqual(tiers, [
+      {
+        resolution: '1080p',
+        resLabel: '1080P',
+        est5sPrice: 1,
+        secondPrice: 0.2,
+        officialEst5sPrice: 1,
+        officialSecondPrice: 0.2,
+      },
+    ])
+  })
+
+  test('does not invent duration prices when the expression has no usage schema', () => {
+    assert.deepEqual(
+      parseDurationVideoTiers('tier("1080P", u("seconds") * 0.2)'),
+      []
+    )
+  })
+
+  test('does not use video defaults when AST has no duration unit price', () => {
+    assert.deepEqual(
+      parseDurationVideoTiers('tier("1080P", u("clips") * 0.2)', {
+        clips: { type: 'number', unit: 'count' },
+        resolution: { enum: ['1080P'] },
+      }),
+      []
+    )
+  })
+
+  test('does not show a default hero price for an unparseable duration expression', () => {
+    const hero = getVideoModelHeroPrice(
+      {
+        id: 3,
+        model_name: 'custom-h3-video',
+        billing_expr: 'tier("1080P", u("seconds") * 0.2)',
+        quota_type: 1,
+        model_ratio: 1,
+        model_price: 0,
+        completion_ratio: 1,
+      },
+      true,
+      1
+    )
+    assert.equal(hero.priceText, '-')
+    assert.equal(hero.unitKey, 'Unable to parse structured pricing')
+    assert.equal(hero.isStartingPrice, false)
   })
 
   test('correctly sets MiniMax-H3 discount to 25% and generates strikethrough official starting price', () => {
@@ -500,7 +606,7 @@ describe('task visual pricing preview', () => {
     assert.equal(hero50.resolutionPrices?.['2k']?.priceText, '$0.045')
   })
 
-  test('dynamically inherits model family savings without manual dictionary bloat', async () => {
+  test('dynamically inherits model family savings with deterministic prefix match', async () => {
     const { lookupModelSavingsOff } = await import('../constants')
     assert.equal(lookupModelSavingsOff('deepseek-v4-pro-0813'), 35)
     assert.equal(lookupModelSavingsOff('deepseek-v4.1-flash'), 35)
@@ -509,6 +615,7 @@ describe('task visual pricing preview', () => {
     assert.equal(lookupModelSavingsOff('glm-5.3-turbo'), 25)
     assert.equal(lookupModelSavingsOff('kimi-k3-pro'), 25)
     assert.equal(lookupModelSavingsOff('minimax-h3-v2'), 25)
+    assert.equal(lookupModelSavingsOff('glm-50-preview'), undefined)
     assert.equal(lookupModelSavingsOff('unknown-brand-new'), undefined)
   })
 
@@ -521,24 +628,106 @@ describe('task visual pricing preview', () => {
     assert.equal(inferVendorFromModelName('moonshot-v1-8k'), 'Moonshot')
   })
 
-  test('correctly slots new version models into their sub-family bracket without breaking product hierarchy', async () => {
+  test('keeps unlisted models below the explicit benchmark order', async () => {
     const { getModelEffectiveScore } = await import('../lib/model-helpers')
     const { VENDOR_MODEL_DISPLAY_ORDER } = await import('../constants')
     const anthropicModels = VENDOR_MODEL_DISPLAY_ORDER.Anthropic
 
-    // claude-fable-5-1 is index 0 -> score 10000
-    // claude-fable-5 is index 1 -> score 20000
-    // claude-opus-5 is index 2 -> score 30000
-    // claude-sonnet-5 is index 7 -> score 80000
-    // claude-sonnet-4-6 is index 8 -> score 90000
-
-    // claude-sonnet-5.2 should slot above claude-sonnet-5 (score 75000), NOT above fable or opus!
-    const sonnetScore = getModelEffectiveScore('claude-sonnet-5.2', anthropicModels)
+    // Listed benchmark models retain exact designated index score
+    const fableScore = getModelEffectiveScore('claude-fable-5-1', anthropicModels)
     const opusScore = getModelEffectiveScore('claude-opus-5', anthropicModels)
-    const sonnetBaseScore = getModelEffectiveScore('claude-sonnet-5', anthropicModels)
+    assert.equal(fableScore, 10000)
+    assert.equal(opusScore, 30000)
 
-    assert.ok(sonnetScore > opusScore, 'Sonnet 5.2 must stay below Opus')
-    assert.ok(sonnetScore < sonnetBaseScore, 'Sonnet 5.2 must slot above Sonnet 5')
+    // New versions do not cross the explicit product hierarchy automatically.
+    const nextGenScore = getModelEffectiveScore('claude-6-preview', anthropicModels)
+    assert.equal(nextGenScore, (anthropicModels.length + 1) * 10000)
+
+    const sonnetScore = getModelEffectiveScore('claude-sonnet-5.2', anthropicModels)
+    assert.equal(sonnetScore, (anthropicModels.length + 1) * 10000)
+    assert.ok(sonnetScore > opusScore, 'unlisted Sonnet must stay below Opus')
+
+    // Unlisted legacy model falls behind the curated list
+    const legacyScore = getModelEffectiveScore('claude-2.1', anthropicModels)
+    assert.ok(legacyScore >= ((anthropicModels.length + 1) * 10000))
+  })
+
+  test('accurately parses GPT image models with token-based tiered expressions', async () => {
+    const {
+      getVideoModelHeroPrice,
+      getVideoModelTagline,
+      getVideoModelCapabilityTag,
+      getModelSupportedResolutions,
+      getResolutionBadgeStyle,
+      getModelSpecificDiscountPercent,
+      isImageModel,
+    } = await import('../lib/video-pricing')
+
+    assert.equal(isImageModel('gpt-image-2'), true)
+    assert.equal(isImageModel('gpt-image-2.5-sunburst'), true)
+    assert.equal(isImageModel('gpt-image-2.5-flare'), true)
+
+    assert.equal(
+      getVideoModelCapabilityTag('gpt-image-2.5-sunburst')?.label,
+      '全能旗舰主力'
+    )
+    assert.equal(
+      getVideoModelCapabilityTag('gpt-image-2.5-flare')?.label,
+      '极速出片'
+    )
+    assert.equal(
+      getVideoModelCapabilityTag('gpt-image-2')?.label,
+      '经典主力'
+    )
+
+    assert.equal(
+      getVideoModelTagline('gpt-image-2.5-sunburst').defaultText,
+      '新一代旗舰图像创作 · 卓越光影质感与复杂场景高精呈现'
+    )
+    assert.equal(
+      getVideoModelTagline('gpt-image-2.5-flare').defaultText,
+      '极速秒级生图出片 · 高并发灵感快速捕捉与敏捷渲染'
+    )
+    assert.equal(
+      getVideoModelTagline('gpt-image-2').defaultText,
+      '经典多模态生图主力 · 原生指令理解与稳定图文创作'
+    )
+    assert.equal(getModelSpecificDiscountPercent('gpt-image-2.5-sunburst'), 0)
+    assert.equal(getModelSpecificDiscountPercent('gpt-image-2.5-flare'), 0)
+
+    const model: PricingModel = {
+      id: 101,
+      model_name: 'gpt-image-2.5-sunburst',
+      quota_type: 0,
+      model_ratio: 1,
+      billing_mode: 'tiered_expr',
+      billing_expr: 'tier("standard", p * 5 + cr * 1.25 + img * 8 + img_cr * 2 + c * 30)',
+    }
+
+    // 官方 OpenAI 图像支持任意自定义尺寸至 4K，以单一规格呈现
+    assert.deepEqual(getModelSupportedResolutions(model), ['custom_4k'])
+    assert.equal(getResolutionBadgeStyle('custom_4k').label, '自定义至 4K')
+
+    // At rate = 0.15 (Group mode)
+    const hero015 = getVideoModelHeroPrice(model, true, 0.15)
+    assert.equal(hero015.priceText, '$0.75')
+    assert.equal(hero015.officialPriceText, '$5')
+    assert.equal(hero015.unitText, '/ 1M Tokens 起')
+    assert.equal(hero015.discountOff, null)
+    assert.equal(hero015.resolutionPrices?.['standard']?.priceText, '$4.5')
+    assert.equal(hero015.resolutionPrices?.['standard']?.officialPriceText, '$30')
+    assert.equal(hero015.resolutionPrices?.['standard']?.imgToImgPriceText, '$5.7')
+    assert.equal(hero015.resolutionPrices?.['standard']?.officialImgToImgPriceText, '$38')
+    assert.equal(hero015.resolutionPrices?.['1024×1024']?.priceText, '$4.5')
+    assert.equal(hero015.resolutionPrices?.['1024×1024']?.imgToImgPriceText, '$5.7')
+
+    // At rate = 1 (Official mode)
+    const heroOfficial = getVideoModelHeroPrice(model, false, 1)
+    assert.equal(heroOfficial.priceText, '$5')
+    assert.equal(heroOfficial.officialPriceText, null)
+    assert.equal(heroOfficial.resolutionPrices?.['standard']?.priceText, '$30')
+    assert.equal(heroOfficial.resolutionPrices?.['standard']?.imgToImgPriceText, '$38')
+    assert.equal(heroOfficial.resolutionPrices?.['1024×1024']?.priceText, '$30')
+    assert.equal(heroOfficial.resolutionPrices?.['1024×1024']?.imgToImgPriceText, '$38')
   })
 })
-

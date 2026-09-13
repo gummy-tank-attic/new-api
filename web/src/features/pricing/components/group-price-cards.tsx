@@ -31,7 +31,7 @@ import {
 } from '../constants'
 import { resolveGroupSavingsOffPercent } from '../lib/group-discount'
 import { getConfiguredGroupRatio } from '../lib/model-helpers'
-import { getOffPeakMultiplier, isTimeTieredModel } from './supplier-price-table'
+import { getOffPeakMultiplier, isTimeTieredModel } from '../lib/time-pricing'
 
 export interface GroupPriceCardsProps {
   groups: string[]
