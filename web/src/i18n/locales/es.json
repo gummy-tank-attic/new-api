@@ -2992,7 +2992,7 @@
     "Model regex cannot be empty": "Model regex cannot be empty",
     "Model scope": "Model scope",
     "Model selected": "Modelo seleccionado",
-    "Model Square": "Explorador de modelos",
+    "Model Square": "Precios",
     "Model Square lists live model IDs and list prices for your selection. Always copy IDs from there.": "Model Square muestra los IDs de modelo activos y los precios de lista para tu selección. Copia siempre los IDs desde allí.",
     "Model Square lists live model IDs, group prices, and cache rates. Always copy IDs from there.": "Model Square lists live model IDs, group prices, and cache rates. Always copy IDs from there.",
     "Model Square shows reference prices for each plan. Your final charges depend on the API key and plan assigned to your account—always confirm in the console.": "Model Square muestra precios de referencia para cada plan. El cargo final depende de la clave de API y el plan asignado a tu cuenta; confírmalo siempre en la consola.",

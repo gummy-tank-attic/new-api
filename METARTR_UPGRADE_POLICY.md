@@ -52,9 +52,9 @@
    - 前端在 `getModelSupportedResolutions` 中收敛为单一 `custom_4k`（“自定义至 4K”）天蓝高亮徽标，彻底消除了原先 4 档固定规格折行导致的卡片高度参差问题；
    - 矩阵定价表收敛为单行输出文生图与图生图 Token 价格，杜绝多行相同价格的重复冗余；
    - 图像卡片表格注脚固定为极简标准格式（`计费单位：/ 1M Tokens` 或 `计费单位：/ 张`），去除多余冗长说明文本。
-2. **公开顶栏品牌保护契约（Protected Brand Contract）**：
-   - `PublicHeader` 永久禁止挂载 `SystemUpdateAction` 或任何版本号胶囊徽标，公开展示页面仅保留 `[MR] MetaRtr` 纯净商业品牌标识，杜绝向访客暴露内部构建或版本信息；
-   - 内部版本与更新检查仅在登录后的控制台（`AppHeader`）及管理设置中提供。
+2. **顶栏品牌保护契约（Protected Brand Contract）**：
+   - `PublicHeader` 与 `AppHeader` 永久禁止挂载 `SystemUpdateAction` 或任何版本号胶囊徽标，顶栏仅保留 `[MR] MetaRtr` 纯净商业品牌标识，杜绝在顶栏暴露内部构建或版本信息；
+   - 内部版本与更新检查统一收敛于管理设置（`UpdateCheckerSection`，路径 `/system-settings/operations/maintenance`）。
 
 This private deployment keeps a deliberately customized frontend. Upstream
 updates must preserve the established MetaRtr frontend layout and visual
