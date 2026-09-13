@@ -876,7 +876,14 @@ function DurationVideoModelGroupPricingSection(props: {
   const { t, i18n } = useTranslation()
   const isZh = i18n.language?.startsWith('zh') ?? true
   const tiers = getDurationVideoTiers(props.model)
+  const dynamicDurationSavings =
+    tiers.length > 0 &&
+    tiers[0].officialSecondPrice != null &&
+    tiers[0].secondPrice < tiers[0].officialSecondPrice
+      ? Math.round((1 - tiers[0].secondPrice / tiers[0].officialSecondPrice) * 100)
+      : null
   const modelDiscountOff =
+    dynamicDurationSavings ??
     lookupModelSavingsOff(props.model.model_name) ??
     (getModelSpecificDiscountPercent(props.model.model_name) || null)
 
@@ -963,13 +970,19 @@ function DurationVideoModelGroupPricingSection(props: {
                         )}
                       </div>
                       <div className='col-span-3 text-right'>
-                        {effectiveDiscount != null ? (
-                          <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
-                            {effectiveDiscount}% OFF
-                          </span>
-                        ) : (
-                          <span className='text-muted-foreground/40 text-xs'>-</span>
-                        )}
+                        {(() => {
+                          const tierSavings =
+                            officialSecond > 0 && billedSecond < officialSecond
+                              ? Math.round((1 - billedSecond / officialSecond) * 100)
+                              : effectiveDiscount
+                          return tierSavings != null ? (
+                            <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
+                              {tierSavings}% OFF
+                            </span>
+                          ) : (
+                            <span className='text-muted-foreground/40 text-xs'>-</span>
+                          )
+                        })()}
                       </div>
                     </div>
                   )

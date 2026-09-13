@@ -516,7 +516,7 @@ export const MANUAL_MODEL_SAVINGS_OFF: Record<string, number> = {
   'kimi-k2.5': 25,
   'kimi-k2.7-code': 15,
   // —— MiniMax ——
-  'minimax-m3': 25,
+  'minimax-m3': 35,
   'minimax-m2.7': 15,
   'minimax-m2.5': 15,
   'minimax-h3': 25,

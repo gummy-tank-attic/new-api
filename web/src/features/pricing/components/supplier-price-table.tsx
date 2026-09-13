@@ -432,10 +432,22 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               (isGroupMode && baseRatio > 0 ? baseRatio : 1) *
               priceRate
           }
-          const modelSavings = lookupModelSavingsOff(
-            model.model_name,
-            actualInputPrice
-          )
+          let durationModelSavings: number | undefined
+          if (isDurationBasedVideoModel(model)) {
+            const tiers = getDurationVideoTiers(model)
+            if (
+              tiers.length > 0 &&
+              tiers[0].officialSecondPrice != null &&
+              tiers[0].secondPrice < tiers[0].officialSecondPrice
+            ) {
+              durationModelSavings = Math.round(
+                (1 - tiers[0].secondPrice / tiers[0].officialSecondPrice) * 100
+              )
+            }
+          }
+          const modelSavings =
+            durationModelSavings ??
+            lookupModelSavingsOff(model.model_name, actualInputPrice)
           const effectiveSavings = isGroupMode
             ? (modelSavings ?? savings)
             : null
@@ -1208,7 +1220,9 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               cacheWriteOff,
               isGroupMode,
               Boolean(selectedGroup),
-              effectiveSavings
+              effectiveSavings,
+              officialRef?.cache_write,
+              tokenUnit
             )
           }
 

@@ -22,6 +22,7 @@ export interface OfficialPriceItem {
   input: number
   output: number
   cache?: number
+  cache_write?: number
 }
 
 /**
@@ -66,11 +67,24 @@ export const KIMI_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
 }
 
 /**
- * 汇总官方标准字典（Z.ai + Kimi / Moonshot 等）
+ * MiniMax 国际版官方标准定价字典
+ * 数据来源：https://platform.minimax.io/docs/guides/pricing-paygo.md
+ */
+export const MINIMAX_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
+  'minimax-m3': { input: 0.30, output: 1.20, cache: 0.06 },
+  'minimax-m2.7': { input: 0.30, output: 1.20, cache: 0.06, cache_write: 0.375 },
+  'minimax-m2.7-highspeed': { input: 0.60, output: 2.40, cache: 0.06, cache_write: 0.375 },
+  'minimax-m2.5': { input: 0.30, output: 1.20, cache: 0.03, cache_write: 0.375 },
+  'minimax-m2.5-highspeed': { input: 0.60, output: 2.40, cache: 0.03, cache_write: 0.375 },
+}
+
+/**
+ * 汇总官方标准字典（Z.ai + Kimi / Moonshot + MiniMax 等）
  */
 export const ALL_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
   ...ZAI_OFFICIAL_PRICES,
   ...KIMI_OFFICIAL_PRICES,
+  ...MINIMAX_OFFICIAL_PRICES,
 }
 
 const ALL_OFFICIAL_ENTRIES = Object.entries(ALL_OFFICIAL_PRICES).sort(

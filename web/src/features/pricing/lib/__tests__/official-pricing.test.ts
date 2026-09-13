@@ -51,6 +51,15 @@ describe('Official Pricing & Dynamic Savings', () => {
 
       const k25 = getOfficialModelPrice('kimi-k2.5')
       expect(k25).toEqual({ input: 0.95, output: 4.0, cache: 0.16 })
+
+      const m3 = getOfficialModelPrice('minimax-m3')
+      expect(m3).toEqual({ input: 0.30, output: 1.20, cache: 0.06 })
+
+      const m27 = getOfficialModelPrice('minimax-m2.7')
+      expect(m27).toEqual({ input: 0.30, output: 1.20, cache: 0.06, cache_write: 0.375 })
+
+      const m25 = getOfficialModelPrice('minimax-m2.5')
+      expect(m25).toEqual({ input: 0.30, output: 1.20, cache: 0.03, cache_write: 0.375 })
     })
 
     it('supports case-insensitivity and prefix matching', () => {
@@ -65,6 +74,9 @@ describe('Official Pricing & Dynamic Savings', () => {
 
       const prefixKimi = getOfficialModelPrice('kimi-k3-preview')
       expect(prefixKimi?.input).toBe(3.0)
+
+      const upperM3 = getOfficialModelPrice('MiniMax-M3')
+      expect(upperM3?.input).toBe(0.30)
     })
 
     it('returns undefined for unmapped models', () => {
@@ -88,6 +100,15 @@ describe('Official Pricing & Dynamic Savings', () => {
 
       // Kimi-k2.7-code: Selling at $0.7125 against official $0.95 -> 25% OFF
       expect(computeAutoSavingsOff('kimi-k2.7-code', 0.7125)).toBe(25)
+
+      // MiniMax-M3: Selling at $0.195 against official $0.30 -> exactly 35% OFF
+      expect(computeAutoSavingsOff('minimax-m3', 0.195)).toBe(35)
+
+      // MiniMax-M2.7: Selling at $0.255 against official $0.30 -> exactly 15% OFF
+      expect(computeAutoSavingsOff('minimax-m2.7', 0.255)).toBe(15)
+
+      // MiniMax-M2.5: Selling at $0.255 against official $0.30 -> exactly 15% OFF
+      expect(computeAutoSavingsOff('minimax-m2.5', 0.255)).toBe(15)
     })
 
     it('returns undefined if selling at or above official price', () => {
@@ -101,12 +122,17 @@ describe('Official Pricing & Dynamic Savings', () => {
       // Dynamic adjustment based on current model ratio / selling price
       const savings = lookupModelSavingsOff('glm-5.3', 0.98) // (1 - 0.98/1.40) = 30%
       expect(savings).toBe(30)
+
+      expect(lookupModelSavingsOff('minimax-m3', 0.195)).toBe(35)
+      expect(lookupModelSavingsOff('minimax-m2.7', 0.255)).toBe(15)
     })
 
     it('falls back to manual table if actual price not passed', () => {
       expect(lookupModelSavingsOff('glm-5.3')).toBe(25)
       expect(lookupModelSavingsOff('glm-5.2')).toBe(35)
       expect(lookupModelSavingsOff('glm-5.1')).toBe(20)
+      expect(lookupModelSavingsOff('minimax-m3')).toBe(35)
+      expect(lookupModelSavingsOff('minimax-m2.7')).toBe(15)
     })
   })
 

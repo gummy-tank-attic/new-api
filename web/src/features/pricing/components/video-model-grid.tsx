@@ -92,16 +92,23 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               ? model.group_ratio[props.selectedGroup] * (props.priceRate ?? 1)
               : effectiveRate)
           : 1
+        const durationTiers = isDurationBased
+          ? getDurationVideoTiers(model)
+          : []
+        const dynamicDurationDiscount =
+          isDurationBased &&
+          durationTiers.length > 0 &&
+          durationTiers[0].officialSecondPrice != null &&
+          durationTiers[0].secondPrice < durationTiers[0].officialSecondPrice
+            ? Math.round((1 - durationTiers[0].secondPrice / durationTiers[0].officialSecondPrice) * 100)
+            : null
         const discountOff = isGroupMode
-          ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || props.savings || null))
+          ? (dynamicDurationDiscount ?? lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || props.savings || null))
           : null
         const hero = getVideoModelHeroPrice(model, isGroupMode, modelRate)
         const tierGroups = isUpscale || isDurationBased ? [] : getVideoModelTierGroups(model)
         const upscaleTiers = isUpscale
           ? parseVideoUpscaleTiers(model.billing_expr)
-          : []
-        const durationTiers = isDurationBased
-          ? getDurationVideoTiers(model)
           : []
 
         const vendorIcon =

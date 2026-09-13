@@ -1171,13 +1171,17 @@ export function getVideoModelHeroPrice(
     const baseEst5s = minTier ? minTier.est5sPrice : 0.400
     const billed = baseEst5s * rate
     const officialEst5s = (minTier?.officialEst5sPrice ?? 0.400) * rate
+    const dynamicDiscountOff =
+      minTier?.officialSecondPrice && minTier.secondPrice < minTier.officialSecondPrice
+        ? Math.round((1 - minTier.secondPrice / minTier.officialSecondPrice) * 100)
+        : discountOff
     return {
       priceText: `$${billed.toFixed(3)}`,
-      officialPriceText: isGroupMode && discountOff != null ? `$${officialEst5s.toFixed(3)}` : null,
+      officialPriceText: isGroupMode && dynamicDiscountOff != null ? `$${officialEst5s.toFixed(3)}` : null,
       unitText: '/ 5秒 起',
       unitKey: 'videoPricing.unitPer5sFrom',
       isStartingPrice: true,
-      discountOff,
+      discountOff: dynamicDiscountOff,
     }
   }
 
