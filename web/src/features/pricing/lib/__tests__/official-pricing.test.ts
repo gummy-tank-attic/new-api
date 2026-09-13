@@ -39,12 +39,32 @@ describe('Official Pricing & Dynamic Savings', () => {
       expect(flash).toEqual({ input: 0.15, output: 0.5, cache: 0.03 })
     })
 
+    it('retrieves official international price for Kimi / Moonshot models', () => {
+      const k3 = getOfficialModelPrice('kimi-k3')
+      expect(k3).toEqual({ input: 3.0, output: 15.0, cache: 0.3 })
+
+      const k27 = getOfficialModelPrice('kimi-k2.7-code')
+      expect(k27).toEqual({ input: 0.95, output: 4.0, cache: 0.19 })
+
+      const k26 = getOfficialModelPrice('kimi-k2.6')
+      expect(k26).toEqual({ input: 0.95, output: 4.0, cache: 0.16 })
+
+      const k25 = getOfficialModelPrice('kimi-k2.5')
+      expect(k25).toEqual({ input: 0.95, output: 4.0, cache: 0.16 })
+    })
+
     it('supports case-insensitivity and prefix matching', () => {
       const upper = getOfficialModelPrice('GLM-5.3')
       expect(upper?.input).toBe(1.4)
 
       const dated = getOfficialModelPrice('glm-5.3-20260301')
       expect(dated?.input).toBe(1.4)
+
+      const upperKimi = getOfficialModelPrice('KIMI-K3')
+      expect(upperKimi?.input).toBe(3.0)
+
+      const prefixKimi = getOfficialModelPrice('kimi-k3-preview')
+      expect(prefixKimi?.input).toBe(3.0)
     })
 
     it('returns undefined for unmapped models', () => {
@@ -62,6 +82,12 @@ describe('Official Pricing & Dynamic Savings', () => {
 
       // Selling at $1.12 against official $1.40 -> 20% OFF
       expect(computeAutoSavingsOff('glm-5.1', 1.12)).toBe(20)
+
+      // Kimi-k3: Selling at $2.193 against official $3.00 -> 27% OFF
+      expect(computeAutoSavingsOff('kimi-k3', 2.193)).toBe(27)
+
+      // Kimi-k2.7-code: Selling at $0.7125 against official $0.95 -> 25% OFF
+      expect(computeAutoSavingsOff('kimi-k2.7-code', 0.7125)).toBe(25)
     })
 
     it('returns undefined if selling at or above official price', () => {

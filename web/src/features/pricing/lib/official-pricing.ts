@@ -49,7 +49,31 @@ export const ZAI_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
   'glm-4.5v': { input: 0.6, output: 1.8, cache: 0.11 },
 }
 
-const ZAI_OFFICIAL_ENTRIES = Object.entries(ZAI_OFFICIAL_PRICES).sort(
+/**
+ * Kimi (月之暗面 / Moonshot) 国际版官方标准定价字典
+ * 数据来源：https://platform.kimi.ai
+ */
+export const KIMI_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
+  'kimi-k3': { input: 3.0, output: 15.0, cache: 0.3 },
+  'kimi-k2.7-code': { input: 0.95, output: 4.0, cache: 0.19 },
+  'kimi-k2.7-code-highspeed': { input: 1.9, output: 8.0, cache: 0.38 },
+  'kimi-k2.6': { input: 0.95, output: 4.0, cache: 0.16 },
+  'kimi-k2.5': { input: 0.95, output: 4.0, cache: 0.16 },
+  'kimi-k2': { input: 0.95, output: 4.0, cache: 0.16 },
+  'moonshot-v1-8k': { input: 1.75, output: 1.75 },
+  'moonshot-v1-32k': { input: 3.5, output: 3.5 },
+  'moonshot-v1-128k': { input: 8.5, output: 8.5 },
+}
+
+/**
+ * 汇总官方标准字典（Z.ai + Kimi / Moonshot 等）
+ */
+export const ALL_OFFICIAL_PRICES: Record<string, OfficialPriceItem> = {
+  ...ZAI_OFFICIAL_PRICES,
+  ...KIMI_OFFICIAL_PRICES,
+}
+
+const ALL_OFFICIAL_ENTRIES = Object.entries(ALL_OFFICIAL_PRICES).sort(
   ([a], [b]) => b.length - a.length
 )
 
@@ -62,11 +86,11 @@ export function getOfficialModelPrice(
   const needle = (modelName || '').trim().toLowerCase()
   if (!needle) return undefined
 
-  if (ZAI_OFFICIAL_PRICES[needle]) {
-    return ZAI_OFFICIAL_PRICES[needle]
+  if (ALL_OFFICIAL_PRICES[needle]) {
+    return ALL_OFFICIAL_PRICES[needle]
   }
 
-  for (const [key, item] of ZAI_OFFICIAL_ENTRIES) {
+  for (const [key, item] of ALL_OFFICIAL_ENTRIES) {
     if (
       needle.startsWith(`${key}-`) ||
       needle.startsWith(`${key}.`) ||

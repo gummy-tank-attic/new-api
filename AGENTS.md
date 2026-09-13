@@ -40,7 +40,7 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 | Pricing nav label | i18n key still `Model Square` → zh **价格**; route `/pricing` |
 | Header Brand | 顶栏品牌区域（公开顶栏与控制台顶栏）仅显示 `[MR] MetaRtr`，**严禁**挂载 `SystemUpdateAction` 或版本号胶囊，禁止在顶栏暴露内部构建版本；系统更新检查收敛于系统设置后台 |
 | Image Pricing Display | 图像模型按 Token 计费且支持任意尺寸时，统一以单徽标 `自定义至 4K`（`custom_4k`）呈现，表格保持单行，避免多行重复单价与折行 |
-| International Pricing & Auto Savings | 针对出海与国际定位，智谱/Z.ai 等模型划线原价必须锚定国际官方 USD 定价（见 `official-pricing.ts`），前台根据实际售价自动推导折算百分比（`XX% OFF` / `UP TO X% OFF`）；严禁采用国内人民币/汇率折算价格为基准，上游合并或更新时严禁覆盖 `official-pricing.ts` 及其相关自动计算逻辑 |
+| International Pricing & Auto Savings | 针对出海与国际定位，智谱/Z.ai、Kimi/Moonshot 等模型划线原价必须锚定国际官方 USD 定价（见 `official-pricing.ts`），前台根据实际售价自动推导折算百分比（`XX% OFF` / `UP TO X% OFF`）；严禁采用国内人民币/汇率折算价格为基准，上游合并或更新时严禁覆盖 `official-pricing.ts` 及其相关自动计算逻辑 |
 
 ## Tech Stack & Architecture
 

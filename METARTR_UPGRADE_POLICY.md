@@ -55,8 +55,8 @@
 2. **顶栏品牌保护契约（Protected Brand Contract）**：
    - `PublicHeader` 与 `AppHeader` 永久禁止挂载 `SystemUpdateAction` 或任何版本号胶囊徽标，顶栏仅保留 `[MR] MetaRtr` 纯净商业品牌标识，杜绝在顶栏暴露内部构建或版本信息；
    - 内部版本与更新检查统一收敛于管理设置（`UpdateCheckerSection`，路径 `/system-settings/operations/maintenance`）。
-3. **Z.ai 国际版官方基准定价与自动折扣计算契约（Official Pricing & Dynamic Savings Contract）**：
-   - **国际定价锚定基准**：MetaRtr 面向出海与国际用户，智谱全系列模型划线原价必须以 Z.ai 国际版官方标准定价（USD，如 GLM-5.3 输入 $1.40 / 输出 $4.40）为唯一基准，严禁采用国内 bigmodel.cn 人民币转美元等低标准原价；
+3. **Z.ai 与 Kimi / Moonshot 国际版官方基准定价与自动折扣计算契约（Official Pricing & Dynamic Savings Contract）**：
+   - **国际定价锚定基准**：MetaRtr 面向出海与国际用户，智谱全系列模型与 Kimi/Moonshot 全系列模型的划线原价必须以各自国际版官方标准定价（USD，如 GLM-5.3 输入 $1.40 / 输出 $4.40，Kimi-K3 输入 $3.00 / 输出 $15.00，Kimi-K2.7/K2.6 输入 $0.95 / 输出 $4.00）为唯一基准，严禁采用国内 bigmodel.cn / moonshot.cn 人民币转美元等低标准原价；
    - **全自动动态推导体系**：通过 `web/src/features/pricing/lib/official-pricing.ts` 集中管理官方基准价，表格组件与分组卡片根据当前生效售价（`actualInputPrice`）自动计算折扣百分比（`Math.round((1 - actual / official) * 100)`）并在表格呈现原价划线与红底白字 `XX% OFF` 徽章，同时驱动分组卡片顶部展示当前分组最高折扣 `UP TO X% OFF`；
    - **免除手动换算负担**：管理员调整模型倍率售价时无需手动反算折扣或修改代码常数，前台自动计算并保持国际原价对齐；
    - **合并冲突与保护**：`web/src/features/pricing/lib/official-pricing.ts` 以及其在 `constants.ts`、`supplier-price-table.tsx`、`group-price-cards.tsx` 中的调用属于 MetaRtr 核心资产，上游升级或代码冲突时必须保留 ours，严禁被上游覆盖。
@@ -73,7 +73,7 @@ Before merging or deploying an upstream update, preserve and regression-check:
 - public header branding: strictly display only `[MR] MetaRtr` without `SystemUpdateAction` or version tags (`v1.0.0-*`); never leak internal build versions on the public header;
 - public `/` is the pricing page (`web/src/routes/index.tsx` renders `Pricing`, shared `search-schema.ts`). Do not restore upstream Home as the root route. If upstream re-adds `web/src/features/home/`, leave it unwired;
 - image pricing presentation: GPT Image series must maintain the single `custom_4k` resolution badge and 1-line token-based pricing matrix table; do not restore multi-line wrapping presets (`1024×1024`, `1536×1024`, `1024×1536`);
-- international official benchmark pricing & dynamic savings: Z.ai models must anchor their strikethrough baseline to Z.ai official international USD prices (`web/src/features/pricing/lib/official-pricing.ts`). The frontend must dynamically calculate `% OFF` badges and strikethrough original prices from actual selling prices, never regressing to domestic RMB baselines or static hardcoded tables;
+- international official benchmark pricing & dynamic savings: Z.ai & Kimi/Moonshot models must anchor their strikethrough baseline to official international USD prices (`web/src/features/pricing/lib/official-pricing.ts`). The frontend must dynamically calculate `% OFF` badges and strikethrough original prices from actual selling prices, never regressing to domestic RMB baselines or static hardcoded tables;
 - on merge conflict, keep MetaRtr (`ours`) for:
   - `web/src/routes/index.tsx`
   - `web/src/routes/pricing/index.tsx`
