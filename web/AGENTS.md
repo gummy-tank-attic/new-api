@@ -105,6 +105,8 @@
 
 - 使用函数式组件与 Hooks，单一职责；组件 props 须有明确类型（接口或类型别名）。
 - **Props 使用**：组件 props 非必要不要解构，直接使用 `props.xxx` 访问属性，保持代码清晰（详见 [3.2 代码风格与类型](#32-代码风格与类型)）。
+- **公开顶栏与控制台顶栏边界**：`PublicHeader` 面向访客公开展示，**严禁**挂载 `SystemUpdateAction` 或版本号胶囊，品牌区仅显示 `[MR] MetaRtr`；系统版本号与更新检查仅限在登录后的 `AppHeader` 或系统管理设置中提供。
+- **生图模型规格与定价呈现**：按 Token 计费且原生支持任意自定义尺寸的模型（如 OpenAI GPT Image 系列），支持规格在 `getModelSupportedResolutions` 中统一收敛为单一 `custom_4k`（“自定义至 4K”），矩阵表保持单行，禁止展开多行重复单价或造成折行。
 - 单文件超过约 200 行时考虑拆分子组件或将逻辑抽到自定义 Hooks；类型定义可与组件同文件或放在同模块的 `types` 中。
 
 **Portal 浮层内需要对 DOM 节点执行副作用时，必须使用 callback ref，而非 useRef**

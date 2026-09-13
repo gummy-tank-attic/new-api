@@ -44,6 +44,18 @@
 
 时间折扣和 Upscale 仍保留旧模型兼容识别逻辑。后续只有在官方 AST 提供等价结构化输出后，才允许移除这些兼容分支；不得为了“统一”而重新引入宽松正则或推测性价格。任何新增供应商价格优先修改后端官方表达式或配置数据，前端只增加对应展示适配和回归测试。
 
+## 定价展示与顶栏品牌审计记录（2026-09-13）
+
+本次审计针对 GPT Image 系列生图定价模型及公共页面品牌呈现进行深度优化与规范固化：
+1. **GPT Image 规格单胶囊化与表格极简呈现**：
+   - 官方 OpenAI GPT Image 2 / 2.5 具备纯按 Token 计费且原生支持任意自定义尺寸至 4K 的特性；
+   - 前端在 `getModelSupportedResolutions` 中收敛为单一 `custom_4k`（“自定义至 4K”）天蓝高亮徽标，彻底消除了原先 4 档固定规格折行导致的卡片高度参差问题；
+   - 矩阵定价表收敛为单行输出文生图与图生图 Token 价格，杜绝多行相同价格的重复冗余；
+   - 图像卡片表格注脚固定为极简标准格式（`计费单位：/ 1M Tokens` 或 `计费单位：/ 张`），去除多余冗长说明文本。
+2. **公开顶栏品牌保护契约（Protected Brand Contract）**：
+   - `PublicHeader` 永久禁止挂载 `SystemUpdateAction` 或任何版本号胶囊徽标，公开展示页面仅保留 `[MR] MetaRtr` 纯净商业品牌标识，杜绝向访客暴露内部构建或版本信息；
+   - 内部版本与更新检查仅在登录后的控制台（`AppHeader`）及管理设置中提供。
+
 This private deployment keeps a deliberately customized frontend. Upstream
 updates must preserve the established MetaRtr frontend layout and visual
 behavior unless the operator explicitly approves a layout change.
@@ -53,7 +65,9 @@ behavior unless the operator explicitly approves a layout change.
 Before merging or deploying an upstream update, preserve and regression-check:
 
 - page structure, navigation, header, footer, and responsive layout;
+- public header branding: strictly display only `[MR] MetaRtr` without `SystemUpdateAction` or version tags (`v1.0.0-*`); never leak internal build versions on the public header;
 - public `/` is the pricing page (`web/src/routes/index.tsx` renders `Pricing`, shared `search-schema.ts`). Do not restore upstream Home as the root route. If upstream re-adds `web/src/features/home/`, leave it unwired;
+- image pricing presentation: GPT Image series must maintain the single `custom_4k` resolution badge and 1-line token-based pricing matrix table; do not restore multi-line wrapping presets (`1024×1024`, `1536×1024`, `1024×1536`);
 - on merge conflict, keep MetaRtr (`ours`) for:
   - `web/src/routes/index.tsx`
   - `web/src/routes/pricing/index.tsx`

@@ -38,6 +38,8 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 | Session / 401 | `skipAuthRefresh` 401 must **not** `clearAuthentication`; silent refresh only (except logout). Access TTL 15m; keep-alive in `auth-session.ts`. SID restore must **not** `queryClient.clear()` — use `applySessionQuerySync`. Parent PRODUCTION §9 / `docs/authentication.md` |
 | About / contact | `/about` contact cards; links only in `web/src/lib/contact-links.ts`; About uses `showFooter={false}`; do not block paint on empty `/api/about` (parent PRODUCTION §7.9) |
 | Pricing nav label | i18n key still `Model Square` → zh **价格**; route `/pricing` |
+| Public Header Brand | 公开顶栏品牌区域仅显示 `[MR] MetaRtr`，**严禁**挂载 `SystemUpdateAction` 或版本号胶囊，禁止向访客泄露内部开发版本 |
+| Image Pricing Display | 图像模型按 Token 计费且支持任意尺寸时，统一以单徽标 `自定义至 4K`（`custom_4k`）呈现，表格保持单行，避免多行重复单价与折行 |
 
 ## Tech Stack & Architecture
 
