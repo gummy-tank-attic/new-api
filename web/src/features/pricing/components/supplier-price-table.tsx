@@ -21,15 +21,18 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
+import { formatBillingCurrencyFromUSD } from '@/lib/currency'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
 import {
   DEFAULT_TOKEN_UNIT,
+  getOfficialModelPrice,
   isDynamicUpToGroup,
   lookupGroupMapValue,
   lookupModelSavingsOff,
   MANUAL_GROUP_SAVINGS_OFF,
+  TOKEN_UNIT_DIVISORS,
 } from '../constants'
 import {
   formatDynamicUnitPrice,
@@ -137,8 +140,35 @@ function resolvePrices(
   officialPrice: string,
   isGroupMode: boolean,
   hasGroup: boolean,
-  effectiveSavings?: number | null
+  effectiveSavings?: number | null,
+  officialRefPrice?: number | null,
+  tokenUnit: TokenUnit = 'M'
 ): { primary: string; official: string | null } {
+  if (officialRefPrice != null && officialRefPrice > 0) {
+    const divisor = TOKEN_UNIT_DIVISORS[tokenUnit] || 1
+    const refFormatted = formatBillingCurrencyFromUSD(
+      officialRefPrice / divisor,
+      {
+        showSymbol: true,
+        digitsLarge: 4,
+        digitsSmall: 6,
+        abbreviate: false,
+      }
+    )
+
+    if (hasGroup && isGroupMode) {
+      if (!isEmptyPrice(groupPrice) && groupPrice !== refFormatted) {
+        return { primary: groupPrice, official: refFormatted }
+      }
+      return { primary: groupPrice, official: null }
+    }
+
+    if (!isEmptyPrice(officialPrice) || !isEmptyPrice(groupPrice)) {
+      return { primary: refFormatted || officialPrice, official: null }
+    }
+    return { primary: '-', official: null }
+  }
+
   if (hasGroup && isGroupMode) {
     if (officialPrice && officialPrice !== groupPrice && !isEmptyPrice(officialPrice)) {
       return { primary: groupPrice, official: officialPrice }
@@ -275,6 +305,11 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
   const isGenerationTable =
     isImageTable || props.models.some((m) => isByteDanceOrVideoModel(m))
 
+  const baseRatio = getConfiguredGroupRatio(
+    props.groupRatio,
+    selectedGroup || ''
+  )
+
   const modelRowClass = cn(
     'group relative grid cursor-pointer items-center rounded-[14px] border border-[var(--p-border,#E2E8F0)] bg-[var(--p-card,#fff)] px-[22px] py-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.02)] transition-all duration-150 hover:border-[var(--p-border-hover,#CBD5E1)] hover:bg-[#FAFAFA] hover:shadow-[0_3px_8px_rgba(15,23,42,0.04)]',
     isMiniMaxTable
@@ -378,7 +413,29 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
       <div className='flex flex-col gap-2.5 sm:gap-3'>
         {props.models.map((model) => {
           const isTimeTiered = isTimeTieredModel(model)
-          const modelSavings = lookupModelSavingsOff(model.model_name)
+          let actualInputPrice: number | undefined
+          if (isDynamicPricingModel(model)) {
+            const tiers = getDynamicPricingTiers(model)
+            if (tiers.length > 0) {
+              const tier = tiers[0]
+              if ('inputPrice' in tier && typeof tier.inputPrice === 'number') {
+                actualInputPrice =
+                  tier.inputPrice *
+                  (isGroupMode && baseRatio > 0 ? baseRatio : 1) *
+                  priceRate
+              }
+            }
+          } else if (model.model_ratio != null) {
+            actualInputPrice =
+              model.model_ratio *
+              2 *
+              (isGroupMode && baseRatio > 0 ? baseRatio : 1) *
+              priceRate
+          }
+          const modelSavings = lookupModelSavingsOff(
+            model.model_name,
+            actualInputPrice
+          )
           const effectiveSavings = isGroupMode
             ? (modelSavings ?? savings)
             : null
@@ -1047,10 +1104,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
             )
             inputPrice = res
           } else {
-            const baseRatio = getConfiguredGroupRatio(
-              props.groupRatio,
-              selectedGroup || ''
-            )
+            const officialRef = getOfficialModelPrice(model.model_name)
             const inGroup = getModelUnitPrice(
               model,
               'input',
@@ -1073,7 +1127,9 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               inOff,
               isGroupMode,
               Boolean(selectedGroup),
-              effectiveSavings
+              effectiveSavings,
+              officialRef?.input,
+              tokenUnit
             )
 
             const outGroup = getModelUnitPrice(
@@ -1098,7 +1154,9 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               outOff,
               isGroupMode,
               Boolean(selectedGroup),
-              effectiveSavings
+              effectiveSavings,
+              officialRef?.output,
+              tokenUnit
             )
 
             const cacheGroup = getModelUnitPrice(
@@ -1123,7 +1181,9 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               cacheOff,
               isGroupMode,
               Boolean(selectedGroup),
-              effectiveSavings
+              effectiveSavings,
+              officialRef?.cache,
+              tokenUnit
             )
 
             const cacheWriteGroup = getModelUnitPrice(

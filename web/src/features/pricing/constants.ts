@@ -18,6 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import type { TFunction } from 'i18next'
 
+import { computeAutoSavingsOff } from './lib/official-pricing'
 import type { TokenUnit } from './types'
 
 // ----------------------------------------------------------------------------
@@ -535,9 +536,23 @@ const MANUAL_MODEL_SAVINGS_PREFIXES = Object.entries(
   .map(([key, value]) => [key.trim().toLowerCase(), value] as const)
   .sort(([left], [right]) => right.length - left.length)
 
-export function lookupModelSavingsOff(modelName: string): number | undefined {
+export {
+  getOfficialModelPrice,
+  computeAutoSavingsOff,
+  formatOfficialPriceValue,
+} from './lib/official-pricing'
+
+export function lookupModelSavingsOff(
+  modelName: string,
+  actualInputPricePerM?: number
+): number | undefined {
   const needle = (modelName || '').trim().toLowerCase()
   if (!needle) return undefined
+
+  if (typeof actualInputPricePerM === 'number' && actualInputPricePerM > 0) {
+    const autoSavings = computeAutoSavingsOff(needle, actualInputPricePerM)
+    if (autoSavings !== undefined) return autoSavings
+  }
 
   const exact = MANUAL_MODEL_SAVINGS_EXACT.get(needle)
   if (exact !== undefined) return exact

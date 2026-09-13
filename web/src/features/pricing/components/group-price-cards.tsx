@@ -29,6 +29,10 @@ import {
   MANUAL_GROUP_SAVINGS_OFF,
   MANUAL_GROUP_ZHE,
 } from '../constants'
+import {
+  getDynamicPricingTiers,
+  isDynamicPricingModel,
+} from '../lib/dynamic-price'
 import { resolveGroupSavingsOffPercent } from '../lib/group-discount'
 import { getConfiguredGroupRatio } from '../lib/model-helpers'
 import { getOffPeakMultiplier, isTimeTieredModel } from '../lib/time-pricing'
@@ -49,10 +53,9 @@ function getGroupMaxDiscount(
   groupRatio?: Record<string, number>
 ): number {
   if (!models || models.length === 0) return 0
+  const gRatio = getConfiguredGroupRatio(groupRatio || {}, group)
   const groupDiscount =
-    resolveGroupSavingsOffPercent(
-      getConfiguredGroupRatio(groupRatio || {}, group)
-    ) ?? 0
+    resolveGroupSavingsOffPercent(gRatio) ?? 0
 
   let maxDiscount = 0
   let hasModelOverride = false
@@ -97,7 +100,21 @@ function getGroupMaxDiscount(
   })
 
   for (const model of targetModels) {
-    const manualModelOff = lookupModelSavingsOff(model.model_name)
+    let actualInputPrice =
+      (model.model_ratio || 0) * 2 * (gRatio > 0 ? gRatio : 1)
+    if (isDynamicPricingModel(model)) {
+      const tiers = getDynamicPricingTiers(model)
+      if (tiers.length > 0) {
+        const tier = tiers[0]
+        if ('inputPrice' in tier && typeof tier.inputPrice === 'number') {
+          actualInputPrice = tier.inputPrice * (gRatio > 0 ? gRatio : 1)
+        }
+      }
+    }
+    const manualModelOff = lookupModelSavingsOff(
+      model.model_name,
+      actualInputPrice
+    )
     if (manualModelOff != null) {
       hasModelOverride = true
       if (manualModelOff > maxDiscount) {

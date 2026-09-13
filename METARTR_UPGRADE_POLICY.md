@@ -55,6 +55,11 @@
 2. **顶栏品牌保护契约（Protected Brand Contract）**：
    - `PublicHeader` 与 `AppHeader` 永久禁止挂载 `SystemUpdateAction` 或任何版本号胶囊徽标，顶栏仅保留 `[MR] MetaRtr` 纯净商业品牌标识，杜绝在顶栏暴露内部构建或版本信息；
    - 内部版本与更新检查统一收敛于管理设置（`UpdateCheckerSection`，路径 `/system-settings/operations/maintenance`）。
+3. **Z.ai 国际版官方基准定价与自动折扣计算契约（Official Pricing & Dynamic Savings Contract）**：
+   - **国际定价锚定基准**：MetaRtr 面向出海与国际用户，智谱全系列模型划线原价必须以 Z.ai 国际版官方标准定价（USD，如 GLM-5.3 输入 $1.40 / 输出 $4.40）为唯一基准，严禁采用国内 bigmodel.cn 人民币转美元等低标准原价；
+   - **全自动动态推导体系**：通过 `web/src/features/pricing/lib/official-pricing.ts` 集中管理官方基准价，表格组件与分组卡片根据当前生效售价（`actualInputPrice`）自动计算折扣百分比（`Math.round((1 - actual / official) * 100)`）并在表格呈现原价划线与红底白字 `XX% OFF` 徽章，同时驱动分组卡片顶部展示当前分组最高折扣 `UP TO X% OFF`；
+   - **免除手动换算负担**：管理员调整模型倍率售价时无需手动反算折扣或修改代码常数，前台自动计算并保持国际原价对齐；
+   - **合并冲突与保护**：`web/src/features/pricing/lib/official-pricing.ts` 以及其在 `constants.ts`、`supplier-price-table.tsx`、`group-price-cards.tsx` 中的调用属于 MetaRtr 核心资产，上游升级或代码冲突时必须保留 ours，严禁被上游覆盖。
 
 This private deployment keeps a deliberately customized frontend. Upstream
 updates must preserve the established MetaRtr frontend layout and visual
@@ -68,11 +73,12 @@ Before merging or deploying an upstream update, preserve and regression-check:
 - public header branding: strictly display only `[MR] MetaRtr` without `SystemUpdateAction` or version tags (`v1.0.0-*`); never leak internal build versions on the public header;
 - public `/` is the pricing page (`web/src/routes/index.tsx` renders `Pricing`, shared `search-schema.ts`). Do not restore upstream Home as the root route. If upstream re-adds `web/src/features/home/`, leave it unwired;
 - image pricing presentation: GPT Image series must maintain the single `custom_4k` resolution badge and 1-line token-based pricing matrix table; do not restore multi-line wrapping presets (`1024×1024`, `1536×1024`, `1024×1536`);
+- international official benchmark pricing & dynamic savings: Z.ai models must anchor their strikethrough baseline to Z.ai official international USD prices (`web/src/features/pricing/lib/official-pricing.ts`). The frontend must dynamically calculate `% OFF` badges and strikethrough original prices from actual selling prices, never regressing to domestic RMB baselines or static hardcoded tables;
 - on merge conflict, keep MetaRtr (`ours`) for:
   - `web/src/routes/index.tsx`
   - `web/src/routes/pricing/index.tsx`
-  - `web/src/features/pricing/**` (including `constants.ts` `MANUAL_MODEL_SAVINGS_OFF` / `VENDOR_MODEL_DISPLAY_ORDER`, `billing-expr.ts` trailing peak/off-peak parse, `pricing-visual.css`, `supplier-price-table.tsx`, `video-model-grid.tsx`)
-- operator-entered unit prices live in the DB (`billing_expr` / ratios) — a git merge never changes them. Display `% OFF` is `MANUAL_MODEL_SAVINGS_OFF` in `constants.ts` — keep ours;
+  - `web/src/features/pricing/**` (including `lib/official-pricing.ts`, `constants.ts` `MANUAL_MODEL_SAVINGS_OFF` / `VENDOR_MODEL_DISPLAY_ORDER`, `billing-expr.ts` trailing peak/off-peak parse, `pricing-visual.css`, `supplier-price-table.tsx`, `video-model-grid.tsx`)
+- operator-entered unit prices live in the DB (`billing_expr` / ratios) — a git merge never changes them. Display `% OFF` is dynamically computed against `official-pricing.ts` or fallback `MANUAL_MODEL_SAVINGS_OFF` in `constants.ts` — keep ours;
 - `parseTiersFromExpr` must still return inner `tier()` unit prices when the expression has a trailing `* (… ? 1 : 0.5)` peak/off-peak scale; do not drop the expr and fall back to `model_ratio`;
 - `web/src/features/pricing/pricing-visual.css` must keep the preview font stack (`Inter, Segoe UI, Microsoft YaHei` — **not** `Inter Variable`), Slate tokens (`#0F172A` / `#334155`), and `text-rendering: auto`; do not restore global Inter Variable or `optimizeLegibility` on the public pricing page;
 - pricing page grouping, ordering (configured `VENDOR_MODEL_DISPLAY_ORDER` first, then natural model-name ordering for unlisted models), presentation, group descriptions, and i18n;
