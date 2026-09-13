@@ -752,14 +752,20 @@ function VideoUpscaleGroupPricingSection(props: {
       <div className='space-y-4'>
         {props.availableGroups.map((group) => {
           const ratio = props.groupRatio[group] || 1
+          const headerDiscount =
+            tiers.length > 0 && tiers[0].officialSecondPrice > 0
+              ? Math.round((1 - (tiers[0].secondPrice * ratio) / tiers[0].officialSecondPrice) * 100)
+              : null
           return (
             <div key={group} className='overflow-hidden rounded-xl border border-border/70 bg-card/60 shadow-2xs space-y-3 pb-3'>
               <div className='bg-muted/30 flex items-center justify-between gap-3 border-b border-border/50 px-3.5 py-2.5'>
                 <GroupBadge group={group} size='sm' />
                 <div className='flex items-center gap-2'>
-                  <span className='inline-flex items-center justify-center rounded-full bg-rose-600 px-2 h-[18px] pt-[2px] pb-[1px] text-[10px] font-bold tracking-wide text-white shadow-2xs leading-none'>
-                    30% OFF
-                  </span>
+                  {headerDiscount != null && headerDiscount > 0 && (
+                    <span className='inline-flex items-center justify-center rounded-full bg-rose-600 px-2 h-[18px] pt-[2px] pb-[1px] text-[10px] font-bold tracking-wide text-white shadow-2xs leading-none'>
+                      {headerDiscount}% OFF
+                    </span>
+                  )}
                   <span className='text-muted-foreground font-mono text-xs'>{ratio}x</span>
                 </div>
               </div>
@@ -784,6 +790,10 @@ function VideoUpscaleGroupPricingSection(props: {
                     {tiers.map((tier) => {
                       const billedSecond = tier.secondPrice * ratio * props.priceRate
                       const officialSecond = tier.officialSecondPrice * props.priceRate
+                      const tierDiscount =
+                        officialSecond > 0 && billedSecond < officialSecond
+                          ? Math.round((1 - billedSecond / officialSecond) * 100)
+                          : null
                       return (
                         <div key={tier.tierKey} className='grid grid-cols-12 items-center px-3 py-2'>
                           <div className='col-span-3 font-bold text-foreground text-xs'>
@@ -796,9 +806,13 @@ function VideoUpscaleGroupPricingSection(props: {
                             ${officialSecond.toFixed(4)}/s
                           </div>
                           <div className='col-span-3 text-right'>
-                            <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
-                              30% OFF
-                            </span>
+                            {tierDiscount != null ? (
+                              <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
+                                {tierDiscount}% OFF
+                              </span>
+                            ) : (
+                              <span className='text-muted-foreground/40 text-xs'>-</span>
+                            )}
                           </div>
                         </div>
                       )
@@ -829,6 +843,10 @@ function VideoUpscaleGroupPricingSection(props: {
                     {tiers.map((tier) => {
                       const billedToken = tier.tokenPricePerM * ratio * props.priceRate
                       const officialToken = tier.officialTokenPricePerM * props.priceRate
+                      const tokenDiscount =
+                        officialToken > 0 && billedToken < officialToken
+                          ? Math.round((1 - billedToken / officialToken) * 100)
+                          : null
                       return (
                         <div key={tier.tierKey} className='grid grid-cols-12 items-center px-3 py-2'>
                           <div className='col-span-3 font-bold text-foreground text-xs'>
@@ -841,9 +859,13 @@ function VideoUpscaleGroupPricingSection(props: {
                             ${officialToken.toFixed(2)}/M
                           </div>
                           <div className='col-span-3 text-right'>
-                            <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
-                              30% OFF
-                            </span>
+                            {tokenDiscount != null ? (
+                              <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
+                                {tokenDiscount}% OFF
+                              </span>
+                            ) : (
+                              <span className='text-muted-foreground/40 text-xs'>-</span>
+                            )}
                           </div>
                         </div>
                       )
@@ -854,8 +876,8 @@ function VideoUpscaleGroupPricingSection(props: {
 
               <div className='border-t border-border/40 pt-2 px-3.5 text-right text-[10px] text-muted-foreground/75 font-mono'>
                 {isZh
-                  ? '计费说明：单次任务扣费 = 视频实际消耗 Token 费 + 视频时长 Upscale 秒费 · 全档位 7 折特惠'
-                  : 'Total = Video Tokens Fee + Video Duration * Upscale Fee · 30% OFF all tiers'}
+                  ? '计费说明：单次任务扣费 = 视频实际消耗 Token 费 + 视频时长 Upscale 秒费'
+                  : 'Total = Video Tokens Fee + Video Duration * Upscale Fee'}
               </div>
             </div>
           )
@@ -876,14 +898,7 @@ function DurationVideoModelGroupPricingSection(props: {
   const { t, i18n } = useTranslation()
   const isZh = i18n.language?.startsWith('zh') ?? true
   const tiers = getDurationVideoTiers(props.model)
-  const dynamicDurationSavings =
-    tiers.length > 0 &&
-    tiers[0].officialSecondPrice != null &&
-    tiers[0].secondPrice < tiers[0].officialSecondPrice
-      ? Math.round((1 - tiers[0].secondPrice / tiers[0].officialSecondPrice) * 100)
-      : null
-  const modelDiscountOff =
-    dynamicDurationSavings ??
+  const defaultModelDiscountOff =
     lookupModelSavingsOff(props.model.model_name) ??
     (getModelSpecificDiscountPercent(props.model.model_name) || null)
 
@@ -893,12 +908,19 @@ function DurationVideoModelGroupPricingSection(props: {
       <div className='space-y-3'>
         {props.availableGroups.map((group) => {
           const ratio = props.groupRatio[group] || 1
+          const groupDynamicDurationSavings =
+            tiers.length > 0 &&
+            tiers[0].officialSecondPrice != null &&
+            tiers[0].secondPrice * ratio < tiers[0].officialSecondPrice
+              ? Math.round((1 - (tiers[0].secondPrice * ratio) / tiers[0].officialSecondPrice) * 100)
+              : null
           const groupDiscount =
             resolveGroupSavingsOffPercent(
               getConfiguredGroupRatio(props.groupRatio || {}, group)
             ) ?? 0
           const effectiveDiscount =
-            modelDiscountOff ?? (groupDiscount > 0 ? groupDiscount : null)
+            groupDynamicDurationSavings ??
+            (groupDiscount > 0 ? groupDiscount : defaultModelDiscountOff)
           const showOfficial = effectiveDiscount != null
 
           return (
@@ -1020,11 +1042,29 @@ function VideoModelGroupPricingSection(props: {
       <div className='space-y-3'>
         {props.availableGroups.map((group) => {
           const ratio = props.groupRatio[group] || 1
+          const firstGroup = groups[0]
+          const groupDynamicDiscount = (() => {
+            if (firstGroup && firstGroup.withoutVideoPrice > 0 && firstGroup.officialWithoutVideoPrice) {
+              const billed = firstGroup.withoutVideoPrice * ratio
+              const off = firstGroup.officialWithoutVideoPrice
+              if (billed < off) {
+                return Math.round((1 - billed / off) * 100)
+              }
+            }
+            return null
+          })()
           return (
             <div key={group} className='overflow-hidden rounded-xl border border-border/70 bg-card/60 shadow-2xs'>
               <div className='bg-muted/30 flex items-center justify-between gap-3 border-b border-border/50 px-3.5 py-2.5'>
                 <GroupBadge group={group} size='sm' />
-                <span className='text-muted-foreground font-mono text-xs'>{ratio}x</span>
+                <div className='flex items-center gap-2'>
+                  {groupDynamicDiscount != null && groupDynamicDiscount > 0 && (
+                    <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
+                      {groupDynamicDiscount}% OFF
+                    </span>
+                  )}
+                  <span className='text-muted-foreground font-mono text-xs'>{ratio}x</span>
+                </div>
               </div>
               <div className='grid grid-cols-12 bg-muted/50 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground'>
                 <div className='col-span-4'>{isZh ? '分辨率' : 'Resolution'}</div>
