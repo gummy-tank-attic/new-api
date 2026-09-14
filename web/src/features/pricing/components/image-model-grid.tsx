@@ -84,7 +84,9 @@ export function ImageModelGrid(props: ImageModelGridProps) {
               : effectiveRate)
           : 1
         const hero = getVideoModelHeroPrice(model, isGroupMode, modelRate)
-        const discountOff = isGroupMode ? (hero.discountOff ?? null) : null
+        const discountOff = isGroupMode
+          ? (hero.discountOff ?? props.savings ?? null)
+          : null
 
         const vendorIcon =
           model.vendor_icon || model.icon

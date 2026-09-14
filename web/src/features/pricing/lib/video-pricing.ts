@@ -1141,13 +1141,17 @@ export function parseImageModelPricing(
       officialImgToImgPriceText: displayOfficialImgToImg != null ? formatRate(displayOfficialImgToImg) : null,
     }
 
+    const dynamicDiscountOff = isGroupMode
+      ? (percentOff(billedOutput, officialOutput) ?? percentOff(billedInput, officialInput))
+      : null
+
     return {
       priceText: formatRate(displayInput),
       officialPriceText: displayOfficialInput != null ? formatRate(displayOfficialInput) : null,
       unitText: '/ 1M Tokens 起',
       unitKey: 'videoPricing.unitPer1MTokensFrom',
       isStartingPrice: true,
-      discountOff: null,
+      discountOff: dynamicDiscountOff,
       isPerImage: false,
       resolutionPrices: {
         standard: standardPriceObj,

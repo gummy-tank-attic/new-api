@@ -727,7 +727,7 @@ describe('task visual pricing preview', () => {
     assert.equal(hero015.priceText, '$0.75')
     assert.equal(hero015.officialPriceText, '$5')
     assert.equal(hero015.unitText, '/ 1M Tokens 起')
-    assert.equal(hero015.discountOff, null)
+    assert.equal(hero015.discountOff, 85)
     assert.equal(hero015.resolutionPrices?.['standard']?.priceText, '$4.5')
     assert.equal(hero015.resolutionPrices?.['standard']?.officialPriceText, '$30')
     assert.equal(hero015.resolutionPrices?.['standard']?.imgToImgPriceText, '$5.7')
