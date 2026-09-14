@@ -87,13 +87,13 @@ export function Hero(props: HeroProps) {
           {/* Status Badge */}
           <div className='mb-5 inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-3.5 py-1 text-xs font-medium text-[#3f3f46] shadow-2xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'>
             <span className='size-2 rounded-full bg-emerald-500 animate-pulse' />
-            <span className='tracking-tight'>MetaRtr Engine · The Intelligent AI Gateway</span>
+            <span className='tracking-tight'>{t('home_hero_badge', 'MetaRtr Engine · The Intelligent AI Gateway')}</span>
           </div>
 
           {/* Heading */}
           <h1 className='text-[34px] sm:text-[46px] lg:text-[54px] font-bold tracking-[-0.038em] leading-[1.08] text-[#111111] dark:text-slate-100'>
-            One Endpoint.<br />
-            Every Frontier Model.
+            {t('home_hero_title_line1', 'One Endpoint.')}<br />
+            {t('home_hero_title_line2', 'Every Frontier Model.')}
           </h1>
 
           {/* Subtitle */}

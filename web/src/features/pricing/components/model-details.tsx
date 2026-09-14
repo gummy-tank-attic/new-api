@@ -716,8 +716,7 @@ function VideoUpscaleGroupPricingSection(props: {
   priceRate: number
   availableGroups: string[]
 }) {
-  const { t, i18n } = useTranslation()
-  const isZh = i18n.language?.startsWith('zh') ?? true
+  const { t } = useTranslation()
   const tiers = parseVideoUpscaleTiers(props.model.billing_expr)
 
   return (
@@ -728,20 +727,16 @@ function VideoUpscaleGroupPricingSection(props: {
       <div className='rounded-xl border border-blue-200/70 bg-blue-50/50 p-3.5 text-xs text-blue-950 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-200 shadow-2xs'>
         <div className='flex items-center gap-1.5 font-bold text-xs text-blue-900 dark:text-blue-300'>
           <span>💡</span>
-          <span>{isZh ? 'Upscale 扣费结构与实测说明（两项相加）' : 'Upscale Billing Breakdown'}</span>
+          <span>{t('videoPricing.upscaleBreakdownTitle', 'Upscale 扣费结构与实测说明（两项相加）')}</span>
         </div>
         <div className='mt-2 space-y-1.5 text-[11px] leading-relaxed text-muted-foreground'>
           <div>
-            <span className='font-semibold text-foreground'>{isZh ? '1. 【Upscale 价格（按秒）】：' : '1. [Upscale Price (Per Sec)]: '}</span>
-            {isZh
-              ? '按目标清晰度收取超分重建服务费。'
-              : 'Upscale reconstruction fee by output resolution and duration.'}
+            <span className='font-semibold text-foreground'>{t('videoPricing.upscaleSecFeeLabel', '1. 【Upscale 价格（按秒）】：')}</span>
+            {t('videoPricing.upscaleSecFeeDesc', '按目标清晰度收取超分重建服务费。')}
           </div>
           <div>
-            <span className='font-semibold text-foreground'>{isZh ? '2. 【视频价格（按 Token）】：' : '2. [Video Token Fee]: '}</span>
-            {isZh
-              ? '超分过程消耗的视频 Token 按实际用量计费。'
-              : 'Video tokens consumed during upscale are billed by actual usage.'}
+            <span className='font-semibold text-foreground'>{t('videoPricing.upscaleTokenFeeLabel', '2. 【视频价格（按 Token）】：')}</span>
+            {t('videoPricing.upscaleTokenFeeDesc', '超分过程消耗的视频 Token 按实际用量计费。')}
           </div>
         </div>
       </div>
@@ -793,14 +788,14 @@ function VideoUpscaleGroupPricingSection(props: {
                     <span className='h-2 w-2 rounded-full bg-purple-500 inline-block' />
                     {t('upscale/s')}
                   </div>
-                  <span className='text-[10px] text-muted-foreground'>按生成视频时长</span>
+                  <span className='text-[10px] text-muted-foreground'>{t('videoPricing.byDuration', '按生成视频时长')}</span>
                 </div>
                 <div className='rounded-lg border border-border/60 overflow-hidden text-xs'>
                   <div className='grid grid-cols-12 bg-muted/40 border-b border-border/40 px-3 py-1.5 text-[11px] font-semibold text-muted-foreground'>
-                    <div className='col-span-3'>{isZh ? '分辨率' : 'Resolution'}</div>
-                    <div className='col-span-3 text-right'>{isZh ? '平台单价' : 'Price /s'}</div>
-                    <div className='col-span-3 text-right'>{isZh ? '官方原价' : 'Official'}</div>
-                    <div className='col-span-3 text-right'>{isZh ? '折扣' : 'Discount'}</div>
+                    <div className='col-span-3'>{t('Resolution', '分辨率')}</div>
+                    <div className='col-span-3 text-right'>{t('Price /s', '平台单价')}</div>
+                    <div className='col-span-3 text-right'>{t('Official', '官方原价')}</div>
+                    <div className='col-span-3 text-right'>{t('Discount', '折扣')}</div>
                   </div>
                   <div className='divide-y divide-border/30 bg-card/40'>
                     {tiers.map((tier) => {
@@ -847,10 +842,10 @@ function VideoUpscaleGroupPricingSection(props: {
                 <div className='flex items-center justify-between mb-1.5'>
                   <div className='text-xs font-bold text-foreground flex items-center gap-1.5'>
                     <span className='h-2 w-2 rounded-full bg-blue-500 inline-block' />
-                    {isZh ? '视频生成价格 (按 Token 计费)' : 'Video Generation Price (Per Token)'}
+                    {t('videoPricing.videoGenPriceTitle', '视频生成价格 (按 Token 计费)')}
                   </div>
                   <span className='text-[10px] text-muted-foreground'>
-                    {isZh ? '文生视频 / 图生视频 / 视频生视频' : 'Text / Image / Video to Video'}
+                    {t('videoPricing.videoGenModesHint', '文生视频 / 图生视频 / 视频生视频')}
                   </span>
                 </div>
                 <div className='rounded-lg border border-border/60 overflow-hidden text-xs'>
@@ -905,9 +900,7 @@ function VideoUpscaleGroupPricingSection(props: {
               </div>
 
               <div className='border-t border-border/40 pt-2 px-3.5 text-right text-[10px] text-muted-foreground/75 font-mono'>
-                {isZh
-                  ? '计费说明：单次任务扣费 = 视频实际消耗 Token 费 + 视频时长 Upscale 秒费'
-                  : 'Total = Video Tokens Fee + Video Duration * Upscale Fee'}
+                {t('videoPricing.upscaleFormulaFootnote', '计费说明：单次任务扣费 = 视频实际消耗 Token 费 + 视频时长 Upscale 秒费')}
               </div>
             </div>
           )
@@ -925,8 +918,7 @@ function DurationVideoModelGroupPricingSection(props: {
   priceRate: number
   availableGroups: string[]
 }) {
-  const { t, i18n } = useTranslation()
-  const isZh = i18n.language?.startsWith('zh') ?? true
+  const { t } = useTranslation()
   const tiers = getDurationVideoTiers(props.model)
 
   return (
@@ -961,10 +953,10 @@ function DurationVideoModelGroupPricingSection(props: {
                 </div>
               </div>
               <div className='grid grid-cols-12 bg-muted/50 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground'>
-                <div className='col-span-3'>{isZh ? '分辨率' : 'Resolution'}</div>
-                <div className='col-span-3 text-right'>{isZh ? '5s 预估价格' : 'Est. 5s Price'}</div>
-                <div className='col-span-3 text-right'>{isZh ? '每秒单价' : 'Rate / sec'}</div>
-                <div className='col-span-3 text-right'>{isZh ? '优惠幅度' : 'Discount'}</div>
+                <div className='col-span-3'>{t('Resolution', '分辨率')}</div>
+                <div className='col-span-3 text-right'>{t('videoPricing.est5s', '5s 预估价格')}</div>
+                <div className='col-span-3 text-right'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
+                <div className='col-span-3 text-right'>{t('Discount', '优惠幅度')}</div>
               </div>
               <div className='divide-y divide-border/40 bg-card/40'>
                 {tiers.length === 0 ? (
@@ -1033,9 +1025,7 @@ function DurationVideoModelGroupPricingSection(props: {
                 )}
               </div>
               <div className='border-t border-border/40 bg-muted/15 px-3.5 py-1.5 text-right text-[10px] text-muted-foreground/75 font-mono'>
-                {isZh
-                  ? '计费单位：/ 秒 · 支持 4~15 秒自定义时长 · 单次扣费 = 视频实际秒数 × 分辨率秒单价'
-                  : 'Unit: / second · Supports 4-15s custom duration · Charge = Duration (s) × Rate / sec'}
+                {t('videoPricing.durationBillingFootnote', '计费单位：/ 秒 · 支持 4~15 秒自定义时长 · 单次扣费 = 视频实际秒数 × 分辨率秒单价')}
               </div>
             </div>
           )
@@ -1053,8 +1043,7 @@ function VideoModelGroupPricingSection(props: {
   priceRate: number
   availableGroups: string[]
 }) {
-  const { i18n } = useTranslation()
-  const isZh = i18n.language?.startsWith('zh') ?? true
+  const { t } = useTranslation()
   const groups = getVideoModelTierGroups(props.model)
 
   return (
@@ -1088,9 +1077,9 @@ function VideoModelGroupPricingSection(props: {
                 </div>
               </div>
               <div className='grid grid-cols-12 bg-muted/50 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground'>
-                <div className='col-span-4'>{isZh ? '分辨率' : 'Resolution'}</div>
-                <div className='col-span-4 text-right'>{isZh ? '无视频输入' : 'Without Video Input'}</div>
-                <div className='col-span-4 text-right'>{isZh ? '有视频输入' : 'With Video Input'}</div>
+                <div className='col-span-4'>{t('Resolution', '分辨率')}</div>
+                <div className='col-span-4 text-right'>{t('Without Video Input', '无视频输入')}</div>
+                <div className='col-span-4 text-right'>{t('With Video Input', '有视频输入')}</div>
               </div>
               <div className='divide-y divide-border/40'>
                 {groups.map((tierGroup) => {
@@ -1133,7 +1122,7 @@ function VideoModelGroupPricingSection(props: {
                 })}
               </div>
               <div className='border-t border-border/40 bg-muted/15 px-3.5 py-1.5 text-right text-[10px] text-muted-foreground/75'>
-                {isZh ? '计费单位: / 1M Tokens' : 'Unit: / 1M Tokens'}
+                {t('videoPricing.unitPer1MTokensColon', '计费单位: / 1M Tokens')}
               </div>
             </div>
           )

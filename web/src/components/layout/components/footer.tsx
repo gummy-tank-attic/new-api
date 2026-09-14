@@ -184,7 +184,6 @@ function TelegramFooterLinks(props: { className?: string }) {
 
 export function Footer(props: FooterProps) {
   const { t } = useTranslation()
-  const { status } = useStatus()
   const {
     systemName,
     logo: systemLogo,

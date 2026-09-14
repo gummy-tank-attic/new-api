@@ -44,7 +44,7 @@ export function CTA(props: CTAProps) {
         </div>
 
         <h2 className='text-[30px] sm:text-[38px] font-bold tracking-[-0.035em] leading-tight text-[#111111] dark:text-slate-100'>
-          Ready to build with MetaRtr?
+          {t('home_cta_heading', 'Ready to build with MetaRtr?')}
         </h2>
 
         <p className='mt-2 text-base font-medium text-slate-800 dark:text-slate-200 tracking-tight'>

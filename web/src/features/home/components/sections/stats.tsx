@@ -105,14 +105,14 @@ export function Stats(_props: StatsProps) {
       end: 50,
       suffix: '+',
       label: t('Active Upstreams', '聚合主流厂商'),
-      sublabel: 'Claude / OpenAI / Gemini / DeepSeek 等',
+      sublabel: t('home_stats_upstreams_sub', 'Claude / OpenAI / Gemini / DeepSeek 等'),
       dotColor: 'bg-blue-500',
     },
     {
       end: 100,
       suffix: '+',
       label: t('Frontier Models', '前沿模型覆盖'),
-      sublabel: '推理 · 代码 · 生图 · 视频全模态',
+      sublabel: t('home_stats_models_sub', '推理 · 代码 · 生图 · 视频全模态'),
       dotColor: 'bg-emerald-500',
     },
     {
@@ -120,7 +120,7 @@ export function Stats(_props: StatsProps) {
       suffix: '%',
       decimals: 2,
       label: t('Target Availability', '服务可用性目标'),
-      sublabel: '双可用区部署 · 毫秒级故障自动容灾',
+      sublabel: t('home_stats_availability_sub', '双可用区部署 · 毫秒级故障自动容灾'),
       dotColor: 'bg-indigo-500',
     },
     {
@@ -128,7 +128,7 @@ export function Stats(_props: StatsProps) {
       prefix: '< ',
       suffix: 'ms',
       label: t('Edge Handshake', '边缘网关延时'),
-      sublabel: '全球高速边缘中继 · 智能动态分发',
+      sublabel: t('home_stats_latency_sub', '全球高速边缘中继 · 智能动态分发'),
       dotColor: 'bg-violet-500',
     },
   ]

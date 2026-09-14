@@ -147,7 +147,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               }
             }}
             className={cn(
-              'group relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#E2E8F0]/90 p-6 text-left shadow-[0_1px_3px_rgba(15,23,42,0.03)] transition-all duration-200',
+              'group relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#E2E8F0]/90 p-5 sm:p-6 text-left shadow-[0_1px_3px_rgba(15,23,42,0.03)] transition-all duration-200',
               '[background:radial-gradient(circle_at_95%_5%,rgba(255,59,128,0.04)_0%,transparent_60%),#fff]',
               'hover:-translate-y-px hover:border-[#CBD5E1] hover:shadow-[0_6px_18px_rgba(15,23,42,0.06)] cursor-pointer',
               'dark:border-border dark:bg-card dark:[background:unset]'
@@ -155,88 +155,78 @@ export function VideoModelGrid(props: VideoModelGridProps) {
           >
 
             {/* Top Section */}
-            <div className='space-y-2.5'>
-              {/* Row 1: Model Identity (Full Width, No Crowding) */}
-              <div className='flex items-center gap-2.5 min-w-0 h-[28px]'>
-                <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)]'>
-                  {vendorIcon}
+            <div className='flex flex-col gap-2.5'>
+              {/* Row 1: Model Identity (Left) & Discount Badge (Right) */}
+              <div className='flex items-center justify-between gap-2 min-h-[28px]'>
+                <div className='flex min-w-0 flex-1 items-center gap-2.5'>
+                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)] dark:border-rose-900/40 dark:bg-rose-950/30'>
+                    {vendorIcon}
+                  </div>
+                  <div className='flex min-w-0 flex-1 items-center gap-1.5'>
+                    <span
+                      translate='no'
+                      className={cn(
+                        'notranslate truncate font-semibold text-[var(--p-text-main,#0F172A)] dark:text-foreground',
+                        titleClass
+                      )}
+                      title={model.model_name}
+                    >
+                      {model.model_name}
+                    </span>
+                    <button
+                      type='button'
+                      aria-label={t('Copy model name', '复制模型名称')}
+                      onClick={(e) => handleCopy(e, model.model_name)}
+                      className='size-6 shrink-0 inline-flex items-center justify-center rounded-md text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[var(--p-text-main,#111111)] dark:hover:bg-muted'
+                    >
+                      {copiedName === model.model_name ? (
+                        <Check className='size-[15.5px] text-emerald-600' />
+                      ) : (
+                        <Copy className='size-[15.5px]' />
+                      )}
+                    </button>
+                  </div>
                 </div>
-                <div className='flex min-w-0 flex-1 items-center gap-1.5'>
+
+                {discountOff != null && discountOff > 0 && isGroupMode ? (
                   <span
                     translate='no'
-                    className={cn(
-                      'notranslate truncate font-semibold text-[var(--p-text-main,#0F172A)]',
-                      titleClass
-                    )}
-                    title={model.model_name}
+                    className='notranslate inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#F43F5E] to-[#E11D48] px-2.5 py-0.5 text-[11px] font-bold tracking-wide text-white shadow-[0_1px_2px_rgba(225,29,72,0.22),inset_0_1px_0_rgba(255,255,255,0.25)] tabular-nums shrink-0 whitespace-nowrap leading-none text-center'
                   >
-                    {model.model_name}
+                    {discountOff}% OFF
                   </span>
-                  <button
-                    type='button'
-                    aria-label={t('Copy model name')}
-                    onClick={(e) => handleCopy(e, model.model_name)}
-                    className='size-6 shrink-0 inline-flex items-center justify-center rounded-md text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[var(--p-text-main,#111111)]'
-                  >
-                    {copiedName === model.model_name ? (
-                      <Check className='size-[15.5px] text-emerald-600' />
-                    ) : (
-                      <Copy className='size-[15.5px]' />
-                    )}
-                  </button>
-                </div>
+                ) : null}
               </div>
 
-              {/* Row 2: Capability Tag (Left) & Discount Badge (Right) - Perfect Balance */}
-              <div className='flex items-center justify-between gap-2.5 h-[26px]'>
+              {/* Row 2: Capability Tag & Supported Resolution Pills (Unified Responsive Flow) */}
+              <div className='flex flex-wrap items-center gap-1.5 min-h-[24px]'>
                 {capTag ? (
                   <span
                     className={cn(
-                      'inline-block rounded-full border px-[9px] py-[2px] text-[11.5px] font-semibold tracking-tight',
+                      'inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap',
                       capTag.className
                     )}
                   >
                     {t(capTag.key, capTag.label)}
                   </span>
-                ) : (
-                  <div />
-                )}
+                ) : null}
 
-                {discountOff != null && discountOff > 0 && isGroupMode ? (
-                  <span
-                    translate='no'
-                    className='notranslate inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#F43F5E] to-[#E11D48] min-w-[4.5rem] px-2.5 h-[22px] text-[11.5px] font-bold tracking-wide text-white shadow-[0_1px_2px_rgba(225,29,72,0.22),inset_0_1px_0_rgba(255,255,255,0.25)] tabular-nums shrink-0 leading-none text-center'
-                  >
-                    {discountOff}% OFF
-                  </span>
-                ) : (
-                  <div />
-                )}
+                {resolutions.map((res) => {
+                  const style = getResolutionBadgeStyle(res)
+                  return (
+                    <span
+                      key={res}
+                      className='inline-flex items-center justify-center rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-[11px] font-semibold tracking-tight text-[#475569] tabular-nums dark:border-border dark:bg-muted/60 dark:text-muted-foreground whitespace-nowrap'
+                    >
+                      {style.label}
+                    </span>
+                  )
+                })}
               </div>
 
-              {/* Row 3: Prominent Supported Resolutions */}
-              <div className='flex items-center gap-[7px] text-[12.5px] h-[26px]'>
-                <span className='shrink-0 text-[12px] font-medium text-[#64748B]'>
-                  {t('Supported Resolutions:')}
-                </span>
-                <div className='flex flex-wrap items-center gap-[7px]'>
-                  {resolutions.map((res) => {
-                    const style = getResolutionBadgeStyle(res)
-                    return (
-                      <span
-                        key={res}
-                        className='inline-flex items-center justify-center rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2.5 py-[2px] text-[12px] font-semibold tracking-[0.01em] text-[var(--p-text-muted,#3f3f46)] tabular-nums dark:border-border dark:bg-muted dark:text-foreground'
-                      >
-                        {style.label}
-                      </span>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Row 4: Tagline */}
-              <div className='flex h-[40px] items-center'>
-                <p className='line-clamp-2 text-[13px] leading-[20px] font-normal text-[var(--p-text-muted,#3f3f46)] dark:text-muted-foreground'>
+              {/* Row 3: Tagline with consistent line-clamp */}
+              <div className='flex min-h-[36px] items-center'>
+                <p className='line-clamp-2 text-[12px] leading-[18px] font-normal text-[var(--p-text-muted,#3f3f46)] dark:text-muted-foreground'>
                   {t(tagline.key, tagline.defaultText)}
                 </p>
               </div>
@@ -274,11 +264,11 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               {isUpscale && (
                 <>
                   <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] text-xs dark:border-border dark:bg-card'>
-                    <div className='grid grid-cols-12 bg-[#F8FAFC] border-b border-[#E2E8F0] px-3.5 py-2 text-xs font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
-                      <div className='col-span-3'>{t('Resolution')}</div>
-                      <div className='col-span-3 text-right'>{t('upscale/s')}</div>
-                      <div className='col-span-3 text-right'>{t('Without Video Input')}</div>
-                      <div className='col-span-3 text-right'>{t('With Video Input')}</div>
+                    <div className='grid grid-cols-12 bg-[#F8FAFC] border-b border-[#E2E8F0] px-3.5 py-2 text-[11px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                      <div className='col-span-3 text-left truncate'>{t('Resolution', '分辨率')}</div>
+                      <div className='col-span-3 text-right truncate' title={t('pricing.unit_upscale_sec', 'Upscale/s')}>{t('pricing.unit_upscale_sec', 'Upscale/s')}</div>
+                      <div className='col-span-3 text-right truncate' title={t('pricing.no_video_short', '无视频')}>{t('pricing.no_video_short', '无视频')}</div>
+                      <div className='col-span-3 text-right truncate' title={t('pricing.with_video_short', '有视频')}>{t('pricing.with_video_short', '有视频')}</div>
                     </div>
                     <div className='divide-y divide-[#F1F5F9] bg-white dark:divide-border/40 dark:bg-card'>
                       {upscaleTiers.map((tier) => {
@@ -350,20 +340,20 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                     </div>
                   </div>
 
-                  {/* Upscale Explanation Banner: fully displayed, no truncation */}
-                  <div className='relative mt-3 rounded-xl border border-purple-200/80 bg-purple-50/70 p-2.5 text-xs text-purple-900 shadow-2xs dark:border-purple-800/60 dark:bg-purple-950/30 dark:text-purple-200'>
-                    <div className='flex items-center gap-1.5 mb-1'>
-                      <span className='inline-flex shrink-0 items-center gap-1 rounded-md bg-purple-600 px-1.5 py-0.5 text-[11px] font-semibold text-white dark:bg-purple-500'>
+                  {/* Upscale Explanation Banner: fully displayed, clean padding and typography */}
+                  <div className='relative mt-3 rounded-xl border border-purple-200/80 bg-purple-50/70 p-3 text-xs text-purple-900 shadow-2xs dark:border-purple-800/60 dark:bg-purple-950/30 dark:text-purple-200'>
+                    <div className='flex flex-wrap items-center gap-1.5 mb-1.5'>
+                      <span className='inline-flex shrink-0 items-center gap-1 rounded-md bg-purple-600 px-2 py-0.5 text-[11px] font-semibold text-white dark:bg-purple-500'>
                         <Sparkles className='size-3' />
-                        {t('Upscale Principle', '超分原理')}
+                        {t('pricing.upscale_principle_badge', '超分原理')}
                       </span>
                       <span className='text-[12px] font-semibold text-purple-950 dark:text-purple-200'>
-                        {t('Deep Learning & Detail Reconstruction', '深度学习与细节重构')}
+                        {t('pricing.upscale_principle_title', '深度学习与细节重构')}
                       </span>
                     </div>
-                    <p className='text-[12px] leading-[1.55] text-purple-900/90 dark:text-purple-200/90'>
+                    <p className='text-[12px] leading-relaxed text-purple-900/90 dark:text-purple-200/90'>
                       {t(
-                        'Takes lower-resolution video and enhances it to higher definition using deep learning and detail reconstruction. For example, generating at 480p and then upscaling to 720p achieves nearly 90% detail fidelity.',
+                        'pricing.upscale_principle_desc',
                         '基于深度学习对低分辨率视频进行细节重建与超分增强，如 480p 生成后超分至 720p 可获得近 90% 细节还原度。'
                       )}
                     </p>
@@ -373,15 +363,15 @@ export function VideoModelGrid(props: VideoModelGridProps) {
 
               {isDurationBased && (
                 <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
-                  <div className='grid grid-cols-[28%_40%_32%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[12px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
-                    <div className='text-left'>{t('Resolution', '分辨率')}</div>
-                    <div className='text-center'>{t('videoPricing.est5s', '5s 预估价格')}</div>
-                    <div className='text-right'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
+                  <div className='grid grid-cols-[28%_38%_34%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[11.5px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                    <div className='text-left truncate'>{t('Resolution', '分辨率')}</div>
+                    <div className='text-center truncate'>{t('videoPricing.est5s', '5s 预估价格')}</div>
+                    <div className='text-right truncate'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
                   </div>
                   <div className='flex flex-col'>
                     {durationTiers.length === 0 ? (
                       <div className='px-[14px] py-3 text-sm text-muted-foreground'>
-                        {t('Unable to parse structured pricing')}
+                        {t('Unable to parse structured pricing', '无法解析规格价格')}
                       </div>
                     ) : (
                       durationTiers.map((tier, index) => {
@@ -401,7 +391,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                           <div
                             key={tier.resolution}
                             className={cn(
-                              'grid grid-cols-[28%_40%_32%] items-center px-[14px] min-h-[50px] py-1.5 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
+                              'grid grid-cols-[28%_38%_34%] items-center px-[14px] min-h-[50px] py-1.5 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
                               index < durationTiers.length - 1 && 'border-b border-[#F1F5F9] dark:border-border/40'
                             )}
                           >
@@ -442,10 +432,10 @@ export function VideoModelGrid(props: VideoModelGridProps) {
 
               {!isUpscale && !isDurationBased && (
                 <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
-                  <div className='grid grid-cols-[28%_36%_36%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[12px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
-                    <div className='text-left'>{t('Resolution')}</div>
-                    <div className='text-right'>{t('Without Video Input')}</div>
-                    <div className='text-right'>{t('With Video Input')}</div>
+                  <div className='grid grid-cols-[28%_36%_36%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[11.5px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                    <div className='text-left truncate'>{t('Resolution', '分辨率')}</div>
+                    <div className='text-right truncate' title={t('pricing.no_video_short', '无视频')}>{t('pricing.no_video_short', '无视频')}</div>
+                    <div className='text-right truncate' title={t('pricing.with_video_short', '有视频')}>{t('pricing.with_video_short', '有视频')}</div>
                   </div>
                   <div className='flex flex-col'>
                     {tierGroups.map((group, index) => {
@@ -507,7 +497,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                     })}
                   </div>
                   <div className='border-t border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-[7px] text-right text-[11.5px] font-normal text-[#64748B] dark:border-border dark:bg-muted/30 dark:text-slate-400'>
-                    {t('Billing Unit:', '计费单位：')}/ 1M Tokens
+                    {t('pricing.billing_unit_label', '计费单位：')} {t('videoPricing.unitPer1MTokens', '/ 1M Tokens')}
                   </div>
                 </div>
               )}
@@ -516,7 +506,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
             {/* Card Footer: pinned strictly to bottom with mt-auto */}
             <div className='mt-auto pt-3.5 flex items-center justify-end border-t border-[#F1F5F9] dark:border-border/40'>
               <span className='inline-flex items-center gap-[3px] text-[12.5px] font-medium text-[#2563EB] group-hover:underline'>
-                {t('Details')}
+                {t('Details', '详情')}
                 <ArrowUpRight className='size-[13px] stroke-[2.2]' />
               </span>
             </div>

@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useState, useEffect, useRef, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
 
@@ -125,7 +126,7 @@ const API_DEMOS: ApiDemoConfig[] = [
     tokens: 38,
     latency: 22,
     cost: '$0.00008',
-    discountBadge: '原厂直连',
+    discountBadge: 'home.hero.direct_connect_badge',
     accent: 'blue',
   },
   {
@@ -189,6 +190,7 @@ interface HeroTerminalDemoProps {
 }
 
 export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
+  const { t } = useTranslation()
   const [activeIndex, setActiveIndex] = useState(0)
   const [transitioning, setTransitioning] = useState(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -324,7 +326,7 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
               </span>
               {demo.discountBadge && (
                 <span className='rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[9.5px] font-bold text-rose-600 dark:bg-rose-500/20 dark:text-rose-400'>
-                  {demo.discountBadge}
+                  {demo.discountBadge.startsWith('home.') ? t(demo.discountBadge) : demo.discountBadge}
                 </span>
               )}
             </span>

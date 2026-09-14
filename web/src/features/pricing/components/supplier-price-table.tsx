@@ -597,7 +597,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                             <div className='border-border/20 text-foreground mb-1 flex items-center justify-between border-b pb-1 text-[11px] font-semibold'>
                               <span className='font-semibold'>{dt.resLabel}</span>
                               <span className='text-muted-foreground/75 tabular-nums text-[10.5px]'>
-                                5s 约 ${billed5s.toFixed(3)}
+                                {t('videoPricing.est5sApprox', '5s 约 {{price}}', { price: `$${billed5s.toFixed(3)}` })}
                                 {showOff && (
                                   <span className='line-through ml-1 text-muted-foreground/50'>
                                     ${official5s.toFixed(3)}
@@ -607,7 +607,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                             </div>
                             <div className='flex items-center justify-between text-[11px]'>
                               <span className='text-muted-foreground/75'>
-                                每秒单价:
+                                {t('Rate / Sec')}:
                               </span>
                               <span className='text-foreground font-semibold tabular-nums'>
                                 ${billedSec >= 0.01 && !Number.isInteger(billedSec * 1000)
@@ -638,7 +638,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                             ? `$${((minUpscale?.officialSecondPrice ?? 0.013) * priceRate).toFixed(4)}`
                             : null
                         }
-                        unit='/ 秒起'
+                        unit={t('videoPricing.unitPerSecondFrom', '/ 秒起')}
                       />
                       <PriceColumn
                         primary={`$${(((minUpscale?.tokenPricePerM ?? 7.1848) * upscaleRatio) * priceRate).toFixed(2)}`}
@@ -655,7 +655,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                           720p · 1080p · 2K
                         </span>
                         <span className='text-muted-foreground/60 mt-0.5 text-[10px]'>
-                          细节重绘超分
+                          {t('videoPricing.upscaleDetail', '细节重绘超分')}
                         </span>
                       </div>
                     </div>
@@ -693,7 +693,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                             </div>
                             <div className='flex items-center justify-between text-[11px]'>
                               <span className='text-muted-foreground/75'>
-                                无视频:
+                                {t('videoPricing.withoutVideo', '无视频:')}
                               </span>
                               <span className='text-foreground font-semibold tabular-nums'>
                                 ${noneBilled.toFixed(3)}
@@ -706,7 +706,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                             </div>
                             <div className='mt-0.5 flex items-center justify-between text-[11px]'>
                               <span className='text-muted-foreground/75'>
-                                有视频:
+                                {t('videoPricing.withVideo', '有视频:')}
                               </span>
                               <span className='text-foreground font-semibold tabular-nums'>
                                 ${videoBilled.toFixed(3)}
@@ -1299,7 +1299,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                   <PriceColumn
                     primary={inputPrice.primary}
                     official={inputPrice.official}
-                    unit={!isToken ? '/ 次' : undefined}
+                    unit={!isToken ? t('pricing.unitPerCall', '/ 次') : undefined}
                     label={`${t('Input price')} (/${unitHint})`}
                   />
                   <PriceColumn
@@ -1323,7 +1323,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                   <PriceColumn
                     primary={inputPrice.primary}
                     official={inputPrice.official}
-                    unit={!isToken ? '/ 次' : undefined}
+                    unit={!isToken ? t('pricing.unitPerCall', '/ 次') : undefined}
                     label={`${t('Input price')} (/${unitHint})`}
                   />
                   <PriceColumn

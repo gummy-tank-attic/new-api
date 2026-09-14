@@ -32,33 +32,46 @@ export function Features(_props: FeaturesProps) {
   const pillars = [
     {
       icon: <Layers className='size-5 text-[#0F172A] dark:text-slate-100' strokeWidth={1.8} />,
-      badge: 'Unified Protocol',
+      badge: t('Unified Protocol'),
       title: t('Unified Standard Protocol', '统一标准化接口'),
       desc: t(
         'A single OpenAI-compatible API protocol connects all major foundation models. Zero vendor lock-in across text, image, video, and audio.',
         '一套完全兼容 OpenAI 的标准化接口规范，无缝直通文本、代码、文生图与视频大模型。彻底消除碎片化接入成本与供应商锁定。'
       ),
-      tags: ['Chat & Completions', 'Code Generation', 'Image & Video', 'Embeddings'],
+      tags: [
+        t('Chat & Completions', '对话与补全'),
+        t('Code Generation', '代码生成'),
+        t('Image & Video', '文生图与视频'),
+        t('Embeddings', '向量嵌入'),
+      ],
     },
     {
       icon: <Zap className='size-5 text-[#0F172A] dark:text-slate-100' strokeWidth={1.8} />,
-      badge: 'Smart Failover',
+      badge: t('Smart Failover'),
       title: t('Smart Failover & Auto Healing', '毫秒级容灾与自愈'),
       desc: t(
         'Continuous real-time upstream health detection. Automatically routes around 429 rate limits and channel errors with sub-20ms edge latency.',
         '实时动态监测多通道真实延时与健康度。遭遇上游 429 限流或服务抖动时，毫秒级自动热切备用线路，保障生产业务 24/7 永不中断。'
       ),
-      tags: ['429 自动热重试', 'Anycast 边缘加速', '高并发负载均衡'],
+      tags: [
+        t('429 Auto-Retry', '429 自动热重试'),
+        t('Anycast Edge Acceleration', 'Anycast 边缘加速'),
+        t('High-Concurrency Load Balancing', '高并发负载均衡'),
+      ],
     },
     {
       icon: <ShieldCheck className='size-5 text-[#0F172A] dark:text-slate-100' strokeWidth={1.8} />,
-      badge: 'Zero Markup',
+      badge: t('Zero Markup'),
       title: t('Strict Pricing Alignment', '纯净计费 · 官方对齐'),
       desc: t(
         'Every token is transparently matched to official upstream list prices. Group discounts applied with zero hidden fees, audited in real time.',
         '严格对齐各厂商官方最新公布牌价，按用户分组倍率纯净扣费。零隐形附加费与溢价，支持精细到 Token 级别的实时账单与流水审计。'
       ),
-      tags: ['官方原价透明对齐', '零隐形溢价', '实时账单可审计'],
+      tags: [
+        t('Transparent Official Pricing', '官方原价透明对齐'),
+        t('Zero Hidden Markup', '零隐形溢价'),
+        t('Auditable Real-Time Billing', '实时账单可审计'),
+      ],
       link: '/pricing',
       linkText: t('View Model Prices', '探索模型价格'),
     },
