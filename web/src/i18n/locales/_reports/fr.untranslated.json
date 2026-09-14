@@ -1,3 +1,10 @@
 {
-  "pricingGroupIntro.seedance": "ByteDance Seedance AI video generation group, supporting text-to-video, image-to-video, and upscaling across 480p / 720p / 1080p / 4K / 2K."
+  "imagePricing.imageToImage": "Image to Image",
+  "imagePricing.tagline.flare": "Sub-second ultra-fast image generation · Rapid creative capture and agile rendering",
+  "imagePricing.tagline.gptImageClassic": "Classic multimodal image workhorse · Native instruction following and consistent text-image creation",
+  "imagePricing.tagline.seedreamPro": "Next-gen flagship image creation · Complex realistic generation with authentic light and textures",
+  "imagePricing.tagline.sunburst": "Next-gen flagship image creation · Superior lighting, texture and complex scene fidelity",
+  "imagePricing.textToImage": "Text to Image",
+  "imagePricing.unfilteredCalloutDesc": "Completely lifts prompt & creative restrictions to unleash native Seedream 5.0 conceptual design and surreal imagination.",
+  "videoPricing.tagline.v15": "Advanced video generation · Text-to-video and image-to-video creation"
 }

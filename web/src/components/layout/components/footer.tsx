@@ -18,43 +18,16 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
 import { Fragment, useMemo } from 'react'
+import { ArrowUpRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { IconTelegramBrand } from '@/assets/brand-icons'
-import { HtmlContent } from '@/components/html-content'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
-import { isLikelyHtml } from '@/lib/content-format'
 import { CONTACT } from '@/lib/contact-links'
 import { cn } from '@/lib/utils'
 
-function resolveCustomFooterHtml(
-  footerHtml: string | undefined,
-  status: Record<string, unknown> | null | undefined
-): string {
-  const fromStore = footerHtml?.trim()
-  if (fromStore) return fromStore
 
-  const raw = status?.footer_html
-  if (typeof raw === 'string' && raw.trim()) return raw.trim()
-
-  return ''
-}
-
-function CustomFooterContent(props: { content: string }) {
-  if (isLikelyHtml(props.content)) {
-    return (
-      <HtmlContent
-        content={props.content}
-        className='custom-footer prose-p:my-0'
-        variant='inline'
-      />
-    )
-  }
-
-  // Plain admin text (no tags) — avoid relying on HTML sanitizer path only.
-  return <p className='custom-footer m-0'>{props.content}</p>
-}
 
 interface FooterLink {
   text: string
@@ -168,12 +141,12 @@ function BrandAttribution(props: {
   )
 }
 
-/** Clickable Telegram support + channel entries for the site footer. */
+/** Clickable Telegram support + channel entries for the site footer (Linear/Vercel micro-pill style). */
 function TelegramFooterLinks(props: { className?: string }) {
   return (
     <div
       className={cn(
-        'text-muted-foreground flex min-w-0 flex-col gap-1 text-sm leading-relaxed',
+        'flex flex-wrap items-center gap-2.5 sm:gap-3',
         props.className
       )}
     >
@@ -181,19 +154,29 @@ function TelegramFooterLinks(props: { className?: string }) {
         href={CONTACT.supportTelegram.href}
         target='_blank'
         rel='noopener noreferrer'
-        className='text-foreground/80 hover:text-foreground inline-flex items-center gap-1.5 underline underline-offset-4 transition-colors'
+        className='group inline-flex items-center gap-2.5 rounded-full border border-border/70 bg-background/80 px-4 py-2 text-xs sm:text-sm font-medium text-muted-foreground shadow-2xs transition-all hover:border-border hover:bg-background hover:text-foreground hover:shadow-xs dark:bg-slate-900/70 dark:hover:bg-slate-800'
       >
-        <IconTelegramBrand className='size-3.5 shrink-0 text-[#2AABEE]' />
-        Telegram Support：{CONTACT.supportTelegram.label}
+        <IconTelegramBrand className='size-4 sm:size-4.5 shrink-0 text-[#229ED9] transition-transform duration-200 group-hover:scale-110' />
+        <span className='font-semibold text-foreground/90 text-[13px] sm:text-sm'>Support</span>
+        <span className='text-muted-foreground/30'>·</span>
+        <span className='font-mono text-[12px] sm:text-[13px] text-muted-foreground transition-colors group-hover:text-foreground'>
+          {CONTACT.supportTelegram.handle}
+        </span>
+        <ArrowUpRight className='size-3.5 sm:size-4 text-muted-foreground/40 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground' />
       </a>
       <a
         href={CONTACT.channelTelegram.href}
         target='_blank'
         rel='noopener noreferrer'
-        className='text-foreground/80 hover:text-foreground inline-flex items-center gap-1.5 break-all underline underline-offset-4 transition-colors'
+        className='group inline-flex items-center gap-2.5 rounded-full border border-border/70 bg-background/80 px-4 py-2 text-xs sm:text-sm font-medium text-muted-foreground shadow-2xs transition-all hover:border-border hover:bg-background hover:text-foreground hover:shadow-xs dark:bg-slate-900/70 dark:hover:bg-slate-800'
       >
-        <IconTelegramBrand className='size-3.5 shrink-0 text-[#2AABEE]' />
-        Telegram Channel：{CONTACT.channelTelegram.href}
+        <IconTelegramBrand className='size-4 sm:size-4.5 shrink-0 text-[#229ED9] transition-transform duration-200 group-hover:scale-110' />
+        <span className='font-semibold text-foreground/90 text-[13px] sm:text-sm'>Channel</span>
+        <span className='text-muted-foreground/30'>·</span>
+        <span className='font-mono text-[12px] sm:text-[13px] text-muted-foreground transition-colors group-hover:text-foreground'>
+          {CONTACT.channelTelegram.handle}
+        </span>
+        <ArrowUpRight className='size-3.5 sm:size-4 text-muted-foreground/40 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground' />
       </a>
     </div>
   )
@@ -205,7 +188,6 @@ export function Footer(props: FooterProps) {
   const {
     systemName,
     logo: systemLogo,
-    footerHtml,
     demoSiteEnabled,
   } = useSystemConfig()
 
@@ -213,10 +195,6 @@ export function Footer(props: FooterProps) {
   const displayName = systemName || props.name || 'MetaRtr'
   const isDemoSiteMode = Boolean(demoSiteEnabled)
   const currentYear = new Date().getFullYear()
-  const customFooter = resolveCustomFooterHtml(
-    footerHtml,
-    status as Record<string, unknown> | null | undefined
-  )
 
   const fallbackColumns = useMemo<FooterColumnProps[]>(
     () => [
@@ -284,11 +262,11 @@ export function Footer(props: FooterProps) {
       className={cn('border-border/40 relative z-10 border-t', props.className)}
       data-site-footer='true'
     >
-      <div className='mx-auto w-full max-w-6xl px-6 py-5'>
-        <div className='bg-muted/20 border-border/50 flex flex-col gap-4 rounded-2xl border px-4 py-4 backdrop-blur-sm sm:px-5'>
+      <div className='mx-auto w-full max-w-6xl px-6 py-6'>
+        <div className='bg-muted/20 border-border/50 flex flex-col gap-4 rounded-2xl border px-5 py-4.5 backdrop-blur-sm sm:px-6 sm:py-5'>
           <div className='flex flex-col items-center justify-between gap-4 sm:flex-row sm:items-center'>
-            <TelegramFooterLinks className='text-center sm:text-left' />
-            <div className='border-border/60 text-muted-foreground/45 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-4 text-xs sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5'>
+            <TelegramFooterLinks className='justify-center sm:justify-start' />
+            <div className='border-border/60 text-muted-foreground/60 flex w-full flex-wrap items-center justify-center gap-x-3.5 gap-y-1.5 border-t pt-4 text-xs sm:text-[13px] sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6'>
               <LegalLinks />
               <BrandAttribution
                 currentYear={currentYear}
@@ -297,15 +275,6 @@ export function Footer(props: FooterProps) {
               />
             </div>
           </div>
-
-          {customFooter ? (
-            <div
-              className='border-border/50 text-muted-foreground border-t pt-3 text-center text-sm leading-relaxed'
-              data-custom-footer='true'
-            >
-              <CustomFooterContent content={customFooter} />
-            </div>
-          ) : null}
         </div>
 
         {/* Keep full multi-column footer only in demo-site mode */}

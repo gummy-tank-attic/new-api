@@ -716,7 +716,7 @@ function VideoUpscaleGroupPricingSection(props: {
   priceRate: number
   availableGroups: string[]
 }) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const isZh = i18n.language?.startsWith('zh') ?? true
   const tiers = parseVideoUpscaleTiers(props.model.billing_expr)
 
@@ -749,10 +749,29 @@ function VideoUpscaleGroupPricingSection(props: {
       <div className='space-y-4'>
         {props.availableGroups.map((group) => {
           const ratio = props.groupRatio[group] || 1
-          const headerDiscount =
-            tiers.length > 0 && tiers[0].officialSecondPrice > 0
-              ? Math.round((1 - (tiers[0].secondPrice * ratio) / tiers[0].officialSecondPrice) * 100)
-              : null
+          const tokenOffs = tiers.flatMap((tier) => {
+            const noneOff =
+              tier.officialTokenPricePerM > 0 &&
+              tier.tokenPricePerM * ratio < tier.officialTokenPricePerM
+                ? Math.round(
+                    (1 - (tier.tokenPricePerM * ratio) / tier.officialTokenPricePerM) * 100
+                  )
+                : null
+            const videoOfficial =
+              tier.officialTokenPriceWithVideoPerM ?? tier.officialTokenPricePerM
+            const videoBilled =
+              (tier.tokenPriceWithVideoPerM ?? tier.tokenPricePerM) * ratio
+            const videoOff =
+              videoOfficial > 0 && videoBilled < videoOfficial
+                ? Math.round((1 - videoBilled / videoOfficial) * 100)
+                : null
+            return [noneOff, videoOff]
+          })
+          const headerDiscount = tokenOffs.reduce<number | null>((max, off) => {
+            if (off == null || off <= 0) return max
+            if (max == null || off > max) return off
+            return max
+          }, null)
           return (
             <div key={group} className='overflow-hidden rounded-xl border border-border/70 bg-card/60 shadow-2xs space-y-3 pb-3'>
               <div className='bg-muted/30 flex items-center justify-between gap-3 border-b border-border/50 px-3.5 py-2.5'>
@@ -772,7 +791,7 @@ function VideoUpscaleGroupPricingSection(props: {
                 <div className='flex items-center justify-between mb-1.5'>
                   <div className='text-xs font-bold text-foreground flex items-center gap-1.5'>
                     <span className='h-2 w-2 rounded-full bg-purple-500 inline-block' />
-                    {isZh ? 'Upscale 价格 (按秒计费)' : 'Upscale Price (Per Sec)'}
+                    {t('upscale/s')}
                   </div>
                   <span className='text-[10px] text-muted-foreground'>按生成视频时长</span>
                 </div>
@@ -836,42 +855,46 @@ function VideoUpscaleGroupPricingSection(props: {
                 </div>
                 <div className='rounded-lg border border-border/60 overflow-hidden text-xs'>
                   <div className='grid grid-cols-12 bg-muted/40 border-b border-border/40 px-3 py-1.5 text-[11px] font-semibold text-muted-foreground'>
-                    <div className='col-span-3'>{isZh ? '分辨率' : 'Resolution'}</div>
-                    <div className='col-span-3 text-right'>{isZh ? '平台单价' : 'Price /1M'}</div>
-                    <div className='col-span-3 text-right'>{isZh ? '官方原价' : 'Official'}</div>
-                    <div className='col-span-3 text-right'>{isZh ? '折扣' : 'Discount'}</div>
+                    <div className='col-span-4'>{t('Resolution')}</div>
+                    <div className='col-span-4 text-right'>{t('Without Video Input')}</div>
+                    <div className='col-span-4 text-right'>{t('With Video Input')}</div>
                   </div>
                   <div className='divide-y divide-border/30 bg-card/40'>
                     {tiers.map((tier) => {
                       const billedToken = tier.tokenPricePerM * ratio * props.priceRate
                       const officialToken = tier.officialTokenPricePerM * props.priceRate
-                      const showList = officialToken > 0 && billedToken <= officialToken + 1e-9
-                      const tokenDiscount =
-                        officialToken > 0 && billedToken < officialToken
-                          ? Math.round((1 - billedToken / officialToken) * 100)
-                          : null
+                      const billedVideo =
+                        (tier.tokenPriceWithVideoPerM ?? tier.tokenPricePerM) *
+                        ratio *
+                        props.priceRate
+                      const officialVideo =
+                        (tier.officialTokenPriceWithVideoPerM ??
+                          tier.officialTokenPricePerM) * props.priceRate
+                      const showNone = officialToken > 0 && billedToken <= officialToken + 1e-9
+                      const showVideo = officialVideo > 0 && billedVideo <= officialVideo + 1e-9
                       return (
                         <div key={tier.tierKey} className='grid grid-cols-12 items-center px-3 py-2'>
-                          <div className='col-span-3 font-bold text-foreground text-xs'>
+                          <div className='col-span-4 font-bold text-foreground text-xs'>
                             {tier.displayName}
                           </div>
-                          <div className='col-span-3 text-right font-mono font-bold text-foreground text-xs tabular-nums'>
-                            ${billedToken.toFixed(2)}/M
-                          </div>
-                          <div className='col-span-3 text-right font-mono text-muted-foreground/60 text-[11px] tabular-nums'>
-                            {showList ? (
-                              <span className='line-through'>${officialToken.toFixed(2)}/M</span>
-                            ) : (
-                              <span className='text-muted-foreground/40'>-</span>
+                          <div className='col-span-4 text-right'>
+                            <div className='font-mono font-bold text-foreground text-xs tabular-nums'>
+                              ${billedToken.toFixed(2)}/M
+                            </div>
+                            {showNone && (
+                              <div className='font-mono text-muted-foreground/60 text-[11px] tabular-nums line-through'>
+                                ${officialToken.toFixed(2)}/M
+                              </div>
                             )}
                           </div>
-                          <div className='col-span-3 text-right'>
-                            {tokenDiscount != null ? (
-                              <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
-                                {tokenDiscount}% OFF
-                              </span>
-                            ) : (
-                              <span className='text-muted-foreground/40 text-xs'>-</span>
+                          <div className='col-span-4 text-right'>
+                            <div className='font-mono font-bold text-foreground text-xs tabular-nums'>
+                              ${billedVideo.toFixed(2)}/M
+                            </div>
+                            {showVideo && (
+                              <div className='font-mono text-muted-foreground/60 text-[11px] tabular-nums line-through'>
+                                ${officialVideo.toFixed(2)}/M
+                              </div>
                             )}
                           </div>
                         </div>

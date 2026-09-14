@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { useStatus } from '@/hooks/use-status'
+import { getLobeIcon } from '@/lib/lobe-icon'
 
 import { HeroTerminalDemo } from '../hero-terminal-demo'
 
@@ -33,21 +34,23 @@ interface HeroProps {
 export function Hero(props: HeroProps) {
   const { t } = useTranslation()
   const { status } = useStatus()
-  // Prefer site-configured docs; never fall back to third-party / upstream doc hosts.
   const docsUrl = (status?.docs_link as string | undefined) || '/docs'
 
   const renderDocsButton = () => {
     const isExternal = docsUrl.startsWith('http')
+    const buttonClass =
+      'h-10 rounded-full border border-[#E2E8F0] bg-white px-5 text-sm font-medium text-[#111111] shadow-2xs transition-all hover:border-[#CBD5E1] hover:bg-[#FAFAFA] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 inline-flex items-center gap-2'
+
     if (isExternal) {
       return (
         <Button
           variant='outline'
-          className='group border-border/50 hover:border-border hover:bg-muted/50 inline-flex h-11 items-center gap-1.5 rounded-lg px-5 text-sm font-medium'
+          className={buttonClass}
           render={
             <a href={docsUrl} target='_blank' rel='noopener noreferrer' />
           }
         >
-          <BookOpen className='text-muted-foreground/80 group-hover:text-foreground size-4 transition-colors duration-200' />
+          <BookOpen className='size-4 text-slate-500 transition-colors dark:text-slate-400' />
           <span>{t('Docs')}</span>
         </Button>
       )
@@ -55,112 +58,119 @@ export function Hero(props: HeroProps) {
     return (
       <Button
         variant='outline'
-        className='group border-border/50 hover:border-border hover:bg-muted/50 inline-flex h-11 items-center gap-1.5 rounded-lg px-5 text-sm font-medium'
+        className={buttonClass}
         render={<Link to={docsUrl} />}
       >
-        <BookOpen className='text-muted-foreground/80 group-hover:text-foreground size-4 transition-colors duration-200' />
+        <BookOpen className='size-4 text-slate-500 transition-colors dark:text-slate-400' />
         <span>{t('Docs')}</span>
       </Button>
     )
   }
 
-  return (
-    <section className='relative z-10 overflow-hidden px-6 pt-24 pb-16 md:pt-32 md:pb-24 lg:pt-36 lg:pb-28'>
-      {/* Radial gradient background */}
-      <div
-        aria-hidden
-        className='pointer-events-none absolute inset-0 -z-10 opacity-25 dark:opacity-[0.12]'
-        style={{
-          background: [
-            'radial-gradient(ellipse 60% 50% at 20% 20%, oklch(0.72 0.18 250 / 80%) 0%, transparent 70%)',
-            'radial-gradient(ellipse 50% 40% at 80% 15%, oklch(0.65 0.15 200 / 60%) 0%, transparent 70%)',
-            'radial-gradient(ellipse 40% 35% at 40% 80%, oklch(0.70 0.12 280 / 40%) 0%, transparent 70%)',
-          ].join(', '),
-        }}
-      />
-      {/* Grid pattern */}
-      <div
-        aria-hidden
-        className='absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_30%,black_20%,transparent_100%)] bg-[size:4rem_4rem] opacity-[0.08]'
-      />
+  const vendors = [
+    { name: 'Anthropic', icon: 'Claude.Color' },
+    { name: 'OpenAI', icon: 'OpenAI' },
+    { name: 'xAI', icon: 'Grok.Color' },
+    { name: 'Google', icon: 'Gemini.Color' },
+    { name: 'DeepSeek', icon: 'DeepSeek.Color' },
+    { name: 'Z.ai', icon: 'Zhipu.Color' },
+    { name: 'Moonshot', icon: 'Moonshot' },
+    { name: 'MiniMax', icon: 'Minimax.Color' },
+    { name: 'ByteDance', icon: 'ByteDance.Color' },
+  ]
 
-      <div className='mx-auto grid max-w-6xl grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-8'>
-        {/* Left Column: Title, description, action buttons and application support */}
+  return (
+    <section className='relative w-full pb-10 sm:pb-14'>
+      <div className='grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-8 xl:gap-12'>
+        {/* Left Column: 6 cols on desktop */}
         <div className='flex flex-col items-start text-left lg:col-span-6'>
-          {/* Top Pill Badge */}
-          <div
-            className='landing-animate-fade-up mb-5 inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/5 px-3 py-1.5 text-[11px] font-medium text-blue-600 opacity-0 shadow-xs dark:border-blue-400/20 dark:bg-blue-400/5 dark:text-blue-400'
-            style={{ animationDelay: '0ms' }}
-          >
-            <span className='relative flex size-1.5'>
-              <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75' />
-              <span className='relative inline-flex size-1.5 rounded-full bg-blue-500 dark:bg-blue-400' />
-            </span>
-            <span>{t('AI Application Infrastructure Foundation')}</span>
+          {/* Status Badge */}
+          <div className='mb-5 inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-3.5 py-1 text-xs font-medium text-[#3f3f46] shadow-2xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'>
+            <span className='size-2 rounded-full bg-emerald-500 animate-pulse' />
+            <span className='tracking-tight'>MetaRtr Engine · The Intelligent AI Gateway</span>
           </div>
 
-          <h1
-            className='landing-animate-fade-up text-[clamp(2.25rem,4.5vw,3.25rem)] leading-[1.15] font-bold tracking-tight'
-            style={{ animationDelay: '60ms' }}
-          >
-            {t('Unified API Gateway for')}
-            <br />
-            <span className='bg-gradient-to-r from-blue-400 via-violet-400 to-purple-500 bg-clip-text text-transparent'>
-              {t('Vast Range of AI Models')}
-            </span>
+          {/* Heading */}
+          <h1 className='text-[34px] sm:text-[46px] lg:text-[54px] font-bold tracking-[-0.038em] leading-[1.08] text-[#111111] dark:text-slate-100'>
+            One Endpoint.<br />
+            Every Frontier Model.
           </h1>
-          <p
-            className='landing-animate-fade-up text-muted-foreground/80 mt-5 max-w-xl text-base leading-relaxed opacity-0 md:text-[15px]'
-            style={{ animationDelay: '120ms' }}
-          >
+
+          {/* Subtitle */}
+          <p className='mt-2 text-base sm:text-lg font-medium text-slate-800 dark:text-slate-200 tracking-tight'>
+            {t('home_hero_tagline', '统一智能网关 · 直连全球前沿大模型')}
+          </p>
+          <p className='mt-3 max-w-xl text-[14px] sm:text-[15px] leading-[1.65] text-[#52525b] dark:text-slate-400'>
             {t(
-              'Access a vast selection of models via a standard, unified API protocol. Power AI applications, manage digital assets, and connect the Future.'
+              'home_hero_subtitle',
+              '零门槛直连 Claude Sonnet 5、DeepSeek V4 Pro、GPT-6 Astra 与 Gemini 3.8 Flash。毫秒级多通道故障自愈，上游原价透明计费。'
             )}
           </p>
 
-          <div
-            className='landing-animate-fade-up mt-8 flex flex-wrap items-center gap-3 opacity-0'
-            style={{ animationDelay: '180ms' }}
-          >
+          {/* Action Buttons: Get Started + Direct Pricing Link + Docs */}
+          <div className='mt-8 flex flex-wrap items-center gap-3'>
             {props.isAuthenticated ? (
-              <>
-                <Button
-                  className='group h-11 rounded-lg px-5 text-sm font-medium'
-                  render={<Link to='/dashboard' />}
-                >
-                  {t('Go to Dashboard')}
-                  <ArrowRight className='ml-1.5 size-4 transition-transform duration-200 group-hover:translate-x-0.5' />
-                </Button>
-                {renderDocsButton()}
-              </>
+              <Button
+                className='group h-11 rounded-full bg-[#0F172A] px-6 text-sm font-medium text-white shadow-sm transition-all hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100'
+                render={<Link to='/dashboard' />}
+              >
+                {t('Go to Dashboard', '进入工作台')}
+                <ArrowRight className='ml-1.5 size-4 transition-transform group-hover:translate-x-0.5' />
+              </Button>
             ) : (
-              <>
-                <Button
-                  className='group h-11 rounded-lg px-5 text-sm font-medium'
-                  render={<Link to='/sign-up' />}
-                >
-                  {t('Get Started')}
-                  <ArrowRight className='ml-1.5 size-4 transition-transform duration-200 group-hover:translate-x-0.5' />
-                </Button>
-                <Button
-                  variant='outline'
-                  className='border-border/50 hover:border-border hover:bg-muted/50 h-11 rounded-lg px-5 text-sm font-medium'
-                  render={<Link to='/pricing' />}
-                >
-                  {t('View Pricing')}
-                </Button>
-                {renderDocsButton()}
-              </>
+              <Button
+                className='group h-11 rounded-full bg-[#0F172A] px-6 text-sm font-medium text-white shadow-sm transition-all hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100'
+                render={<Link to='/sign-up' />}
+              >
+                {t('Get Started', '立即接入')}
+                <ArrowRight className='ml-1.5 size-4 transition-transform group-hover:translate-x-0.5' />
+              </Button>
             )}
+
+            <Button
+              variant='outline'
+              className='h-11 rounded-full border border-[#E2E8F0] bg-white px-6 text-sm font-medium text-[#111111] shadow-2xs transition-all hover:border-[#CBD5E1] hover:bg-[#FAFAFA] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100'
+              render={<Link to='/pricing' />}
+            >
+              {t('View Pricing', '探索模型价格')}
+            </Button>
+
+            {renderDocsButton()}
+          </div>
+
+          {/* Supported Vendors Ecosystem: 100% styled to match Pricing page segmented bar */}
+          <div className='mt-8 pt-6 border-t border-[#E2E8F0]/80 dark:border-slate-800/80'>
+            <div className='flex items-center justify-between mb-2.5'>
+              <div className='text-[11px] font-semibold uppercase tracking-wider text-[#71717a] dark:text-slate-400'>
+                {t('Supported AI Ecosystem', '支持主流顶尖厂商 · 原厂直连')}
+              </div>
+              <Link
+                to='/pricing'
+                className='text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 transition-colors'
+              >
+                {t('View All Prices', '查看全量价格表 →')}
+              </Link>
+            </div>
+            {/* Apple / Linear segmented control matching SupplierTabs on /pricing */}
+            <div className='flex w-full flex-wrap gap-1 rounded-[14px] border border-[#E2E8F0] bg-[#F1F5F9] p-[5px] dark:border-slate-800 dark:bg-slate-900/60'>
+              {vendors.map((v) => (
+                <Link
+                  key={v.name}
+                  to='/pricing'
+                  search={{ vendor: v.name }}
+                  className='inline-flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-xs font-medium text-[#334155] transition-all hover:bg-white hover:text-[#0F172A] hover:shadow-[0_1px_3px_rgba(15,23,42,0.06)] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+                >
+                  {getLobeIcon(v.icon, 14)}
+                  <span>{v.name}</span>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Right Column: Hero Terminal API Demo */}
-        <div
-          className='landing-animate-fade-up flex w-full justify-center opacity-0 lg:col-span-6'
-          style={{ animationDelay: '320ms' }}
-        >
-          <HeroTerminalDemo className='mt-8 lg:mt-0' />
+        {/* Right Column: 6 cols on desktop — Interactive Console */}
+        <div className='w-full lg:col-span-6'>
+          <HeroTerminalDemo className='w-full max-w-full' />
         </div>
       </div>
     </section>

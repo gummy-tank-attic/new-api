@@ -102,7 +102,7 @@ func TestDoubaoUpscaleUsageProfileAndSeconds(t *testing.T) {
 	require.Contains(t, schema, "seconds")
 	require.Contains(t, schema, "tokens")
 	require.Contains(t, schema, "resolution")
-	assert.NotContains(t, schema, "video_input")
+	assert.Contains(t, schema, "video_input")
 	assert.Equal(t, []string{"720p", "1080p", "2k"}, schema["resolution"].Enum)
 	assert.Equal(t, "Video upscale unit price", schema["seconds"].Description["en"])
 	assert.Equal(t, "视频超分单价", schema["seconds"].Description["zh"])
@@ -128,7 +128,7 @@ func TestDoubaoUpscaleUsageProfileAndSeconds(t *testing.T) {
 		require.NoError(t, common.Unmarshal(encoded, &facts))
 		assert.Equal(t, float64(5), facts["seconds"])
 		assert.Equal(t, "720p", facts["resolution"])
-		assert.NotContains(t, facts, "video_input")
+		assert.Equal(t, "none", facts["video_input"])
 		assert.Contains(t, facts, "tokens")
 	})
 

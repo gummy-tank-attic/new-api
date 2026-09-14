@@ -36,6 +36,7 @@ import {
   getVideoModelHeroPrice,
   getVideoModelTierGroups,
   parseDurationVideoTiers,
+  parseVideoUpscaleTiers,
 } from '../lib/video-pricing'
 import type { BillingUsageSchema, PricingModel } from '../types'
 
@@ -784,6 +785,23 @@ describe('task visual pricing preview', () => {
       billing_usage_schema: genericDoubaoSchema,
     }
     assert.deepEqual(getModelSupportedResolutions(seedanceUpscale), ['720p', '1080p', '2k'])
+  })
+
+  test('upscale expression splits token prices by video_input', () => {
+    const expr =
+      'u("resolution") == "720p" && u("video_input") == "none" ? tier("720p", u("tokens") * 6.671554 / 1000000 + u("seconds") * 0.0143) : u("resolution") == "720p" && u("video_input") == "video" ? tier("720p", u("tokens") * 4.002932 / 1000000 + u("seconds") * 0.0143) : u("resolution") == "1080p" && u("video_input") == "none" ? tier("1080p", u("tokens") * 6.671554 / 1000000 + u("seconds") * 0.030799) : u("resolution") == "1080p" && u("video_input") == "video" ? tier("1080p", u("tokens") * 4.002932 / 1000000 + u("seconds") * 0.030799) : u("resolution") == "2k" && u("video_input") == "none" ? tier("2k", u("tokens") * 7.338709 / 1000000 + u("seconds") * 0.0561) : tier("2k", u("tokens") * 4.384046 / 1000000 + u("seconds") * 0.0561)'
+    const tiers = parseVideoUpscaleTiers(expr)
+    assert.equal(tiers.length, 3)
+    const p720 = tiers.find((tier) => tier.resolution === '720p')
+    const p2k = tiers.find((tier) => tier.resolution === '2k')
+    assert.ok(p720)
+    assert.ok(p2k)
+    assert.equal(p720.tokenPricePerM, 6.671554)
+    assert.equal(p720.tokenPriceWithVideoPerM, 4.002932)
+    assert.equal(p720.secondPrice, 0.0143)
+    assert.equal(p2k.tokenPricePerM, 7.338709)
+    assert.equal(p2k.tokenPriceWithVideoPerM, 4.384046)
+    assert.equal(p2k.officialTokenPriceWithVideoPerM, 6.744686)
   })
 
   test('Seedance 2.5 aligns directly with expression billed prices and dynamically derives discount off official benchmarks', () => {

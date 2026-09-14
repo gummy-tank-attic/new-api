@@ -92,11 +92,17 @@ export const meta = {
           unit: "second",
           description: { en: "Video upscale unit price", zh: "视频超分单价" },
         },
+        video_input: {
+          enum: ["none", "video"],
+          enumLabels: { none: { en: "No reference video", zh: "无参考视频" }, video: { en: "With reference video", zh: "有参考视频" } },
+          description: { en: "Reference video input", zh: "参考视频输入" },
+        },
       },
       examples: [
-        { label: "720p · 5s", facts: { tokens: 108000, resolution: "720p", seconds: 5 } },
-        { label: "1080p · 5s", facts: { tokens: 243000, resolution: "1080p", seconds: 5 } },
-        { label: "2k · 5s", facts: { tokens: 432000, resolution: "2k", seconds: 5 } },
+        { label: "720p · 5s", facts: { tokens: 108000, resolution: "720p", seconds: 5, video_input: "none" } },
+        { label: "720p · 5s · video", facts: { tokens: 108000, resolution: "720p", seconds: 5, video_input: "video" } },
+        { label: "1080p · 5s", facts: { tokens: 243000, resolution: "1080p", seconds: 5, video_input: "none" } },
+        { label: "2k · 5s", facts: { tokens: 432000, resolution: "2k", seconds: 5, video_input: "none" } },
       ],
     },
   ],
@@ -370,6 +376,7 @@ export function extractUsage(ctx) {
       tokens: estimateTokens(seconds, resolution),
       resolution: resolution,
       seconds: seconds,
+      video_input: hasVideo(metadata.content) ? "video" : "none",
     };
   }
   return {

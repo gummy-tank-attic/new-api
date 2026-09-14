@@ -90,7 +90,10 @@ interface StatsProps {
 interface StatItem {
   end: number
   suffix: string
+  prefix?: string
   label: string
+  sublabel: string
+  dotColor: string
   decimals?: number
 }
 
@@ -98,31 +101,66 @@ export function Stats(_props: StatsProps) {
   const { t } = useTranslation()
 
   const stats: StatItem[] = [
-    { end: 50, suffix: '+', label: t('upstream services integrated') },
-    { end: 100, suffix: '+', label: t('model billing support') },
-    { end: 50, suffix: '+', label: t('compatible API routes') },
-    { end: 10, suffix: '+', label: t('scheduling controls') },
+    {
+      end: 50,
+      suffix: '+',
+      label: t('Active Upstreams', '聚合主流厂商'),
+      sublabel: 'Claude / OpenAI / Gemini / DeepSeek 等',
+      dotColor: 'bg-blue-500',
+    },
+    {
+      end: 100,
+      suffix: '+',
+      label: t('Frontier Models', '前沿模型覆盖'),
+      sublabel: '推理 · 代码 · 生图 · 视频全模态',
+      dotColor: 'bg-emerald-500',
+    },
+    {
+      end: 99.99,
+      suffix: '%',
+      decimals: 2,
+      label: t('Target Availability', '服务可用性目标'),
+      sublabel: '双可用区部署 · 毫秒级故障自动容灾',
+      dotColor: 'bg-indigo-500',
+    },
+    {
+      end: 20,
+      prefix: '< ',
+      suffix: 'ms',
+      label: t('Edge Handshake', '边缘网关延时'),
+      sublabel: '全球高速边缘中继 · 智能动态分发',
+      dotColor: 'bg-violet-500',
+    },
   ]
 
   return (
-    <div className='border-border/40 bg-muted/10 relative z-10 border-y'>
-      <div className='mx-auto max-w-6xl px-6 py-10 md:py-12'>
-        <div className='grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-12'>
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className='flex flex-col items-center text-center'
-            >
-              <span className='text-2xl font-bold tracking-tight md:text-3xl'>
-                <Counter end={s.end} suffix={s.suffix} decimals={s.decimals} />
-              </span>
-              <span className='text-muted-foreground mt-1.5 text-xs'>
-                {s.label}
+    <section className='relative w-full py-8 sm:py-10 border-y border-[#E2E8F0]/80 dark:border-slate-800/80'>
+      <div className='grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-8 text-left'>
+        {stats.map((s) => (
+          <div key={s.label} className='flex flex-col justify-center'>
+            <div className='flex items-center gap-1.5 mb-2'>
+              <span className={`size-1.5 rounded-full ${s.dotColor}`} />
+              <span className='text-[10.5px] font-semibold tracking-wider text-[#71717a] uppercase dark:text-slate-500 font-mono'>
+                SYSTEM SPEC
               </span>
             </div>
-          ))}
-        </div>
+            <div className='font-mono text-3xl sm:text-[34px] font-bold tracking-tight text-[#111111] dark:text-white'>
+              <Counter
+                end={s.end}
+                prefix={s.prefix}
+                suffix={s.suffix}
+                decimals={s.decimals}
+              />
+            </div>
+            <div className='mt-2 text-[14px] font-semibold text-[#111111] dark:text-slate-100 tracking-tight'>
+              {s.label}
+            </div>
+            <div className='mt-1 text-[12px] leading-relaxed text-[#71717a] dark:text-slate-400'>
+              {s.sublabel}
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
+    </section>
   )
 }

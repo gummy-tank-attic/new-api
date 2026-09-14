@@ -16,16 +16,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import {
-  Zap,
-  Shield,
-  Globe,
-  Code,
-  Gauge,
-  DollarSign,
-  Users,
-  HeartHandshake,
-} from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { ArrowRight, Layers, ShieldCheck, Zap } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { AnimateInView } from '@/components/animate-in-view'
@@ -37,202 +29,103 @@ interface FeaturesProps {
 export function Features(_props: FeaturesProps) {
   const { t } = useTranslation()
 
-  const features = [
+  const pillars = [
     {
-      id: 'fast',
-      num: '01',
-      title: t('Lightning Fast'),
+      icon: <Layers className='size-5 text-[#0F172A] dark:text-slate-100' strokeWidth={1.8} />,
+      badge: 'Unified Protocol',
+      title: t('Unified Standard Protocol', '统一标准化接口'),
       desc: t(
-        'Optimized network architecture ensures millisecond response times'
+        'A single OpenAI-compatible API protocol connects all major foundation models. Zero vendor lock-in across text, image, video, and audio.',
+        '一套完全兼容 OpenAI 的标准化接口规范，无缝直通文本、代码、文生图与视频大模型。彻底消除碎片化接入成本与供应商锁定。'
       ),
-      span: 'md:col-span-2',
-      icon: <Zap className='size-4 text-blue-400' />,
-      visual: (
-        <div className='mt-4 grid grid-cols-3 gap-2'>
-          {['OpenAI', 'Claude', 'Gemini', 'DeepSeek', 'Qwen', 'Llama'].map(
-            (name) => (
-              <div
-                key={name}
-                className='border-border/30 bg-muted/20 text-muted-foreground flex items-center justify-center rounded-lg border px-3 py-2 text-xs transition-colors duration-300 hover:border-blue-500/30 hover:bg-blue-500/5'
-              >
-                {name}
-              </div>
-            )
-          )}
-        </div>
-      ),
+      tags: ['Chat & Completions', 'Code Generation', 'Image & Video', 'Embeddings'],
     },
     {
-      id: 'secure',
-      num: '02',
-      title: t('Secure & Reliable'),
+      icon: <Zap className='size-5 text-[#0F172A] dark:text-slate-100' strokeWidth={1.8} />,
+      badge: 'Smart Failover',
+      title: t('Smart Failover & Auto Healing', '毫秒级容灾与自愈'),
       desc: t(
-        'Enterprise-grade security with comprehensive permission management'
+        'Continuous real-time upstream health detection. Automatically routes around 429 rate limits and channel errors with sub-20ms edge latency.',
+        '实时动态监测多通道真实延时与健康度。遭遇上游 429 限流或服务抖动时，毫秒级自动热切备用线路，保障生产业务 24/7 永不中断。'
       ),
-      span: 'md:col-span-1',
-      icon: <Shield className='size-4 text-emerald-400' />,
-      visual: (
-        <div className='mt-4 flex items-center justify-center'>
-          <div className='relative'>
-            <div className='flex size-16 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/5'>
-              <Shield
-                className='size-7 text-emerald-500/70'
-                strokeWidth={1.5}
-              />
-            </div>
-            <div className='absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-emerald-500'>
-              <svg
-                className='size-2.5 text-white'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
-                strokeWidth={3}
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  d='m4.5 12.75 6 6 9-13.5'
-                />
-              </svg>
-            </div>
-          </div>
-        </div>
+      tags: ['429 自动热重试', 'Anycast 边缘加速', '高并发负载均衡'],
+    },
+    {
+      icon: <ShieldCheck className='size-5 text-[#0F172A] dark:text-slate-100' strokeWidth={1.8} />,
+      badge: 'Zero Markup',
+      title: t('Strict Pricing Alignment', '纯净计费 · 官方对齐'),
+      desc: t(
+        'Every token is transparently matched to official upstream list prices. Group discounts applied with zero hidden fees, audited in real time.',
+        '严格对齐各厂商官方最新公布牌价，按用户分组倍率纯净扣费。零隐形附加费与溢价，支持精细到 Token 级别的实时账单与流水审计。'
       ),
-    },
-    {
-      id: 'global',
-      num: '03',
-      title: t('Global Coverage'),
-      desc: t('Multi-region deployment for stable global access'),
-      span: 'md:col-span-1',
-      icon: <Globe className='size-4 text-violet-400' />,
-      visual: (
-        <div className='mt-4 space-y-2'>
-          {[t('Load Balancing'), t('Rate Limiting'), t('Cost Tracking')].map(
-            (step, i) => (
-              <div key={step} className='flex items-center gap-2'>
-                <div
-                  className={`flex size-6 items-center justify-center rounded-full text-[10px] font-bold ${
-                    i === 1
-                      ? 'border border-blue-500/30 bg-blue-500/20 text-blue-500'
-                      : 'border-border/40 bg-muted text-muted-foreground border'
-                  }`}
-                >
-                  {i + 1}
-                </div>
-                <div className='bg-border/40 h-px flex-1' />
-                <span className='text-muted-foreground text-xs'>{step}</span>
-              </div>
-            )
-          )}
-        </div>
-      ),
-    },
-    {
-      id: 'developer',
-      num: '04',
-      title: t('Developer Friendly'),
-      desc: t('Compatible API routes for common AI application workflows'),
-      span: 'md:col-span-2',
-      icon: <Code className='size-4 text-amber-400' />,
-      visual: (
-        <div className='mt-4 flex items-center gap-3'>
-          <div className='flex -space-x-2'>
-            {['API', 'SDK', 'CLI', 'Docs'].map((n) => (
-              <div
-                key={n}
-                className='border-background from-muted to-muted/60 text-muted-foreground flex size-8 items-center justify-center rounded-full border-2 bg-gradient-to-br text-[9px] font-bold'
-              >
-                {n}
-              </div>
-            ))}
-          </div>
-          <div className='text-muted-foreground flex items-center gap-1.5 text-xs'>
-            <Code className='size-3.5 text-blue-500' />
-            {t('Multi-protocol Compatible')}
-          </div>
-        </div>
-      ),
-    },
-  ]
-
-  const additionalFeatures = [
-    {
-      icon: <Gauge className='size-5' strokeWidth={1.5} />,
-      title: t('High Performance'),
-      desc: t('Support for high concurrency with automatic load balancing'),
-    },
-    {
-      icon: <DollarSign className='size-5' strokeWidth={1.5} />,
-      title: t('Transparent Billing'),
-      desc: t('Pay-as-you-go with real-time usage monitoring'),
-    },
-    {
-      icon: <Users className='size-5' strokeWidth={1.5} />,
-      title: t('Team Collaboration'),
-      desc: t('Multi-user management with flexible permission allocation'),
-    },
-    {
-      icon: <HeartHandshake className='size-5' strokeWidth={1.5} />,
-      title: t('Open Source'),
-      desc: t('Community driven, self-hosted, and extensible'),
+      tags: ['官方原价透明对齐', '零隐形溢价', '实时账单可审计'],
+      link: '/pricing',
+      linkText: t('View Model Prices', '探索模型价格'),
     },
   ]
 
   return (
-    <section className='relative z-10 px-6 py-24 md:py-32'>
-      <div className='mx-auto max-w-6xl'>
-        <AnimateInView className='mb-16 max-w-lg'>
-          <p className='text-muted-foreground mb-3 text-xs font-medium tracking-widest uppercase'>
-            {t('Core Features')}
-          </p>
-          <h2 className='text-2xl leading-tight font-bold tracking-tight md:text-3xl'>
-            {t('Built for developers,')}
-            <br />
-            {t('designed for scale')}
+    <section className='relative w-full py-4 sm:py-6'>
+      <div className='w-full'>
+        {/* Section Heading: Calm, elegant, airy */}
+        <AnimateInView className='mb-12 max-w-2xl text-left'>
+          <div className='mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-white px-3 py-1 text-xs font-medium text-[#71717a] shadow-2xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'>
+            <span>{t('Core Architecture', '核心技术架构')}</span>
+          </div>
+          <h2 className='text-[28px] sm:text-[34px] font-bold tracking-[-0.035em] leading-tight text-[#111111] dark:text-slate-100'>
+            {t('Built for developers, engineered for scale', '为开发者而生，为高并发生产环境打造')}
           </h2>
+          <p className='mt-3 text-[15px] sm:text-[16px] leading-[1.65] text-[#52525b] dark:text-slate-400'>
+            {t(
+              'A unified standard protocol, high-concurrency elastic dispatching, and enterprise-grade multi-tenant governance.',
+              '精炼、稳健、纯净。以现代极简工程标准打造兼具极速响应与工业级容灾的智能中枢。'
+            )}
+          </p>
         </AnimateInView>
 
-        {/* Bento grid */}
-        <div className='border-border/40 bg-border/40 grid gap-px overflow-hidden rounded-xl border md:grid-cols-3'>
-          {features.map((f, i) => (
-            <AnimateInView
-              key={f.id}
-              delay={i * 100}
-              animation='scale-in'
-              className={`bg-background group hover:bg-muted/20 p-7 transition-colors duration-300 md:p-8 ${f.span}`}
+        {/* 3 Spacious Pillars Grid */}
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+          {pillars.map((p) => (
+            <div
+              key={p.title}
+              className='home-card group flex flex-col justify-between rounded-[16px] border border-[#E2E8F0] bg-white p-7 sm:p-8 text-left shadow-[0_1px_3px_rgba(15,23,42,0.02)] transition-all hover:border-[#CBD5E1] hover:bg-[#FAFAFA] dark:border-slate-800 dark:bg-slate-900'
             >
-              <div className='mb-3 flex items-center gap-3'>
-                <span className='border-border/40 bg-muted text-muted-foreground flex size-7 items-center justify-center rounded-md border text-[10px] font-semibold tabular-nums'>
-                  {f.num}
-                </span>
-                <h3 className='text-sm font-semibold'>{f.title}</h3>
+              <div>
+                <div className='mb-5 flex size-10 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] dark:border-slate-800 dark:bg-slate-800'>
+                  {p.icon}
+                </div>
+                <h3 className='text-[17px] font-bold tracking-[-0.02em] text-[#111111] dark:text-slate-100'>
+                  {p.title}
+                </h3>
+                <p className='mt-2.5 text-[13.5px] sm:text-[14px] leading-[1.65] text-[#52525b] dark:text-slate-400'>
+                  {p.desc}
+                </p>
               </div>
-              <p className='text-muted-foreground text-sm leading-relaxed'>
-                {f.desc}
-              </p>
-              {f.visual}
-            </AnimateInView>
-          ))}
-        </div>
 
-        {/* Additional features row */}
-        <div className='mt-12 grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-12'>
-          {additionalFeatures.map((f, i) => (
-            <AnimateInView
-              key={f.title}
-              delay={i * 100}
-              animation='fade-up'
-              className='flex flex-col items-center text-center'
-            >
-              <div className='text-muted-foreground border-border/50 bg-muted/30 group-hover:text-foreground mb-3 flex size-12 items-center justify-center rounded-xl border transition-colors'>
-                {f.icon}
+              <div className='mt-8 pt-5 border-t border-[#E2E8F0]/70 dark:border-slate-800/70'>
+                <div className='flex flex-wrap gap-1.5'>
+                  {p.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className='rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400'
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                {p.link && (
+                  <div className='mt-4'>
+                    <Link
+                      to={p.link}
+                      className='inline-flex items-center gap-1.5 text-xs font-semibold text-[#0F172A] hover:text-black dark:text-white group/link'
+                    >
+                      <span>{p.linkText}</span>
+                      <ArrowRight className='size-3 transition-transform group-hover/link:translate-x-0.5' />
+                    </Link>
+                  </div>
+                )}
               </div>
-              <h3 className='mb-1.5 text-sm font-semibold'>{f.title}</h3>
-              <p className='text-muted-foreground max-w-[200px] text-xs leading-relaxed'>
-                {f.desc}
-              </p>
-            </AnimateInView>
+            </div>
           ))}
         </div>
       </div>

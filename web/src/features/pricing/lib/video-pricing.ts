@@ -47,9 +47,11 @@ export interface VideoUpscaleTier {
   resolution: string
   displayName: string
   tokenPricePerM: number
+  tokenPriceWithVideoPerM?: number
   secondPrice: number
   officialSecondPrice: number
   officialTokenPricePerM: number
+  officialTokenPriceWithVideoPerM?: number
   est5sTotal: number
   officialEst5sTotal?: number
 }
@@ -508,8 +510,10 @@ export function parseVideoUpscaleTiers(expression: string | null | undefined): V
       resolution: '720p',
       displayName: '720p',
       tokenPricePerM: 7.18475,
+      tokenPriceWithVideoPerM: 4.31085,
       secondPrice: 0.0091,
       officialTokenPricePerM: 10.263929,
+      officialTokenPriceWithVideoPerM: 6.158357,
       officialSecondPrice: 0.013,
       est5sTotal: 0.66,
       officialEst5sTotal: 0.94,
@@ -519,8 +523,10 @@ export function parseVideoUpscaleTiers(expression: string | null | undefined): V
       resolution: '1080p',
       displayName: '1080p',
       tokenPricePerM: 7.18475,
+      tokenPriceWithVideoPerM: 4.31085,
       secondPrice: 0.0196,
       officialTokenPricePerM: 10.263929,
+      officialTokenPriceWithVideoPerM: 6.158357,
       officialSecondPrice: 0.028,
       est5sTotal: 0.71,
       officialEst5sTotal: 1.01,
@@ -530,8 +536,10 @@ export function parseVideoUpscaleTiers(expression: string | null | undefined): V
       resolution: '2k',
       displayName: '2K',
       tokenPricePerM: 7.903225,
+      tokenPriceWithVideoPerM: 4.72128,
       secondPrice: 0.0357,
       officialTokenPricePerM: 11.290322,
+      officialTokenPriceWithVideoPerM: 6.744686,
       officialSecondPrice: 0.051,
       est5sTotal: 0.85,
       officialEst5sTotal: 1.21,
@@ -541,44 +549,62 @@ export function parseVideoUpscaleTiers(expression: string | null | undefined): V
   if (!expression) return defaultTiers
 
   const regex = /tier\("([^"]+)",\s*u\("tokens"\)\s*\*\s*([\d.]+)\s*\/\s*1000000\s*\+\s*u\("seconds"\)\s*\*\s*([\d.]+)\)/g
-  const matches: VideoUpscaleTier[] = []
+  const byRes = new Map<string, VideoUpscaleTier>()
   let match: RegExpExecArray | null
 
   while ((match = regex.exec(expression)) !== null) {
     const rawKey = match[1].toLowerCase()
     const tokenPrice = Number(match[2]) || 7.18475
     const secondPrice = Number(match[3]) || 0.01
+    const clauseStart = expression.lastIndexOf(':', match.index - 1)
+    const clause = expression.slice(clauseStart + 1, match.index)
+    const videoKind = /u\("video_input"\)\s*==\s*"(none|video)"/.exec(clause)?.[1]
     let res = '720p'
     let name = '720p'
-    if (rawKey === '2k') {
+    if (rawKey === '2k' || rawKey.startsWith('2k')) {
       res = '2k'
       name = '2K'
-    } else if (rawKey === '1080p') {
+    } else if (rawKey.includes('1080')) {
       res = '1080p'
       name = '1080p'
     }
     const officialRef = defaultTiers.find((tier) => tier.resolution === res)
     const officialToken = officialRef?.officialTokenPricePerM ?? tokenPrice
+    const officialTokenVideo =
+      officialRef?.officialTokenPriceWithVideoPerM ?? officialToken
     const officialSec = officialRef?.officialSecondPrice ?? secondPrice
-    const est5sTokens = 85_000
-    const est5s = Number((secondPrice * 5 + (tokenPrice * est5sTokens) / 1_000_000).toFixed(2))
-    const officialEst5s = Number((officialSec * 5 + (officialToken * est5sTokens) / 1_000_000).toFixed(2))
-
-    matches.push({
-      tierKey: rawKey,
-      resolution: res,
-      displayName: name,
-      tokenPricePerM: tokenPrice,
-      secondPrice,
-      officialTokenPricePerM: officialToken,
-      officialSecondPrice: officialSec,
-      est5sTotal: est5s > 0 ? est5s : 0.66,
-      officialEst5sTotal: officialEst5s > 0 ? officialEst5s : 0.94,
-    })
+    const current = byRes.get(res)
+    if (!current) {
+      const est5sTokens = 85_000
+      const est5s = Number((secondPrice * 5 + (tokenPrice * est5sTokens) / 1_000_000).toFixed(2))
+      const officialEst5s = Number(
+        (officialSec * 5 + (officialToken * est5sTokens) / 1_000_000).toFixed(2)
+      )
+      byRes.set(res, {
+        tierKey: res,
+        resolution: res,
+        displayName: name,
+        tokenPricePerM: tokenPrice,
+        tokenPriceWithVideoPerM: videoKind === 'video' ? tokenPrice : undefined,
+        secondPrice,
+        officialTokenPricePerM: officialToken,
+        officialTokenPriceWithVideoPerM: officialTokenVideo,
+        officialSecondPrice: officialSec,
+        est5sTotal: est5s > 0 ? est5s : 0.66,
+        officialEst5sTotal: officialEst5s > 0 ? officialEst5s : 0.94,
+      })
+    } else if (videoKind === 'none') {
+      current.tokenPricePerM = tokenPrice
+      current.secondPrice = secondPrice
+    } else {
+      current.tokenPriceWithVideoPerM = tokenPrice
+    }
   }
 
   const resOrder: Record<string, number> = { '720p': 1, '1080p': 2, '2k': 3 }
-  matches.sort((a, b) => (resOrder[a.resolution] ?? 99) - (resOrder[b.resolution] ?? 99))
+  const matches = [...byRes.values()].sort(
+    (a, b) => (resOrder[a.resolution] ?? 99) - (resOrder[b.resolution] ?? 99)
+  )
 
   return matches.length > 0 ? matches : defaultTiers
 }
@@ -1243,20 +1269,26 @@ export function getVideoModelHeroPrice(
   }
 
   if (name.includes('upscale') || name.includes('chaofen')) {
-    let billedSec = 0.0091
-    const officialSec = 0.013
-    if (model.billing_expr) {
-      const m = model.billing_expr.match(/u\("seconds"\)\s*\*\s*([\d.]+)/)
-      if (m && m[1]) {
-        const val = Number.parseFloat(m[1])
-        if (Number.isFinite(val) && val > 0) {
-          billedSec = val
-        }
-      }
-    }
+    const tiers = parseVideoUpscaleTiers(model.billing_expr)
+    const minTier = tiers[0]
+    const billedSec = minTier?.secondPrice ?? 0.0091
+    const officialSec = minTier?.officialSecondPrice ?? 0.013
     const billedSecond = billedSec * rate
     const officialSecond = officialSec * rate
-    const upscaleOff = isGroupMode ? percentOff(billedSecond, officialSecond) : null
+    const tokenOffs = tiers.flatMap((tier) => [
+      percentOff(tier.tokenPricePerM * rate, tier.officialTokenPricePerM),
+      percentOff(
+        (tier.tokenPriceWithVideoPerM ?? tier.tokenPricePerM) * rate,
+        tier.officialTokenPriceWithVideoPerM ?? tier.officialTokenPricePerM
+      ),
+    ])
+    const upscaleOff = isGroupMode
+      ? tokenOffs.reduce<number | null>((max, off) => {
+          if (off == null) return max
+          if (max == null || off > max) return off
+          return max
+        }, null)
+      : null
     return {
       priceText: isGroupMode ? `$${billedSecond.toFixed(4)}` : `$${officialSecond.toFixed(4)}`,
       officialPriceText:

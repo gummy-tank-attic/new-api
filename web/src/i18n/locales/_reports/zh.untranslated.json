@@ -1,8 +1,6 @@
 {
   "/ {{unit}} tokens": "/ {{unit}} tokens",
   "403 / insufficient_user_quota": "403 / insufficient_user_quota",
-  "API Key": "API Key",
-  "Base URL": "Base URL",
   "Claude Code": "Claude Code",
   "Cursor / Windsurf": "Cursor / Windsurf",
   "macOS / Linux / WSL": "macOS / Linux / WSL",
@@ -12,9 +10,8 @@
   "OpenAI Realtime WebSocket": "OpenAI Realtime WebSocket",
   "Python SDK": "Python SDK",
   "SDK Base URL": "SDK Base URL",
+  "videoPricing.unitPer1MTokens": "/ 1M Tokens",
   "Windows PowerShell": "Windows PowerShell",
-  "wire_api / responses": "wire_api / responses",
   "Windsurf": "Windsurf",
-  "pricing.offPeakTimeRange": "00:00-09:00, 12:00-14:00, 18:00-24:00 (SGT)",
-  "pricing.peakTimeRange": "09:00-12:00, 14:00-18:00 (SGT)"
+  "wire_api / responses": "wire_api / responses"
 }

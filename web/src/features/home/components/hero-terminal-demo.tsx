@@ -20,11 +20,14 @@ import { useState, useEffect, useRef, type ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { getLobeIcon } from '@/lib/lobe-icon'
+
 type AccentTone = 'emerald' | 'amber' | 'blue' | 'violet'
 
 interface ApiDemoConfig {
   id: string
   label: string
+  icon: string
   method: 'POST' | 'GET'
   endpoint: string
   headers: string[]
@@ -33,6 +36,8 @@ interface ApiDemoConfig {
   responseHighlights: string[]
   tokens: number
   latency: number
+  cost: string
+  discountBadge?: string
   accent: AccentTone
 }
 
@@ -72,15 +77,16 @@ const ACCENT_CLASSES: Record<
 
 const API_DEMOS: ApiDemoConfig[] = [
   {
-    id: 'gpt-chat',
-    label: 'Chat',
+    id: 'claude-sonnet-5',
+    label: 'Claude 5',
+    icon: 'Claude.Color',
     method: 'POST',
     endpoint: '/v1/chat/completions',
     headers: ['"Authorization: Bearer sk-••••"'],
     request: [
-      '"model": "your-model",',
+      '"model": "claude-sonnet-5",',
       '"messages": [',
-      '  { "role": "user", "content": "..." }',
+      '  { "role": "user", "content": "Explain quantum computing in 1 sentence." }',
       ']',
     ],
     response: [
@@ -91,72 +97,87 @@ const API_DEMOS: ApiDemoConfig[] = [
     ],
     responseHighlights: ['<text>', '<tokens>'],
     tokens: 27,
-    latency: 142,
-    accent: 'emerald',
+    latency: 18,
+    cost: '$0.00005',
+    discountBadge: '80% OFF',
+    accent: 'amber',
   },
   {
-    id: 'responses',
-    label: 'Responses',
+    id: 'deepseek-v4-pro',
+    label: 'DeepSeek V4',
+    icon: 'DeepSeek.Color',
     method: 'POST',
-    endpoint: '/v1/responses',
+    endpoint: '/v1/chat/completions',
     headers: ['"Authorization: Bearer sk-••••"'],
-    request: ['"model": "your-model",', '"input": "..."'],
+    request: [
+      '"model": "deepseek-v4-pro",',
+      '"messages": [',
+      '  { "role": "user", "content": "Solve IMO theorem proof with chain of thought." }',
+      ']',
+    ],
     response: [
       '{',
-      '  "output": [{ "type": "output_text", "text": <text> }],',
+      '  "choices": [{ "message": { "content": <text> } }],',
       '  "usage": { "total_tokens": <tokens> }',
       '}',
     ],
     responseHighlights: ['<text>', '<tokens>'],
-    tokens: 31,
-    latency: 168,
-    accent: 'amber',
-  },
-  {
-    id: 'claude',
-    label: 'Claude',
-    method: 'POST',
-    endpoint: '/v1/messages',
-    headers: ['"x-api-key: sk-••••"', '"anthropic-version: 2023-06-01"'],
-    request: [
-      '"model": "your-model",',
-      '"max_tokens": 1024,',
-      '"messages": [',
-      '  { "role": "user", "content": "..." }',
-      ']',
-    ],
-    response: [
-      '{',
-      '  "content": [{ "type": "text", "text": <text> }],',
-      '  "usage": { "input_tokens": <in>, "output_tokens": <out> }',
-      '}',
-    ],
-    responseHighlights: ['<text>', '<in>', '<out>'],
-    tokens: 29,
-    latency: 156,
+    tokens: 38,
+    latency: 22,
+    cost: '$0.00008',
+    discountBadge: '原厂直连',
     accent: 'blue',
   },
   {
-    id: 'gemini',
-    label: 'Gemini',
+    id: 'gpt-6-astra',
+    label: 'GPT-6',
+    icon: 'OpenAI',
     method: 'POST',
-    endpoint: '/v1beta/models/{model}:generateContent',
-    headers: ['"x-goog-api-key: sk-••••"'],
+    endpoint: '/v1/chat/completions',
+    headers: ['"Authorization: Bearer sk-••••"'],
     request: [
-      '"contents": [',
-      '  { "role": "user",',
-      '    "parts": [{ "text": "..." }] }',
+      '"model": "gpt-6-astra",',
+      '"messages": [',
+      '  { "role": "user", "content": "Synthesize autonomous multi-agent plan." }',
       ']',
     ],
     response: [
       '{',
-      '  "candidates": [{ "content": { "parts": [{ "text": <text> }] } }],',
-      '  "usageMetadata": { "totalTokenCount": <tokens> }',
+      '  "choices": [{ "message": { "content": <text> } }],',
+      '  "usage": { "total_tokens": <tokens> }',
       '}',
     ],
     responseHighlights: ['<text>', '<tokens>'],
-    tokens: 25,
-    latency: 93,
+    tokens: 34,
+    latency: 20,
+    cost: '$0.00012',
+    discountBadge: '85% OFF',
+    accent: 'emerald',
+  },
+  {
+    id: 'gemini-3-8-flash',
+    label: 'Gemini 3.8',
+    icon: 'Gemini.Color',
+    method: 'POST',
+    endpoint: '/v1/chat/completions',
+    headers: ['"Authorization: Bearer sk-••••"'],
+    request: [
+      '"model": "gemini-3.8-flash",',
+      '"messages": [',
+      '  { "role": "user", "content": "Analyze multimodal benchmark results." }',
+      ']',
+    ],
+    response: [
+      '{',
+      '  "choices": [{ "message": { "content": <text> } }],',
+      '  "usage": { "total_tokens": <tokens> }',
+      '}',
+    ],
+    responseHighlights: ['<text>', '<tokens>'],
+    tokens: 28,
+    latency: 16,
+    cost: '$0.00003',
+    discountBadge: '35% OFF',
     accent: 'violet',
   },
 ]
@@ -192,44 +213,54 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
   const accent = ACCENT_CLASSES[demo.accent]
 
   return (
-    <div className={cn('mx-auto w-full max-w-2xl', props.className)}>
+    <div className={cn('w-full', props.className)}>
       <div
         className={cn(
-          'overflow-hidden rounded-2xl border backdrop-blur-sm',
-          'border-border/60 bg-white/95 shadow-[0_20px_50px_-25px_rgba(15,23,42,0.18)]',
-          'dark:border-white/[0.06] dark:bg-[#0b0f17]/95 dark:shadow-[0_20px_60px_-25px_rgba(0,0,0,0.7)]'
+          'overflow-hidden rounded-[16px] border',
+          'border-[#E2E8F0] bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)]',
+          'dark:border-slate-800 dark:bg-[#0f172a]'
         )}
       >
-        {/* Tab strip */}
+        {/* Tab strip: Apple / Linear segmented style matching pricing header */}
         <div
           className={cn(
-            'flex items-center gap-1 border-b px-2 sm:gap-1.5 sm:px-3',
-            'border-border/50 dark:border-white/[0.05]'
+            'flex items-center border-b px-2 sm:px-3 overflow-x-auto no-scrollbar',
+            'border-[#E2E8F0] bg-[#F8FAFC] dark:border-slate-800 dark:bg-slate-900/60'
           )}
         >
-          {API_DEMOS.map((item, index) => {
-            const tone = ACCENT_CLASSES[item.accent]
-            const isActive = index === activeIndex
-            return (
-              <button
-                key={item.id}
-                type='button'
-                onClick={() => handleSelect(index)}
-                className={cn(
-                  'relative -mb-px flex items-center gap-1.5 border-b-2 px-2.5 py-2.5 text-[11px] font-medium tracking-wide transition-colors sm:px-3 sm:text-xs',
-                  isActive
-                    ? `${tone.activeBorder} ${tone.activeText}`
-                    : 'text-foreground/40 hover:text-foreground/70 border-transparent'
-                )}
-              >
-                {item.label}
-              </button>
-            )
-          })}
-          <div className='ml-auto flex items-center gap-2 pr-2 sm:pr-3'>
-            <span className='inline-block size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.45)]' />
-            <span className='text-foreground/40 font-mono text-[10px] tracking-wider uppercase'>
-              200 ok
+          {/* Subtle Window Controls */}
+          <div className='flex shrink-0 items-center gap-1.5 py-2.5 pr-2'>
+            <span className='size-2 rounded-full bg-slate-300 dark:bg-slate-700' />
+            <span className='size-2 rounded-full bg-slate-300 dark:bg-slate-700' />
+            <span className='size-2 rounded-full bg-slate-300 dark:bg-slate-700' />
+          </div>
+          <div className='mr-1 h-3.5 w-px shrink-0 bg-slate-200 dark:bg-slate-800' />
+
+          <div className='flex min-w-0 flex-1 items-center gap-0.5 sm:gap-1 overflow-x-auto no-scrollbar'>
+            {API_DEMOS.map((item, index) => {
+              const isActive = index === activeIndex
+              return (
+                <button
+                  key={item.id}
+                  type='button'
+                  onClick={() => handleSelect(index)}
+                  className={cn(
+                    'relative -mb-px flex shrink-0 whitespace-nowrap items-center gap-1.5 border-b-2 px-2 sm:px-2.5 py-2 text-xs font-semibold tracking-wide transition-colors',
+                    isActive
+                      ? 'border-[#0F172A] text-[#0F172A] dark:border-white dark:text-white'
+                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  )}
+                >
+                  {getLobeIcon(item.icon, 13)}
+                  <span>{item.label}</span>
+                </button>
+              )
+            })}
+          </div>
+          <div className='ml-auto flex shrink-0 items-center gap-1.5 pl-2 pr-1'>
+            <span className='inline-block size-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]' />
+            <span className='font-mono text-[10px] font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400'>
+              200 OK
             </span>
           </div>
         </div>
@@ -237,13 +268,13 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
         {/* Endpoint row */}
         <div
           className={cn(
-            'flex items-center gap-2.5 border-b px-5 py-3',
-            'border-border/40 dark:border-white/[0.04]'
+            'flex items-center gap-2.5 border-b px-4 py-2',
+            'border-[#E2E8F0] bg-white dark:border-slate-800 dark:bg-slate-900/30'
           )}
         >
           <span
             className={cn(
-              'rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-wider',
+              'rounded-md px-1.5 py-0.5 font-mono text-[10px] font-bold tracking-wider uppercase',
               accent.badge
             )}
           >
@@ -251,7 +282,7 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
           </span>
           <code
             className={cn(
-              'text-foreground/75 truncate font-mono text-[12.5px] transition-opacity duration-200',
+              'truncate font-mono text-[12px] font-semibold text-slate-800 dark:text-slate-200 transition-opacity duration-200',
               transitioning ? 'opacity-0' : 'opacity-100'
             )}
           >
@@ -260,7 +291,7 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
         </div>
 
         {/* Body — fixed rows so neither block shifts when switching demos */}
-        <div className='grid h-[400px] grid-rows-[235px_minmax(0,1fr)] font-mono text-[12.5px] leading-[1.55]'>
+        <div className='grid h-[280px] grid-rows-[145px_minmax(0,1fr)] bg-white font-mono text-[11.5px] leading-[1.5] dark:bg-[#0f172a]'>
           {/* Request */}
           <RequestBlock demo={demo} transitioning={transitioning} />
 
@@ -272,28 +303,33 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
         <div
           className={cn(
             'flex items-center justify-between border-t px-5 py-2.5',
-            'border-border/40 bg-muted/30 dark:border-white/[0.05] dark:bg-white/[0.02]'
+            'border-[#E2E8F0] bg-[#F8FAFC] dark:border-slate-800 dark:bg-slate-900/50'
           )}
         >
-          <div className='text-foreground/40 flex items-center gap-3 text-[10px] tabular-nums'>
+          <div className='flex items-center gap-3 text-[11px] font-medium text-slate-500 tabular-nums dark:text-slate-400'>
             <span className='flex items-center gap-1'>
-              <span className='font-mono'>{demo.latency}</span>
-              <span className='tracking-wider uppercase'>ms</span>
+              <span className='font-mono font-semibold text-slate-700 dark:text-slate-300'>{demo.latency}</span>
+              <span className='text-[10px] tracking-wider uppercase'>ms</span>
             </span>
-            <span className='bg-foreground/15 size-1 rounded-full' />
+            <span className='size-1 rounded-full bg-slate-300 dark:bg-slate-700' />
             <span className='flex items-center gap-1'>
-              <span className='font-mono'>{demo.tokens}</span>
-              <span className='tracking-wider uppercase'>tokens</span>
+              <span className='font-mono font-semibold text-slate-700 dark:text-slate-300'>{demo.tokens}</span>
+              <span className='text-[10px] tracking-wider uppercase'>tokens</span>
             </span>
-            <span className='bg-foreground/15 size-1 rounded-full' />
-            <span className='flex items-center gap-1'>
-              <span className='tracking-wider uppercase'>cost</span>
-              <span className='font-mono'>
-                ${(demo.tokens * 0.00003).toFixed(5)}
+            <span className='size-1 rounded-full bg-slate-300 dark:bg-slate-700' />
+            <span className='flex items-center gap-1.5'>
+              <span className='text-[10px] tracking-wider uppercase'>cost</span>
+              <span className='font-mono font-semibold text-emerald-600 dark:text-emerald-400'>
+                {demo.cost}
               </span>
+              {demo.discountBadge && (
+                <span className='rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[9.5px] font-bold text-rose-600 dark:bg-rose-500/20 dark:text-rose-400'>
+                  {demo.discountBadge}
+                </span>
+              )}
             </span>
           </div>
-          <span className='text-foreground/30 font-mono text-[10px] tracking-wider uppercase'>
+          <span className='font-mono text-[10.5px] font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400'>
             stream · sse
           </span>
         </div>
@@ -434,12 +470,12 @@ function renderResponseLine(line: string, demo: ApiDemoConfig): ReactNode {
 
 function truncateResponse(demo: ApiDemoConfig): string {
   const map: Record<string, string> = {
-    'gpt-chat': 'Chat request routed.',
-    responses: 'Response workflow ready.',
-    claude: 'Claude message routed.',
-    gemini: 'Gemini request served.',
+    'claude-sonnet-5': 'Quantum superposition enables exponential parallelism.',
+    'deepseek-v4-pro': 'Chain of thought verified: contradiction reached. Q.E.D.',
+    'gpt-6-astra': 'Autonomous multi-agent orchestration planned and verified.',
+    'gemini-3-8-flash': 'Multimodal benchmarks evaluated across vision tasks.',
   }
-  return map[demo.id] ?? '...'
+  return map[demo.id] ?? 'Request routed successfully.'
 }
 
 function tokenize(input: string): ReactNode {
@@ -490,7 +526,7 @@ function CodeLine(props: { children: ReactNode; indent?: number }) {
 
 function Command(props: { children: ReactNode }) {
   return (
-    <span className='font-medium text-emerald-600 dark:text-emerald-400'>
+    <span className='font-semibold text-blue-600 dark:text-blue-400'>
       {props.children}
     </span>
   )
@@ -498,32 +534,32 @@ function Command(props: { children: ReactNode }) {
 
 function Flag(props: { children: ReactNode }) {
   return (
-    <span className='text-blue-600 dark:text-blue-400'>{props.children}</span>
+    <span className='font-medium text-slate-600 dark:text-slate-400'>{props.children}</span>
   )
 }
 
 function Key(props: { children: ReactNode }) {
   return (
-    <span className='text-sky-700 dark:text-sky-300'>{props.children}</span>
+    <span className='font-semibold text-slate-900 dark:text-slate-100'>{props.children}</span>
   )
 }
 
 function StringText(props: { children: ReactNode }) {
   return (
-    <span className='text-amber-700 dark:text-amber-300'>{props.children}</span>
+    <span className='font-medium text-emerald-700 dark:text-emerald-400'>{props.children}</span>
   )
 }
 
 function NumberText(props: { children: ReactNode }) {
   return (
-    <span className='font-medium text-violet-600 dark:text-violet-300'>
+    <span className='font-semibold text-indigo-600 dark:text-indigo-400'>
       {props.children}
     </span>
   )
 }
 
 function Muted(props: { children: ReactNode }) {
-  return <span className='text-foreground/55'>{props.children}</span>
+  return <span className='text-slate-400 dark:text-slate-500'>{props.children}</span>
 }
 
 function Accent(props: { children: ReactNode; accent: AccentTone }) {

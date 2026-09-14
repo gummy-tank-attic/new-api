@@ -275,9 +275,10 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                 <>
                   <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] text-xs dark:border-border dark:bg-card'>
                     <div className='grid grid-cols-12 bg-[#F8FAFC] border-b border-[#E2E8F0] px-3.5 py-2 text-xs font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
-                      <div className='col-span-4'>{t('Resolution')}</div>
-                      <div className='col-span-4 text-right'>{t('Upscale (/s)')}</div>
-                      <div className='col-span-4 text-right'>{t('Video (/1M)')}</div>
+                      <div className='col-span-3'>{t('Resolution')}</div>
+                      <div className='col-span-3 text-right'>{t('upscale/s')}</div>
+                      <div className='col-span-3 text-right'>{t('Without Video Input')}</div>
+                      <div className='col-span-3 text-right'>{t('With Video Input')}</div>
                     </div>
                     <div className='divide-y divide-[#F1F5F9] bg-white dark:divide-border/40 dark:bg-card'>
                       {upscaleTiers.map((tier) => {
@@ -291,18 +292,26 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                           props.priceRate
                         const officialToken =
                           tier.officialTokenPricePerM * props.priceRate
+                        const billedTokenVideo =
+                          (isGroupMode
+                            ? (tier.tokenPriceWithVideoPerM ?? tier.tokenPricePerM)
+                            : (tier.officialTokenPriceWithVideoPerM ??
+                              tier.officialTokenPricePerM)) * props.priceRate
+                        const officialTokenVideo =
+                          (tier.officialTokenPriceWithVideoPerM ??
+                            tier.officialTokenPricePerM) * props.priceRate
 
                         return (
                           <div
                             key={tier.tierKey}
                             className='grid grid-cols-12 items-center px-3.5 min-h-[46px] py-1 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30'
                           >
-                            <div className='col-span-4 pr-1'>
+                            <div className='col-span-3 pr-1'>
                               <span className='font-semibold text-[var(--p-text-main,#111111)] text-[13px] dark:text-foreground'>
                                 {tier.displayName}
                               </span>
                             </div>
-                            <div className='col-span-4 text-right flex flex-col justify-center min-h-[34px]'>
+                            <div className='col-span-3 text-right flex flex-col justify-center min-h-[34px]'>
                               <div className='font-semibold text-[var(--p-text-main,#111111)] text-[13.5px] tabular-nums leading-tight dark:text-foreground'>
                                 ${billedSecond.toFixed(4)}/s
                               </div>
@@ -312,13 +321,23 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                                 </div>
                               )}
                             </div>
-                            <div className='col-span-4 text-right flex flex-col justify-center min-h-[34px]'>
+                            <div className='col-span-3 text-right flex flex-col justify-center min-h-[34px]'>
                               <div className='font-semibold text-[var(--p-text-main,#111111)] text-[13.5px] tabular-nums leading-tight dark:text-foreground'>
                                 ${billedToken.toFixed(2)}/M
                               </div>
                               {showOfficial && billedToken <= officialToken && (
                                 <div className='text-[10px] text-[#94A3B8] line-through tabular-nums font-normal leading-none mt-0.5'>
                                   ${officialToken.toFixed(2)}
+                                </div>
+                              )}
+                            </div>
+                            <div className='col-span-3 text-right flex flex-col justify-center min-h-[34px]'>
+                              <div className='font-semibold text-[var(--p-text-main,#111111)] text-[13.5px] tabular-nums leading-tight dark:text-foreground'>
+                                ${billedTokenVideo.toFixed(2)}/M
+                              </div>
+                              {showOfficial && billedTokenVideo <= officialTokenVideo && (
+                                <div className='text-[10px] text-[#94A3B8] line-through tabular-nums font-normal leading-none mt-0.5'>
+                                  ${officialTokenVideo.toFixed(2)}
                                 </div>
                               )}
                             </div>
