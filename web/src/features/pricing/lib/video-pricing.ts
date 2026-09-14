@@ -150,6 +150,27 @@ export function getModelSupportedResolutions(model: PricingModel): string[] {
   if (name.includes('seedream')) {
     return ['1k', '2k']
   }
+  // 官方权威 Seedance 视频规格约束（杜绝共享插件通配 4k 枚举污染）
+  if (name.includes('upscale') || name.includes('chaofen')) {
+    return ['720p', '1080p', '2k']
+  }
+  if (name.includes('4k')) {
+    return ['4k']
+  }
+  if (name.includes('fast') || (name.includes('mini') && !name.includes('minimax'))) {
+    return ['480p', '720p']
+  }
+  if (
+    name.includes('seedance 1.0') ||
+    name.includes('seedance1.0') ||
+    name.includes('seedance-1.0') ||
+    name.includes('seedance-1-0')
+  ) {
+    return ['480p', '720p']
+  }
+  if (name.includes('seedance')) {
+    return ['480p', '720p', '1080p']
+  }
 
   // 2. 动态时长/任务阶梯自适应：从已解析的时长阶梯中提取真实计费分辨率
   if (isDurationBasedVideoModel(model)) {
@@ -179,26 +200,6 @@ export function getModelSupportedResolutions(model: PricingModel): string[] {
   }
 
   // 5. 业务家族兜底（对齐官方权威规格）
-  if (name.includes('upscale') || name.includes('chaofen')) {
-    return ['720p', '1080p', '2k']
-  }
-  if (name.includes('4k')) {
-    return ['4k']
-  }
-  if (name.includes('fast') || (name.includes('mini') && !name.includes('minimax'))) {
-    return ['480p', '720p']
-  }
-  if (
-    name.includes('seedance 1.0') ||
-    name.includes('seedance1.0') ||
-    name.includes('seedance-1.0') ||
-    name.includes('seedance-1-0')
-  ) {
-    return ['480p', '720p']
-  }
-  if (name.includes('seedance')) {
-    return ['480p', '720p', '1080p']
-  }
   if (name.includes('grok-imagine-video')) {
     return ['480p', '720p']
   }

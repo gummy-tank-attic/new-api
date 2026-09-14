@@ -741,4 +741,47 @@ describe('task visual pricing preview', () => {
     assert.equal(heroOfficial.resolutionPrices?.['1024×1024']?.priceText, '$30')
     assert.equal(heroOfficial.resolutionPrices?.['1024×1024']?.imgToImgPriceText, '$38')
   })
+
+  test('Seedance models strictly return authoritative resolutions and resist generic schema 4K pollution', () => {
+    const genericDoubaoSchema = {
+      resolution: { enum: ['480p', '720p', '1080p', '4k'] },
+    }
+
+    const seedance25: PricingModel = {
+      id: 201,
+      model_name: 'seedance2.5',
+      quota_type: 0,
+      model_ratio: 1,
+      billing_usage_schema: genericDoubaoSchema,
+    }
+    assert.deepEqual(getModelSupportedResolutions(seedance25), ['480p', '720p', '1080p'])
+
+    const seedanceFast: PricingModel = {
+      id: 202,
+      model_name: 'seedance2.0-fast',
+      quota_type: 0,
+      model_ratio: 1,
+      billing_usage_schema: genericDoubaoSchema,
+    }
+    assert.deepEqual(getModelSupportedResolutions(seedanceFast), ['480p', '720p'])
+
+    const seedance4k: PricingModel = {
+      id: 203,
+      model_name: 'Seedance2.0-4k',
+      quota_type: 0,
+      model_ratio: 1,
+      billing_usage_schema: genericDoubaoSchema,
+    }
+    assert.deepEqual(getModelSupportedResolutions(seedance4k), ['4k'])
+
+    const seedanceUpscale: PricingModel = {
+      id: 204,
+      model_name: 'seedance-2.5-upscale',
+      quota_type: 0,
+      model_ratio: 1,
+      billing_usage_schema: genericDoubaoSchema,
+    }
+    assert.deepEqual(getModelSupportedResolutions(seedanceUpscale), ['720p', '1080p', '2k'])
+  })
 })
+
