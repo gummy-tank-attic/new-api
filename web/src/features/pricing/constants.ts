@@ -484,10 +484,7 @@ export const MANUAL_GROUP_ZHE: Record<string, number> = {
  * 仅当不想跟倍率走时再在此写固定值（例如 85）。
  * 仅在「分组价格」模式显示；「官方价格」模式始终留空。
  */
-export const MANUAL_GROUP_SAVINGS_OFF: Record<string, number> = {
-  // 对标上游 tokease 9折 (10% off)
-  Seedance: 10,
-}
+export const MANUAL_GROUP_SAVINGS_OFF: Record<string, number> = {}
 
 /**
  * 自定义分组展示文案（如 "up to 50% off"）

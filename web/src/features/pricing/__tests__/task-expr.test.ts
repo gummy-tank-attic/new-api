@@ -849,6 +849,42 @@ describe('task visual pricing preview', () => {
     assert.equal(hero10.officialPriceText, '$6.400')
     assert.equal(hero10.discountOff, 10)
   })
+
+  test('seedance-2.5-unfiltered strictly displays official base price with null discountOff and no strikethrough', () => {
+    const unfilteredExpr =
+      'u("resolution") == "480p" && u("video_input") == "none" ? tier("480p·none", u("tokens") * 10.7 / 1000000) : u("resolution") == "480p" && u("video_input") == "video" ? tier("480p·video", u("tokens") * 6.4 / 1000000) : u("resolution") == "720p" && u("video_input") == "none" ? tier("720p·none", u("tokens") * 10.7 / 1000000) : u("resolution") == "720p" && u("video_input") == "video" ? tier("720p·video", u("tokens") * 6.4 / 1000000) : u("resolution") == "1080p" && u("video_input") == "none" ? tier("1080p·none", u("tokens") * 11.7 / 1000000) : tier("1080p·video", u("tokens") * 7 / 1000000)'
+    const schema = {
+      tokens: { type: 'number' as const, unit: 'token' },
+      resolution: { enum: ['480p', '720p', '1080p', '4k'] },
+      video_input: { enum: ['none', 'video'] },
+    }
+
+    const model: PricingModel = {
+      id: 302,
+      model_name: 'seedance-2.5-unfiltered',
+      vendor_name: 'ByteDance',
+      billing_mode: 'tiered_expr',
+      billing_expr: unfilteredExpr,
+      billing_usage_schema: schema,
+      quota_type: 0,
+      model_ratio: 1,
+    }
+
+    const groups = getVideoModelTierGroups(model)
+    assert.equal(groups.length, 2)
+    const g720 = groups.find((g) => g.resolutions.includes('720p'))
+    assert.ok(g720)
+    assert.equal(g720.withoutVideoPrice, 10.7)
+    assert.equal(g720.withVideoPrice, 6.4)
+    assert.equal(g720.officialWithoutVideoPrice, 10.7)
+    assert.equal(g720.officialWithVideoPrice, 6.4)
+
+    // In Group Mode, since selling price == official base price, discountOff MUST be null (no 10% OFF badge)
+    const hero = getVideoModelHeroPrice(model, true, 1)
+    assert.equal(hero.priceText, '$6.400')
+    assert.equal(hero.officialPriceText, null)
+    assert.equal(hero.discountOff, null)
+  })
 })
 
 

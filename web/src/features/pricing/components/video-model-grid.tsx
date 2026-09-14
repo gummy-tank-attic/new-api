@@ -111,10 +111,19 @@ export function VideoModelGrid(props: VideoModelGridProps) {
             ? Math.round((1 - (durationTiers[0].secondPrice * durationRatio) / durationTiers[0].officialSecondPrice) * 100)
             : null
         const hero = getVideoModelHeroPrice(model, isGroupMode, modelRate)
-        const discountOff = isGroupMode
-          ? (hero.discountOff ?? dynamicDurationDiscount ?? lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || props.savings || null))
-          : null
         const tierGroups = isUpscale || isDurationBased ? [] : getVideoModelTierGroups(model)
+        let discountOff: number | null = null
+        if (isGroupMode) {
+          if (tierGroups.length > 0) {
+            discountOff = hero.discountOff ?? null
+          } else {
+            discountOff =
+              hero.discountOff ??
+              dynamicDurationDiscount ??
+              lookupModelSavingsOff(model.model_name) ??
+              (getModelSpecificDiscountPercent(model.model_name) || props.savings || null)
+          }
+        }
         const upscaleTiers = isUpscale
           ? parseVideoUpscaleTiers(model.billing_expr)
           : []
@@ -204,13 +213,15 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                   <div />
                 )}
 
-                {discountOff != null && isGroupMode && (
+                {discountOff != null && discountOff > 0 && isGroupMode ? (
                   <span
                     translate='no'
                     className='notranslate inline-flex items-center justify-center rounded-full bg-gradient-to-b from-[#F43F5E] to-[#E11D48] min-w-[4.5rem] px-2.5 h-[22px] text-[11.5px] font-bold tracking-wide text-white shadow-[0_1px_2px_rgba(225,29,72,0.22),inset_0_1px_0_rgba(255,255,255,0.25)] tabular-nums shrink-0 leading-none text-center'
                   >
                     {discountOff}% OFF
                   </span>
+                ) : (
+                  <div />
                 )}
               </div>
 
