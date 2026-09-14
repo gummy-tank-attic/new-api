@@ -24,11 +24,9 @@ import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
-import { lookupModelSavingsOff } from '../constants'
 import { getConfiguredGroupRatio } from '../lib/model-helpers'
 import {
   getDurationVideoTiers,
-  getModelSpecificDiscountPercent,
   getModelSupportedResolutions,
   getResolutionBadgeStyle,
   getVideoModelCapabilityTag,
@@ -112,18 +110,9 @@ export function VideoModelGrid(props: VideoModelGridProps) {
             : null
         const hero = getVideoModelHeroPrice(model, isGroupMode, modelRate)
         const tierGroups = isUpscale || isDurationBased ? [] : getVideoModelTierGroups(model)
-        let discountOff: number | null = null
-        if (isGroupMode) {
-          if (tierGroups.length > 0) {
-            discountOff = hero.discountOff ?? null
-          } else {
-            discountOff =
-              hero.discountOff ??
-              dynamicDurationDiscount ??
-              lookupModelSavingsOff(model.model_name) ??
-              (getModelSpecificDiscountPercent(model.model_name) || props.savings || null)
-          }
-        }
+        const discountOff = isGroupMode
+          ? (hero.discountOff ?? dynamicDurationDiscount ?? null)
+          : null
         const upscaleTiers = isUpscale
           ? parseVideoUpscaleTiers(model.billing_expr)
           : []
@@ -144,7 +133,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
             'text-[14.5px] sm:text-[15px] leading-snug tracking-[-0.01em]'
         }
 
-        const showOfficial = isGroupMode && discountOff != null
+        const showOfficial = isGroupMode
 
         return (
           <div
@@ -158,7 +147,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               }
             }}
             className={cn(
-              'group relative flex w-full flex-col justify-start overflow-hidden rounded-2xl border border-[#E2E8F0]/90 p-6 text-left shadow-[0_1px_3px_rgba(15,23,42,0.03)] transition-all duration-200',
+              'group relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#E2E8F0]/90 p-6 text-left shadow-[0_1px_3px_rgba(15,23,42,0.03)] transition-all duration-200',
               '[background:radial-gradient(circle_at_95%_5%,rgba(255,59,128,0.04)_0%,transparent_60%),#fff]',
               'hover:-translate-y-px hover:border-[#CBD5E1] hover:shadow-[0_6px_18px_rgba(15,23,42,0.06)] cursor-pointer',
               'dark:border-border dark:bg-card dark:[background:unset]'
@@ -168,7 +157,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
             {/* Top Section */}
             <div className='space-y-2.5'>
               {/* Row 1: Model Identity (Full Width, No Crowding) */}
-              <div className='flex items-center gap-2.5 min-w-0 min-h-[26px]'>
+              <div className='flex items-center gap-2.5 min-w-0 h-[28px]'>
                 <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)]'>
                   {vendorIcon}
                 </div>
@@ -176,7 +165,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                   <span
                     translate='no'
                     className={cn(
-                      'notranslate break-words font-semibold text-[var(--p-text-main,#0F172A)]',
+                      'notranslate truncate font-semibold text-[var(--p-text-main,#0F172A)]',
                       titleClass
                     )}
                     title={model.model_name}
@@ -187,7 +176,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                     type='button'
                     aria-label={t('Copy model name')}
                     onClick={(e) => handleCopy(e, model.model_name)}
-                    className='size-6 shrink-0 inline-flex items-center justify-center rounded-md text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
+                    className='size-6 shrink-0 inline-flex items-center justify-center rounded-md text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[var(--p-text-main,#111111)]'
                   >
                     {copiedName === model.model_name ? (
                       <Check className='size-[15.5px] text-emerald-600' />
@@ -199,7 +188,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               </div>
 
               {/* Row 2: Capability Tag (Left) & Discount Badge (Right) - Perfect Balance */}
-              <div className='flex items-center justify-between gap-2.5 min-h-[24px]'>
+              <div className='flex items-center justify-between gap-2.5 h-[26px]'>
                 {capTag ? (
                   <span
                     className={cn(
@@ -226,7 +215,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               </div>
 
               {/* Row 3: Prominent Supported Resolutions */}
-              <div className='mb-2.5 flex items-center gap-[7px] text-[12.5px] min-h-[24px]'>
+              <div className='flex items-center gap-[7px] text-[12.5px] h-[26px]'>
                 <span className='shrink-0 text-[12px] font-medium text-[#64748B]'>
                   {t('Supported Resolutions:')}
                 </span>
@@ -236,7 +225,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                     return (
                       <span
                         key={res}
-                        className='inline-flex items-center justify-center rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2.5 py-[2px] text-[12px] font-semibold tracking-[0.01em] text-[#334155] tabular-nums dark:border-border dark:bg-muted dark:text-foreground'
+                        className='inline-flex items-center justify-center rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2.5 py-[2px] text-[12px] font-semibold tracking-[0.01em] text-[var(--p-text-muted,#3f3f46)] tabular-nums dark:border-border dark:bg-muted dark:text-foreground'
                       >
                         {style.label}
                       </span>
@@ -246,182 +235,201 @@ export function VideoModelGrid(props: VideoModelGridProps) {
               </div>
 
               {/* Row 4: Tagline */}
-              <p className='min-h-[42px] text-[13px] leading-[21px] font-normal text-[#334155] dark:text-muted-foreground'>
-                {t(tagline.key, tagline.defaultText)}
-              </p>
+              <div className='flex h-[40px] items-center'>
+                <p className='line-clamp-2 text-[13px] leading-[20px] font-normal text-[var(--p-text-muted,#3f3f46)] dark:text-muted-foreground'>
+                  {t(tagline.key, tagline.defaultText)}
+                </p>
+              </div>
             </div>
 
             {/* Middle Section: Hero Price & Rate Breakdown */}
-            <div className='mt-4'>
-              {/* Hero Starting Price */}
-              {!isDurationBased && (
+            <div className='mt-3.5 flex flex-1 flex-col justify-start'>
+              {/* Hero Starting Price (only for simple models without structured spec tables) */}
+              {!isDurationBased && !isUpscale && tierGroups.length === 0 && (
                 <div className='flex items-baseline justify-between border-t border-[#E2E8F0] pt-3'>
                   <span className='text-[12px] font-semibold uppercase tracking-[0.05em] text-[#64748B]'>
                     {t('Starting Price')}
                   </span>
                   <div className='text-right'>
                     <div className='flex items-baseline justify-end gap-1'>
-                      <span className='text-[22px] font-semibold tabular-nums text-[#0F172A] dark:text-foreground'>
+                      <span className='text-[22px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground'>
                         {hero.priceText}
                       </span>
-                      {hero.officialPriceText && isGroupMode && (
-                        <span className='text-[13px] font-normal tabular-nums text-[#94A3B8] line-through'>
-                          {hero.officialPriceText}
-                        </span>
-                      )}
+                      {hero.officialPriceText &&
+                        hero.officialPriceText !== hero.priceText &&
+                        isGroupMode && (
+                          <span className='text-[13px] font-normal tabular-nums text-[#94A3B8] line-through'>
+                            {hero.officialPriceText}
+                          </span>
+                        )}
                       <span className='ml-0.5 text-[12.5px] font-normal text-[#64748B]'>
                         {t(hero.unitKey, hero.unitText)}
                       </span>
                     </div>
-                    {isUpscale && (
-                      <div className='text-[10px] text-muted-foreground/80 mt-0.5 font-medium'>
-                        {t('Upscale Service · Video Tokens $7.18/1M+')}
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
 
               {/* Pricing Spec Matrix (Seedance 官方规格表) */}
               {isUpscale && (
-                <div className='rounded-xl border border-border/70 bg-muted/20 overflow-hidden text-xs shadow-2xs'>
-                  <div className='grid grid-cols-12 bg-muted/40 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground'>
-                    <div className='col-span-4'>{t('Resolution')}</div>
-                    <div className='col-span-4 text-right'>{t('Upscale (/s)')}</div>
-                    <div className='col-span-4 text-right'>{t('Video (/1M)')}</div>
-                  </div>
-                  <div className='divide-y divide-border/40 bg-card/60'>
-                    {upscaleTiers.map((tier) => {
-                      const billedSecond =
-                        (isGroupMode ? tier.secondPrice : tier.officialSecondPrice) *
-                        props.priceRate
-                      const officialSecond =
-                        tier.officialSecondPrice * props.priceRate
-                      const billedToken =
-                        (isGroupMode ? tier.tokenPricePerM : tier.officialTokenPricePerM) *
-                        props.priceRate
-                      const officialToken =
-                        tier.officialTokenPricePerM * props.priceRate
-
-                      return (
-                        <div
-                          key={tier.tierKey}
-                          className='grid grid-cols-12 items-center px-3 py-2.5 transition-colors hover:bg-muted/30'
-                        >
-                          <div className='col-span-4 pr-1'>
-                            <span className='font-semibold text-foreground text-[13px]'>
-                              {tier.displayName}
-                            </span>
-                          </div>
-                          <div className='col-span-4 text-right'>
-                            <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
-                              ${billedSecond.toFixed(4)}/s
-                            </div>
-                            {showOfficial && (
-                              <div className='text-[10px] text-muted-foreground/55 line-through tabular-nums font-normal'>
-                                ${officialSecond.toFixed(4)}
-                              </div>
-                            )}
-                          </div>
-                          <div className='col-span-4 text-right'>
-                            <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
-                              ${billedToken.toFixed(2)}/M
-                            </div>
-                            {showOfficial && (
-                              <div className='text-[10px] text-muted-foreground/55 line-through tabular-nums font-normal'>
-                                ${officialToken.toFixed(2)}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                  <div className='border-t border-border bg-slate-50 px-3.5 py-[7px] text-right text-[11.5px] font-medium text-slate-500 dark:bg-muted/30 dark:text-slate-400'>
-                    {t('Billing formula: Charge = Video Tokens + Duration × Upscale Rate')}
-                  </div>
-                </div>
-              )}
-              {isDurationBased && (
-                <div className='border-t border-[#E2E8F0] pt-3.5 dark:border-border'>
-                  <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
-                    <div className='grid grid-cols-[28%_40%_32%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[12px] font-semibold text-[#334155] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
-                      <div className='text-left'>{t('Resolution', '分辨率')}</div>
-                      <div className='text-center'>{t('videoPricing.est5s', '5s 预估价格')}</div>
-                      <div className='text-right'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
+                <>
+                  <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] text-xs dark:border-border dark:bg-card'>
+                    <div className='grid grid-cols-12 bg-[#F8FAFC] border-b border-[#E2E8F0] px-3.5 py-2 text-xs font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                      <div className='col-span-4'>{t('Resolution')}</div>
+                      <div className='col-span-4 text-right'>{t('Upscale (/s)')}</div>
+                      <div className='col-span-4 text-right'>{t('Video (/1M)')}</div>
                     </div>
-                    <div className='flex flex-col'>
-                      {durationTiers.length === 0 ? (
-                        <div className='px-[14px] py-3 text-sm text-muted-foreground'>
-                          {t('Unable to parse structured pricing')}
-                        </div>
-                      ) : (
-                        durationTiers.map((tier, index) => {
-                          const billedEst5s =
-                            (isGroupMode ? tier.est5sPrice : tier.officialEst5sPrice ?? tier.est5sPrice) *
-                            props.priceRate
-                          const officialEst5s =
-                            (tier.officialEst5sPrice ?? tier.est5sPrice) * props.priceRate
-                          const billedSecond =
-                            (isGroupMode ? tier.secondPrice : tier.officialSecondPrice ?? tier.secondPrice) *
-                            props.priceRate
-                          const officialSecond =
-                            (tier.officialSecondPrice ?? tier.secondPrice) * props.priceRate
-                          const showOffPrice =
-                            showOfficial && Math.abs(billedSecond - officialSecond) > 0.0001
+                    <div className='divide-y divide-[#F1F5F9] bg-white dark:divide-border/40 dark:bg-card'>
+                      {upscaleTiers.map((tier) => {
+                        const billedSecond =
+                          (isGroupMode ? tier.secondPrice : tier.officialSecondPrice) *
+                          props.priceRate
+                        const officialSecond =
+                          tier.officialSecondPrice * props.priceRate
+                        const billedToken =
+                          (isGroupMode ? tier.tokenPricePerM : tier.officialTokenPricePerM) *
+                          props.priceRate
+                        const officialToken =
+                          tier.officialTokenPricePerM * props.priceRate
 
-                          return (
-                            <div
-                              key={tier.resolution}
-                              className={cn(
-                                'grid grid-cols-[28%_40%_32%] items-center px-[14px] py-[9.5px] transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
-                                index < durationTiers.length - 1 && 'border-b border-[#F1F5F9] dark:border-border/40'
+                        return (
+                          <div
+                            key={tier.tierKey}
+                            className='grid grid-cols-12 items-center px-3.5 min-h-[46px] py-1 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30'
+                          >
+                            <div className='col-span-4 pr-1'>
+                              <span className='font-semibold text-[var(--p-text-main,#111111)] text-[13px] dark:text-foreground'>
+                                {tier.displayName}
+                              </span>
+                            </div>
+                            <div className='col-span-4 text-right flex flex-col justify-center min-h-[34px]'>
+                              <div className='font-semibold text-[var(--p-text-main,#111111)] text-[13.5px] tabular-nums leading-tight dark:text-foreground'>
+                                ${billedSecond.toFixed(4)}/s
+                              </div>
+                              {showOfficial && billedSecond <= officialSecond && (
+                                <div className='text-[10px] text-[#94A3B8] line-through tabular-nums font-normal leading-none mt-0.5'>
+                                  ${officialSecond.toFixed(4)}
+                                </div>
                               )}
-                            >
-                              <div className='text-left text-[13px] font-semibold text-[#0F172A] dark:text-foreground'>
-                                {tier.resLabel}
-                              </div>
-                              <div className='text-center'>
-                                <div className='text-[13.5px] font-semibold tabular-nums text-[#0F172A] dark:text-foreground leading-tight'>
-                                  ${billedEst5s.toFixed(3)}
-                                </div>
-                                {showOffPrice && (
-                                  <div className='text-[10.5px] text-muted-foreground/60 line-through tabular-nums font-normal'>
-                                    ${officialEst5s.toFixed(3)}
-                                  </div>
-                                )}
-                              </div>
-                              <div className='text-right'>
-                                <div className='text-[13.5px] font-semibold tabular-nums text-[#0F172A] dark:text-foreground leading-tight'>
-                                  ${billedSecond >= 0.01 && !Number.isInteger(billedSecond * 1000) ? billedSecond.toFixed(4).replace(/0$/, '') : billedSecond.toFixed(3)}
-                                  <span className='ml-0.5 text-[12px] font-normal text-[#64748B]'>/s</span>
-                                </div>
-                                {showOffPrice && (
-                                  <div className='text-[10.5px] text-muted-foreground/60 line-through tabular-nums font-normal'>
-                                    ${officialSecond.toFixed(3)}/s
-                                  </div>
-                                )}
-                              </div>
                             </div>
-                          )
-                        })
+                            <div className='col-span-4 text-right flex flex-col justify-center min-h-[34px]'>
+                              <div className='font-semibold text-[var(--p-text-main,#111111)] text-[13.5px] tabular-nums leading-tight dark:text-foreground'>
+                                ${billedToken.toFixed(2)}/M
+                              </div>
+                              {showOfficial && billedToken <= officialToken && (
+                                <div className='text-[10px] text-[#94A3B8] line-through tabular-nums font-normal leading-none mt-0.5'>
+                                  ${officialToken.toFixed(2)}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <div className='border-t border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-[7px] text-right text-[11px] font-normal text-[#64748B] dark:border-border dark:bg-muted/30 dark:text-slate-400'>
+                      {t('Billing formula: Charge = Video Tokens + Duration × Upscale Rate', '计费公式：单次任务扣费 = 视频实际消耗 Token 费 + 视频时长 Upscale 秒费')}
+                    </div>
+                  </div>
+
+                  {/* Upscale Explanation Banner: fully displayed, no truncation */}
+                  <div className='relative mt-3 rounded-xl border border-purple-200/80 bg-purple-50/70 p-2.5 text-xs text-purple-900 shadow-2xs dark:border-purple-800/60 dark:bg-purple-950/30 dark:text-purple-200'>
+                    <div className='flex items-center gap-1.5 mb-1'>
+                      <span className='inline-flex shrink-0 items-center gap-1 rounded-md bg-purple-600 px-1.5 py-0.5 text-[11px] font-semibold text-white dark:bg-purple-500'>
+                        <Sparkles className='size-3' />
+                        {t('Upscale Principle', '超分原理')}
+                      </span>
+                      <span className='text-[12px] font-semibold text-purple-950 dark:text-purple-200'>
+                        {t('Deep Learning & Detail Reconstruction', '深度学习与细节重构')}
+                      </span>
+                    </div>
+                    <p className='text-[12px] leading-[1.55] text-purple-900/90 dark:text-purple-200/90'>
+                      {t(
+                        'Takes lower-resolution video and enhances it to higher definition using deep learning and detail reconstruction. For example, generating at 480p and then upscaling to 720p achieves nearly 90% detail fidelity.',
+                        '基于深度学习对低分辨率视频进行细节重建与超分增强，如 480p 生成后超分至 720p 可获得近 90% 细节还原度。'
                       )}
-                    </div>
-                    <div className='border-t border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-[7px] text-right text-[11.5px] font-normal text-[#64748B] dark:border-border dark:bg-muted/30 dark:text-slate-400'>
-                      {t('videoPricing.durationUnitFooter', '计费单位：/ 秒 · 支持 4~15 秒自定义时长')}
-                    </div>
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {isDurationBased && (
+                <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
+                  <div className='grid grid-cols-[28%_40%_32%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[12px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                    <div className='text-left'>{t('Resolution', '分辨率')}</div>
+                    <div className='text-center'>{t('videoPricing.est5s', '5s 预估价格')}</div>
+                    <div className='text-right'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
+                  </div>
+                  <div className='flex flex-col'>
+                    {durationTiers.length === 0 ? (
+                      <div className='px-[14px] py-3 text-sm text-muted-foreground'>
+                        {t('Unable to parse structured pricing')}
+                      </div>
+                    ) : (
+                      durationTiers.map((tier, index) => {
+                        const billedEst5s =
+                          (isGroupMode ? tier.est5sPrice : tier.officialEst5sPrice ?? tier.est5sPrice) *
+                          props.priceRate
+                        const officialEst5s =
+                          (tier.officialEst5sPrice ?? tier.est5sPrice) * props.priceRate
+                        const billedSecond =
+                          (isGroupMode ? tier.secondPrice : tier.officialSecondPrice ?? tier.secondPrice) *
+                          props.priceRate
+                        const officialSecond =
+                          (tier.officialSecondPrice ?? tier.secondPrice) * props.priceRate
+                        const showOffPrice = showOfficial
+
+                        return (
+                          <div
+                            key={tier.resolution}
+                            className={cn(
+                              'grid grid-cols-[28%_40%_32%] items-center px-[14px] min-h-[50px] py-1.5 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
+                              index < durationTiers.length - 1 && 'border-b border-[#F1F5F9] dark:border-border/40'
+                            )}
+                          >
+                            <div className='text-left text-[13px] font-semibold text-[var(--p-text-main,#111111)] dark:text-foreground'>
+                              {tier.resLabel}
+                            </div>
+                            <div className='text-center flex flex-col justify-center min-h-[36px]'>
+                              <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
+                                ${billedEst5s.toFixed(3)}
+                              </div>
+                              {showOffPrice && (
+                                <div className='text-[10.5px] font-normal tabular-nums text-[#94A3B8] line-through leading-none mt-0.5'>
+                                  ${officialEst5s.toFixed(3)}
+                                </div>
+                              )}
+                            </div>
+                            <div className='text-right flex flex-col justify-center min-h-[36px]'>
+                              <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
+                                ${billedSecond >= 0.01 && !Number.isInteger(billedSecond * 1000) ? billedSecond.toFixed(4).replace(/0$/, '') : billedSecond.toFixed(3)}
+                                <span className='ml-0.5 text-[12px] font-normal text-[#64748B]'>/s</span>
+                              </div>
+                              {showOffPrice && (
+                                <div className='text-[10.5px] font-normal tabular-nums text-[#94A3B8] line-through leading-none mt-0.5'>
+                                  ${officialSecond.toFixed(3)}/s
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })
+                    )}
+                  </div>
+                  <div className='border-t border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-[7px] text-right text-[11.5px] font-normal text-[#64748B] dark:border-border dark:bg-muted/30 dark:text-slate-400'>
+                    {t('videoPricing.durationUnitFooter', '计费单位：/ 秒 · 支持 4~15 秒自定义时长')}
                   </div>
                 </div>
               )}
+
               {!isUpscale && !isDurationBased && (
-                <div className='mt-4 overflow-hidden rounded-xl border border-[#E2E8F0] bg-white text-xs shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
-                  <div className='grid grid-cols-12 bg-muted/40 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground'>
-                    <div className='col-span-4'>{t('Resolution')}</div>
-                    <div className='col-span-4 text-right'>{t('Without Video Input')}</div>
-                    <div className='col-span-4 text-right'>{t('With Video Input')}</div>
+                <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
+                  <div className='grid grid-cols-[28%_36%_36%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[12px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                    <div className='text-left'>{t('Resolution')}</div>
+                    <div className='text-right'>{t('Without Video Input')}</div>
+                    <div className='text-right'>{t('With Video Input')}</div>
                   </div>
-                  <div className='divide-y divide-border/40 bg-card/60'>
-                    {tierGroups.map((group) => {
+                  <div className='flex flex-col'>
+                    {tierGroups.map((group, index) => {
                       const billedNoVideo =
                         (isGroupMode
                           ? group.withoutVideoPrice
@@ -438,33 +446,39 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                       const officialVideo =
                         (group.officialWithVideoPrice ?? group.withVideoPrice) *
                         props.priceRate
+                      const showNoVideoOfficial =
+                        isGroupMode && officialNoVideo > billedNoVideo + 0.0001
+                      const showVideoOfficial =
+                        isGroupMode && officialVideo > billedVideo + 0.0001
 
                       return (
                         <div
                           key={group.title}
-                          className='grid grid-cols-12 items-center px-3 py-2.5 transition-colors hover:bg-muted/30'
+                          className={cn(
+                            'grid grid-cols-[28%_36%_36%] items-center px-[14px] min-h-[50px] py-1.5 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
+                            index < tierGroups.length - 1 &&
+                              'border-b border-[#F1F5F9] dark:border-border/40'
+                          )}
                         >
-                          <div className='col-span-4 pr-1'>
-                            <div className='font-semibold text-foreground text-[13px] leading-tight'>
-                              {group.resLabel}
-                            </div>
+                          <div className='text-left text-[13px] font-semibold text-[var(--p-text-main,#111111)] dark:text-foreground'>
+                            {group.resLabel}
                           </div>
-                          <div className='col-span-4 text-right'>
-                            <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
+                          <div className='text-right flex flex-col justify-center min-h-[36px]'>
+                            <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
                               ${billedNoVideo.toFixed(3)}
                             </div>
-                            {showOfficial && officialNoVideo > billedNoVideo + 0.0001 && (
-                              <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
+                            {showNoVideoOfficial && (
+                              <div className='text-[10.5px] font-normal tabular-nums text-[#94A3B8] line-through leading-none mt-0.5'>
                                 ${officialNoVideo.toFixed(3)}
                               </div>
                             )}
                           </div>
-                          <div className='col-span-4 text-right'>
-                            <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
+                          <div className='text-right flex flex-col justify-center min-h-[36px]'>
+                            <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
                               ${billedVideo.toFixed(3)}
                             </div>
-                            {showOfficial && officialVideo > billedVideo + 0.0001 && (
-                              <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
+                            {showVideoOfficial && (
+                              <div className='text-[10.5px] font-normal tabular-nums text-[#94A3B8] line-through leading-none mt-0.5'>
                                 ${officialVideo.toFixed(3)}
                               </div>
                             )}
@@ -473,34 +487,16 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                       )
                     })}
                   </div>
-                  <div className='border-t border-border bg-slate-50 px-3.5 py-[7px] text-right text-[11.5px] font-medium text-slate-500 dark:bg-muted/30 dark:text-slate-400'>
-                    {t('Unit: / 1M Tokens')}
+                  <div className='border-t border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-[7px] text-right text-[11.5px] font-normal text-[#64748B] dark:border-border dark:bg-muted/30 dark:text-slate-400'>
+                    {t('Billing Unit:', '计费单位：')}/ 1M Tokens
                   </div>
-                </div>
-              )}
-
-              {/* Upscale Explanation Banner at bottom of card */}
-              {isUpscale && (
-                <div className='relative mt-3.5 overflow-hidden rounded-xl border border-purple-300/70 bg-gradient-to-br from-purple-500/12 via-indigo-500/8 to-purple-500/16 p-3 shadow-2xs dark:border-purple-700/60 dark:from-purple-950/50 dark:to-indigo-950/40'>
-                  <div className='flex items-center gap-2 mb-2'>
-                    <span className='inline-flex items-center gap-1 rounded-md bg-purple-600 px-2 py-0.5 text-xs font-semibold text-white shadow-xs dark:bg-purple-500'>
-                      <Sparkles className='h-3 w-3' />
-                      {t('Upscale Principle')}
-                    </span>
-                    <span className='text-[13px] font-semibold text-purple-950 dark:text-purple-200 tracking-tight'>
-                      {t('Deep Learning & Detail Reconstruction')}
-                    </span>
-                  </div>
-                  <p className='text-[12.5px] leading-[1.6] text-foreground/85'>
-                    {t('Takes lower-resolution video and enhances it to higher definition using deep learning and detail reconstruction. For example, generating at 480p and then upscaling to 720p achieves nearly 90% detail fidelity.')}
-                  </p>
                 </div>
               )}
             </div>
 
-            {/* Card Footer: clean, zero duplicate estimate note text */}
-            <div className='mt-3.5 flex items-center justify-end border-t border-[#F1F5F9] pt-2.5 dark:border-border/40'>
-              <span className='inline-flex items-center gap-[3px] text-[12.5px] font-medium text-[#2563EB]'>
+            {/* Card Footer: pinned strictly to bottom with mt-auto */}
+            <div className='mt-auto pt-3.5 flex items-center justify-end border-t border-[#F1F5F9] dark:border-border/40'>
+              <span className='inline-flex items-center gap-[3px] text-[12.5px] font-medium text-[#2563EB] group-hover:underline'>
                 {t('Details')}
                 <ArrowUpRight className='size-[13px] stroke-[2.2]' />
               </span>

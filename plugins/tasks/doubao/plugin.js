@@ -7,7 +7,7 @@ export const meta = {
     en: "Volcengine Doubao Seedance video generation (text-to-video, image-to-video, and video-to-video)",
     zh: "火山引擎豆包 Seedance 视频生成（文生视频、图生视频、视频生视频）",
   },
-  version: "1.0.3",
+  version: "1.0.4",
   author: { name: "QuantumNous" },
   channelTypes: [54, 45], // VolcEngine-type channels serve Ark video models with the same wire format
   models: [
@@ -69,6 +69,37 @@ export const meta = {
     { label: "720p · 10s", facts: { tokens: 216000, resolution: "720p", video_input: "none" } },
     { label: "720p · 5s (+4s 输入视频)", facts: { tokens: 194400, resolution: "720p", video_input: "video" } },
   ],
+  usageProfiles: [
+    {
+      models: ["seedance-2.5-upscale"],
+      schema: {
+        tokens: {
+          type: "number",
+          unit: "token",
+          description: { en: "Billing token unit price", zh: "计费 Token 单价" },
+        },
+        resolution: {
+          enum: ["720p", "1080p", "2k"],
+          enumLabels: {
+            "720p": { en: "720p", zh: "720p" },
+            "1080p": { en: "1080p", zh: "1080p" },
+            "2k": { en: "2K", zh: "2K" },
+          },
+          description: { en: "Output video resolution", zh: "输出视频分辨率" },
+        },
+        seconds: {
+          type: "number",
+          unit: "second",
+          description: { en: "Video upscale unit price", zh: "视频超分单价" },
+        },
+      },
+      examples: [
+        { label: "720p · 5s", facts: { tokens: 108000, resolution: "720p", seconds: 5 } },
+        { label: "1080p · 5s", facts: { tokens: 243000, resolution: "1080p", seconds: 5 } },
+        { label: "2k · 5s", facts: { tokens: 432000, resolution: "2k", seconds: 5 } },
+      ],
+    },
+  ],
   routes: [
     { method: "POST", path: "/doubao/api/v3/contents/generations/tasks", type: "submit", decode: "createTask", render: "taskCreated" },
     { method: "GET", path: "/doubao/api/v3/contents/generations/tasks/:task_id", type: "query", render: "taskStatus" },
@@ -78,6 +109,16 @@ export const meta = {
 
 function trimmed(value) {
   return String(value || "").trim();
+}
+
+function isUpscaleModel(model) {
+  const name = trimmed(model).toLowerCase();
+  return name.includes("upscale") || name.includes("chaofen");
+}
+
+function modelName(source) {
+  if (!source || typeof source !== "object" || Array.isArray(source)) return "";
+  return trimmed(source.upstreamModel || source.model || source.originModelName);
 }
 
 function draftTaskIds(content) {
@@ -115,8 +156,19 @@ function rewriteDraftTaskContent(content, originTasks) {
   });
 }
 
-function normalizeResolution(value) {
+function normalizeResolution(value, model) {
   const raw = trimmed(value).toLowerCase();
+  if (isUpscaleModel(model)) {
+    if (raw === "2k") return "2k";
+    if (raw === "1080p" || raw === "720p") return raw;
+    const parts = raw.replace("*", "x").split("x");
+    if (parts.length === 2) {
+      const max = Math.max(Number(parts[0]), Number(parts[1]));
+      if (Number.isFinite(max) && max >= 2048) return "2k";
+      if (Number.isFinite(max) && max >= 1920) return "1080p";
+    }
+    return "720p";
+  }
   if (["480p", "720p", "1080p", "4k"].includes(raw)) return raw;
   const parts = raw.replace("*", "x").split("x");
   if (parts.length !== 2) return "720p";
@@ -138,6 +190,7 @@ function hasVideo(content) {
 function resolutionMaxPixels(resolution) {
   if (resolution === "480p") return [854, 480];
   if (resolution === "1080p") return [1920, 1080];
+  if (resolution === "2k") return [2560, 1440];
   if (resolution === "4k") return [3840, 2160];
   return [1280, 720];
 }
@@ -304,10 +357,21 @@ export function extractUsage(ctx) {
   }
   if (seconds <= 0) seconds = 5;
   seconds = Math.min(seconds, 3600);
+  const model = ctx.upstreamModel || ctx.model;
   const rawResolution = metadata.resolution || req.size;
   const raw = trimmed(rawResolution).toLowerCase();
-  const recognized = ["480p", "720p", "1080p", "4k"].includes(raw) || raw.replace("*", "x").split("x").length === 2;
-  const resolution = recognized ? normalizeResolution(rawResolution) : "1080p";
+  const upscale = isUpscaleModel(model);
+  const recognized = upscale
+    ? ["720p", "1080p", "2k"].includes(raw) || raw.replace("*", "x").split("x").length === 2
+    : ["480p", "720p", "1080p", "4k"].includes(raw) || raw.replace("*", "x").split("x").length === 2;
+  const resolution = recognized ? normalizeResolution(rawResolution, model) : upscale ? "720p" : "1080p";
+  if (upscale) {
+    return {
+      tokens: estimateTokens(seconds, resolution),
+      resolution: resolution,
+      seconds: seconds,
+    };
+  }
   return {
     tokens: estimateTokens(seconds, resolution),
     resolution: resolution,
@@ -374,7 +438,14 @@ export function extractUsageOnComplete(task, taskResult, body) {
   if (Number.isFinite(tokens) && tokens > 0) facts.tokens = tokens;
   const content = body.content || {};
   const resolution = trimmed(content.resolution || body.resolution).toLowerCase();
-  if (["480p", "720p", "1080p", "4k"].includes(resolution)) facts.resolution = resolution;
+  const upscale = isUpscaleModel(modelName(task));
+  if (upscale) {
+    if (["720p", "1080p", "2k"].includes(resolution)) facts.resolution = resolution;
+    const duration = Number(body.duration);
+    if (Number.isFinite(duration) && duration > 0) facts.seconds = Math.min(duration, 3600);
+  } else if (["480p", "720p", "1080p", "4k"].includes(resolution)) {
+    facts.resolution = resolution;
+  }
   return facts;
 }
 
@@ -399,7 +470,7 @@ export const protocols = {
       if (!prompt && images.length === 0) throw new Error("input is required");
       const metadata = Object.assign({}, req.metadata || {});
       if (Object.prototype.hasOwnProperty.call(req, "resolution")) metadata.resolution = req.resolution;
-      else if (req.size && !metadata.resolution) metadata.resolution = normalizeResolution(req.size);
+      else if (req.size && !metadata.resolution) metadata.resolution = normalizeResolution(req.size, model);
       const requestBody = { model: model, prompt: prompt, metadata: metadata };
       if (images.length) requestBody.images = images;
       if (Object.prototype.hasOwnProperty.call(req, "seconds")) requestBody.seconds = req.seconds;

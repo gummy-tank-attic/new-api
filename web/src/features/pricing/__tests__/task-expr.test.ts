@@ -32,7 +32,6 @@ import {
   type TaskVisualConfig,
 } from '../lib/task-expr'
 import {
-  getModelSpecificDiscountPercent,
   getModelSupportedResolutions,
   getVideoModelHeroPrice,
   getVideoModelTierGroups,
@@ -529,9 +528,6 @@ describe('task visual pricing preview', () => {
   })
 
   test('correctly sets MiniMax-H3 discount to 25% and generates strikethrough official starting price', () => {
-    assert.equal(getModelSpecificDiscountPercent('MiniMax-H3'), 25)
-    assert.equal(getModelSpecificDiscountPercent('hailuo-h3'), 25)
-
     const model: PricingModel = {
       id: 1,
       model_name: 'MiniMax-H3',
@@ -565,6 +561,15 @@ describe('task visual pricing preview', () => {
     // Ensure MiniMax-H3 does NOT get misclassified into Seedance 2.0 Mini token table
     const groups = getVideoModelTierGroups(model)
     assert.equal(groups.length, 0)
+
+    const originalPrice: PricingModel = {
+      ...model,
+      billing_expr: 'tier("768P", u("seconds") * 0.08)',
+    }
+    const originalHero = getVideoModelHeroPrice(originalPrice, true, 1)
+    assert.equal(originalHero.priceText, '$0.400')
+    assert.equal(originalHero.officialPriceText, '$0.400')
+    assert.equal(originalHero.discountOff, null)
   })
 
   test('dynamically parses Doubao Seedream fixed image pricing without hardcoding', () => {
@@ -625,7 +630,7 @@ describe('task visual pricing preview', () => {
     assert.equal(lookupModelSavingsOff('glm-5.3-flash'), 25)
     assert.equal(lookupModelSavingsOff('glm-5.3-turbo'), 25)
     assert.equal(lookupModelSavingsOff('kimi-k3-pro'), 25)
-    assert.equal(lookupModelSavingsOff('minimax-h3-v2'), 25)
+    assert.equal(lookupModelSavingsOff('minimax-h3-v2'), undefined)
     assert.equal(lookupModelSavingsOff('glm-50-preview'), undefined)
     assert.equal(lookupModelSavingsOff('unknown-brand-new'), undefined)
   })
@@ -670,7 +675,6 @@ describe('task visual pricing preview', () => {
       getVideoModelCapabilityTag,
       getModelSupportedResolutions,
       getResolutionBadgeStyle,
-      getModelSpecificDiscountPercent,
       isImageModel,
     } = await import('../lib/video-pricing')
 
@@ -703,8 +707,6 @@ describe('task visual pricing preview', () => {
       getVideoModelTagline('gpt-image-2').defaultText,
       '经典多模态生图主力 · 原生指令理解与稳定图文创作'
     )
-    assert.equal(getModelSpecificDiscountPercent('gpt-image-2.5-sunburst'), 0)
-    assert.equal(getModelSpecificDiscountPercent('gpt-image-2.5-flare'), 0)
 
     const model: PricingModel = {
       id: 101,
@@ -850,7 +852,7 @@ describe('task visual pricing preview', () => {
     assert.equal(hero10.discountOff, 10)
   })
 
-  test('seedance-2.5-unfiltered strictly displays official base price with null discountOff and no strikethrough', () => {
+  test('seedance-2.5-unfiltered shows official price with null discountOff', () => {
     const unfilteredExpr =
       'u("resolution") == "480p" && u("video_input") == "none" ? tier("480p·none", u("tokens") * 10.7 / 1000000) : u("resolution") == "480p" && u("video_input") == "video" ? tier("480p·video", u("tokens") * 6.4 / 1000000) : u("resolution") == "720p" && u("video_input") == "none" ? tier("720p·none", u("tokens") * 10.7 / 1000000) : u("resolution") == "720p" && u("video_input") == "video" ? tier("720p·video", u("tokens") * 6.4 / 1000000) : u("resolution") == "1080p" && u("video_input") == "none" ? tier("1080p·none", u("tokens") * 11.7 / 1000000) : tier("1080p·video", u("tokens") * 7 / 1000000)'
     const schema = {
@@ -879,11 +881,159 @@ describe('task visual pricing preview', () => {
     assert.equal(g720.officialWithoutVideoPrice, 10.7)
     assert.equal(g720.officialWithVideoPrice, 6.4)
 
-    // In Group Mode, since selling price == official base price, discountOff MUST be null (no 10% OFF badge)
+    // In Group Mode, since selling price == official base price, discountOff and officialPriceText MUST be null (no strikethrough identical price, no 10% OFF badge)
     const hero = getVideoModelHeroPrice(model, true, 1)
     assert.equal(hero.priceText, '$6.400')
     assert.equal(hero.officialPriceText, null)
     assert.equal(hero.discountOff, null)
+  })
+
+  test('dreamina-seedance-2-0 correctly extracts 10% off prices against official 2.0 benchmarks', () => {
+    const expr20_10off =
+      'u("resolution") == "480p" && u("video_input") == "none" ? tier("480p·none", u("tokens") * 6.3 / 1000000) : u("resolution") == "480p" && u("video_input") == "video" ? tier("480p·video", u("tokens") * 3.87 / 1000000) : u("resolution") == "720p" && u("video_input") == "none" ? tier("720p·none", u("tokens") * 6.3 / 1000000) : u("resolution") == "720p" && u("video_input") == "video" ? tier("720p·video", u("tokens") * 3.87 / 1000000) : u("resolution") == "1080p" && u("video_input") == "none" ? tier("1080p·none", u("tokens") * 6.93 / 1000000) : tier("1080p·video", u("tokens") * 4.23 / 1000000)'
+    const schema = {
+      tokens: { type: 'number' as const, unit: 'token' },
+      resolution: { enum: ['480p', '720p', '1080p'] },
+      video_input: { enum: ['none', 'video'] },
+    }
+
+    const model: PricingModel = {
+      id: 303,
+      model_name: 'dreamina-seedance-2-0',
+      vendor_name: 'ByteDance',
+      billing_mode: 'tiered_expr',
+      billing_expr: expr20_10off,
+      billing_usage_schema: schema,
+      quota_type: 0,
+      model_ratio: 1,
+    }
+
+    const groups = getVideoModelTierGroups(model)
+    assert.equal(groups.length, 2)
+
+    const g720 = groups.find((g) => g.resolutions.includes('720p'))
+    assert.ok(g720)
+    assert.equal(g720.withoutVideoPrice, 6.3)
+    assert.equal(g720.withVideoPrice, 3.87)
+    assert.equal(g720.officialWithoutVideoPrice, 7.0)
+    assert.equal(g720.officialWithVideoPrice, 4.3)
+
+    const g1080 = groups.find((g) => g.resolutions.includes('1080p'))
+    assert.ok(g1080)
+    assert.equal(g1080.withoutVideoPrice, 6.93)
+    assert.equal(g1080.withVideoPrice, 4.23)
+    assert.equal(g1080.officialWithoutVideoPrice, 7.7)
+    assert.equal(g1080.officialWithVideoPrice, 4.7)
+
+    // Hero: min billed is $3.870, official benchmark is $4.300 -> 10% OFF
+    const hero = getVideoModelHeroPrice(model, true, 1)
+    assert.equal(hero.priceText, '$3.870')
+    assert.equal(hero.officialPriceText, '$4.300')
+    assert.equal(hero.discountOff, 10)
+    assert.equal(hero.unitText, '/ 1M Tokens 起')
+  })
+
+  test('Seedance2.0-4k accurately derives 8% off against upstream official benchmarks', () => {
+    const expr =
+      'u("video_input") == "none" ? tier("4k·none", u("tokens") * 3.507331 / 1000000) : tier("4k·video", u("tokens") * 2.158358 / 1000000)'
+
+    const model: PricingModel = {
+      id: 205,
+      model_name: 'Seedance2.0-4k',
+      quota_type: 0,
+      model_ratio: 1,
+      billing_mode: 'tiered_expr',
+      billing_expr: expr,
+      billing_usage_schema: {
+        resolution: { enum: ['4k'] },
+        video_input: { enum: ['none', 'video'] },
+        tokens: { type: 'number', unit: 'token' },
+      },
+    }
+
+    const groups = getVideoModelTierGroups(model)
+    assert.equal(groups.length, 1)
+    const g4k = groups[0]
+    assert.equal(g4k.title, '4K')
+    assert.equal(g4k.withoutVideoPrice, 3.507331)
+    assert.equal(g4k.withVideoPrice, 2.158358)
+    assert.equal(g4k.officialWithoutVideoPrice, 3.812316)
+    assert.equal(g4k.officialWithVideoPrice, 2.346041)
+
+    // Hero price: minBilled is 2.158358, minOfficial is 2.346041 -> exactly 8% OFF
+    const hero = getVideoModelHeroPrice(model, true, 1)
+    assert.equal(hero.priceText, '$2.158')
+    assert.equal(hero.officialPriceText, '$2.346')
+    assert.equal(hero.discountOff, 8)
+    assert.equal(hero.isStartingPrice, false)
+  })
+
+  test('seedance2.0-mini accurately derives 55% off against official mini benchmarks', () => {
+    const expr =
+      'u("video_input") == "none" ? tier("480p·720p·none", u("tokens") * 1.575 / 1000000) : tier("480p·720p·video", u("tokens") * 0.945 / 1000000)'
+
+    const model: PricingModel = {
+      id: 206,
+      model_name: 'seedance2.0-mini',
+      quota_type: 0,
+      model_ratio: 1,
+      billing_mode: 'tiered_expr',
+      billing_expr: expr,
+      billing_usage_schema: {
+        resolution: { enum: ['480p', '720p'] },
+        video_input: { enum: ['none', 'video'] },
+        tokens: { type: 'number', unit: 'token' },
+      },
+    }
+
+    const groups = getVideoModelTierGroups(model)
+    assert.equal(groups.length, 1)
+    const g = groups[0]
+    assert.equal(g.title, '480p · 720p')
+    assert.equal(g.withoutVideoPrice, 1.575)
+    assert.equal(g.withVideoPrice, 0.945)
+    assert.equal(g.officialWithoutVideoPrice, 3.5)
+    assert.equal(g.officialWithVideoPrice, 2.1)
+
+    // Hero price: minBilled is 0.945, minOfficial is 2.1 -> exactly 55% OFF
+    const hero = getVideoModelHeroPrice(model, true, 1)
+    assert.equal(hero.priceText, '$0.945')
+    assert.equal(hero.officialPriceText, '$2.100')
+    assert.equal(hero.discountOff, 55)
+  })
+
+  test('seedance2.0-fast accurately derives 20% off against official fast benchmarks', () => {
+    const expr =
+      'u("video_input") == "none" ? tier("480p·720p·none", u("tokens") * 4.48 / 1000000) : tier("480p·720p·video", u("tokens") * 2.64 / 1000000)'
+
+    const model: PricingModel = {
+      id: 207,
+      model_name: 'seedance2.0-fast',
+      quota_type: 0,
+      model_ratio: 1,
+      billing_mode: 'tiered_expr',
+      billing_expr: expr,
+      billing_usage_schema: {
+        resolution: { enum: ['480p', '720p'] },
+        video_input: { enum: ['none', 'video'] },
+        tokens: { type: 'number', unit: 'token' },
+      },
+    }
+
+    const groups = getVideoModelTierGroups(model)
+    assert.equal(groups.length, 1)
+    const g = groups[0]
+    assert.equal(g.title, '480p · 720p')
+    assert.equal(g.withoutVideoPrice, 4.48)
+    assert.equal(g.withVideoPrice, 2.64)
+    assert.equal(g.officialWithoutVideoPrice, 5.6)
+    assert.equal(g.officialWithVideoPrice, 3.3)
+
+    // Hero price: minBilled is 2.64, minOfficial is 3.3 -> exactly 20% OFF
+    const hero = getVideoModelHeroPrice(model, true, 1)
+    assert.equal(hero.priceText, '$2.640')
+    assert.equal(hero.officialPriceText, '$3.300')
+    assert.equal(hero.discountOff, 20)
   })
 })
 

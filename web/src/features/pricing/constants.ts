@@ -489,9 +489,7 @@ export const MANUAL_GROUP_SAVINGS_OFF: Record<string, number> = {}
 /**
  * 自定义分组展示文案（如 "up to 50% off"）
  */
-export const MANUAL_GROUP_OFF_LABEL: Record<string, string> = {
-  Seedance: 'UP TO 50%\u00A0OFF',
-}
+export const MANUAL_GROUP_OFF_LABEL: Record<string, string> = {}
 
 /**
  * 单个模型的自定义折扣覆盖（百分比，例如 35 对应 35% OFF）
@@ -516,8 +514,6 @@ export const MANUAL_MODEL_SAVINGS_OFF: Record<string, number> = {
   'minimax-m3': 35,
   'minimax-m2.7': 15,
   'minimax-m2.5': 15,
-  'minimax-h3': 25,
-  'hailuo-h3': 25,
 }
 
 const MANUAL_MODEL_SAVINGS_EXACT = new Map(

@@ -36,6 +36,10 @@ import {
 import { resolveGroupSavingsOffPercent } from '../lib/group-discount'
 import { getConfiguredGroupRatio } from '../lib/model-helpers'
 import { getOffPeakMultiplier, isTimeTieredModel } from '../lib/time-pricing'
+import {
+  getDurationVideoTiers,
+  isDurationBasedVideoModel,
+} from '../lib/video-pricing'
 
 export interface GroupPriceCardsProps {
   groups: string[]
@@ -47,7 +51,7 @@ export interface GroupPriceCardsProps {
   className?: string
 }
 
-function getGroupMaxDiscount(
+export function getGroupMaxDiscount(
   group: string,
   models?: PricingModel[],
   groupRatio?: Record<string, number>
@@ -100,6 +104,28 @@ function getGroupMaxDiscount(
   })
 
   for (const model of targetModels) {
+    if (isDurationBasedVideoModel(model)) {
+      const tiers = getDurationVideoTiers(model)
+      const durationRatio = gRatio > 0 ? gRatio : 1
+      if (
+        tiers.length > 0 &&
+        tiers[0].officialSecondPrice != null &&
+        tiers[0].secondPrice * durationRatio < tiers[0].officialSecondPrice
+      ) {
+        const durationOff = Math.round(
+          (1 -
+            (tiers[0].secondPrice * durationRatio) /
+              tiers[0].officialSecondPrice) *
+            100
+        )
+        if (durationOff > 0) {
+          hasModelOverride = true
+          if (durationOff > maxDiscount) maxDiscount = durationOff
+        }
+      }
+      continue
+    }
+
     let actualInputPrice =
       (model.model_ratio || 0) * 2 * (gRatio > 0 ? gRatio : 1)
     if (isDynamicPricingModel(model)) {

@@ -16,13 +16,31 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { isByteDancePricingVendor, lookupModelSavingsOff } from '../constants'
+import { isByteDancePricingVendor } from '../constants'
 import type { BillingUsageSchema, PricingModel } from '../types'
 import { parseTaskTiersFromExpr } from './billing-expr'
 import { compileBillingExpression } from './billing-expression/parser'
 import type { ExpressionNode } from './billing-expression/types'
+import { getOfficialModelPrice } from './official-pricing'
 import { stripTrailingZeros } from './price'
 import { getTaskMatrixDisplayTiers } from './task-matrix-display'
+
+function percentOff(
+  billed: number,
+  official: number | null | undefined
+): number | null {
+  if (
+    official == null ||
+    !Number.isFinite(billed) ||
+    !Number.isFinite(official) ||
+    official <= 0 ||
+    billed >= official
+  ) {
+    return null
+  }
+  const off = Math.round((1 - billed / official) * 100)
+  return off >= 1 && off <= 99 ? off : null
+}
 
 export interface VideoUpscaleTier {
   tierKey: string
@@ -405,14 +423,6 @@ export function getVideoModelCapabilityTag(modelName: string): {
   return null
 }
 
-export function getModelSpecificDiscountPercent(modelName: string): number {
-  const name = modelName.toLowerCase()
-  if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) return 25
-  if (name.includes('minimax')) return 0
-  if (name.includes('upscale') || name.includes('chaofen')) return 30
-  return 0
-}
-
 export const SEEDANCE_OFFICIAL_BENCHMARKS: Record<
   string,
   Record<string, { none: number; video: number }>
@@ -430,7 +440,7 @@ export const SEEDANCE_OFFICIAL_BENCHMARKS: Record<
     '1080p': { none: 7.7, video: 4.7 },
   },
   '4k': {
-    '4k': { none: 4.0, video: 2.4 },
+    '4k': { none: 3.812316, video: 2.346041 },
   },
   'fast': {
     '480p·720p': { none: 5.6, video: 3.3 },
@@ -450,11 +460,29 @@ export function getSeedanceOfficialBenchmark(
 ): { none: number; video: number } | null {
   const name = modelName.toLowerCase()
   let versionKey: string | null = null
-  if (name.includes('2.5') && !name.startsWith('gpt-image') && !name.includes('upscale') && !name.includes('chaofen')) versionKey = '2.5'
-  else if (name.includes('2.0') && !name.includes('4k') && !name.includes('fast') && !name.includes('upscale') && !name.includes('chaofen')) versionKey = '2.0'
-  else if (name.includes('4k')) versionKey = '4k'
-  else if (name.includes('fast')) versionKey = 'fast'
-  else if (name.includes('mini') && !name.includes('minimax')) versionKey = 'mini'
+  if (
+    (name.includes('2.5') || name.includes('2-5')) &&
+    !name.startsWith('gpt-image') &&
+    !name.includes('upscale') &&
+    !name.includes('chaofen')
+  ) {
+    versionKey = '2.5'
+  } else if (
+    (name.includes('2.0') || name.includes('2-0')) &&
+    !name.includes('4k') &&
+    !name.includes('fast') &&
+    !name.includes('mini') &&
+    !name.includes('upscale') &&
+    !name.includes('chaofen')
+  ) {
+    versionKey = '2.0'
+  } else if (name.includes('4k')) {
+    versionKey = '4k'
+  } else if (name.includes('fast')) {
+    versionKey = 'fast'
+  } else if (name.includes('mini') && !name.includes('minimax')) {
+    versionKey = 'mini'
+  }
 
   if (!versionKey) return null
   const versionMap = SEEDANCE_OFFICIAL_BENCHMARKS[versionKey]
@@ -529,16 +557,9 @@ export function parseVideoUpscaleTiers(expression: string | null | undefined): V
       res = '1080p'
       name = '1080p'
     }
-    const discountPercent = getModelSpecificDiscountPercent('seedance-2.5-upscale') || 30
-    const discountMultiplier = 1 - discountPercent / 100
-    const officialToken =
-      discountMultiplier > 0
-        ? Number((tokenPrice / discountMultiplier).toFixed(6))
-        : tokenPrice
-    const officialSec =
-      discountMultiplier > 0
-        ? Number((secondPrice / discountMultiplier).toFixed(4))
-        : secondPrice
+    const officialRef = defaultTiers.find((tier) => tier.resolution === res)
+    const officialToken = officialRef?.officialTokenPricePerM ?? tokenPrice
+    const officialSec = officialRef?.officialSecondPrice ?? secondPrice
     const est5sTokens = 85_000
     const est5s = Number((secondPrice * 5 + (tokenPrice * est5sTokens) / 1_000_000).toFixed(2))
     const officialEst5s = Number((officialSec * 5 + (officialToken * est5sTokens) / 1_000_000).toFixed(2))
@@ -570,10 +591,10 @@ export function getDefaultVideoModelTierGroups(modelName: string): VideoTierGrou
         title: '4K',
         resLabel: '4K',
         resolutions: ['4k'],
-        withoutVideoPrice: 3.6,
-        withVideoPrice: 2.16,
-        officialWithoutVideoPrice: 4.0,
-        officialWithVideoPrice: 2.4,
+        withoutVideoPrice: 3.507331,
+        withVideoPrice: 2.158358,
+        officialWithoutVideoPrice: 3.812316,
+        officialWithVideoPrice: 2.346041,
       },
     ]
   }
@@ -737,12 +758,6 @@ export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
     if (benchmark) {
       officialNone = benchmark.none
       officialVideo = benchmark.video
-    } else {
-      const discountPercent = getModelSpecificDiscountPercent(modelName)
-      if (discountPercent > 0 && discountPercent < 100) {
-        officialNone = Number((billedNone / (1 - discountPercent / 100)).toFixed(4))
-        officialVideo = Number((billedVideo / (1 - discountPercent / 100)).toFixed(4))
-      }
     }
 
     groups.push({
@@ -1031,23 +1046,12 @@ export function parseImageModelPricing(
     const official1k = officialBase1k * rate
     const official2k = officialBase2k * rate
 
-    let discountOff: number | null = null
-    if (isGroupMode) {
-      const manualOff = lookupModelSavingsOff(model.model_name)
-      if (manualOff != null) {
-        discountOff = manualOff
-      } else if (official1k > 0 && actual1k < official1k) {
-        const computed = Math.round((1 - actual1k / official1k) * 100)
-        if (computed > 0) {
-          discountOff = computed
-        }
-      }
-    }
+    const discountOff = isGroupMode ? percentOff(actual1k, official1k) : null
 
     const display1k = isGroupMode ? actual1k : official1k
     const display2k = isGroupMode ? actual2k : official2k
-    const displayOfficial1k = isGroupMode && discountOff != null ? official1k : null
-    const displayOfficial2k = isGroupMode && discountOff != null ? official2k : null
+    const displayOfficial1k = isGroupMode ? official1k : null
+    const displayOfficial2k = isGroupMode ? official2k : null
 
     return {
       priceText: formatImgPrice(display1k),
@@ -1091,10 +1095,6 @@ export function parseImageModelPricing(
     const officialOutput = rawOutput
     const officialImgToImg = rawImg + rawOutput
 
-    const manualOff = isGroupMode
-      ? (lookupModelSavingsOff(model.model_name) ?? null)
-      : null
-
     const formatRate = (v: number) => `$${stripTrailingZeros(v.toFixed(3))}`
 
     const displayInput = isGroupMode ? billedInput : officialInput
@@ -1121,7 +1121,7 @@ export function parseImageModelPricing(
       unitText: '/ 1M Tokens 起',
       unitKey: 'videoPricing.unitPer1MTokensFrom',
       isStartingPrice: true,
-      discountOff: manualOff,
+      discountOff: null,
       isPerImage: false,
       resolutionPrices: {
         standard: standardPriceObj,
@@ -1158,14 +1158,16 @@ export function parseImageModelPricing(
   if (tokenMatch) {
     unitPrice = Number(tokenMatch[1]) * rate
   }
-  const manualOff = isGroupMode
-    ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(name) || null))
+  const officialUnitPrice = getOfficialModelPrice(model.model_name)?.input
+  const tokenDiscountOff = isGroupMode
+    ? percentOff(unitPrice, officialUnitPrice)
     : null
-  const officialUnitPrice = manualOff ? unitPrice / (1 - manualOff / 100) : 1.140 * rate
-  const displayToken = isGroupMode ? unitPrice : officialUnitPrice
-  const displayOfficialToken = isGroupMode && manualOff != null ? officialUnitPrice : null
+  const displayToken = isGroupMode ? unitPrice : (officialUnitPrice ?? unitPrice)
+  const displayOfficialToken =
+    isGroupMode && officialUnitPrice != null ? officialUnitPrice : null
   const tokenPriceFormatted = `$${displayToken.toFixed(3)}`
-  const tokenOfficialFormatted = displayOfficialToken != null ? `$${displayOfficialToken.toFixed(3)}` : null
+  const tokenOfficialFormatted =
+    displayOfficialToken != null ? `$${displayOfficialToken.toFixed(3)}` : null
 
   return {
     priceText: tokenPriceFormatted,
@@ -1173,7 +1175,7 @@ export function parseImageModelPricing(
     unitText: '/ 1M Tokens 起',
     unitKey: 'videoPricing.unitPer1MTokensFrom',
     isStartingPrice: true,
-    discountOff: manualOff,
+    discountOff: tokenDiscountOff,
     isPerImage: false,
     resolutionPrices: {
       '1k': {
@@ -1202,9 +1204,6 @@ export function getVideoModelHeroPrice(
   }
 
   const name = model.model_name.toLowerCase()
-  const discountOff = isGroupMode
-    ? (lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(name) || null))
-    : null
 
   if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo') || isDurationBasedVideoModel(model)) {
     const durationTiers = getDurationVideoTiers(model)
@@ -1225,15 +1224,17 @@ export function getVideoModelHeroPrice(
     )
     const baseEst5s = minTier ? minTier.est5sPrice : 0.400
     const billed = baseEst5s * rate
-    const officialEst5s = minTier?.officialEst5sPrice ?? 0.400
+    const officialEst5s = minTier?.officialEst5sPrice
     const effectiveSecondPrice = (minTier?.secondPrice ?? 0.060) * rate
-    const dynamicDiscountOff =
-      minTier?.officialSecondPrice && effectiveSecondPrice < minTier.officialSecondPrice
-        ? Math.round((1 - effectiveSecondPrice / minTier.officialSecondPrice) * 100)
-        : discountOff
+    const dynamicDiscountOff = isGroupMode
+      ? percentOff(effectiveSecondPrice, minTier?.officialSecondPrice)
+      : null
     return {
       priceText: `$${billed.toFixed(3)}`,
-      officialPriceText: isGroupMode && dynamicDiscountOff != null ? `$${officialEst5s.toFixed(3)}` : null,
+      officialPriceText:
+        isGroupMode && officialEst5s != null
+          ? `$${officialEst5s.toFixed(3)}`
+          : null,
       unitText: '/ 5秒 起',
       unitKey: 'videoPricing.unitPer5sFrom',
       isStartingPrice: true,
@@ -1243,26 +1244,29 @@ export function getVideoModelHeroPrice(
 
   if (name.includes('upscale') || name.includes('chaofen')) {
     let billedSec = 0.0091
-    let officialSec = 0.013
+    const officialSec = 0.013
     if (model.billing_expr) {
       const m = model.billing_expr.match(/u\("seconds"\)\s*\*\s*([\d.]+)/)
       if (m && m[1]) {
         const val = Number.parseFloat(m[1])
         if (Number.isFinite(val) && val > 0) {
           billedSec = val
-          officialSec = discountOff ? val / (1 - discountOff / 100) : val / 0.7
         }
       }
     }
     const billedSecond = billedSec * rate
     const officialSecond = officialSec * rate
+    const upscaleOff = isGroupMode ? percentOff(billedSecond, officialSecond) : null
     return {
       priceText: isGroupMode ? `$${billedSecond.toFixed(4)}` : `$${officialSecond.toFixed(4)}`,
-      officialPriceText: isGroupMode ? `$${officialSecond.toFixed(4)}` : null,
+      officialPriceText:
+        isGroupMode && billedSecond <= officialSecond
+          ? `$${officialSecond.toFixed(4)}`
+          : null,
       unitText: '/ s (Upscale)',
       unitKey: 'videoPricing.unitPerSecUpscale',
       isStartingPrice: true,
-      discountOff,
+      discountOff: upscaleOff,
     }
   }
 
@@ -1281,22 +1285,11 @@ export function getVideoModelHeroPrice(
     )
     if (validBilled.length > 0) {
       const minBilled = Math.min(...validBilled) * rate
-      let minOfficial: number | null = null
-      if (validOfficial.length > 0) {
-        minOfficial = Math.min(...validOfficial) * rate
-      } else if (discountOff != null && discountOff < 100) {
-        minOfficial = minBilled / (1 - discountOff / 100)
-      }
-      let effectiveDiscount: number | null = null
-      if (minOfficial && minOfficial > minBilled) {
-        const computed = Math.round((1 - minBilled / minOfficial) * 100)
-        if (computed > 0) {
-          effectiveDiscount = computed
-        }
-      }
-      if (effectiveDiscount == null && (!minOfficial || minBilled < minOfficial)) {
-        effectiveDiscount = discountOff
-      }
+      const minOfficial =
+        validOfficial.length > 0 ? Math.min(...validOfficial) * rate : null
+      const effectiveDiscount = isGroupMode
+        ? percentOff(minBilled, minOfficial)
+        : null
       const is4k = name.includes('4k')
       let dynamicPriceText = `$${minBilled.toFixed(3)}`
       if (!isGroupMode && minOfficial) {
@@ -1304,11 +1297,14 @@ export function getVideoModelHeroPrice(
       }
       return {
         priceText: dynamicPriceText,
-        officialPriceText: isGroupMode && minOfficial && minOfficial > minBilled ? `$${minOfficial.toFixed(3)}` : null,
+        officialPriceText:
+          isGroupMode && minOfficial != null && minOfficial > minBilled + 0.0001
+            ? `$${minOfficial.toFixed(3)}`
+            : null,
         unitText: is4k ? '/ 1M Tokens' : '/ 1M Tokens 起',
         unitKey: is4k ? 'videoPricing.unitPer1MTokens' : 'videoPricing.unitPer1MTokensFrom',
         isStartingPrice: !is4k,
-        discountOff: isGroupMode ? effectiveDiscount : null,
+        discountOff: effectiveDiscount,
       }
     }
   }

@@ -632,12 +632,22 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                     <div className='grid grid-cols-1 gap-2 sm:grid-cols-3'>
                       <PriceColumn
                         primary={`$${(((minUpscale?.secondPrice ?? 0.0091) * upscaleRatio) * priceRate).toFixed(4)}`}
-                        official={`$${((minUpscale?.officialSecondPrice ?? 0.013) * priceRate).toFixed(4)}`}
+                        official={
+                          (minUpscale?.secondPrice ?? 0) <=
+                          (minUpscale?.officialSecondPrice ?? 0)
+                            ? `$${((minUpscale?.officialSecondPrice ?? 0.013) * priceRate).toFixed(4)}`
+                            : null
+                        }
                         unit='/ 秒起'
                       />
                       <PriceColumn
                         primary={`$${(((minUpscale?.tokenPricePerM ?? 7.1848) * upscaleRatio) * priceRate).toFixed(2)}`}
-                        official={`$${((minUpscale?.officialTokenPricePerM ?? 10.2639) * priceRate).toFixed(2)}`}
+                        official={
+                          (minUpscale?.tokenPricePerM ?? 0) <=
+                          (minUpscale?.officialTokenPricePerM ?? 0)
+                            ? `$${((minUpscale?.officialTokenPricePerM ?? 10.2639) * priceRate).toFixed(2)}`
+                            : null
+                        }
                         unit='/ 1M'
                       />
                       <div className='flex flex-col items-center justify-center py-1 text-center'>

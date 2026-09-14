@@ -24,10 +24,8 @@ import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
-import { lookupModelSavingsOff } from '../constants'
 import { getConfiguredGroupRatio } from '../lib/model-helpers'
 import {
-  getModelSpecificDiscountPercent,
   getModelSupportedResolutions,
   getResolutionBadgeStyle,
   getVideoModelCapabilityTag,
@@ -86,9 +84,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
               : effectiveRate)
           : 1
         const hero = getVideoModelHeroPrice(model, isGroupMode, modelRate)
-        const discountOff = isGroupMode
-          ? (hero.discountOff ?? lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || props.savings || null))
-          : null
+        const discountOff = isGroupMode ? (hero.discountOff ?? null) : null
 
         const vendorIcon =
           model.vendor_icon || model.icon
@@ -115,7 +111,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
               }
             }}
             className={cn(
-              'group relative flex w-full flex-col justify-start overflow-hidden rounded-2xl border border-[#E2E8F0]/90 p-6 text-left shadow-[0_1px_3px_rgba(15,23,42,0.03)] transition-all duration-200',
+              'group relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-[#E2E8F0]/90 p-6 text-left shadow-[0_1px_3px_rgba(15,23,42,0.03)] transition-all duration-200',
               '[background:radial-gradient(circle_at_95%_5%,rgba(16,185,129,0.04)_0%,transparent_60%),#fff]',
               'hover:-translate-y-px hover:border-[#CBD5E1] hover:shadow-[0_6px_18px_rgba(15,23,42,0.06)] cursor-pointer',
               'dark:border-border dark:bg-card dark:[background:unset]'
@@ -124,7 +120,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
             {/* Top Section */}
             <div className='space-y-2.5'>
               {/* Row 1: Model Identity (Full Width, No Crowding) */}
-              <div className='flex items-center gap-2.5 min-w-0 min-h-[26px]'>
+              <div className='flex items-center gap-2.5 min-w-0 h-[28px]'>
                 <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-emerald-100 bg-emerald-50/70 dark:border-emerald-800/40 dark:bg-emerald-950/30'>
                   {vendorIcon}
                 </div>
@@ -132,7 +128,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                   <span
                     translate='no'
                     className={cn(
-                      'notranslate break-words font-semibold text-[var(--p-text-main,#0F172A)]',
+                      'notranslate truncate font-semibold text-[var(--p-text-main,#0F172A)]',
                       titleClass
                     )}
                     title={model.model_name}
@@ -143,7 +139,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                     type='button'
                     aria-label={t('Copy model name')}
                     onClick={(e) => handleCopy(e, model.model_name)}
-                    className='size-6 shrink-0 inline-flex items-center justify-center rounded-md text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
+                    className='size-6 shrink-0 inline-flex items-center justify-center rounded-md text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[var(--p-text-main,#111111)]'
                   >
                     {copiedName === model.model_name ? (
                       <Check className='size-[15.5px] text-emerald-600' />
@@ -155,7 +151,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
               </div>
 
               {/* Row 2: Capability Tag (Left) & Discount Badge (Right) - Perfect Balance */}
-              <div className='flex items-center justify-between gap-2.5 min-h-[24px]'>
+              <div className='flex items-center justify-between gap-2.5 h-[26px]'>
                 {capTag ? (
                   <span
                     className={cn(
@@ -180,7 +176,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
               </div>
 
               {/* Row 3: Prominent Supported Resolutions */}
-              <div className='mb-2.5 flex items-center gap-[7px] text-[12.5px] min-h-[24px]'>
+              <div className='flex items-center gap-[7px] text-[12.5px] h-[26px]'>
                 <span className='shrink-0 text-[12px] font-medium text-[#64748B]'>
                   {t('Supported Resolutions:', '支持分辨率:')}
                 </span>
@@ -190,7 +186,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                     return (
                       <span
                         key={res}
-                        className='inline-flex items-center justify-center rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2.5 py-[2px] text-[12px] font-semibold tracking-[0.01em] text-[#334155] tabular-nums dark:border-border dark:bg-muted dark:text-foreground'
+                        className='inline-flex items-center justify-center rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2.5 py-[2px] text-[12px] font-semibold tracking-[0.01em] text-[var(--p-text-muted,#3f3f46)] tabular-nums dark:border-border dark:bg-muted dark:text-foreground'
                       >
                         {style.label}
                       </span>
@@ -200,102 +196,110 @@ export function ImageModelGrid(props: ImageModelGridProps) {
               </div>
 
               {/* Row 4: Tagline */}
-              <p className='min-h-[42px] text-[13px] leading-[21px] font-normal text-[#334155] dark:text-muted-foreground'>
-                {t(tagline.key, tagline.defaultText)}
-              </p>
+              <div className='flex h-[40px] items-center'>
+                <p className='line-clamp-2 text-[13px] leading-[20px] font-normal text-[var(--p-text-muted,#3f3f46)] dark:text-muted-foreground'>
+                  {t(tagline.key, tagline.defaultText)}
+                </p>
+              </div>
             </div>
 
             {/* Middle Section: Hero Price & Image Spec Matrix */}
-            <div className='mt-4 flex-1 flex flex-col'>
-              {/* Hero Starting Price */}
-              <div className='flex items-baseline justify-between border-t border-[#E2E8F0] pt-3'>
-                <span className='text-[12px] font-semibold uppercase tracking-[0.05em] text-[#64748B]'>
-                  {t('Starting Price', '起步价格')}
-                </span>
-                <div className='text-right'>
-                  <div className='flex items-baseline justify-end gap-1'>
-                    <span className='text-[22px] font-semibold tabular-nums text-[#0F172A] dark:text-foreground'>
-                      {hero.priceText}
-                    </span>
-                    {hero.officialPriceText && isGroupMode && (
-                      <span className='text-[13px] font-normal tabular-nums text-[#94A3B8] line-through'>
-                        {hero.officialPriceText}
+            <div className='mt-3.5 flex flex-1 flex-col justify-start'>
+              {/* Hero Starting Price (only for simple models without structured spec tables) */}
+              {resolutions.length === 0 && (
+                <div className='flex items-baseline justify-between border-t border-[#E2E8F0] pt-3'>
+                  <span className='text-[12px] font-semibold uppercase tracking-[0.05em] text-[#64748B]'>
+                    {t('Starting Price', '起步价格')}
+                  </span>
+                  <div className='text-right'>
+                    <div className='flex items-baseline justify-end gap-1'>
+                      <span className='text-[22px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground'>
+                        {hero.priceText}
                       </span>
-                    )}
-                    <span className='ml-0.5 text-[12.5px] font-normal text-[#64748B]'>
-                      {t(hero.unitKey, hero.unitText)}
-                    </span>
+                      {hero.officialPriceText && isGroupMode && (
+                        <span className='text-[13px] font-normal tabular-nums text-[#94A3B8] line-through'>
+                          {hero.officialPriceText}
+                        </span>
+                      )}
+                      <span className='ml-0.5 text-[12.5px] font-normal text-[#64748B]'>
+                        {t(hero.unitKey, hero.unitText)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Pricing Matrix (Aligned with Video Model Cards) */}
-              <div className='mt-3.5 overflow-hidden rounded-xl border border-[#E2E8F0] bg-white text-xs shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
-                <div className='grid grid-cols-12 bg-muted/40 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground'>
-                  <div className='col-span-4'>{t('Resolution', '分辨率')}</div>
-                  <div className='col-span-4 text-right'>{t('imagePricing.textToImage', '文生图')}</div>
-                  <div className='col-span-4 text-right'>{t('imagePricing.imageToImage', '图生图')}</div>
-                </div>
-                <div className='divide-y divide-border/40 bg-card/60'>
-                  {resolutions.map((res) => {
-                    const resKey = res.toLowerCase()
-                    const resPrice = hero.resolutionPrices?.[resKey]
-                    const currentPriceText = resPrice?.priceText ?? hero.priceText
-                    const currentOfficialText = resPrice?.officialPriceText ?? hero.officialPriceText
-                    const currentImgToImgPriceText = resPrice?.imgToImgPriceText ?? currentPriceText
-                    const currentOfficialImgToImgText = resPrice?.officialImgToImgPriceText ?? currentOfficialText
-                    const style = getResolutionBadgeStyle(res)
-                    const showOfficial = isGroupMode && currentOfficialText != null
-                    const showOfficialImgToImg = isGroupMode && currentOfficialImgToImgText != null
+              {resolutions.length > 0 && (
+                <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
+                  <div className='grid grid-cols-[28%_36%_36%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[12px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                    <div className='text-left'>{t('Resolution', '分辨率')}</div>
+                    <div className='text-right'>{t('imagePricing.textToImage', '文生图')}</div>
+                    <div className='text-right'>{t('imagePricing.imageToImage', '图生图')}</div>
+                  </div>
+                  <div className='flex flex-col'>
+                    {resolutions.map((res, index) => {
+                      const resKey = res.toLowerCase()
+                      const resPrice = hero.resolutionPrices?.[resKey]
+                      const currentPriceText = resPrice?.priceText ?? hero.priceText
+                      const currentOfficialText = resPrice?.officialPriceText ?? hero.officialPriceText
+                      const currentImgToImgPriceText = resPrice?.imgToImgPriceText ?? currentPriceText
+                      const currentOfficialImgToImgText = resPrice?.officialImgToImgPriceText ?? currentOfficialText
+                      const style = getResolutionBadgeStyle(res)
+                      const showOfficial = isGroupMode && currentOfficialText != null
+                      const showOfficialImgToImg = isGroupMode && currentOfficialImgToImgText != null
 
-                    return (
-                      <div
-                        key={res}
-                        className='grid grid-cols-12 items-center px-3.5 py-2.5 transition-colors hover:bg-muted/30'
-                      >
-                        <div className='col-span-4 pr-1'>
-                          <span className='font-semibold text-foreground text-[13px]'>
+                      return (
+                        <div
+                          key={res}
+                          className={cn(
+                            'grid grid-cols-[28%_36%_36%] items-center px-[14px] min-h-[50px] py-1.5 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
+                            index < resolutions.length - 1 &&
+                              'border-b border-[#F1F5F9] dark:border-border/40'
+                          )}
+                        >
+                          <div className='text-left text-[13px] font-semibold text-[var(--p-text-main,#111111)] dark:text-foreground'>
                             {style.label}
-                          </span>
-                        </div>
-                        <div className='col-span-4 text-right'>
-                          <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
-                            {currentPriceText}
                           </div>
-                          {showOfficial && (
-                            <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
-                              {currentOfficialText}
+                          <div className='text-right flex flex-col justify-center min-h-[36px]'>
+                            <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
+                              {currentPriceText}
                             </div>
-                          )}
-                        </div>
-                        <div className='col-span-4 text-right'>
-                          <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
-                            {currentImgToImgPriceText}
+                            {showOfficial && (
+                              <div className='text-[10.5px] font-normal tabular-nums text-[#94A3B8] line-through leading-none mt-0.5'>
+                                {currentOfficialText}
+                              </div>
+                            )}
                           </div>
-                          {showOfficialImgToImg && (
-                            <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
-                              {currentOfficialImgToImgText}
+                          <div className='text-right flex flex-col justify-center min-h-[36px]'>
+                            <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
+                              {currentImgToImgPriceText}
                             </div>
-                          )}
+                            {showOfficialImgToImg && (
+                              <div className='text-[10.5px] font-normal tabular-nums text-[#94A3B8] line-through leading-none mt-0.5'>
+                                {currentOfficialImgToImgText}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
+                  <div className='border-t border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-[7px] text-right text-[11.5px] font-normal text-[#64748B] dark:border-border dark:bg-muted/30 dark:text-slate-400'>
+                    {hero.isPerImage
+                      ? `${t('Billing Unit:', '计费单位：')}/ ${t('image (unit)', '张')}`
+                      : `${t('Billing Unit:', '计费单位：')}/ 1M Tokens`}
+                  </div>
                 </div>
-                <div className='border-t border-border bg-slate-50 px-3.5 py-[7px] text-right text-[11.5px] font-medium text-slate-500 dark:bg-muted/30 dark:text-slate-400'>
-                  {hero.isPerImage
-                    ? `${t('Billing Unit:', '计费单位：')}/ ${t('image (unit)', '张')}`
-                    : `${t('Billing Unit:', '计费单位：')}/ 1M Tokens`}
-                </div>
-              </div>
+              )}
+            </div>
 
-              {/* Card Footer: clean, zero duplicate estimate note text */}
-              <div className='mt-auto pt-3 flex items-center justify-end border-t border-[#F1F5F9] dark:border-border/40'>
-                <span className='inline-flex items-center gap-[3px] text-[12.5px] font-medium text-[#2563EB]'>
-                  {t('Details', '详情')}
-                  <ArrowUpRight className='size-[13px] stroke-[2.2]' />
-                </span>
-              </div>
+            {/* Card Footer: clean, zero duplicate estimate note text */}
+            <div className='mt-auto pt-3.5 flex items-center justify-end border-t border-[#F1F5F9] dark:border-border/40'>
+              <span className='inline-flex items-center gap-[3px] text-[12.5px] font-medium text-[#2563EB] group-hover:underline'>
+                {t('Details', '详情')}
+                <ArrowUpRight className='size-[13px] stroke-[2.2]' />
+              </span>
             </div>
           </div>
         )

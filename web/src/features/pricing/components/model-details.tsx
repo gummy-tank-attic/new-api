@@ -63,9 +63,8 @@ import { requireServerSuccess } from '@/lib/server-error-message'
 import { cn } from '@/lib/utils'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 
-import { DEFAULT_TOKEN_UNIT, lookupModelSavingsOff } from '../constants'
+import { DEFAULT_TOKEN_UNIT } from '../constants'
 import { useBillingTime } from '../hooks/use-billing-time'
-import { resolveGroupSavingsOffPercent } from '../lib/group-discount'
 import { usePricingData } from '../hooks/use-pricing-data'
 import type { ParsedTaskTier } from '../lib/billing-expr'
 import { formatBillingCondition } from '../lib/billing-expression/condition-display'
@@ -104,7 +103,6 @@ import {
 import {
   formatHumanFriendlyTierLabel,
   getDurationVideoTiers,
-  getModelSpecificDiscountPercent,
   getModelSupportedResolutions,
   getResolutionBadgeStyle,
   getVideoModelTierGroups,
@@ -735,16 +733,15 @@ function VideoUpscaleGroupPricingSection(props: {
         <div className='mt-2 space-y-1.5 text-[11px] leading-relaxed text-muted-foreground'>
           <div>
             <span className='font-semibold text-foreground'>{isZh ? '1. 【Upscale 价格（按秒）】：' : '1. [Upscale Price (Per Sec)]: '}</span>
-            {isZh ? '目标清晰度的 Upscale 重建服务费（如 720p 为 $0.0091/秒，原价 $0.0130/秒）。' : 'Upscale service fee per second (e.g. 720p is $0.0091/s).'}
+            {isZh
+              ? '按目标清晰度收取超分重建服务费。'
+              : 'Upscale reconstruction fee by output resolution and duration.'}
           </div>
           <div>
             <span className='font-semibold text-foreground'>{isZh ? '2. 【视频价格（按 Token）】：' : '2. [Video Token Fee]: '}</span>
-            {isZh ? 'Upscale 生成视频时消耗的底模 Token，为 $7.18/1M Tokens（实测 6秒约消耗 10万 Tokens，约合 $0.61）。' : 'Underlying video model token usage (~100k tokens for 6s).'}
-          </div>
-          <div className='mt-1 pt-1.5 border-t border-blue-200/50 dark:border-blue-900/40 font-mono text-[10px] text-primary'>
             {isZh
-              ? '• 实测账目对照（以 6秒 720p 为例）：Upscale 费 6秒 × $0.0091/s ($0.055) + 102,880 Tokens ($0.612) = 实际扣费约 $0.66'
-              : '• Real Billing Example (6s 720p): Upscale 6s * $0.0091 ($0.055) + 102,880 Tokens ($0.612) = Total ~$0.66'}
+              ? '超分过程消耗的视频 Token 按实际用量计费。'
+              : 'Video tokens consumed during upscale are billed by actual usage.'}
           </div>
         </div>
       </div>
@@ -790,6 +787,7 @@ function VideoUpscaleGroupPricingSection(props: {
                     {tiers.map((tier) => {
                       const billedSecond = tier.secondPrice * ratio * props.priceRate
                       const officialSecond = tier.officialSecondPrice * props.priceRate
+                      const showList = officialSecond > 0 && billedSecond <= officialSecond + 1e-9
                       const tierDiscount =
                         officialSecond > 0 && billedSecond < officialSecond
                           ? Math.round((1 - billedSecond / officialSecond) * 100)
@@ -802,8 +800,12 @@ function VideoUpscaleGroupPricingSection(props: {
                           <div className='col-span-3 text-right font-mono font-bold text-foreground text-xs tabular-nums'>
                             ${billedSecond.toFixed(4)}/s
                           </div>
-                          <div className='col-span-3 text-right font-mono text-muted-foreground/60 line-through text-[11px] tabular-nums'>
-                            ${officialSecond.toFixed(4)}/s
+                          <div className='col-span-3 text-right font-mono text-muted-foreground/60 text-[11px] tabular-nums'>
+                            {showList ? (
+                              <span className='line-through'>${officialSecond.toFixed(4)}/s</span>
+                            ) : (
+                              <span className='text-muted-foreground/40'>-</span>
+                            )}
                           </div>
                           <div className='col-span-3 text-right'>
                             {tierDiscount != null ? (
@@ -843,6 +845,7 @@ function VideoUpscaleGroupPricingSection(props: {
                     {tiers.map((tier) => {
                       const billedToken = tier.tokenPricePerM * ratio * props.priceRate
                       const officialToken = tier.officialTokenPricePerM * props.priceRate
+                      const showList = officialToken > 0 && billedToken <= officialToken + 1e-9
                       const tokenDiscount =
                         officialToken > 0 && billedToken < officialToken
                           ? Math.round((1 - billedToken / officialToken) * 100)
@@ -855,8 +858,12 @@ function VideoUpscaleGroupPricingSection(props: {
                           <div className='col-span-3 text-right font-mono font-bold text-foreground text-xs tabular-nums'>
                             ${billedToken.toFixed(2)}/M
                           </div>
-                          <div className='col-span-3 text-right font-mono text-muted-foreground/60 line-through text-[11px] tabular-nums'>
-                            ${officialToken.toFixed(2)}/M
+                          <div className='col-span-3 text-right font-mono text-muted-foreground/60 text-[11px] tabular-nums'>
+                            {showList ? (
+                              <span className='line-through'>${officialToken.toFixed(2)}/M</span>
+                            ) : (
+                              <span className='text-muted-foreground/40'>-</span>
+                            )}
                           </div>
                           <div className='col-span-3 text-right'>
                             {tokenDiscount != null ? (
@@ -898,9 +905,6 @@ function DurationVideoModelGroupPricingSection(props: {
   const { t, i18n } = useTranslation()
   const isZh = i18n.language?.startsWith('zh') ?? true
   const tiers = getDurationVideoTiers(props.model)
-  const defaultModelDiscountOff =
-    lookupModelSavingsOff(props.model.model_name) ??
-    (getModelSpecificDiscountPercent(props.model.model_name) || null)
 
   return (
     <section className='space-y-3'>
@@ -914,13 +918,7 @@ function DurationVideoModelGroupPricingSection(props: {
             tiers[0].secondPrice * ratio < tiers[0].officialSecondPrice
               ? Math.round((1 - (tiers[0].secondPrice * ratio) / tiers[0].officialSecondPrice) * 100)
               : null
-          const groupDiscount =
-            resolveGroupSavingsOffPercent(
-              getConfiguredGroupRatio(props.groupRatio || {}, group)
-            ) ?? 0
-          const effectiveDiscount =
-            groupDynamicDurationSavings ??
-            (groupDiscount > 0 ? groupDiscount : defaultModelDiscountOff)
+          const effectiveDiscount = groupDynamicDurationSavings
           const showOfficial = effectiveDiscount != null
 
           return (
