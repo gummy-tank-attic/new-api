@@ -16,11 +16,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { createFileRoute } from '@tanstack/react-router'
+// ============================================================================
+// Home Page Types
+// ============================================================================
 
-import { Home } from '@/features/home'
+/**
+ * Response from home page content API
+ */
+export interface HomePageContentResponse {
+  success: boolean
+  message?: string
+  data?: string
+  /** Short SHA-256 prefix from the API for SWR cache invalidation. */
+  hash?: string
+}
 
-export const Route = createFileRoute('/')({
-  component: Home,
-})
-
+/**
+ * Home page content result from hook
+ */
+export interface HomePageContentResult {
+  content: string
+  isUrl: boolean
+}

@@ -32,10 +32,10 @@ test('global API clients do not force preflight-only headers', () => {
   }
 })
 
-test('root route renders the public pricing page', () => {
+test('root route renders the public home page', () => {
   const source = read('../../routes/index.tsx')
-  assert.match(source, /from '@\/features\/pricing'/)
-  assert.match(source, /component:\s*Pricing/)
+  assert.match(source, /from '@\/features\/home'/)
+  assert.match(source, /component:\s*Home/)
 })
 
 test('billing expr keeps peak unit prices under a trailing off-peak scale', () => {

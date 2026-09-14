@@ -30,11 +30,6 @@ const sourceChecks = [
     forbidden: "i18next-browser-languagedetector",
     message: 'LanguageDetector must not persist a temporary en locale',
   },
-  {
-    file: 'src/routes/index.tsx',
-    forbidden: "from '@/features/home'",
-    message: 'public / must stay the pricing page, not restore Home',
-  },
 ]
 
 for (const check of sourceChecks) {

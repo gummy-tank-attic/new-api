@@ -16,11 +16,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { createFileRoute } from '@tanstack/react-router'
+import { api } from '@/lib/api'
+import { PUBLIC_API_REQUEST_CONFIG } from '@/lib/http-client'
 
-import { Home } from '@/features/home'
+import type { HomePageContentResponse } from './types'
 
-export const Route = createFileRoute('/')({
-  component: Home,
-})
+// ============================================================================
+// Home Page APIs
+// ============================================================================
 
+/**
+ * Get custom home page content
+ * Returns Markdown/HTML content or iframe URL
+ */
+export async function getHomePageContent(): Promise<HomePageContentResponse> {
+  const res = await api.get('/api/home_page_content', {
+    ...PUBLIC_API_REQUEST_CONFIG,
+    headers: { 'Cache-Control': null },
+  })
+  return res.data
+}

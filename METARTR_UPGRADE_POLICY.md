@@ -71,7 +71,7 @@ Before merging or deploying an upstream update, preserve and regression-check:
 
 - page structure, navigation, header, footer, and responsive layout;
 - public header branding: strictly display only `[MR] MetaRtr` without `SystemUpdateAction` or version tags (`v1.0.0-*`); never leak internal build versions on the public header;
-- public `/` is the pricing page (`web/src/routes/index.tsx` renders `Pricing`, shared `search-schema.ts`). Do not restore upstream Home as the root route. If upstream re-adds `web/src/features/home/`, leave it unwired;
+- public `/` is the original Home page (`web/src/routes/index.tsx` renders `Home`). Public pricing is independently hosted at `/pricing` (`web/src/routes/pricing/index.tsx` renders `Pricing`);
 - image pricing presentation: GPT Image series must maintain the single `custom_4k` resolution badge and 1-line token-based pricing matrix table; do not restore multi-line wrapping presets (`1024×1024`, `1536×1024`, `1024×1536`);
 - international official benchmark pricing & dynamic savings: Z.ai & Kimi/Moonshot models must anchor their strikethrough baseline to official international USD prices (`web/src/features/pricing/lib/official-pricing.ts`). The frontend must dynamically calculate `% OFF` badges and strikethrough original prices from actual selling prices, never regressing to domestic RMB baselines or static hardcoded tables;
 - on merge conflict, keep MetaRtr (`ours`) for:
