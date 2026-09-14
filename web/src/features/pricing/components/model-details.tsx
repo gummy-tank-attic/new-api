@@ -450,7 +450,12 @@ function ModelBackendQuickStats(props: { model: PricingModel }) {
       key: 'resolutions',
       icon: Film,
       label: t('Resolutions', '支持分辨率'),
-      value: supportedRes.map((r) => getResolutionBadgeStyle(r).label).join(' · '),
+      value: supportedRes
+        .map((r) => {
+          const s = getResolutionBadgeStyle(r)
+          return s.key ? t(s.key, s.label) : s.label
+        })
+        .join(' · '),
       hint: t('Supported output resolutions', '模型支持输出的分辨率规格'),
     })
   }
@@ -688,7 +693,7 @@ function ModelHeader(props: { model: PricingModel }) {
                       variant='outline'
                       className={cn('text-[10px] px-1.5 py-0 font-medium', style.className)}
                     >
-                      {style.label}
+                      {style.key ? t(style.key, style.label) : style.label}
                     </Badge>
                   )
                 })}
