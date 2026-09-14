@@ -442,7 +442,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                             <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
                               ${billedNoVideo.toFixed(3)}
                             </div>
-                            {showOfficial && (
+                            {showOfficial && officialNoVideo > billedNoVideo + 0.0001 && (
                               <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
                                 ${officialNoVideo.toFixed(3)}
                               </div>
@@ -452,7 +452,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                             <div className='font-semibold text-foreground text-[13.5px] tabular-nums leading-tight'>
                               ${billedVideo.toFixed(3)}
                             </div>
-                            {showOfficial && (
+                            {showOfficial && officialVideo > billedVideo + 0.0001 && (
                               <div className='text-[11px] text-muted-foreground/55 line-through tabular-nums font-normal'>
                                 ${officialVideo.toFixed(3)}
                               </div>

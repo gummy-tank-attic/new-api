@@ -450,8 +450,8 @@ export function getSeedanceOfficialBenchmark(
 ): { none: number; video: number } | null {
   const name = modelName.toLowerCase()
   let versionKey: string | null = null
-  if (name.includes('2.5') && !name.startsWith('gpt-image')) versionKey = '2.5'
-  else if (name.includes('2.0') && !name.includes('4k') && !name.includes('fast')) versionKey = '2.0'
+  if (name.includes('2.5') && !name.startsWith('gpt-image') && !name.includes('upscale') && !name.includes('chaofen')) versionKey = '2.5'
+  else if (name.includes('2.0') && !name.includes('4k') && !name.includes('fast') && !name.includes('upscale') && !name.includes('chaofen')) versionKey = '2.0'
   else if (name.includes('4k')) versionKey = '4k'
   else if (name.includes('fast')) versionKey = 'fast'
   else if (name.includes('mini') && !name.includes('minimax')) versionKey = 'mini'
@@ -654,7 +654,7 @@ export function getDefaultVideoModelTierGroups(modelName: string): VideoTierGrou
 }
 
 export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
-  if (isDurationBasedVideoModel(model)) {
+  if (isDurationBasedVideoModel(model) || isVideoUpscaleModel(model)) {
     return []
   }
   const allowedResolutions = getModelSupportedResolutions(model)
@@ -1294,7 +1294,7 @@ export function getVideoModelHeroPrice(
           effectiveDiscount = computed
         }
       }
-      if (effectiveDiscount == null) {
+      if (effectiveDiscount == null && (!minOfficial || minBilled < minOfficial)) {
         effectiveDiscount = discountOff
       }
       const is4k = name.includes('4k')
@@ -1304,7 +1304,7 @@ export function getVideoModelHeroPrice(
       }
       return {
         priceText: dynamicPriceText,
-        officialPriceText: isGroupMode && minOfficial ? `$${minOfficial.toFixed(3)}` : null,
+        officialPriceText: isGroupMode && minOfficial && minOfficial > minBilled ? `$${minOfficial.toFixed(3)}` : null,
         unitText: is4k ? '/ 1M Tokens' : '/ 1M Tokens 起',
         unitKey: is4k ? 'videoPricing.unitPer1MTokens' : 'videoPricing.unitPer1MTokensFrom',
         isStartingPrice: !is4k,

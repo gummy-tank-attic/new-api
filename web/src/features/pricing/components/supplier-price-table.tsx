@@ -52,6 +52,7 @@ import {
 } from '../lib/price'
 import {
   getDurationVideoTiers,
+  getVideoModelHeroPrice,
   getVideoModelTierGroups,
   isByteDanceOrVideoModel,
   isDurationBasedVideoModel,
@@ -446,8 +447,18 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
               )
             }
           }
+          let tierModelSavings: number | null = null
+          if (
+            isByteDanceOrVideoModel(model) &&
+            !isDurationBasedVideoModel(model) &&
+            !isVideoUpscaleModel(model)
+          ) {
+            const hero = getVideoModelHeroPrice(model, isGroupMode, baseRatio * priceRate)
+            tierModelSavings = hero.discountOff
+          }
           const modelSavings =
             durationModelSavings ??
+            tierModelSavings ??
             lookupModelSavingsOff(model.model_name, actualInputPrice)
           const effectiveSavings = isGroupMode
             ? (modelSavings ?? savings)
@@ -676,7 +687,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                               </span>
                               <span className='text-foreground font-semibold tabular-nums'>
                                 ${noneBilled.toFixed(3)}
-                                {isGroupMode && (
+                                {isGroupMode && noneOff > noneBilled + 0.0001 && (
                                   <span className='text-muted-foreground/50 ml-1 text-[9.5px] font-normal line-through'>
                                     ${noneOff.toFixed(3)}
                                   </span>
@@ -689,7 +700,7 @@ export function SupplierPriceTable(props: SupplierPriceTableProps) {
                               </span>
                               <span className='text-foreground font-semibold tabular-nums'>
                                 ${videoBilled.toFixed(3)}
-                                {isGroupMode && (
+                                {isGroupMode && videoOff > videoBilled + 0.0001 && (
                                   <span className='text-muted-foreground/50 ml-1 text-[9.5px] font-normal line-through'>
                                     ${videoOff.toFixed(3)}
                                   </span>
