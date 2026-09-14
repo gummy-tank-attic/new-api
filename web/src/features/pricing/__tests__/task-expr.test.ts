@@ -783,5 +783,72 @@ describe('task visual pricing preview', () => {
     }
     assert.deepEqual(getModelSupportedResolutions(seedanceUpscale), ['720p', '1080p', '2k'])
   })
+
+  test('Seedance 2.5 aligns directly with expression billed prices and dynamically derives discount off official benchmarks', () => {
+    const liveExpression =
+      'u("resolution") == "480p" && u("video_input") == "none" ? tier("480p·none", u("tokens") * 10.165 / 1000000) : u("resolution") == "480p" && u("video_input") == "video" ? tier("480p·video", u("tokens") * 6.08 / 1000000) : u("resolution") == "720p" && u("video_input") == "none" ? tier("720p·none", u("tokens") * 10.165 / 1000000) : u("resolution") == "720p" && u("video_input") == "video" ? tier("720p·video", u("tokens") * 6.08 / 1000000) : u("resolution") == "1080p" && u("video_input") == "none" ? tier("1080p·none", u("tokens") * 11.115 / 1000000) : tier("1080p·video", u("tokens") * 6.65 / 1000000)'
+    const schema = {
+      tokens: { type: 'number' as const, unit: 'token' },
+      resolution: { enum: ['480p', '720p', '1080p', '4k'] },
+      video_input: { enum: ['none', 'video'] },
+    }
+
+    const model: PricingModel = {
+      id: 301,
+      model_name: 'seedance2.5',
+      vendor_name: 'ByteDance',
+      billing_mode: 'tiered_expr',
+      billing_expr: liveExpression,
+      billing_usage_schema: schema,
+      quota_type: 0,
+      model_ratio: 1,
+    }
+
+    // 1. Tier groups verification:
+    // Expression prices are 100% directly treated as actual billed prices without secondary discounts
+    const groups = getVideoModelTierGroups(model)
+    assert.equal(groups.length, 2)
+
+    const group720 = groups.find((g) => g.resolutions.includes('720p'))
+    assert.ok(group720)
+    assert.equal(group720.withoutVideoPrice, 10.165)
+    assert.equal(group720.withVideoPrice, 6.08)
+    assert.equal(group720.officialWithoutVideoPrice, 10.7)
+    assert.equal(group720.officialWithVideoPrice, 6.4)
+
+    const group1080 = groups.find((g) => g.resolutions.includes('1080p'))
+    assert.ok(group1080)
+    assert.equal(group1080.withoutVideoPrice, 11.115)
+    assert.equal(group1080.withVideoPrice, 6.65)
+    assert.equal(group1080.officialWithoutVideoPrice, 11.7)
+    assert.equal(group1080.officialWithVideoPrice, 7.0)
+
+    // 2. Hero starting price and dynamic discount badge:
+    // Min billed is $6.080, official benchmark is $6.400 -> (1 - 6.08 / 6.40) * 100 = 5% OFF!
+    const hero = getVideoModelHeroPrice(model, true, 1)
+    assert.equal(hero.priceText, '$6.080')
+    assert.equal(hero.officialPriceText, '$6.400')
+    assert.equal(hero.discountOff, 5)
+    assert.equal(hero.unitText, '/ 1M Tokens 起')
+
+    // 3. Official mode:
+    const officialHero = getVideoModelHeroPrice(model, false, 1)
+    assert.equal(officialHero.priceText, '$6.400')
+    assert.equal(officialHero.officialPriceText, null)
+    assert.equal(officialHero.discountOff, null)
+
+    // 4. Dynamic discount responsiveness: if admin changes expression to 10% off (5.76 / 9.63)
+    const expr10 =
+      'u("resolution") == "480p" && u("video_input") == "none" ? tier("480p·none", u("tokens") * 9.63 / 1000000) : u("resolution") == "480p" && u("video_input") == "video" ? tier("480p·video", u("tokens") * 5.76 / 1000000) : u("resolution") == "720p" && u("video_input") == "none" ? tier("720p·none", u("tokens") * 9.63 / 1000000) : u("resolution") == "720p" && u("video_input") == "video" ? tier("720p·video", u("tokens") * 5.76 / 1000000) : u("resolution") == "1080p" && u("video_input") == "none" ? tier("1080p·none", u("tokens") * 10.53 / 1000000) : tier("1080p·video", u("tokens") * 6.30 / 1000000)'
+    const model10: PricingModel = {
+      ...model,
+      billing_expr: expr10,
+    }
+    const hero10 = getVideoModelHeroPrice(model10, true, 1)
+    assert.equal(hero10.priceText, '$5.760')
+    assert.equal(hero10.officialPriceText, '$6.400')
+    assert.equal(hero10.discountOff, 10)
+  })
 })
+
 

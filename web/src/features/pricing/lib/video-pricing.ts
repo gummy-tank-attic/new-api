@@ -240,7 +240,7 @@ export function getResolutionBadgeStyle(res: string): { label: string; className
     return { label: '4K', className: neutralClass }
   }
   if (clean.includes('x') || clean.includes('×')) {
-    return { label: clean.replace(/x/g, '×'), className: neutralClass }
+    return { label: clean.replaceAll('x', '×'), className: neutralClass }
   }
   return {
     label: res.toUpperCase(),
@@ -409,13 +409,67 @@ export function getModelSpecificDiscountPercent(modelName: string): number {
   const name = modelName.toLowerCase()
   if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) return 25
   if (name.includes('minimax')) return 0
-  if (name.includes('mini')) return 50
   if (name.includes('upscale') || name.includes('chaofen')) return 30
-  if (name.includes('fast')) return 20
-  if (name.includes('2.0') && !name.includes('2.5') && !name.includes('4k')) return 16
-  if (name.includes('2.5') && !name.startsWith('gpt-image')) return 10
-  if (name.includes('4k')) return 10
   return 0
+}
+
+export const SEEDANCE_OFFICIAL_BENCHMARKS: Record<
+  string,
+  Record<string, { none: number; video: number }>
+> = {
+  '2.5': {
+    '480p·720p': { none: 10.7, video: 6.4 },
+    '480p': { none: 10.7, video: 6.4 },
+    '720p': { none: 10.7, video: 6.4 },
+    '1080p': { none: 11.7, video: 7.0 },
+  },
+  '2.0': {
+    '480p·720p': { none: 7.0, video: 4.3 },
+    '480p': { none: 7.0, video: 4.3 },
+    '720p': { none: 7.0, video: 4.3 },
+    '1080p': { none: 7.7, video: 4.7 },
+  },
+  '4k': {
+    '4k': { none: 4.0, video: 2.4 },
+  },
+  'fast': {
+    '480p·720p': { none: 5.6, video: 3.3 },
+    '480p': { none: 5.6, video: 3.3 },
+    '720p': { none: 5.6, video: 3.3 },
+  },
+  'mini': {
+    '480p·720p': { none: 3.5, video: 2.1 },
+    '480p': { none: 3.5, video: 2.1 },
+    '720p': { none: 3.5, video: 2.1 },
+  },
+}
+
+export function getSeedanceOfficialBenchmark(
+  modelName: string,
+  resList: string[]
+): { none: number; video: number } | null {
+  const name = modelName.toLowerCase()
+  let versionKey: string | null = null
+  if (name.includes('2.5') && !name.startsWith('gpt-image')) versionKey = '2.5'
+  else if (name.includes('2.0') && !name.includes('4k') && !name.includes('fast')) versionKey = '2.0'
+  else if (name.includes('4k')) versionKey = '4k'
+  else if (name.includes('fast')) versionKey = 'fast'
+  else if (name.includes('mini') && !name.includes('minimax')) versionKey = 'mini'
+
+  if (!versionKey) return null
+  const versionMap = SEEDANCE_OFFICIAL_BENCHMARKS[versionKey]
+  if (!versionMap) return null
+
+  if (resList.includes('480p') || resList.includes('720p')) {
+    return versionMap['480p·720p'] || versionMap['480p'] || versionMap['720p'] || null
+  }
+  if (resList.includes('1080p')) {
+    return versionMap['1080p'] || null
+  }
+  if (resList.includes('4k')) {
+    return versionMap['4k'] || null
+  }
+  return null
 }
 
 export function parseVideoUpscaleTiers(expression: string | null | undefined): VideoUpscaleTier[] {
@@ -516,10 +570,10 @@ export function getDefaultVideoModelTierGroups(modelName: string): VideoTierGrou
         title: '4K',
         resLabel: '4K',
         resolutions: ['4k'],
-        withoutVideoPrice: 5.913,
-        withVideoPrice: 5.913,
-        officialWithoutVideoPrice: 6.570,
-        officialWithVideoPrice: 6.570,
+        withoutVideoPrice: 3.6,
+        withVideoPrice: 2.16,
+        officialWithoutVideoPrice: 4.0,
+        officialWithVideoPrice: 2.4,
       },
     ]
   }
@@ -529,10 +583,10 @@ export function getDefaultVideoModelTierGroups(modelName: string): VideoTierGrou
         title: '480p · 720p',
         resLabel: '480p · 720p',
         resolutions: ['480p', '720p'],
-        withoutVideoPrice: 4.340,
-        withVideoPrice: 2.581,
-        officialWithoutVideoPrice: 5.425,
-        officialWithVideoPrice: 3.2258,
+        withoutVideoPrice: 4.48,
+        withVideoPrice: 2.64,
+        officialWithoutVideoPrice: 5.6,
+        officialWithVideoPrice: 3.3,
       },
     ]
   }
@@ -545,54 +599,54 @@ export function getDefaultVideoModelTierGroups(modelName: string): VideoTierGrou
         title: '480p · 720p',
         resLabel: '480p · 720p',
         resolutions: ['480p', '720p'],
-        withoutVideoPrice: 1.6862,
-        withVideoPrice: 1.0264,
-        officialWithoutVideoPrice: 3.3724,
-        officialWithVideoPrice: 2.0528,
+        withoutVideoPrice: 1.75,
+        withVideoPrice: 1.05,
+        officialWithoutVideoPrice: 3.5,
+        officialWithVideoPrice: 2.1,
       },
     ]
   }
-  if (name.includes('2.5')) {
+  if (name.includes('2.5') || name.includes('2-5')) {
     return [
       {
         title: '480p · 720p',
         resLabel: '480p · 720p',
         resolutions: ['480p', '720p'],
-        withoutVideoPrice: 9.237536,
-        withVideoPrice: 5.544,
-        officialWithoutVideoPrice: 10.263929,
-        officialWithVideoPrice: 6.160,
+        withoutVideoPrice: 10.165,
+        withVideoPrice: 6.08,
+        officialWithoutVideoPrice: 10.7,
+        officialWithVideoPrice: 6.4,
       },
       {
         title: '1080p',
         resLabel: '1080p',
         resolutions: ['1080p'],
-        withoutVideoPrice: 10.16129,
-        withVideoPrice: 6.070381,
-        officialWithoutVideoPrice: 11.290322,
-        officialWithVideoPrice: 6.744868,
+        withoutVideoPrice: 11.115,
+        withVideoPrice: 6.65,
+        officialWithoutVideoPrice: 11.7,
+        officialWithVideoPrice: 7.0,
       },
     ]
   }
-  if (name.includes('2.0')) {
+  if (name.includes('2.0') || name.includes('2-0')) {
     return [
       {
         title: '480p · 720p',
         resLabel: '480p · 720p',
         resolutions: ['480p', '720p'],
-        withoutVideoPrice: 5.6658,
-        withVideoPrice: 3.4487,
-        officialWithoutVideoPrice: 6.745,
-        officialWithVideoPrice: 4.1056,
+        withoutVideoPrice: 5.88,
+        withVideoPrice: 3.612,
+        officialWithoutVideoPrice: 7.0,
+        officialWithVideoPrice: 4.3,
       },
       {
         title: '1080p',
         resLabel: '1080p',
         resolutions: ['1080p'],
-        withoutVideoPrice: 6.2815,
-        withVideoPrice: 3.8182,
-        officialWithoutVideoPrice: 7.478,
-        officialWithVideoPrice: 4.5455,
+        withoutVideoPrice: 6.468,
+        withVideoPrice: 3.948,
+        officialWithoutVideoPrice: 7.7,
+        officialWithVideoPrice: 4.7,
       },
     ]
   }
@@ -657,10 +711,6 @@ export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
   for (const item of distinctTiers.values()) {
     let title = ''
     let resLabel = ''
-    let officialNone = item.none
-    let officialVideo = item.video
-    let billedNone = item.none
-    let billedVideo = item.video
 
     if (item.resList.includes('480p') && item.resList.includes('720p')) {
       title = '480p · 720p'
@@ -676,19 +726,23 @@ export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
       resLabel = item.resList.map((r) => r.toUpperCase()).join(' · ')
     }
 
-    const discountPercent = getModelSpecificDiscountPercent(modelName)
-    if (modelName.includes('fast') || modelName.includes('mini')) {
-      // Expressions define billed prices
-      billedNone = item.none
-      billedVideo = item.video > 0 ? item.video : item.none
-      officialNone = discountPercent > 0 ? Number((item.none / (1 - discountPercent / 100)).toFixed(4)) : item.none
-      officialVideo = discountPercent > 0 ? Number((billedVideo / (1 - discountPercent / 100)).toFixed(4)) : billedVideo
+    // 1. Expressions directly define actual billed prices (100% aligned with actual deduction)
+    const billedNone = item.none
+    const billedVideo = item.video > 0 ? item.video : item.none
+
+    // 2. Official base prices anchored strictly to official benchmarks
+    let officialNone = billedNone
+    let officialVideo = billedVideo
+    const benchmark = getSeedanceOfficialBenchmark(modelName, item.resList)
+    if (benchmark) {
+      officialNone = benchmark.none
+      officialVideo = benchmark.video
     } else {
-      // Expressions define official base prices (e.g. 2.5, 2.0, 4k)
-      officialNone = item.none
-      officialVideo = item.video > 0 ? item.video : item.none
-      billedNone = discountPercent > 0 ? Number((item.none * (1 - discountPercent / 100)).toFixed(6)) : item.none
-      billedVideo = discountPercent > 0 ? Number((officialVideo * (1 - discountPercent / 100)).toFixed(6)) : officialVideo
+      const discountPercent = getModelSpecificDiscountPercent(modelName)
+      if (discountPercent > 0 && discountPercent < 100) {
+        officialNone = Number((billedNone / (1 - discountPercent / 100)).toFixed(4))
+        officialVideo = Number((billedVideo / (1 - discountPercent / 100)).toFixed(4))
+      }
     }
 
     groups.push({
@@ -1212,115 +1266,50 @@ export function getVideoModelHeroPrice(
     }
   }
 
-  // Dynamic extraction from matrix tier groups if configured in backend billing_expr / schema
-  const matrixTiers = getTaskMatrixDisplayTiers(model.billing_expr, model.billing_usage_schema)
-  if (matrixTiers && matrixTiers.length > 0) {
-    const groups = getVideoModelTierGroups(model)
-    if (groups.length > 0) {
-      const validBilled = groups.flatMap((g) =>
-        [g.withVideoPrice, g.withoutVideoPrice].filter(
-          (p): p is number => typeof p === 'number' && p > 0
-        )
+  // Dynamic extraction from tier groups (configured in backend billing_expr / schema or fallback)
+  const groups = getVideoModelTierGroups(model)
+  if (groups.length > 0) {
+    const validBilled = groups.flatMap((g) =>
+      [g.withVideoPrice, g.withoutVideoPrice].filter(
+        (p): p is number => typeof p === 'number' && p > 0
       )
-      const validOfficial = groups.flatMap((g) =>
-        [g.officialWithVideoPrice, g.officialWithoutVideoPrice].filter(
-          (p): p is number => typeof p === 'number' && p > 0
-        )
+    )
+    const validOfficial = groups.flatMap((g) =>
+      [g.officialWithVideoPrice, g.officialWithoutVideoPrice].filter(
+        (p): p is number => typeof p === 'number' && p > 0
       )
-      if (validBilled.length > 0) {
-        const minBilled = Math.min(...validBilled) * rate
-        let minOfficial: number | null = null
-        if (validOfficial.length > 0) {
-          minOfficial = Math.min(...validOfficial) * rate
-        } else if (discountOff != null && discountOff < 100) {
-          minOfficial = minBilled / (1 - discountOff / 100)
-        }
-        let effectiveDiscount = discountOff
-        if (effectiveDiscount == null && minOfficial && minOfficial > minBilled) {
-          const computed = Math.round((1 - minBilled / minOfficial) * 100)
-          if (computed > 0) {
-            effectiveDiscount = computed
-          }
-        }
-        const is4k = name.includes('4k')
-        let dynamicPriceText = `$${minBilled.toFixed(3)}`
-        if (!isGroupMode && minOfficial) {
-          dynamicPriceText = `$${minOfficial.toFixed(3)}`
-        }
-        return {
-          priceText: dynamicPriceText,
-          officialPriceText: isGroupMode && minOfficial ? `$${minOfficial.toFixed(3)}` : null,
-          unitText: is4k ? '/ 1M Tokens' : '/ 1M Tokens 起',
-          unitKey: is4k ? 'videoPricing.unitPer1MTokens' : 'videoPricing.unitPer1MTokensFrom',
-          isStartingPrice: !is4k,
-          discountOff: effectiveDiscount,
+    )
+    if (validBilled.length > 0) {
+      const minBilled = Math.min(...validBilled) * rate
+      let minOfficial: number | null = null
+      if (validOfficial.length > 0) {
+        minOfficial = Math.min(...validOfficial) * rate
+      } else if (discountOff != null && discountOff < 100) {
+        minOfficial = minBilled / (1 - discountOff / 100)
+      }
+      let effectiveDiscount: number | null = null
+      if (minOfficial && minOfficial > minBilled) {
+        const computed = Math.round((1 - minBilled / minOfficial) * 100)
+        if (computed > 0) {
+          effectiveDiscount = computed
         }
       }
-    }
-  }
-
-  if (name.includes('mini')) {
-    const billed = 1.026 * rate
-    const official = 2.053 * rate
-    return {
-      priceText: isGroupMode ? `$${billed.toFixed(3)}` : `$${official.toFixed(3)}`,
-      officialPriceText: isGroupMode ? `$${official.toFixed(3)}` : null,
-      unitText: '/ 1M Tokens 起',
-      unitKey: 'videoPricing.unitPer1MTokensFrom',
-      isStartingPrice: true,
-      discountOff,
-    }
-  }
-
-  if (name.includes('fast')) {
-    const billed = 2.581 * rate
-    const official = 3.226 * rate
-    return {
-      priceText: isGroupMode ? `$${billed.toFixed(3)}` : `$${official.toFixed(3)}`,
-      officialPriceText: isGroupMode ? `$${official.toFixed(3)}` : null,
-      unitText: '/ 1M Tokens 起',
-      unitKey: 'videoPricing.unitPer1MTokensFrom',
-      isStartingPrice: true,
-      discountOff,
-    }
-  }
-
-  if ((name.includes('2.0') || name.includes('2-0')) && !name.includes('2.5') && !name.includes('2-5') && !name.includes('4k')) {
-    const billed = 3.449 * rate
-    const official = 4.106 * rate
-    return {
-      priceText: isGroupMode ? `$${billed.toFixed(3)}` : `$${official.toFixed(3)}`,
-      officialPriceText: isGroupMode ? `$${official.toFixed(3)}` : null,
-      unitText: '/ 1M Tokens 起',
-      unitKey: 'videoPricing.unitPer1MTokensFrom',
-      isStartingPrice: true,
-      discountOff,
-    }
-  }
-
-  if (name.includes('4k')) {
-    const billed = 5.913 * rate
-    const official = 6.57 * rate
-    return {
-      priceText: isGroupMode ? `$${billed.toFixed(3)}` : `$${official.toFixed(3)}`,
-      officialPriceText: isGroupMode ? `$${official.toFixed(3)}` : null,
-      unitText: '/ 1M Tokens',
-      unitKey: 'videoPricing.unitPer1MTokens',
-      isStartingPrice: false,
-      discountOff,
-    }
-  }
-
-  if (name.includes('2.5') || name.includes('2-5')) {
-    const billed = 5.544 * rate
-    const official = 6.16 * rate
-    return {
-      priceText: isGroupMode ? `$${billed.toFixed(3)}` : `$${official.toFixed(3)}`,
-      officialPriceText: isGroupMode ? `$${official.toFixed(3)}` : null,
-      unitText: '/ 1M Tokens 起',
-      unitKey: 'videoPricing.unitPer1MTokensFrom',
-      isStartingPrice: true,
-      discountOff,
+      if (effectiveDiscount == null) {
+        effectiveDiscount = discountOff
+      }
+      const is4k = name.includes('4k')
+      let dynamicPriceText = `$${minBilled.toFixed(3)}`
+      if (!isGroupMode && minOfficial) {
+        dynamicPriceText = `$${minOfficial.toFixed(3)}`
+      }
+      return {
+        priceText: dynamicPriceText,
+        officialPriceText: isGroupMode && minOfficial ? `$${minOfficial.toFixed(3)}` : null,
+        unitText: is4k ? '/ 1M Tokens' : '/ 1M Tokens 起',
+        unitKey: is4k ? 'videoPricing.unitPer1MTokens' : 'videoPricing.unitPer1MTokensFrom',
+        isStartingPrice: !is4k,
+        discountOff: isGroupMode ? effectiveDiscount : null,
+      }
     }
   }
 

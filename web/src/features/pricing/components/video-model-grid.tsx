@@ -87,11 +87,18 @@ export function VideoModelGrid(props: VideoModelGridProps) {
         const resolutions = getModelSupportedResolutions(model)
         const capTag = getVideoModelCapabilityTag(model.model_name)
         const tagline = getVideoModelTagline(model.model_name)
-        const modelRate = isGroupMode
-          ? (model.group_ratio && props.selectedGroup && typeof model.group_ratio[props.selectedGroup] === 'number'
-              ? model.group_ratio[props.selectedGroup] * (props.priceRate ?? 1)
-              : effectiveRate)
-          : 1
+        let modelRate = 1
+        if (isGroupMode) {
+          if (
+            model.group_ratio &&
+            props.selectedGroup &&
+            typeof model.group_ratio[props.selectedGroup] === 'number'
+          ) {
+            modelRate = model.group_ratio[props.selectedGroup] * (props.priceRate ?? 1)
+          } else {
+            modelRate = effectiveRate
+          }
+        }
         const durationTiers = isDurationBased
           ? getDurationVideoTiers(model)
           : []
@@ -103,10 +110,10 @@ export function VideoModelGrid(props: VideoModelGridProps) {
           durationTiers[0].secondPrice * durationRatio < durationTiers[0].officialSecondPrice
             ? Math.round((1 - (durationTiers[0].secondPrice * durationRatio) / durationTiers[0].officialSecondPrice) * 100)
             : null
-        const discountOff = isGroupMode
-          ? (dynamicDurationDiscount ?? lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || props.savings || null))
-          : null
         const hero = getVideoModelHeroPrice(model, isGroupMode, modelRate)
+        const discountOff = isGroupMode
+          ? (hero.discountOff ?? dynamicDurationDiscount ?? lookupModelSavingsOff(model.model_name) ?? (getModelSpecificDiscountPercent(model.model_name) || props.savings || null))
+          : null
         const tierGroups = isUpscale || isDurationBased ? [] : getVideoModelTierGroups(model)
         const upscaleTiers = isUpscale
           ? parseVideoUpscaleTiers(model.billing_expr)
