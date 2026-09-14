@@ -3008,13 +3008,13 @@
     "imagePricing.badge.gptImageClassic": "Clásico",
     "imagePricing.badge.sunburst": "Insignia",
     "imagePricing.badge.unfiltered": "Sin filtro",
-    "imagePricing.imageToImage": "Imagen a imagen (i2i)",
+    "imagePricing.imageToImage": "Imagen → Imagen",
     "imagePricing.tagline.flare": "Generación de imágenes ultrarrápida en menos de un segundo · Captura creativa rápida y renderizado ágil",
     "imagePricing.tagline.gptImageClassic": "Modelo multimodal clásico de trabajo · Cumplimiento nativo de instrucciones y creación consistente",
     "imagePricing.tagline.seedreamPro": "Creación de imágenes insignia de nueva generación · Generación realista de escenas complejas con iluminación y texturas auténticas",
     "imagePricing.tagline.seedreamUnfiltered": "Restricciones de moderación relajadas",
     "imagePricing.tagline.sunburst": "Creación de imágenes insignia de nueva generación · Iluminación, textura y fidelidad de escenas complejas superiores",
-    "imagePricing.textToImage": "Texto a imagen (t2i)",
+    "imagePricing.textToImage": "Texto → Imagen",
     "imagePricing.unfilteredCalloutBadge": "Libertad nativa",
     "imagePricing.unfilteredCalloutDesc": "Elimina por completo las restricciones de prompts y creatividad para liberar el diseño conceptual nativo y la imaginación de Seedream 5.0.",
     "imagePricing.unfilteredCalloutTitle": "Libertad creativa sin filtros",
@@ -7134,6 +7134,7 @@
     "pricing.with_video_short": "Con vídeo",
     "pricing.upscale_principle_badge": "Upscale",
     "pricing.upscale_principle_title": "Deep Learning y Superresolución",
-    "pricing.upscale_principle_desc": "Mejora la definición de vídeos de baja resolución mediante reconstrucción neuronal (el escalado de 480p a 720p conserva casi el 90% de detalle)."
+    "pricing.upscale_principle_desc": "Mejora la definición de vídeos de baja resolución mediante reconstrucción neuronal (el escalado de 480p a 720p conserva casi el 90% de detalle).",
+    "resolution.custom_4k": "Hasta 4K"
   }
 }

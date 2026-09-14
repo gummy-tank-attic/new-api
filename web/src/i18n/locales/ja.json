@@ -3008,13 +3008,13 @@
     "imagePricing.badge.gptImageClassic": "定番主力",
     "imagePricing.badge.sunburst": "万能旗艦",
     "imagePricing.badge.unfiltered": "審査緩和",
-    "imagePricing.imageToImage": "画像から画像生成 (i2i)",
+    "imagePricing.imageToImage": "画像→画像",
     "imagePricing.tagline.flare": "サブ秒級の超高速画像生成 · 迅速なアイデア具現化と俊敏なレンダリング",
     "imagePricing.tagline.gptImageClassic": "定番マルチモーダル画像主力 · ネイティブな指示追従と安定した画像生成",
     "imagePricing.tagline.seedreamPro": "次世代フラッグシップ画像生成 · 複雑な現実シーンの超高精細生成と自然な質感",
     "imagePricing.tagline.seedreamUnfiltered": "審査制限を緩和した自由なクリエイティブ生成",
     "imagePricing.tagline.sunburst": "次世代フラッグシップ画像生成 · 優れたライティング、テクスチャ、複雑なシーン表現",
-    "imagePricing.textToImage": "テキストから画像生成 (t2i)",
+    "imagePricing.textToImage": "テキスト→画像",
     "imagePricing.unfilteredCalloutBadge": "ネイティブな自由度",
     "imagePricing.unfilteredCalloutDesc": "プロンプトとクリエイティブ制限を完全解除し、Seedream 5.0 本来のコンセプトデザインと超現実的な想像力を引き出します。",
     "imagePricing.unfilteredCalloutTitle": "制限のないクリエイティブな自由",
@@ -7134,6 +7134,7 @@
     "pricing.with_video_short": "動画あり",
     "pricing.upscale_principle_badge": "超解像原理",
     "pricing.upscale_principle_title": "ディテール再描画と超解像",
-    "pricing.upscale_principle_desc": "ディープラーニングにより低解像度動画を高精細に復元。480pから720pへの超解像で約90%のディテールを再現します。"
+    "pricing.upscale_principle_desc": "ディープラーニングにより低解像度動画を高精細に復元。480pから720pへの超解像で約90%のディテールを再現します。",
+    "resolution.custom_4k": "最大 4K"
   }
 }

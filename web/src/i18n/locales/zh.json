@@ -7134,6 +7134,7 @@
     "pricing.with_video_short": "有视频",
     "pricing.upscale_principle_badge": "超分原理",
     "pricing.upscale_principle_title": "深度学习与细节重构",
-    "pricing.upscale_principle_desc": "基于深度学习对低分辨率视频进行细节重建与超分增强，如 480p 生成后超分至 720p 可获得近 90% 细节还原度。"
+    "pricing.upscale_principle_desc": "基于深度学习对低分辨率视频进行细节重建与超分增强，如 480p 生成后超分至 720p 可获得近 90% 细节还原度。",
+    "resolution.custom_4k": "自定义至 4K"
   }
 }

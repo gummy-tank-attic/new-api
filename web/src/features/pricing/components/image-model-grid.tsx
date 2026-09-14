@@ -183,7 +183,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                       key={res}
                       className='inline-flex items-center justify-center rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-[11px] font-semibold tracking-tight text-[#475569] tabular-nums dark:border-border dark:bg-muted/60 dark:text-muted-foreground whitespace-nowrap'
                     >
-                      {style.label}
+                      {style.key ? t(style.key, style.label) : style.label}
                     </span>
                   )
                 })}
@@ -253,7 +253,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                           )}
                         >
                           <div className='text-left text-[13px] font-semibold text-[var(--p-text-main,#111111)] dark:text-foreground'>
-                            {style.label}
+                            {style.key ? t(style.key, style.label) : style.label}
                           </div>
                           <div className='text-right flex flex-col justify-center min-h-[36px]'>
                             <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>

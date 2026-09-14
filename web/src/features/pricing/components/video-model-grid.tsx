@@ -218,7 +218,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                       key={res}
                       className='inline-flex items-center justify-center rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-[11px] font-semibold tracking-tight text-[#475569] tabular-nums dark:border-border dark:bg-muted/60 dark:text-muted-foreground whitespace-nowrap'
                     >
-                      {style.label}
+                      {style.key ? t(style.key, style.label) : style.label}
                     </span>
                   )
                 })}

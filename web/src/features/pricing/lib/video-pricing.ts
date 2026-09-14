@@ -226,14 +226,15 @@ export function getModelSupportedResolutions(model: PricingModel): string[] {
   return []
 }
 
-export function getResolutionBadgeStyle(res: string): { label: string; className: string } {
+export function getResolutionBadgeStyle(res: string): { label: string; key?: string; className: string } {
   const clean = res.trim().toLowerCase()
   const neutralClass =
-    'border-[#E2E8F0] bg-[#F1F5F9] text-[#334155] dark:border-border dark:bg-muted dark:text-foreground font-semibold'
+    'border-[#E2E8F0] bg-[#F8FAFC] text-[#475569] dark:border-border dark:bg-muted/60 dark:text-muted-foreground font-semibold'
 
   if (clean === 'custom_4k' || clean === 'custom' || clean.includes('自定义')) {
     return {
       label: '自定义至 4K',
+      key: 'resolution.custom_4k',
       className:
         'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-300 font-semibold',
     }

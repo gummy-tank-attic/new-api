@@ -167,7 +167,6 @@ export function getGroupMaxDiscount(
   return maxDiscount
 }
 
-/** Format manual 折 number for badge, e.g. 1 → "1折", 1.4 → "1.4折" */
 function formatManualZhe(value: number): string {
   if (!Number.isFinite(value) || value <= 0) return ''
   const label = Number.isInteger(value)
@@ -217,7 +216,7 @@ export function GroupPriceCards(props: GroupPriceCardsProps) {
         const ratio = getConfiguredGroupRatio(props.groupRatio, group)
         const zheRaw = lookupGroupMapValue(MANUAL_GROUP_ZHE, group)
         const zhe =
-          typeof zheRaw === 'number' && Number.isFinite(zheRaw)
+          isZh && typeof zheRaw === 'number' && Number.isFinite(zheRaw)
             ? formatManualZhe(zheRaw)
             : null
         // 任意分组：按倍率换算 N% off（Claude / Codex / DeepSeek / Grok / 智谱…）

@@ -378,7 +378,9 @@ export function DynamicPricingBreakdown({
                   </div>
                   <div className='mt-2.5 font-mono text-base font-bold text-foreground'>
                     ${(tier.secondPrice * rate).toFixed(4)}
-                    <span className='text-xs font-normal text-muted-foreground ml-1'>/ 秒 (Upscale)</span>
+                    <span className='text-xs font-normal text-muted-foreground ml-1'>
+                      {t('videoPricing.unitPerSecUpscale', '/ 秒 (Upscale)')}
+                    </span>
                   </div>
                   <div className='text-xs text-muted-foreground mt-0.5 font-mono'>
                     + ${(tier.tokenPricePerM * rate).toFixed(2)} / 1M tok

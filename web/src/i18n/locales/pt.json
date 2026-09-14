@@ -3008,13 +3008,13 @@
     "imagePricing.badge.gptImageClassic": "Clássico",
     "imagePricing.badge.sunburst": "Carro-chefe",
     "imagePricing.badge.unfiltered": "Sem filtro",
-    "imagePricing.imageToImage": "Imagem para imagem (i2i)",
+    "imagePricing.imageToImage": "Imagem → Imagem",
     "imagePricing.tagline.flare": "Geração de imagens ultrarrápida em menos de um segundo · Captura criativa rápida e renderização ágil",
     "imagePricing.tagline.gptImageClassic": "Modelo multimodal clássico de trabalho · Cumprimento nativo de instruções e criação consistente",
     "imagePricing.tagline.seedreamPro": "Criação de imagens de ponta de nova geração · Geração realista de cenas complexas com iluminação e texturas autênticas",
     "imagePricing.tagline.seedreamUnfiltered": "Restrições de moderação relaxadas",
     "imagePricing.tagline.sunburst": "Criação de imagens de ponta de nova geração · Iluminação, textura e fidelidade excepcionais em cenas complexas",
-    "imagePricing.textToImage": "Texto para imagem (t2i)",
+    "imagePricing.textToImage": "Texto → Imagem",
     "imagePricing.unfilteredCalloutBadge": "Liberdade nativa",
     "imagePricing.unfilteredCalloutDesc": "Remove totalmente as restrições de prompts e criatividade para liberar o design conceitual nativo do Seedream 5.0.",
     "imagePricing.unfilteredCalloutTitle": "Liberdade criativa sem filtros",
@@ -7134,6 +7134,7 @@
     "pricing.with_video_short": "Com vídeo",
     "pricing.upscale_principle_badge": "Upscale",
     "pricing.upscale_principle_title": "Deep Learning e Super-resolução",
-    "pricing.upscale_principle_desc": "Aumenta a nitidez de vídeos de baixa resolução por reconstrução neural (upscaling de 480p para 720p preserva cerca de 90% dos detalhes)."
+    "pricing.upscale_principle_desc": "Aumenta a nitidez de vídeos de baixa resolução por reconstrução neural (upscaling de 480p para 720p preserva cerca de 90% dos detalhes).",
+    "resolution.custom_4k": "Até 4K"
   }
 }

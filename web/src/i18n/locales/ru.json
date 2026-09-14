@@ -3008,13 +3008,13 @@
     "imagePricing.badge.gptImageClassic": "Классика",
     "imagePricing.badge.sunburst": "Флагман",
     "imagePricing.badge.unfiltered": "Без цензуры",
-    "imagePricing.imageToImage": "Изображение в изображение (i2i)",
+    "imagePricing.imageToImage": "Фото → Фото",
     "imagePricing.tagline.flare": "Субсекундная сверхбыстрая генерация · Мгновенное воплощение идей и гибкий рендеринг",
     "imagePricing.tagline.gptImageClassic": "Классическая мультимодальная рабочая лошадка · Точное следование инструкциям и стабильная генерация",
     "imagePricing.tagline.seedreamPro": "Флагманское создание изображений нового поколения · Реалистичная генерация сложных сцен с естественным освещением и текстурами",
     "imagePricing.tagline.seedreamUnfiltered": "Ослабленные ограничения модерации",
     "imagePricing.tagline.sunburst": "Флагманская генерация нового поколения · Превосходное освещение, текстуры и высокая точность сложных сцен",
-    "imagePricing.textToImage": "Текст в изображение (t2i)",
+    "imagePricing.textToImage": "Текст → Фото",
     "imagePricing.unfilteredCalloutBadge": "Полная свобода",
     "imagePricing.unfilteredCalloutDesc": "Полностью снимает ограничения промптов и творчества, раскрывая оригинальный концептуальный дизайн Seedream 5.0.",
     "imagePricing.unfilteredCalloutTitle": "Творческая свобода без ограничений",
@@ -7134,6 +7134,7 @@
     "pricing.with_video_short": "С видео",
     "pricing.upscale_principle_badge": "Upscale",
     "pricing.upscale_principle_title": "Глубокое обучение и сверхразрешение",
-    "pricing.upscale_principle_desc": "Повышает четкость видео низкого разрешения с помощью нейросетевой реконструкции (апскейл с 480p до 720p сохраняет до 90% деталей)."
+    "pricing.upscale_principle_desc": "Повышает четкость видео низкого разрешения с помощью нейросетевой реконструкции (апскейл с 480p до 720p сохраняет до 90% деталей).",
+    "resolution.custom_4k": "До 4K"
   }
 }

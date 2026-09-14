@@ -3008,13 +3008,13 @@
     "imagePricing.badge.gptImageClassic": "Kinh điển",
     "imagePricing.badge.sunburst": "Toàn năng",
     "imagePricing.badge.unfiltered": "Miễn duyệt",
-    "imagePricing.imageToImage": "Ảnh sang ảnh (i2i)",
+    "imagePricing.imageToImage": "Ảnh → Ảnh",
     "imagePricing.tagline.flare": "Tạo ảnh cực nhanh dưới một giây · Nắm bắt ý tưởng nhanh chóng và kết xuất linh hoạt",
     "imagePricing.tagline.gptImageClassic": "Mô hình tạo ảnh đa phương thức kinh điển · Tuân thủ chỉ dẫn chuẩn xác và tạo ảnh ổn định",
     "imagePricing.tagline.seedreamPro": "Mô hình tạo ảnh thế hệ mới đỉnh cao · Tạo cảnh thực tế phức tạp với ánh sáng và chi tiết sống động",
     "imagePricing.tagline.seedreamUnfiltered": "Nới lỏng giới hạn kiểm duyệt",
     "imagePricing.tagline.sunburst": "Mô hình tạo ảnh thế hệ mới đỉnh cao · Ánh sáng, kết cấu vượt trội và độ chân thực cao trong các cảnh phức tạp",
-    "imagePricing.textToImage": "Văn bản sang ảnh (t2i)",
+    "imagePricing.textToImage": "Văn bản → Ảnh",
     "imagePricing.unfilteredCalloutBadge": "Tự do nguyên bản",
     "imagePricing.unfilteredCalloutDesc": "Gỡ bỏ hoàn toàn các hạn chế về prompt và ý tưởng để giải phóng tối đa khả năng thiết kế ý niệm và trí tưởng tượng siêu thực của Seedream 5.0.",
     "imagePricing.unfilteredCalloutTitle": "Tự do sáng tạo không kiểm duyệt",
@@ -7134,6 +7134,7 @@
     "pricing.with_video_short": "Có video",
     "pricing.upscale_principle_badge": "Upscale",
     "pricing.upscale_principle_title": "Deep Learning & Siêu phân giải",
-    "pricing.upscale_principle_desc": "Tái tạo chi tiết và nâng cao độ nét video độ phân giải thấp bằng học sâu (nâng cấp từ 480p lên 720p đạt gần 90% độ chi tiết)."
+    "pricing.upscale_principle_desc": "Tái tạo chi tiết và nâng cao độ nét video độ phân giải thấp bằng học sâu (nâng cấp từ 480p lên 720p đạt gần 90% độ chi tiết).",
+    "resolution.custom_4k": "Tối đa 4K"
   }
 }
