@@ -7135,6 +7135,7 @@
     "pricing.upscale_principle_badge": "Upscale",
     "pricing.upscale_principle_title": "Глубокое обучение и сверхразрешение",
     "pricing.upscale_principle_desc": "Повышает четкость видео низкого разрешения с помощью нейросетевой реконструкции (апскейл с 480p до 720p сохраняет до 90% деталей).",
-    "resolution.custom_4k": "До 4K"
+    "resolution.custom_4k": "До 4K",
+    "imagePricing.tagline.default": "Профессиональная модель генерации изображений"
   }
 }

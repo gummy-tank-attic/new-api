@@ -7135,6 +7135,7 @@
     "pricing.upscale_principle_badge": "超分原理",
     "pricing.upscale_principle_title": "深度學習與細節重構",
     "pricing.upscale_principle_desc": "基於深度學習對低解析度影片進行細節重建與超分增強，如 480p 生成後超分至 720p 可獲得近 90% 細節還原度。",
-    "resolution.custom_4k": "自訂至 4K"
+    "resolution.custom_4k": "自訂至 4K",
+    "imagePricing.tagline.default": "專業 AI 影像生成與創作模型"
   }
 }

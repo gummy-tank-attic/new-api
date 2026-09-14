@@ -7135,6 +7135,7 @@
     "pricing.upscale_principle_badge": "Upscale",
     "pricing.upscale_principle_title": "Deep Learning & Siêu phân giải",
     "pricing.upscale_principle_desc": "Tái tạo chi tiết và nâng cao độ nét video độ phân giải thấp bằng học sâu (nâng cấp từ 480p lên 720p đạt gần 90% độ chi tiết).",
-    "resolution.custom_4k": "Tối đa 4K"
+    "resolution.custom_4k": "Tối đa 4K",
+    "imagePricing.tagline.default": "Mô hình tạo và sáng tạo hình ảnh AI chuyên nghiệp"
   }
 }

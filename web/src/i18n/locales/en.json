@@ -7135,6 +7135,7 @@
     "pricing.upscale_principle_badge": "Upscale",
     "pricing.upscale_principle_title": "Deep Learning & Detail Reconstruction",
     "pricing.upscale_principle_desc": "Enhances lower-resolution video to high definition via deep learning reconstruction, achieving ~90% detail fidelity when upscaling 480p to 720p.",
-    "resolution.custom_4k": "Up to 4K"
+    "resolution.custom_4k": "Up to 4K",
+    "imagePricing.tagline.default": "Professional AI image generation and creation model"
   }
 }

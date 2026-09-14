@@ -7135,6 +7135,7 @@
     "pricing.upscale_principle_badge": "Upscale",
     "pricing.upscale_principle_title": "Deep Learning & Super-résolution",
     "pricing.upscale_principle_desc": "Améliore la netteté des vidéos basse résolution par reconstruction neuronale. L'upscale 480p vers 720p restitue près de 90 % des détails.",
-    "resolution.custom_4k": "Jusqu'à 4K"
+    "resolution.custom_4k": "Jusqu'à 4K",
+    "imagePricing.tagline.default": "Modèle professionnel de génération et création d'images IA"
   }
 }
