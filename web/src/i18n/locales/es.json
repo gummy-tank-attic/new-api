@@ -7136,6 +7136,7 @@
     "pricing.upscale_principle_title": "Deep Learning y Superresolución",
     "pricing.upscale_principle_desc": "Mejora la definición de vídeos de baja resolución mediante reconstrucción neuronal (el escalado de 480p a 720p conserva casi el 90% de detalle).",
     "resolution.custom_4k": "Hasta 4K",
-    "imagePricing.tagline.default": "Modelo profesional de generación y creación de imágenes IA"
+    "imagePricing.tagline.default": "Modelo profesional de generación y creación de imágenes IA",
+    "pricing.no_telemetry_24h": "Sin datos de tráfico en las últimas 24 horas"
   }
 }

@@ -105,9 +105,13 @@ import {
   getDurationVideoTiers,
   getModelSupportedResolutions,
   getResolutionBadgeStyle,
+  getVideoModelCapabilityTag,
+  getVideoModelHeroPrice,
+  getVideoModelTagline,
   getVideoModelTierGroups,
   isByteDanceOrVideoModel,
   isDurationBasedVideoModel,
+  isImageModel,
   isVideoUpscaleModel,
   parseVideoUpscaleTiers,
 } from '../lib/video-pricing'
@@ -318,24 +322,33 @@ function OverviewSummaryGrid(props: { model: PricingModel }) {
         )
       : 0
 
+  const hasData = groups.length > 0
+
   return (
-    <div className='bg-muted/20 grid overflow-hidden rounded-lg border sm:grid-cols-3 sm:divide-x'>
-      <OverviewMetric
-        icon={Timer}
-        label='TPS'
-        value={formatThroughput(avgTps)}
-      />
-      <OverviewMetric
-        icon={Timer}
-        label={t('Average latency')}
-        value={formatLatency(avgLatency)}
-      />
-      <OverviewMetric
-        icon={HeartPulse}
-        label={t('Success rate')}
-        value={formatUptimePct(successRate)}
-        valueClassName={getSuccessRateTextClass(successRate)}
-      />
+    <div className='space-y-1.5'>
+      <div className='bg-muted/20 grid overflow-hidden rounded-lg border sm:grid-cols-3 sm:divide-x'>
+        <OverviewMetric
+          icon={Timer}
+          label='TPS'
+          value={formatThroughput(avgTps)}
+        />
+        <OverviewMetric
+          icon={Timer}
+          label={t('Average latency')}
+          value={formatLatency(avgLatency)}
+        />
+        <OverviewMetric
+          icon={HeartPulse}
+          label={t('Success rate')}
+          value={formatUptimePct(successRate)}
+          valueClassName={getSuccessRateTextClass(successRate)}
+        />
+      </div>
+      {!hasData && (
+        <div className='text-muted-foreground/65 flex items-center justify-center gap-1.5 px-2 py-0.5 text-[11px]'>
+          <span>{t('pricing.no_telemetry_24h', '近 24 小时暂无实测调用数据')}</span>
+        </div>
+      )}
     </div>
   )
 }
@@ -654,7 +667,14 @@ function ModelHeader(props: { model: PricingModel }) {
   const model = props.model
   const modelIconKey = model.icon || model.vendor_icon
   const modelIcon = modelIconKey ? getLobeIcon(modelIconKey, 20) : null
-  const description = model.description || model.vendor_description || null
+  const tagline = (isImageModel(model) || isByteDanceOrVideoModel(model))
+    ? getVideoModelTagline(model.model_name)
+    : null
+  const description =
+    model.description ||
+    model.vendor_description ||
+    (tagline ? t(tagline.key, tagline.defaultText) : null)
+  const capTag = getVideoModelCapabilityTag(model.model_name)
 
   return (
     <header className='pb-4'>
@@ -678,6 +698,17 @@ function ModelHeader(props: { model: PricingModel }) {
         )}
         <span className='text-muted-foreground/30'>·</span>
         <ModelBillingModeBadge model={model} />
+        {capTag && (
+          <>
+            <span className='text-muted-foreground/30'>·</span>
+            <Badge
+              variant='outline'
+              className={cn('text-[10px] px-1.5 py-0 font-medium', capTag.className)}
+            >
+              {capTag.key ? t(capTag.key, capTag.label) : capTag.label}
+            </Badge>
+          </>
+        )}
         {(() => {
           const resolutions = getModelSupportedResolutions(model)
           if (resolutions.length === 0) return null
@@ -1137,6 +1168,172 @@ function VideoModelGroupPricingSection(props: {
   )
 }
 
+function ImageModelGroupPricingSection(props: {
+  model: PricingModel
+  groupRatio: Record<string, number>
+  usableGroup: Record<string, string>
+  autoGroups: string[]
+  priceRate: number
+  availableGroups: string[]
+}) {
+  const { t } = useTranslation()
+  const resolutions = getModelSupportedResolutions(props.model)
+
+  return (
+    <section className='space-y-3'>
+      <AutoGroupChain model={props.model} autoGroups={props.autoGroups} />
+      <div className='space-y-3'>
+        {props.availableGroups.map((group) => {
+          const ratio = getConfiguredGroupRatio(props.groupRatio, group)
+          const effectiveRate = ratio * props.priceRate
+          const hero = getVideoModelHeroPrice(props.model, true, effectiveRate)
+          const discountOff = hero.discountOff
+
+          const hasImgToImg = resolutions.some((r) => {
+            const resKey = r.toLowerCase()
+            return hero.resolutionPrices?.[resKey]?.imgToImgPriceText != null
+          })
+
+          return (
+            <div
+              key={group}
+              className='overflow-hidden rounded-xl border border-border/70 bg-card/60 shadow-2xs'
+            >
+              <div className='bg-muted/30 flex items-center justify-between gap-3 border-b border-border/50 px-3.5 py-2.5'>
+                <GroupBadge group={group} size='sm' />
+                <div className='flex items-center gap-2'>
+                  {discountOff != null && discountOff > 0 && (
+                    <span className='rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'>
+                      {discountOff}% OFF
+                    </span>
+                  )}
+                  <span className='text-muted-foreground font-mono text-xs'>
+                    {ratio}x
+                  </span>
+                </div>
+              </div>
+
+              {resolutions.length > 0 ? (
+                <>
+                  <div
+                    className={cn(
+                      'grid bg-muted/50 border-b border-border/50 px-3.5 py-2 text-xs font-semibold text-muted-foreground',
+                      hasImgToImg ? 'grid-cols-12' : 'grid-cols-12'
+                    )}
+                  >
+                    <div className={hasImgToImg ? 'col-span-4' : 'col-span-6'}>
+                      {t('Resolution', '分辨率')}
+                    </div>
+                    <div
+                      className={cn(
+                        'text-right',
+                        hasImgToImg ? 'col-span-4' : 'col-span-6'
+                      )}
+                    >
+                      {hasImgToImg
+                        ? t('imagePricing.textToImage', '文生图')
+                        : t('Price', '价格')}
+                    </div>
+                    {hasImgToImg && (
+                      <div className='col-span-4 text-right'>
+                        {t('imagePricing.imageToImage', '图生图')}
+                      </div>
+                    )}
+                  </div>
+                  <div className='divide-y divide-border/40'>
+                    {resolutions.map((res) => {
+                      const resKey = res.toLowerCase()
+                      const resPrice = hero.resolutionPrices?.[resKey]
+                      const currentPriceText =
+                        resPrice?.priceText ?? hero.priceText
+                      const currentOfficialText =
+                        resPrice?.officialPriceText ?? hero.officialPriceText
+                      const currentImgToImgPriceText =
+                        resPrice?.imgToImgPriceText ?? currentPriceText
+                      const currentOfficialImgToImgText =
+                        resPrice?.officialImgToImgPriceText ??
+                        currentOfficialText
+                      const style = getResolutionBadgeStyle(res)
+                      const showOfficial = currentOfficialText != null
+                      const showOfficialImgToImg =
+                        currentOfficialImgToImgText != null
+
+                      return (
+                        <div
+                          key={res}
+                          className='grid grid-cols-12 items-center px-3.5 py-2.5 transition-colors hover:bg-muted/30'
+                        >
+                          <div
+                            className={cn(
+                              'font-bold text-foreground text-xs sm:text-sm',
+                              hasImgToImg ? 'col-span-4' : 'col-span-6'
+                            )}
+                          >
+                            {style.key ? t(style.key, style.label) : style.label}
+                          </div>
+                          <div
+                            className={cn(
+                              'text-right',
+                              hasImgToImg ? 'col-span-4' : 'col-span-6'
+                            )}
+                          >
+                            <div className='font-mono font-bold text-foreground text-xs sm:text-sm tabular-nums'>
+                              {currentPriceText}
+                            </div>
+                            {showOfficial && (
+                              <div className='text-[10px] text-muted-foreground/55 line-through font-mono'>
+                                {currentOfficialText}
+                              </div>
+                            )}
+                          </div>
+                          {hasImgToImg && (
+                            <div className='col-span-4 text-right'>
+                              <div className='font-mono font-bold text-foreground text-xs sm:text-sm tabular-nums'>
+                                {currentImgToImgPriceText}
+                              </div>
+                              {showOfficialImgToImg && (
+                                <div className='text-[10px] text-muted-foreground/55 line-through font-mono'>
+                                  {currentOfficialImgToImgText}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              ) : (
+                <div className='flex items-center justify-between px-3.5 py-3'>
+                  <span className='text-xs font-semibold text-muted-foreground'>
+                    {t('Starting Price', '起步价格')}
+                  </span>
+                  <div className='text-right'>
+                    <div className='font-mono font-bold text-foreground text-sm tabular-nums'>
+                      {hero.priceText}
+                    </div>
+                    {hero.officialPriceText && (
+                      <div className='text-[10px] text-muted-foreground/55 line-through font-mono'>
+                        {hero.officialPriceText}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className='border-t border-border/40 bg-muted/15 px-3.5 py-1.5 text-right text-[10px] text-muted-foreground/75'>
+                {hero.isPerImage
+                  ? `${t('pricing.billing_unit_label', '计费单位：')} ${t('imagePricing.unitPerImage', '/ 张')}`
+                  : `${t('pricing.billing_unit_label', '计费单位：')} ${t('videoPricing.unitPer1MTokens', '/ 1M Tokens')}`}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 // ----------------------------------------------------------------------------
 // Base price card (used in the Overview tab)
 // ----------------------------------------------------------------------------
@@ -1216,7 +1413,7 @@ function PriceSection(props: {
     },
   ]
 
-  if (isByteDanceOrVideoModel(props.model)) {
+  if (isByteDanceOrVideoModel(props.model) || isImageModel(props.model)) {
     return null
   }
 
@@ -1643,6 +1840,19 @@ function ProviderGroupPricingSection(
     }
     return (
       <VideoModelGroupPricingSection
+        model={props.model}
+        groupRatio={props.groupRatio}
+        usableGroup={props.usableGroup}
+        autoGroups={props.autoGroups}
+        priceRate={props.priceRate}
+        availableGroups={availableGroups}
+      />
+    )
+  }
+
+  if (isImageModel(props.model)) {
+    return (
+      <ImageModelGroupPricingSection
         model={props.model}
         groupRatio={props.groupRatio}
         usableGroup={props.usableGroup}
@@ -2094,6 +2304,7 @@ export function ModelDetailsContent(props: ModelDetailsContentProps) {
             {isDynamic &&
               !simpleTaskPricing &&
               !isByteDanceOrVideoModel(props.model) &&
+              !isImageModel(props.model) &&
               !isPerImageExpressionModel(props.model) && (
                 <DynamicPricingBreakdown
                   billingExpr={props.model.billing_expr}

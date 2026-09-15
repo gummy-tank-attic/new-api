@@ -7136,6 +7136,7 @@
     "pricing.upscale_principle_title": "ディテール再描画と超解像",
     "pricing.upscale_principle_desc": "ディープラーニングにより低解像度動画を高精細に復元。480pから720pへの超解像で約90%のディテールを再現します。",
     "resolution.custom_4k": "最大 4K",
-    "imagePricing.tagline.default": "プロ向け AI 画像生成・創作モデル"
+    "imagePricing.tagline.default": "プロ向け AI 画像生成・創作モデル",
+    "pricing.no_telemetry_24h": "過去24時間のトラフィックデータはありません"
   }
 }
