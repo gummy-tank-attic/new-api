@@ -980,7 +980,11 @@ function DurationVideoModelGroupPricingSection(props: {
       <AutoGroupChain model={props.model} autoGroups={props.autoGroups} />
       <div className='space-y-3'>
         {props.availableGroups.map((group) => {
-          const ratio = props.groupRatio[group] || 1
+          const ratio =
+            props.model.group_ratio &&
+            typeof props.model.group_ratio[group] === 'number'
+              ? props.model.group_ratio[group]
+              : getConfiguredGroupRatio(props.groupRatio, group)
           const groupDynamicDurationSavings =
             tiers.length > 0 &&
             tiers[0].officialSecondPrice != null &&
@@ -1105,7 +1109,11 @@ function VideoModelGroupPricingSection(props: {
       <AutoGroupChain model={props.model} autoGroups={props.autoGroups} />
       <div className='space-y-3'>
         {props.availableGroups.map((group) => {
-          const ratio = props.groupRatio[group] || 1
+          const ratio =
+            props.model.group_ratio &&
+            typeof props.model.group_ratio[group] === 'number'
+              ? props.model.group_ratio[group]
+              : getConfiguredGroupRatio(props.groupRatio, group)
           const firstGroup = groups[0]
           const groupDynamicDiscount = (() => {
             if (firstGroup && firstGroup.withoutVideoPrice > 0 && firstGroup.officialWithoutVideoPrice) {
@@ -1202,7 +1210,11 @@ function ImageModelGroupPricingSection(props: {
       <AutoGroupChain model={props.model} autoGroups={props.autoGroups} />
       <div className='space-y-3'>
         {props.availableGroups.map((group) => {
-          const ratio = getConfiguredGroupRatio(props.groupRatio, group)
+          const ratio =
+            props.model.group_ratio &&
+            typeof props.model.group_ratio[group] === 'number'
+              ? props.model.group_ratio[group]
+              : getConfiguredGroupRatio(props.groupRatio, group)
           const effectiveRate = ratio * props.priceRate
           const hero = getVideoModelHeroPrice(props.model, true, effectiveRate)
           const discountOff = hero.discountOff

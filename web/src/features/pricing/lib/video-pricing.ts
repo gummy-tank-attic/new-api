@@ -702,7 +702,11 @@ export function getDefaultVideoModelTierGroups(modelName: string): VideoTierGrou
 }
 
 export function getVideoModelTierGroups(model: PricingModel): VideoTierGroup[] {
-  if (isDurationBasedVideoModel(model) || isVideoUpscaleModel(model)) {
+  if (
+    isDurationBasedVideoModel(model) ||
+    isVideoUpscaleModel(model) ||
+    isImageModel(model)
+  ) {
     return []
   }
   const allowedResolutions = getModelSupportedResolutions(model)
