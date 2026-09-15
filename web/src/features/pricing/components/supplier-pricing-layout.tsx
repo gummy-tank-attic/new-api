@@ -156,32 +156,58 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
         // Single Category: Pure video vendor
         if (activeCategoryCount === 1 && videoModels.length > 0) {
           return (
-            <VideoModelGrid
-              models={videoModels}
-              priceMode={props.priceMode}
-              selectedGroup={props.selectedGroup}
-              groupRatio={props.groupRatio}
-              priceRate={props.priceRate}
-              usdExchangeRate={props.usdExchangeRate}
-              savings={savings}
-              onModelClick={props.onModelClick}
-            />
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2.5'>
+                <div className='flex size-7 shrink-0 items-center justify-center rounded-full border border-purple-300 bg-purple-50 text-purple-600 dark:border-purple-700/60 dark:bg-purple-950/40 dark:text-purple-400'>
+                  <Film className='size-3.5' />
+                </div>
+                <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
+                  {t('pricing.section.videoModels', '视频生成模型')}
+                </h3>
+                <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'>
+                  {videoModels.length}
+                </span>
+              </div>
+              <VideoModelGrid
+                models={videoModels}
+                priceMode={props.priceMode}
+                selectedGroup={props.selectedGroup}
+                groupRatio={props.groupRatio}
+                priceRate={props.priceRate}
+                usdExchangeRate={props.usdExchangeRate}
+                savings={savings}
+                onModelClick={props.onModelClick}
+              />
+            </div>
           )
         }
 
         // Single Category: Pure image vendor
         if (activeCategoryCount === 1 && imageModels.length > 0) {
           return (
-            <ImageModelGrid
-              models={imageModels}
-              priceMode={props.priceMode}
-              selectedGroup={props.selectedGroup}
-              groupRatio={props.groupRatio}
-              priceRate={props.priceRate}
-              usdExchangeRate={props.usdExchangeRate}
-              savings={savings}
-              onModelClick={props.onModelClick}
-            />
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2.5'>
+                <div className='flex size-7 shrink-0 items-center justify-center rounded-full border border-emerald-300 bg-emerald-50 text-emerald-600 dark:border-emerald-700/60 dark:bg-emerald-950/40 dark:text-emerald-400'>
+                  <ImageIcon className='size-3.5' />
+                </div>
+                <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
+                  {t('pricing.section.imageModels', '图像生成模型')}
+                </h3>
+                <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'>
+                  {imageModels.length}
+                </span>
+              </div>
+              <ImageModelGrid
+                models={imageModels}
+                priceMode={props.priceMode}
+                selectedGroup={props.selectedGroup}
+                groupRatio={props.groupRatio}
+                priceRate={props.priceRate}
+                usdExchangeRate={props.usdExchangeRate}
+                savings={savings}
+                onModelClick={props.onModelClick}
+              />
+            </div>
           )
         }
 
@@ -207,13 +233,13 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
             {standardModels.length > 0 && (
               <div className='space-y-4'>
                 <div className='flex items-center gap-2.5'>
-                  <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-400'>
+                  <div className='flex size-7 shrink-0 items-center justify-center rounded-full border border-blue-300 bg-blue-50 text-blue-600 dark:border-blue-700/60 dark:bg-blue-950/40 dark:text-blue-400'>
                     <MessageSquare className='size-3.5' />
                   </div>
                   <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
                     {t('pricing.section.textModels', '语言与对话模型')}
                   </h3>
-                  <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums'>
+                  <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'>
                     {standardModels.length}
                   </span>
                 </div>
@@ -233,13 +259,13 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
             {imageModels.length > 0 && (
               <div className={cn('space-y-4', standardModels.length > 0 && 'pt-6 border-t border-border/50')}>
                 <div className='flex items-center gap-2.5'>
-                  <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-400'>
+                  <div className='flex size-7 shrink-0 items-center justify-center rounded-full border border-emerald-300 bg-emerald-50 text-emerald-600 dark:border-emerald-700/60 dark:bg-emerald-950/40 dark:text-emerald-400'>
                     <ImageIcon className='size-3.5' />
                   </div>
                   <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
                     {t('pricing.section.imageModels', '图像生成模型')}
                   </h3>
-                  <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums'>
+                  <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'>
                     {imageModels.length}
                   </span>
                 </div>
@@ -260,13 +286,13 @@ export function SupplierPricingLayout(props: SupplierPricingLayoutProps) {
             {videoModels.length > 0 && (
               <div className={cn('space-y-4', (standardModels.length > 0 || imageModels.length > 0) && 'pt-6 border-t border-border/50')}>
                 <div className='flex items-center gap-2.5'>
-                  <div className='flex size-6.5 shrink-0 items-center justify-center rounded-lg border border-purple-200 bg-purple-50 text-purple-600 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-400'>
+                  <div className='flex size-7 shrink-0 items-center justify-center rounded-full border border-purple-300 bg-purple-50 text-purple-600 dark:border-purple-700/60 dark:bg-purple-950/40 dark:text-purple-400'>
                     <Film className='size-3.5' />
                   </div>
                   <h3 className='text-[16.5px] font-semibold tracking-[-0.01em] text-[#0F172A] dark:text-foreground'>
                     {t('pricing.section.videoModels', '视频生成模型')}
                   </h3>
-                  <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums'>
+                  <span className='rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2 py-[1.5px] text-xs font-semibold leading-[1.4] text-[#334155] tabular-nums dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'>
                     {videoModels.length}
                   </span>
                 </div>
