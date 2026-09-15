@@ -73,8 +73,16 @@ export function isImageModel(model: PricingModel | string): boolean {
   if (name.includes('flux') || name.includes('midjourney') || name.startsWith('mj_') || name.startsWith('mj-')) return true
   if (name.startsWith('gpt-image') || name.startsWith('dall-e')) return true
   if (name.includes('grok-imagine-image')) return true
+  if (name.includes('vidu-q2') || name.includes('vidu_q2') || (name.includes('vidu') && (name.includes('image') || name.includes('q2')))) return true
   if (typeof model !== 'string') {
     if (model.supported_endpoint_types?.includes('image-generation') && !name.includes('video')) return true
+    if (
+      model.billing_expr &&
+      (model.billing_expr.includes('image_url') || model.billing_expr.includes('image_count') || model.billing_expr.includes('data:image')) &&
+      !name.includes('video')
+    ) {
+      return true
+    }
   }
   return false
 }
@@ -169,6 +177,9 @@ export function getModelSupportedResolutions(model: PricingModel): string[] {
   }
   if (name.includes('seedream')) {
     return ['1k', '2k']
+  }
+  if (name.includes('vidu-q2') || name.includes('vidu_q2') || (name.includes('vidu') && name.includes('q2'))) {
+    return ['1k', '2k', '4k']
   }
   // 官方权威 Seedance 视频规格约束（杜绝共享插件通配 4k 枚举污染）
   if (name.includes('upscale') || name.includes('chaofen')) {
@@ -286,6 +297,14 @@ export function getVideoModelCapabilityTag(modelName: string): {
     }
     return {
       key: 'imagePricing.badge.flagship',
+      label: '旗舰生图',
+      className:
+        'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300',
+    }
+  }
+  if (name.includes('vidu-q2') || name.includes('vidu_q2') || (name.includes('vidu') && (name.includes('image') || name.includes('q2')))) {
+    return {
+      key: 'imagePricing.badge.vidu',
       label: '旗舰生图',
       className:
         'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300',
@@ -890,6 +909,12 @@ export function getVideoModelTagline(modelName: string): {
       defaultText: '新一代旗舰图像创作 · 支持复杂真实场景超高清生成，质感更自然逼真',
     }
   }
+  if (name.includes('vidu-q2') || name.includes('vidu_q2') || (name.includes('vidu') && (name.includes('image') || name.includes('q2')))) {
+    return {
+      key: 'imagePricing.tagline.viduq2',
+      defaultText: '新一代多模态旗舰生图 · 支持 1K/2K/4K 高清文生图与图生图',
+    }
+  }
   if (name.includes('minimax-h3') || name.includes('h3') || name.includes('hailuo')) {
     return {
       key: 'videoPricing.tagline.h3',
@@ -1049,6 +1074,80 @@ export function parseImageModelPricing(
   }
 
   const formatImgPrice = (v: number) => stripTrailingZeros(`$${v.toFixed(5)}`)
+  const formatImgPrice6 = (v: number) => stripTrailingZeros(`$${v.toFixed(6)}`)
+
+  if (name.includes('vidu-q2') || name.includes('vidu_q2') || (name.includes('vidu') && (name.includes('image') || name.includes('q2')))) {
+    const officialT2I: Record<string, number> = { '1k': 0.0275, '2k': 0.0366, '4k': 0.0458 }
+    const officialI2I: Record<string, number> = { '1k': 0.0366, '2k': 0.0549, '4k': 0.0733 }
+
+    let actualT2I: Record<string, number> = { '1k': 0.023375, '2k': 0.031110, '4k': 0.038930 }
+    let actualI2I: Record<string, number> = { '1k': 0.031110, '2k': 0.046665, '4k': 0.062305 }
+
+    const tierFixedMatches = [
+      ...expr.matchAll(/tier\s*\(\s*["']([^"']+)["']\s*,\s*fixed\(\s*["']?([\d.]+)["']?\s*\)\s*\)/gi),
+    ]
+    if (tierFixedMatches.length >= 6) {
+      const i2iMatches = tierFixedMatches.slice(0, 3)
+      const t2iMatches = tierFixedMatches.slice(3, 6)
+      for (const m of i2iMatches) {
+        const k = m[1].toLowerCase()
+        if (actualI2I[k] !== undefined) actualI2I[k] = Number(m[2])
+      }
+      for (const m of t2iMatches) {
+        const k = m[1].toLowerCase()
+        if (actualT2I[k] !== undefined) actualT2I[k] = Number(m[2])
+      }
+    } else if (tierFixedMatches.length > 0) {
+      for (const m of tierFixedMatches) {
+        const k = m[1].toLowerCase()
+        if (actualT2I[k] !== undefined) actualT2I[k] = Number(m[2])
+      }
+    }
+
+    const resolutionPrices: Record<string, ImageResolutionPrice> = {}
+    for (const res of ['1k', '2k', '4k']) {
+      const actT2I = actualT2I[res] * rate
+      const actI2I = actualI2I[res] * rate
+      const offT2I = officialT2I[res] * rate
+      const offI2I = officialI2I[res] * rate
+
+      const displayT2IVal = isGroupMode ? actT2I : offT2I
+      const displayOfficialT2IVal = isGroupMode ? offT2I : null
+      const displayI2IVal = isGroupMode ? actI2I : offI2I
+      const displayOfficialI2IVal = isGroupMode ? offI2I : null
+
+      resolutionPrices[res] = {
+        priceText: formatImgPrice6(displayT2IVal),
+        officialPriceText:
+          displayOfficialT2IVal != null ? formatImgPrice6(displayOfficialT2IVal) : null,
+        price: displayT2IVal,
+        officialPrice: displayOfficialT2IVal,
+        imgToImgPriceText: formatImgPrice6(displayI2IVal),
+        officialImgToImgPriceText:
+          displayOfficialI2IVal != null ? formatImgPrice6(displayOfficialI2IVal) : null,
+      }
+    }
+
+    const baseActual1k = actualT2I['1k'] * rate
+    const baseOfficial1k = officialT2I['1k'] * rate
+    const dynamicDiscountOff = isGroupMode
+      ? percentOff(baseActual1k, baseOfficial1k)
+      : null
+    const display1k = isGroupMode ? baseActual1k : baseOfficial1k
+    const displayOfficial1k = isGroupMode ? baseOfficial1k : null
+
+    return {
+      priceText: formatImgPrice6(display1k),
+      officialPriceText:
+        displayOfficial1k != null ? formatImgPrice6(displayOfficial1k) : null,
+      unitText: '/ 张 起',
+      unitKey: 'imagePricing.unitPerImageFrom',
+      isStartingPrice: true,
+      discountOff: dynamicDiscountOff,
+      isPerImage: true,
+      resolutionPrices,
+    }
+  }
 
   if (isPerImageExpr || (model.quota_type === 1 && !tokenMatch)) {
     let basePrice = 0.02925

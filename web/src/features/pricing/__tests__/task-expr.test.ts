@@ -1053,6 +1053,54 @@ describe('task visual pricing preview', () => {
     assert.equal(hero.officialPriceText, '$3.300')
     assert.equal(hero.discountOff, 20)
   })
+
+  test('Vidu-q2 is recognized as image model with 1K/2K/4K text-to-image and image-to-image pricing matrix', async () => {
+    const { isImageModel, getModelSupportedResolutions, getVideoModelHeroPrice } =
+      await import('../lib/video-pricing')
+
+    assert.equal(isImageModel('Vidu-q2'), true)
+    assert.equal(isImageModel('vidu-q2'), true)
+
+    const expr =
+      '(has(param("messages"), "image_url") || has(param("messages"), "data:image")) ? ((has(param("size"), "4k") || has(param("size"), "4K") || has(param("size"), "4096") || has(param("resolution"), "4k") || has(param("resolution"), "4K")) ? tier("4k", fixed(0.062305)) : (has(param("size"), "2k") || has(param("size"), "2K") || has(param("size"), "2048") || has(param("size"), "2560") || has(param("resolution"), "2k") || has(param("resolution"), "2K")) ? tier("2k", fixed(0.046665)) : tier("1k", fixed(0.031110))) : ((has(param("size"), "4k") || has(param("size"), "4K") || has(param("size"), "4096") || has(param("resolution"), "4k") || has(param("resolution"), "4K")) ? tier("4k", fixed(0.038930)) : (has(param("size"), "2k") || has(param("size"), "2K") || has(param("size"), "2048") || has(param("size"), "2560") || has(param("resolution"), "2k") || has(param("resolution"), "2K")) ? tier("2k", fixed(0.031110)) : tier("1k", fixed(0.023375)))'
+
+    const model: PricingModel = {
+      id: 301,
+      model_name: 'Vidu-q2',
+      quota_type: 1,
+      model_ratio: 1,
+      billing_mode: 'tiered_expr',
+      billing_expr: expr,
+    }
+
+    assert.deepEqual(getModelSupportedResolutions(model), ['1k', '2k', '4k'])
+
+    const hero = getVideoModelHeroPrice(model, true, 1)
+    assert.equal(hero.isPerImage, true)
+    assert.equal(hero.unitText, '/ 张 起')
+    assert.equal(hero.priceText, '$0.023375')
+    assert.equal(hero.officialPriceText, '$0.0275')
+    assert.equal(hero.discountOff, 15)
+
+    // Check 1k, 2k, 4k resolution matrices
+    const res1k = hero.resolutionPrices?.['1k']
+    assert.equal(res1k?.priceText, '$0.023375')
+    assert.equal(res1k?.officialPriceText, '$0.0275')
+    assert.equal(res1k?.imgToImgPriceText, '$0.03111')
+    assert.equal(res1k?.officialImgToImgPriceText, '$0.0366')
+
+    const res2k = hero.resolutionPrices?.['2k']
+    assert.equal(res2k?.priceText, '$0.03111')
+    assert.equal(res2k?.officialPriceText, '$0.0366')
+    assert.equal(res2k?.imgToImgPriceText, '$0.046665')
+    assert.equal(res2k?.officialImgToImgPriceText, '$0.0549')
+
+    const res4k = hero.resolutionPrices?.['4k']
+    assert.equal(res4k?.priceText, '$0.03893')
+    assert.equal(res4k?.officialPriceText, '$0.0458')
+    assert.equal(res4k?.imgToImgPriceText, '$0.062305')
+    assert.equal(res4k?.officialImgToImgPriceText, '$0.0733')
+  })
 })
 
 

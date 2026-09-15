@@ -63,8 +63,8 @@
   - 即使父组件已使用 `useTranslation()`，子组件仍应自行使用，以保证独立性。
 - **专有名词**：品牌、产品、技术术语等可保留英文（如 API、React、TypeScript）；若有约定俗成的译法则使用翻译。
 - **翻译键**：使用有层级、语义清晰的键名，如 `dashboard.overview.title`，并保持命名一致。
-- **语言包 JSON 必须嵌套在 `translation` 命名空间内部**：所有 7 语 `locales/*.json` 文件必须包裹在 `{ "translation": { ... } }` 对象中，**严禁**在 JSON 最外层平铺添加 key，否则 i18next 将无法识别并静默回退显示英文 key。
-- **启动：** `index.html` 检测语言并并行 `fetch /locales/{当前语}.json`；`initI18n()` 只消费该预取。禁止 7 语进主包、禁止主包下完再拉当前语、禁止 `i18next-browser-languagedetector`。权威：仓库 `docs/FRONTEND_I18N.md`。
+- **语言包 JSON 必须嵌套在 `translation` 命名空间内部**：所有 9 语系 `locales/*.json` 文件必须包裹在 `{ "translation": { ... } }` 对象中，**严禁**在 JSON 最外层平铺添加 key，否则 i18next 将无法识别并静默回退显示英文 key。
+- **启动：** `index.html` 检测语言并并行 `fetch /locales/{当前语}.json`；`initI18n()` 只消费该预取。禁止 9 语同步打入主包、禁止主包下完再拉当前语、禁止 `i18next-browser-languagedetector`。权威：仓库 `docs/FRONTEND_I18N.md`。
 
 - **枚举与文案（常量中的 i18n）**
   各 feature 的 `constants.ts` 中常出现「枚举/状态 + 展示文案」或「成功/错误消息」，须统一约定以免遗漏 i18n、用法混乱：
