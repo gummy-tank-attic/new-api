@@ -405,8 +405,17 @@ function ModalityLabels(props: { items: string[] }) {
 function ModelBackendQuickStats(props: { model: PricingModel }) {
   const { t } = useTranslation()
   const model = props.model
-  const inputModalities = normalizeCatalogItems(model.input_modalities)
-  const outputModalities = normalizeCatalogItems(model.output_modalities)
+  let inputModalities = normalizeCatalogItems(model.input_modalities)
+  let outputModalities = normalizeCatalogItems(model.output_modalities)
+  if (inputModalities.length === 0 && outputModalities.length === 0) {
+    if (isImageModel(model)) {
+      inputModalities = ['text', 'image']
+      outputModalities = ['image']
+    } else if (isByteDanceOrVideoModel(model)) {
+      inputModalities = ['text', 'image']
+      outputModalities = ['video']
+    }
+  }
   const contextLength = model.context_length ?? 0
   const maxOutput = model.max_output_tokens ?? 0
   const knowledgeCutoff = formatCatalogYearMonth(model.knowledge_cutoff)
@@ -524,8 +533,17 @@ function ModelBackendQuickStats(props: { model: PricingModel }) {
 function ModelBackendSignalsSection(props: { model: PricingModel }) {
   const { t } = useTranslation()
   const capabilities = normalizeCatalogItems(props.model.capabilities)
-  const inputModalities = normalizeCatalogItems(props.model.input_modalities)
-  const outputModalities = normalizeCatalogItems(props.model.output_modalities)
+  let inputModalities = normalizeCatalogItems(props.model.input_modalities)
+  let outputModalities = normalizeCatalogItems(props.model.output_modalities)
+  if (inputModalities.length === 0 && outputModalities.length === 0) {
+    if (isImageModel(props.model)) {
+      inputModalities = ['text', 'image']
+      outputModalities = ['image']
+    } else if (isByteDanceOrVideoModel(props.model)) {
+      inputModalities = ['text', 'image']
+      outputModalities = ['video']
+    }
+  }
 
   if (
     capabilities.length === 0 &&
