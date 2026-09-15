@@ -366,10 +366,10 @@ export function VideoModelGrid(props: VideoModelGridProps) {
 
               {isDurationBased && (
                 <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
-                  <div className='grid grid-cols-[28%_38%_34%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[11.5px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                  <div className='grid grid-cols-[28%_36%_36%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[11.5px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
                     <div className='text-left truncate'>{t('Resolution', '分辨率')}</div>
                     <div className='text-center truncate'>{t('videoPricing.est5s', '5s 预估价格')}</div>
-                    <div className='text-right truncate'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
+                    <div className='text-center truncate'>{t('videoPricing.ratePerSec', '每秒单价')}</div>
                   </div>
                   <div className='flex flex-col'>
                     {durationTiers.length === 0 ? (
@@ -394,14 +394,14 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                           <div
                             key={tier.resolution}
                             className={cn(
-                              'grid grid-cols-[28%_38%_34%] items-center px-[14px] min-h-[50px] py-1.5 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
+                              'grid grid-cols-[28%_36%_36%] items-center px-[14px] min-h-[50px] py-1.5 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
                               index < durationTiers.length - 1 && 'border-b border-[#F1F5F9] dark:border-border/40'
                             )}
                           >
                             <div className='text-left text-[13px] font-semibold text-[var(--p-text-main,#111111)] dark:text-foreground'>
                               {tier.resLabel}
                             </div>
-                            <div className='text-center flex flex-col justify-center min-h-[36px]'>
+                            <div className='text-center flex flex-col items-center justify-center min-h-[36px]'>
                               <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
                                 ${billedEst5s.toFixed(3)}
                               </div>
@@ -411,7 +411,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                                 </div>
                               )}
                             </div>
-                            <div className='text-right flex flex-col justify-center min-h-[36px]'>
+                            <div className='text-center flex flex-col items-center justify-center min-h-[36px]'>
                               <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
                                 ${billedSecond >= 0.01 && !Number.isInteger(billedSecond * 1000) ? billedSecond.toFixed(4).replace(/0$/, '') : billedSecond.toFixed(3)}
                                 <span className='ml-0.5 text-[12px] font-normal text-[#64748B]'>/s</span>
@@ -435,10 +435,10 @@ export function VideoModelGrid(props: VideoModelGridProps) {
 
               {!isUpscale && !isDurationBased && (
                 <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
-                  <div className='grid grid-cols-[28%_36%_36%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[11.5px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                  <div className='grid grid-cols-[30%_35%_35%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[11.5px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
                     <div className='text-left truncate'>{t('Resolution', '分辨率')}</div>
-                    <div className='text-right truncate' title={t('pricing.no_video_short', '无视频')}>{t('pricing.no_video_short', '无视频')}</div>
-                    <div className='text-right truncate' title={t('pricing.with_video_short', '有视频')}>{t('pricing.with_video_short', '有视频')}</div>
+                    <div className='text-center truncate' title={t('pricing.no_video_short', '无视频')}>{t('pricing.no_video_short', '无视频')}</div>
+                    <div className='text-center truncate' title={t('pricing.with_video_short', '有视频')}>{t('pricing.with_video_short', '有视频')}</div>
                   </div>
                   <div className='flex flex-col'>
                     {tierGroups.map((group, index) => {
@@ -467,7 +467,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                         <div
                           key={group.title}
                           className={cn(
-                            'grid grid-cols-[28%_36%_36%] items-center px-[14px] min-h-[50px] py-1.5 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
+                            'grid grid-cols-[30%_35%_35%] items-center px-[14px] min-h-[50px] py-1.5 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
                             index < tierGroups.length - 1 &&
                               'border-b border-[#F1F5F9] dark:border-border/40'
                           )}
@@ -475,7 +475,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                           <div className='text-left text-[13px] font-semibold text-[var(--p-text-main,#111111)] dark:text-foreground'>
                             {group.resLabel}
                           </div>
-                          <div className='text-right flex flex-col justify-center min-h-[36px]'>
+                          <div className='text-center flex flex-col items-center justify-center min-h-[36px]'>
                             <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
                               ${billedNoVideo.toFixed(3)}
                             </div>
@@ -485,7 +485,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                               </div>
                             )}
                           </div>
-                          <div className='text-right flex flex-col justify-center min-h-[36px]'>
+                          <div className='text-center flex flex-col items-center justify-center min-h-[36px]'>
                             <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
                               ${billedVideo.toFixed(3)}
                             </div>

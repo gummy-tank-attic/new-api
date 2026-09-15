@@ -229,10 +229,10 @@ export function ImageModelGrid(props: ImageModelGridProps) {
               {/* Pricing Matrix (Aligned with Video Model Cards) */}
               {resolutions.length > 0 && (
                 <div className='overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-border dark:bg-card'>
-                  <div className='grid grid-cols-[28%_36%_36%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[11.5px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
+                  <div className='grid grid-cols-[30%_35%_35%] border-b border-[#E2E8F0] bg-[#F8FAFC] px-[14px] py-2 text-[11.5px] font-semibold text-[var(--p-text-muted,#3f3f46)] dark:border-border dark:bg-muted/40 dark:text-muted-foreground'>
                     <div className='text-left truncate'>{t('Resolution', '分辨率')}</div>
-                    <div className='text-right truncate' title={t('imagePricing.textToImage', '文生图')}>{t('imagePricing.textToImage', '文生图')}</div>
-                    <div className='text-right truncate' title={t('imagePricing.imageToImage', '图生图')}>{t('imagePricing.imageToImage', '图生图')}</div>
+                    <div className='text-center truncate' title={t('imagePricing.textToImage', '文生图')}>{t('imagePricing.textToImage', '文生图')}</div>
+                    <div className='text-center truncate' title={t('imagePricing.imageToImage', '图生图')}>{t('imagePricing.imageToImage', '图生图')}</div>
                   </div>
                   <div className='flex flex-col'>
                     {resolutions.map((res, index) => {
@@ -250,7 +250,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                         <div
                           key={res}
                           className={cn(
-                            'grid grid-cols-[28%_36%_36%] items-center px-[14px] min-h-[50px] py-1.5 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
+                            'grid grid-cols-[30%_35%_35%] items-center px-[14px] min-h-[50px] py-1.5 transition-colors hover:bg-[#FAFAFA] dark:hover:bg-muted/30',
                             index < resolutions.length - 1 &&
                               'border-b border-[#F1F5F9] dark:border-border/40'
                           )}
@@ -258,7 +258,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                           <div className='text-left text-[13px] font-semibold text-[var(--p-text-main,#111111)] dark:text-foreground'>
                             {style.key ? t(style.key, style.label) : style.label}
                           </div>
-                          <div className='text-right flex flex-col justify-center min-h-[36px]'>
+                          <div className='text-center flex flex-col items-center justify-center min-h-[36px]'>
                             <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
                               {currentPriceText}
                             </div>
@@ -268,7 +268,7 @@ export function ImageModelGrid(props: ImageModelGridProps) {
                               </div>
                             )}
                           </div>
-                          <div className='text-right flex flex-col justify-center min-h-[36px]'>
+                          <div className='text-center flex flex-col items-center justify-center min-h-[36px]'>
                             <div className='text-[13.5px] font-semibold tabular-nums text-[var(--p-text-main,#111111)] dark:text-foreground leading-tight'>
                               {currentImgToImgPriceText}
                             </div>
