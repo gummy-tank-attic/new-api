@@ -78,7 +78,6 @@ import { cn } from '@/lib/utils'
 
 import {
   createApiKey,
-  getApiKeys,
   updateApiKey,
   getApiKey,
   getTokenAutoGroups,
@@ -98,7 +97,6 @@ import {
 } from './api-key-group-combobox'
 import { isCliOnlyGroup } from './api-key-group-option-item'
 import { useApiKeys } from './api-keys-provider'
-import { hasConnectGuide } from './dialogs/api-key-connect-plan'
 
 type ApiKeyMutateDrawerProps = {
   open: boolean
@@ -114,13 +112,7 @@ export function ApiKeysMutateDrawer({
   const { t } = useTranslation()
   const isUpdate = !!currentRow
   const currentRowId = currentRow?.id
-  const {
-    triggerRefresh,
-    setOpen,
-    setCurrentRow,
-    setResolvedKey,
-    resolveRealKey,
-  } = useApiKeys()
+  const { triggerRefresh } = useApiKeys()
   const { loading: statusLoading } = useStatus()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(false)
@@ -282,14 +274,12 @@ export function ApiKeysMutateDrawer({
         // Create mode - handle batch creation
         const count = data.tokenCount || 1
         let successCount = 0
-        let firstTokenName = ''
 
         for (let i = 0; i < count; i++) {
           const tokenName =
             i === 0 && data.name
               ? data.name
               : `${data.name || 'default'}-${Math.random().toString(36).slice(2, 8)}`
-          if (i === 0) firstTokenName = tokenName
           const result = await createApiKey({
             ...basePayload,
             name: tokenName,
@@ -310,29 +300,6 @@ export function ApiKeysMutateDrawer({
           )
           onOpenChange(false)
           triggerRefresh()
-          if (count === 1) {
-            // 后端 AddToken 不返回新令牌数据：回查列表（id 倒序）定位新建令牌，再取完整 key
-            try {
-              const listRes = await getApiKeys({ p: 1, size: 5 })
-              const items = listRes?.data?.items ?? []
-              const created = items.find((item) => item.name === firstTokenName)
-              if (created) {
-                const rawKey = await resolveRealKey(created.id)
-                if (rawKey) {
-                  setResolvedKey(
-                    rawKey.startsWith('sk-') ? rawKey : `sk-${rawKey}`
-                  )
-                  const group = created.group || data.group
-                  setCurrentRow({ ...created, group })
-                  if (hasConnectGuide(group)) {
-                    setOpen('connect')
-                  }
-                }
-              }
-            } catch {
-              // 接入弹窗信息获取失败不影响创建成功
-            }
-          }
         }
       }
     } catch (error) {

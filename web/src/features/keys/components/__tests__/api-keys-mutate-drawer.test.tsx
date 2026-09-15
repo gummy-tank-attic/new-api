@@ -76,15 +76,6 @@ function installApiFixtures(
             data: { groups: ['vip', 'default'], max_count: 3 },
           },
         }
-      case '/api/token/?p=1&size=5':
-        return {
-          data: {
-            success: true,
-            data: {
-              items: [{ id: 999, name: 'another-key', group: 'vip' }],
-            },
-          },
-        }
       default:
         throw new Error(`Unexpected GET ${url}`)
     }
@@ -267,7 +258,7 @@ describe('API keys mutate drawer group selection (T1)', () => {
     }
   })
 
-  test('does not resolve or show an unrelated key when the new key is absent from the refreshed list', async () => {
+  test('does not open the connection guide after a successful create', async () => {
     const createdPayloads: Array<Record<string, unknown>> = []
     const requestedUrls: string[] = []
     installApiFixtures(createdPayloads, requestedUrls)
@@ -277,9 +268,8 @@ describe('API keys mutate drawer group selection (T1)', () => {
     changeInput(getControlByLabel('Name'), 'my-new-key')
     fireEvent.click(findButton('Save changes', true))
 
-    await waitFor(() =>
-      expect(requestedUrls).toContain('/api/token/?p=1&size=5')
-    )
+    await waitFor(() => expect(createdPayloads).toHaveLength(1))
+    expect(requestedUrls).not.toContain('/api/token/?p=1&size=5')
     expect(requestedUrls.some((url) => url.endsWith('/key'))).toBe(false)
   })
 })
