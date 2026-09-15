@@ -156,37 +156,51 @@ export function VideoModelGrid(props: VideoModelGridProps) {
 
             {/* Top Section */}
             <div className='flex flex-col gap-2.5'>
-              {/* Row 1: Model Identity (Left) & Discount Badge (Right) */}
-              <div className='flex items-center justify-between gap-2 min-h-[28px]'>
-                <div className='flex min-w-0 flex-1 items-center gap-2.5'>
-                  <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)] dark:border-rose-900/40 dark:bg-rose-950/30'>
-                    {vendorIcon}
-                  </div>
-                  <div className='flex min-w-0 flex-1 items-center gap-1.5'>
-                    <span
-                      translate='no'
-                      className={cn(
-                        'notranslate truncate font-semibold text-[var(--p-text-main,#0F172A)] dark:text-foreground',
-                        titleClass
-                      )}
-                      title={model.model_name}
-                    >
-                      {model.model_name}
-                    </span>
-                    <button
-                      type='button'
-                      aria-label={t('Copy model name', '复制模型名称')}
-                      onClick={(e) => handleCopy(e, model.model_name)}
-                      className='size-6 shrink-0 inline-flex items-center justify-center rounded-md text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[var(--p-text-main,#111111)] dark:hover:bg-muted'
-                    >
-                      {copiedName === model.model_name ? (
-                        <Check className='size-[15.5px] text-emerald-600' />
-                      ) : (
-                        <Copy className='size-[15.5px]' />
-                      )}
-                    </button>
-                  </div>
+              {/* Row 1: Model Identity (Full Width, No Crowding) */}
+              <div className='flex items-center gap-2.5 min-w-0 min-h-[28px]'>
+                <div className='flex size-[26px] shrink-0 items-center justify-center rounded-[7px] border border-[var(--p-logo-border,#FFE4E6)] bg-[var(--p-logo-bg,#FFF1F5)] dark:border-rose-900/40 dark:bg-rose-950/30'>
+                  {vendorIcon}
                 </div>
+                <div className='flex min-w-0 flex-1 items-center gap-1.5'>
+                  <span
+                    translate='no'
+                    className={cn(
+                      'notranslate truncate font-semibold text-[var(--p-text-main,#0F172A)] dark:text-foreground',
+                      titleClass
+                    )}
+                    title={model.model_name}
+                  >
+                    {model.model_name}
+                  </span>
+                  <button
+                    type='button'
+                    aria-label={t('Copy model name', '复制模型名称')}
+                    onClick={(e) => handleCopy(e, model.model_name)}
+                    className='size-6 shrink-0 inline-flex items-center justify-center rounded-md text-[#94A3B8] opacity-70 transition-opacity duration-150 group-hover:opacity-[0.85] hover:bg-[#F1F5F9] hover:text-[var(--p-text-main,#111111)] dark:hover:bg-muted'
+                  >
+                    {copiedName === model.model_name ? (
+                      <Check className='size-[15.5px] text-emerald-600' />
+                    ) : (
+                      <Copy className='size-[15.5px]' />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Row 2: Capability Tag (Left) & Discount Badge (Far Right) */}
+              <div className='flex items-center justify-between gap-2.5 min-h-[24px]'>
+                {capTag ? (
+                  <span
+                    className={cn(
+                      'inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap',
+                      capTag.className
+                    )}
+                  >
+                    {t(capTag.key, capTag.label)}
+                  </span>
+                ) : (
+                  <div />
+                )}
 
                 {discountOff != null && discountOff > 0 && isGroupMode ? (
                   <span
@@ -198,19 +212,8 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                 ) : null}
               </div>
 
-              {/* Row 2: Capability Tag & Supported Resolution Pills (Unified Responsive Flow) */}
+              {/* Row 3: Supported Resolution Pills */}
               <div className='flex flex-wrap items-center gap-1.5 min-h-[24px]'>
-                {capTag ? (
-                  <span
-                    className={cn(
-                      'inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap',
-                      capTag.className
-                    )}
-                  >
-                    {t(capTag.key, capTag.label)}
-                  </span>
-                ) : null}
-
                 {resolutions.map((res) => {
                   const style = getResolutionBadgeStyle(res)
                   return (
@@ -224,7 +227,7 @@ export function VideoModelGrid(props: VideoModelGridProps) {
                 })}
               </div>
 
-              {/* Row 3: Tagline with consistent line-clamp */}
+              {/* Row 4: Tagline with consistent line-clamp */}
               <div className='flex min-h-[36px] items-center'>
                 <p className='line-clamp-2 text-[12px] leading-[18px] font-normal text-[var(--p-text-muted,#3f3f46)] dark:text-muted-foreground'>
                   {t(tagline.key, tagline.defaultText)}
