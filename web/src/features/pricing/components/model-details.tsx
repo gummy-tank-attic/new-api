@@ -297,11 +297,12 @@ function OverviewSummaryGrid(props: { model: PricingModel }) {
   })
 
   const summary = metricsQuery.data?.data.summary
+  const groups = metricsQuery.data?.data.groups ?? []
   const successRate = summary?.success_rate ?? Number.NaN
   const avgTps = summary?.avg_tps ?? 0
   const avgLatency = summary?.avg_latency_ms ?? 0
 
-  const hasData = groups.length > 0
+  const hasData = groups.length > 0 || (!!summary && (Number.isFinite(successRate) || avgTps > 0 || avgLatency > 0))
 
   return (
     <div className='space-y-1.5'>
