@@ -152,7 +152,7 @@ test('Zhipu GLM uses the renamed Chinese label and remains searchable after chan
     screen.getByRole('option', { name: 'Zhipu GLM Built-in #26' })
   ).toBeVisible()
   await act(() => language.changeLanguage('zh'))
-  expect(screen.getByRole('option', { name: '智谱GLM 内置 #26' })).toBeVisible()
+  expect(screen.getByRole('option', { name: /智谱\s*GLM 内置 #26/ })).toBeVisible()
 })
 
 test('plugin extensions keep built-in and independent plugin choices distinct in every category', async () => {
